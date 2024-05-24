@@ -7,6 +7,16 @@ import { Graph, createRandomConnectedGraph } from "./graph.js"; // Adjust the pa
 import { createThreePointLighting } from "./utils/threePointLighting.js";
 import { KruskalAlgorithm } from "./kruskal.js";
 
+let health = 3;
+
+function updateHealth() {
+  const healthIcons = document.querySelectorAll(".health-icon");
+  if (health >= 0 && health <= 3) {
+    healthIcons[health].style.fill = "white";
+    health--;
+  }
+}
+
 // Initialize Three.js scene, camera, and renderer
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -113,6 +123,12 @@ async function createModels() {
     const openModel = await loadModel(openChestURL.href, position);
     openModel.visible = false;
     openChestList.push(openModel);
+
+    // Add a label in front of the chest
+    const labelPosition = position.clone();
+    labelPosition.x -= 0.55; // Adjust the height if needed
+    labelPosition.z -= 0.5;
+    createNodeLabel(`Chest ${i}`, labelPosition);
   }
 
   console.log("All models loaded. Final chestList:", chestList);
@@ -131,13 +147,13 @@ fontLoader.load(
 );
 
 // Function to create text labels
-function createLabel(text, position) {
+function createLabel(text, position, color = 0x000000) {
   const textGeometry = new TextGeometry(text, {
     font: font,
     size: 0.25,
     depth: 0.1,
   });
-  const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+  const textMaterial = new THREE.MeshBasicMaterial({ color });
   const textMesh = new THREE.Mesh(textGeometry, textMaterial);
   textMesh.position.copy(position);
   textMesh.rotation.x = -Math.PI / 2;
@@ -145,6 +161,22 @@ function createLabel(text, position) {
   labels.push(textMesh);
   return textMesh;
 }
+
+// Function to create node labels
+function createNodeLabel(text, position) {
+  const textGeometry = new TextGeometry(text, {
+    font: font,
+    size: 0.25,
+    height: 0.1,
+  });
+  const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 }); // Gold color
+  const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+  textMesh.position.set(position.x, position.y, position.z + 1); // Position in front of the chest
+
+  scene.add(textMesh);
+}
+
+// Function to draw lines between the chests
 function drawLines() {
   console.log("Drawing lines between chests.");
   console.log("Graph edges:", graph.edges); // Debugging statement
@@ -257,10 +289,6 @@ function drawLines() {
             "Current weight of the spanning tree:",
             kruskal.currentWeight
           );
-
-          // Remove the selected line and label from the hover effect arrays
-          lines.splice(lines.indexOf(intersectedObject), 1);
-          labels.splice(labels.indexOf(intersectedObject.userData.label), 1);
         } else {
           // Incorrect selection
           console.log("Incorrect edge selection:", edge);
@@ -268,11 +296,8 @@ function drawLines() {
           if (intersectedObject.userData.label) {
             intersectedObject.userData.label.material.color.set(0xff0000); // Set label to red
           }
-
-          // Shake the screen
-          shakeScreen();
-
-          // Reset colors after 3 seconds
+          updateHealth(); // Update health
+          shakeScreen(); // Shake screen
           setTimeout(() => {
             intersectedObject.material.color.set(0x0000ff); // Reset line color
             if (intersectedObject.userData.label) {
