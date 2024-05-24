@@ -4,6 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { Graph, createRandomConnectedGraph } from "./graph.js"; // Adjust the path as needed
+import { createThreePointLighting } from "./utils/threePointLighting.js";
 
 // Initialize Three.js scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -129,7 +130,7 @@ fontLoader.load(
 function createLabel(text, position) {
   const textGeometry = new TextGeometry(text, {
     font: font,
-    size: 0.5,
+    size: 0.25,
     depth: 0.1,
   });
   const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
@@ -148,7 +149,8 @@ function drawLines() {
   const lines = [];
   graph.edges.forEach(([start, end, weight]) => {
     console.log("Drawing line between:", start, end); // Debugging statement
-    const line = drawLine(chestList[start], chestList[end], weight);
+    const edge = { start, end, weight }; // Create edge data
+    const line = drawLine(chestList[start], chestList[end], weight, edge); // Pass edge data
     lines.push(line);
   });
 
@@ -159,6 +161,13 @@ function drawLines() {
   let selectedLine = null;
   let previousChests = [];
 
+  // Create the sphere for hover effect
+  const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32);
+  const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+  const sphereInter = new THREE.Mesh(sphereGeometry, sphereMaterial);
+  sphereInter.visible = false;
+  scene.add(sphereInter);
+
   function onMouseMove(event) {
     event.preventDefault();
 
@@ -168,9 +177,15 @@ function drawLines() {
     raycaster.setFromCamera(mouse, camera);
 
     const intersects = raycaster.intersectObjects([...lines, ...labels]);
+    // console.log(intersects);
+    // console.log(selectedLine);
 
     if (intersects.length > 0) {
-      if (selectedLine !== intersects[0].object) {
+      const intersectedObject = intersects[0].object;
+      sphereInter.position.copy(intersects[0].point);
+      sphereInter.visible = true;
+
+      if (selectedLine !== intersectedObject) {
         if (selectedLine) {
           selectedLine.material.color.set(0x0000ff); // Reset previous line color
           if (selectedLine.userData.label) {
@@ -183,7 +198,7 @@ function drawLines() {
             }
           });
         }
-        selectedLine = intersects[0].object;
+        selectedLine = intersectedObject;
         selectedLine.material.color.set(0xff0000); // Highlight selected line
         if (selectedLine.userData.label) {
           selectedLine.userData.label.material.color.set(0xff0000); // Highlight label
@@ -205,6 +220,8 @@ function drawLines() {
         });
       }
     } else {
+      sphereInter.visible = false;
+
       if (selectedLine) {
         selectedLine.material.color.set(0x0000ff); // Reset previous line color
         if (selectedLine.userData.label) {
@@ -222,11 +239,34 @@ function drawLines() {
     }
   }
 
+  function onClick(event) {
+    event.preventDefault();
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects([...lines, ...labels]);
+
+    if (intersects.length > 0) {
+      const intersectedObject = intersects[0].object;
+      if (intersectedObject.userData) {
+        console.log("Line:", intersectedObject);
+        console.log("Label:", intersectedObject.userData.label);
+        console.log("Start Object:", intersectedObject.userData.startCube);
+        console.log("End Object:", intersectedObject.userData.endCube);
+        console.log("Edge Data:", intersectedObject.userData.edge); // Log edge data
+      }
+    }
+  }
+
   window.addEventListener("mousemove", onMouseMove, false);
+  window.addEventListener("click", onClick, false);
 }
 
 // Function to draw a line between two chests
-function drawLine(startCube, endCube, weight) {
+function drawLine(startCube, endCube, weight, edge) {
   const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
   const points = [];
 
@@ -253,32 +293,14 @@ function drawLine(startCube, endCube, weight) {
     (startCube.position.z + endCube.position.z) / 2
   );
   const label = createLabel(weight.toString(), midPoint);
-  line.userData = { startCube, endCube, label };
+  line.userData = { startCube, endCube, label, edge }; // Store edge data
 
   return line;
 }
 
 // Lighting
-function createThreePointLighting() {
-  const three_point_lighting_prefab = new THREE.Group();
-  const light = new THREE.AmbientLight(0xffffff, 1);
-  const light1 = new THREE.DirectionalLight(0xffffff, 5);
-  const light2 = new THREE.DirectionalLight(0xffffff, 1);
-  const light3 = new THREE.DirectionalLight(0xffffff, 1);
 
-  light1.position.x += 100;
-  light2.position.x -= 100;
-  light3.position.z += 100;
-
-  three_point_lighting_prefab.add(light);
-  three_point_lighting_prefab.add(light1);
-  three_point_lighting_prefab.add(light2);
-  three_point_lighting_prefab.add(light3);
-
-  scene.add(three_point_lighting_prefab);
-}
-
-createThreePointLighting();
+createThreePointLighting(scene);
 camera.position.z = 15;
 
 // Function to handle window resizing

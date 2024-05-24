@@ -1,6 +1,11 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { Graph, createRandomConnectedGraph } from "./graph.js"; // Adjust the path as needed
+import { createThreePointLighting } from "./utils/threePointLighting.js";
+import { KruskalAlgorithm } from "./kruskal.js";
 
 // Initialize Three.js scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -31,10 +36,20 @@ const assetLoader = new GLTFLoader();
 let chestList = [];
 let openChestList = [];
 const mixers = [];
-const numChests = 7;
 const cubeSize = 1; // Define the size of the cube for positioning purposes
-const minDistance = cubeSize * 3.5; // Minimum distance between cubes, scaled by cube size
-const gridSize = 15; // Size of the area within which cubes will be placed
+const minDistance = cubeSize * 3.5; // Minimum distance between chests, scaled by cube size
+const gridSize = 15; // Size of the area within which chests will be placed
+const labels = []; // Array to store text labels
+
+// Create a random connected graph
+const nodes = Array.from({ length: 7 }, (_, i) => i);
+const totalEdges = 10; // Adjust the number of edges as needed
+const graph = createRandomConnectedGraph(nodes, totalEdges);
+
+// Initialize KruskalAlgorithm
+const kruskal = new KruskalAlgorithm(graph);
+
+console.log("Generated Graph:", graph); // Debugging statement
 
 // Function to load a model
 function loadModel(url, position) {
@@ -67,7 +82,7 @@ function loadModel(url, position) {
 
 // Create and position models sequentially to maintain order
 async function createModels() {
-  for (let i = 0; i < numChests; i++) {
+  for (let i = 0; i < nodes.length; i++) {
     let validPosition = false;
     let position = new THREE.Vector3();
 
@@ -81,7 +96,7 @@ async function createModels() {
       // Assume the position is valid
       validPosition = true;
 
-      // Check against all existing cubes in chestList
+      // Check against all existing chests in chestList
       for (let x = 0; x < chestList.length; x++) {
         if (chestList[x].position.distanceTo(position) < minDistance) {
           validPosition = false;
@@ -104,21 +119,55 @@ async function createModels() {
   drawLines();
 }
 
-// Function to draw lines between the chests
+// Load font for text geometry
+const fontLoader = new FontLoader();
+let font;
+fontLoader.load(
+  "https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
+  (loadedFont) => {
+    font = loadedFont;
+    createModels(); // Start creating models after font is loaded
+  }
+);
+
+// Function to create text labels
+function createLabel(text, position) {
+  const textGeometry = new TextGeometry(text, {
+    font: font,
+    size: 0.25,
+    depth: 0.1,
+  });
+  const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+  const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+  textMesh.position.copy(position);
+  textMesh.rotation.x = -Math.PI / 2;
+  scene.add(textMesh);
+  labels.push(textMesh);
+  return textMesh;
+}
 function drawLines() {
   console.log("Drawing lines between chests.");
+  console.log("Graph edges:", graph.edges); // Debugging statement
   const lines = [];
-  for (let i = 1; i < chestList.length; i++) {
-    const line = drawLine(chestList[0], chestList[i]);
+  graph.edges.forEach(([start, end, weight]) => {
+    console.log("Drawing line between:", start, end); // Debugging statement
+    const edge = { start, end, weight }; // Create edge data
+    const line = drawLine(chestList[start], chestList[end], weight, edge); // Pass edge data
     lines.push(line);
-  }
+  });
 
   // Hovering effect on lines
   const raycaster = new THREE.Raycaster();
   raycaster.params.Line.threshold = 0.5;
   const mouse = new THREE.Vector2();
   let selectedLine = null;
-  let previousChests = [];
+
+  // Create the sphere for hover effect
+  const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32);
+  const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+  const sphereInter = new THREE.Mesh(sphereGeometry, sphereMaterial);
+  sphereInter.visible = false;
+  scene.add(sphereInter);
 
   function onMouseMove(event) {
     event.preventDefault();
@@ -128,51 +177,119 @@ function drawLines() {
 
     raycaster.setFromCamera(mouse, camera);
 
-    const intersects = raycaster.intersectObjects(lines);
+    const intersects = raycaster.intersectObjects([...lines, ...labels]);
 
     if (intersects.length > 0) {
-      if (selectedLine !== intersects[0].object) {
-        if (selectedLine) {
-          selectedLine.material.color.set(0x0000ff); // Reset previous line color
-          previousChests.forEach(({ closed, open }) => {
-            closed.visible = true; // Show closed chest
-            open.visible = false; // Hide open chest
-          });
-        }
-        selectedLine = intersects[0].object;
-        selectedLine.material.color.set(0xff0000); // Highlight selected line
+      const intersectedObject = intersects[0].object;
+      sphereInter.position.copy(intersects[0].point);
+      sphereInter.visible = true;
 
-        const { startCube, endCube } = selectedLine.userData;
-        previousChests = [
-          {
-            closed: startCube,
-            open: openChestList[chestList.indexOf(startCube)],
-          },
-          { closed: endCube, open: openChestList[chestList.indexOf(endCube)] },
-        ];
-        previousChests.forEach(({ closed, open }) => {
-          closed.visible = false; // Hide closed chest
-          open.visible = true; // Show open chest
-        });
+      if (selectedLine !== intersectedObject) {
+        if (selectedLine && !selectedLine.userData.selected) {
+          selectedLine.material.color.set(0x0000ff); // Reset previous line color
+          if (selectedLine.userData.label) {
+            selectedLine.userData.label.material.color.set(0x000000); // Reset previous label color
+          }
+        }
+        selectedLine = intersectedObject;
+        if (!selectedLine.userData.selected) {
+          selectedLine.material.color.set(0x00ff00); // Highlight selected line
+          if (selectedLine.userData.label) {
+            selectedLine.userData.label.material.color.set(0x00ff00); // Highlight label
+          }
+        }
       }
     } else {
-      if (selectedLine) {
+      sphereInter.visible = false;
+
+      if (selectedLine && !selectedLine.userData.selected) {
         selectedLine.material.color.set(0x0000ff); // Reset previous line color
-        previousChests.forEach(({ closed, open }) => {
-          closed.visible = true; // Show closed chest
-          open.visible = false; // Hide open chest
-        });
+        if (selectedLine.userData.label) {
+          selectedLine.userData.label.material.color.set(0x000000); // Reset previous label color
+        }
       }
       selectedLine = null;
-      previousChests = [];
+    }
+  }
+
+  function shakeScreen() {
+    document.body.classList.add("shake");
+    setTimeout(() => {
+      document.body.classList.remove("shake");
+    }, 500);
+  }
+
+  function onClick(event) {
+    event.preventDefault();
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects([...lines, ...labels]);
+
+    if (intersects.length > 0) {
+      const intersectedObject = intersects[0].object;
+      if (intersectedObject.userData) {
+        const edge = intersectedObject.userData.edge;
+
+        if (kruskal.selectEdge([edge.start, edge.end, edge.weight])) {
+          // Correct selection
+          intersectedObject.material.color.set(0x00ff00); // Set line to green
+          intersectedObject.userData.selected = true; // Mark as selected
+          if (intersectedObject.userData.label) {
+            intersectedObject.userData.label.material.color.set(0x00ff00); // Set label to green
+          }
+          const { startCube, endCube } = intersectedObject.userData;
+          const closedStart = chestList[chestList.indexOf(startCube)];
+          const openStart = openChestList[chestList.indexOf(startCube)];
+          const closedEnd = chestList[chestList.indexOf(endCube)];
+          const openEnd = openChestList[chestList.indexOf(endCube)];
+
+          closedStart.visible = false;
+          openStart.visible = true;
+          closedEnd.visible = false;
+          openEnd.visible = true;
+
+          console.log("Selected edges:", kruskal.selectedEdges);
+          console.log(
+            "Current weight of the spanning tree:",
+            kruskal.currentWeight
+          );
+
+          // Remove the selected line and label from the hover effect arrays
+          lines.splice(lines.indexOf(intersectedObject), 1);
+          labels.splice(labels.indexOf(intersectedObject.userData.label), 1);
+        } else {
+          // Incorrect selection
+          console.log("Incorrect edge selection:", edge);
+          intersectedObject.material.color.set(0xff0000); // Set line to red
+          if (intersectedObject.userData.label) {
+            intersectedObject.userData.label.material.color.set(0xff0000); // Set label to red
+          }
+
+          // Shake the screen
+          shakeScreen();
+
+          // Reset colors after 3 seconds
+          setTimeout(() => {
+            intersectedObject.material.color.set(0x0000ff); // Reset line color
+            if (intersectedObject.userData.label) {
+              intersectedObject.userData.label.material.color.set(0x000000); // Reset label color
+            }
+          }, 3000);
+        }
+      }
     }
   }
 
   window.addEventListener("mousemove", onMouseMove, false);
+  window.addEventListener("click", onClick, false);
 }
 
-// Function to draw a line between two cubes
-function drawLine(startCube, endCube) {
+// Function to draw a line between two chests
+function drawLine(startCube, endCube, weight, edge) {
   const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
   const points = [];
 
@@ -190,32 +307,23 @@ function drawLine(startCube, endCube) {
 
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
   const line = new THREE.Line(geometry, lineMaterial);
-  line.userData = { startCube, endCube };
   scene.add(line);
+
+  // Create label in the middle of the line
+  const midPoint = new THREE.Vector3(
+    (startCube.position.x + endCube.position.x) / 2,
+    (startCube.position.y + endCube.position.y) / 2,
+    (startCube.position.z + endCube.position.z) / 2
+  );
+  const label = createLabel(weight.toString(), midPoint);
+  line.userData = { startCube, endCube, label, edge, selected: false }; // Store edge data and selected state
+
   return line;
 }
 
 // Lighting
-function createThreePointLighting() {
-  const three_point_lighting_prefab = new THREE.Group();
-  const light = new THREE.AmbientLight(0xffffff, 1);
-  const light1 = new THREE.DirectionalLight(0xffffff, 5);
-  const light2 = new THREE.DirectionalLight(0xffffff, 1);
-  const light3 = new THREE.DirectionalLight(0xffffff, 1);
 
-  light1.position.x += 100;
-  light2.position.x -= 100;
-  light3.position.z += 100;
-
-  three_point_lighting_prefab.add(light);
-  three_point_lighting_prefab.add(light1);
-  three_point_lighting_prefab.add(light2);
-  three_point_lighting_prefab.add(light3);
-
-  scene.add(three_point_lighting_prefab);
-}
-
-createThreePointLighting();
+createThreePointLighting(scene);
 camera.position.z = 15;
 
 // Function to handle window resizing
@@ -233,6 +341,3 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
-
-// Start creating models
-createModels();

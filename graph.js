@@ -39,7 +39,7 @@ export class Graph {
   }
 
   createRandomEdge() {
-    const weight = Math.floor(Math.random() * 100);
+    const weight = Math.floor(Math.random() * 10) + 1;
     const node1 = this.getRandomInt(0, this.nodes.length - 1);
     let node2 = this.getRandomInt(0, this.nodes.length - 1);
     while (node1 === node2) {
@@ -74,7 +74,7 @@ export function createRandomConnectedGraph(nodes, totalEdges) {
 
   while (allNodes.length > 0) {
     let neighbor = popRandomElement(allNodes);
-    const weight = Math.floor(Math.random() * 100);
+    const weight = Math.floor(Math.random() * 10) + 1;
     if (!visited.has(neighbor)) {
       graph.addEdge(
         cur < neighbor ? [cur, neighbor, weight] : [neighbor, cur, weight]
