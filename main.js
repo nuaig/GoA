@@ -6,6 +6,21 @@ import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { Graph, createRandomConnectedGraph } from "./graph.js"; // Adjust the path as needed
 import { createThreePointLighting } from "./utils/threePointLighting.js";
 import { KruskalAlgorithm } from "./kruskal.js";
+import { drawLine, setFont } from "./utils/graphRelated/drawLine.js";
+
+// Click event to open hint
+function toggleInstructions() {
+  const instructions = document.getElementsByClassName(
+    "topnav-instructions"
+  )[0];
+  if (instructions.style.display === "block") {
+    instructions.style.display = "none";
+  } else {
+    instructions.style.display = "block";
+  }
+}
+
+window.toggleInstructions = toggleInstructions;
 
 let health = 3;
 
@@ -14,6 +29,8 @@ function updateHealth() {
   if (health >= 0 && health <= 3) {
     healthIcons[health].style.fill = "white";
     health--;
+  } else {
+    uiText.innerHTML = `Game Over. Better luck next time!`;
   }
 }
 
@@ -30,8 +47,8 @@ renderer.setClearColor(0xa3a3a3);
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const grid = new THREE.GridHelper(30, 30);
-scene.add(grid);
+// const grid = new THREE.GridHelper(30, 30);
+// scene.add(grid);
 
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
@@ -41,6 +58,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 // Importing models
 const closedChestURL = new URL("./src/Prop_Chest_CLosed.gltf", import.meta.url);
 const openChestURL = new URL("./src/Prop_Chest_Gold.gltf", import.meta.url);
+const dungeonRoomURL = new URL("./src/DungeonRoom.glb", import.meta.url);
 
 const assetLoader = new GLTFLoader();
 let chestList = [];
@@ -142,32 +160,17 @@ fontLoader.load(
   "https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
   (loadedFont) => {
     font = loadedFont;
+    setFont(font); // Set the font for text labels
     createModels(); // Start creating models after font is loaded
   }
 );
-
-// Function to create text labels
-function createLabel(text, position, color = 0x000000) {
-  const textGeometry = new TextGeometry(text, {
-    font: font,
-    size: 0.25,
-    depth: 0.1,
-  });
-  const textMaterial = new THREE.MeshBasicMaterial({ color });
-  const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-  textMesh.position.copy(position);
-  textMesh.rotation.x = -Math.PI / 2;
-  scene.add(textMesh);
-  labels.push(textMesh);
-  return textMesh;
-}
 
 // Function to create node labels
 function createNodeLabel(text, position) {
   const textGeometry = new TextGeometry(text, {
     font: font,
     size: 0.25,
-    height: 0.1,
+    depth: 0.1,
   });
   const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 }); // Gold color
   const textMesh = new THREE.Mesh(textGeometry, textMaterial);
@@ -184,7 +187,13 @@ function drawLines() {
   graph.edges.forEach(([start, end, weight]) => {
     console.log("Drawing line between:", start, end); // Debugging statement
     const edge = { start, end, weight }; // Create edge data
-    const line = drawLine(chestList[start], chestList[end], weight, edge); // Pass edge data
+    const line = drawLine(
+      chestList[start],
+      chestList[end],
+      weight,
+      edge,
+      scene
+    ); // Pass edge data
     lines.push(line);
   });
 
@@ -203,6 +212,10 @@ function drawLines() {
 
   function onMouseMove(event) {
     event.preventDefault();
+    if (kruskal.isComplete()) {
+      sphereInter.visible = false;
+      return; // Stop hover effects when Kruskal's algorithm is complete
+    }
 
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -213,6 +226,11 @@ function drawLines() {
 
     if (intersects.length > 0) {
       const intersectedObject = intersects[0].object;
+      if (intersectedObject.userData.selected) {
+        sphereInter.visible = false;
+        return; // Skip already selected lines
+      }
+
       sphereInter.position.copy(intersects[0].point);
       sphereInter.visible = true;
 
@@ -260,9 +278,14 @@ function drawLines() {
     raycaster.setFromCamera(mouse, camera);
 
     const intersects = raycaster.intersectObjects([...lines, ...labels]);
+    const uiText = document.getElementById("UI-Text");
 
     if (intersects.length > 0) {
       const intersectedObject = intersects[0].object;
+      if (intersectedObject.userData.selected) {
+        return; // Skip already selected lines
+      }
+
       if (intersectedObject.userData) {
         const edge = intersectedObject.userData.edge;
 
@@ -289,6 +312,11 @@ function drawLines() {
             "Current weight of the spanning tree:",
             kruskal.currentWeight
           );
+          if (kruskal.isComplete()) {
+            uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${kruskal.currentWeight}.`;
+          } else {
+            uiText.innerText = `Correct! Current weight is ${kruskal.currentWeight}.`;
+          }
         } else {
           // Incorrect selection
           console.log("Incorrect edge selection:", edge);
@@ -298,6 +326,7 @@ function drawLines() {
           }
           updateHealth(); // Update health
           shakeScreen(); // Shake screen
+          uiText.innerText = "Wrong selection. Try again.";
           setTimeout(() => {
             intersectedObject.material.color.set(0x0000ff); // Reset line color
             if (intersectedObject.userData.label) {
@@ -313,43 +342,11 @@ function drawLines() {
   window.addEventListener("click", onClick, false);
 }
 
-// Function to draw a line between two chests
-function drawLine(startCube, endCube, weight, edge) {
-  const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
-  const points = [];
-
-  const numSegments = 50; // Increase the number of segments for more precision
-  for (let i = 0; i <= numSegments; i++) {
-    const t = i / numSegments;
-    const x =
-      startCube.position.x + t * (endCube.position.x - startCube.position.x);
-    const y =
-      startCube.position.y + t * (endCube.position.y - startCube.position.y);
-    const z =
-      startCube.position.z + t * (endCube.position.z - startCube.position.z);
-    points.push(new THREE.Vector3(x, y, z));
-  }
-
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  const line = new THREE.Line(geometry, lineMaterial);
-  scene.add(line);
-
-  // Create label in the middle of the line
-  const midPoint = new THREE.Vector3(
-    (startCube.position.x + endCube.position.x) / 2,
-    (startCube.position.y + endCube.position.y) / 2,
-    (startCube.position.z + endCube.position.z) / 2
-  );
-  const label = createLabel(weight.toString(), midPoint);
-  line.userData = { startCube, endCube, label, edge, selected: false }; // Store edge data and selected state
-
-  return line;
-}
-
 // Lighting
 
 createThreePointLighting(scene);
 camera.position.z = 15;
+camera.position.y = 10;
 
 // Function to handle window resizing
 function onWindowResize() {
@@ -366,3 +363,12 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
+
+async function createDungeonRoom() {
+  const position = new THREE.Vector3(0, -0.1, 0); // Position the floor slightly below the chests
+  const dungeonRoom = await loadModel(dungeonRoomURL.href, position);
+  dungeonRoom.scale.set(0.5, 0.5, 0.5); // Scale the floor tile if necessary
+}
+
+// Call the function to load the floor tile
+createDungeonRoom();

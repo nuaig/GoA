@@ -1,56 +1,159 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-    <link rel="stylesheet" href="/style.css" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <script type="module" src="mainv2.js"></script>
   </head>
   <body>
-    <div id="app"></div>
-    <div id="health-bar">
-      <svg
-        class="health-icon"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="red"
-      >
-        <path
-          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+    <div id="Renderer">
+      <!-- <div id="MainMenu">
+        <div class="main-menu">
+          <button id="Start Game">Start Game</button>
+          <button id="Instructions">Instructions</button>
+        </div>
+        <div class="instruct-menu" id="InstructMenu">
+          <img src="instructions.png" width="500" height="600" />
+          <button id="return">X</button>
+        </div>
+      </div> -->
+      <div id="linkedListGame">
+        <div class="topnav-centered">
+          <p id="UI-Text" class="UI-Text">
+            Click on the Edge to Create Minimum Spanning Tree!
+          </p>
+        </div>
+        <img
+          id="helpIcon"
+          class="help-icon"
+          width="100"
+          height="100"
+          src="https://img.icons8.com/plasticine/100/help.png"
+          alt="help"
+          onclick="toggleInstructions()"
         />
-      </svg>
-      <svg
-        class="health-icon"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="red"
-      >
-        <path
-          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-        />
-      </svg>
-      <svg
-        class="health-icon"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="red"
-      >
-        <path
-          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-        />
-      </svg>
-      <svg
-        class="health-icon"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="red"
-      >
-        <path
-          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-        />
-      </svg>
+        <div class="topnav-instructions">
+          <pre class="code-block">
+KRUSKAL(G):
+A = ∅
+For each vertex v ∈ G.V:
+    <span class="function">MAKE-SET</span>(v)
+For each edge (u, v) ∈ G.E ordered by increasing order by weight(u, v):
+    if <span class="function">FIND-SET</span>(u) ≠ <span class="function">FIND-SET</span>(v):
+        A = A ∪ {(u, v)}
+        <span class="function">UNION</span>(u, v)
+return A
+          </pre>
+        </div>
+        <div class="Score">
+          <div id="health-bar">
+            <svg
+              class="health-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="red"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              />
+            </svg>
+            <svg
+              class="health-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="red"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              />
+            </svg>
+            <svg
+              class="health-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="red"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              />
+            </svg>
+            <svg
+              class="health-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="red"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <!-- <div class="button-nav">
+          <button id="Node-Creator">Generate New Node</button>
+          <button id="Check-Answer">Check Answer</button>
+          <button id="Clear-List">Try Again?</button>
+        </div> -->
+      </div>
+      <!-- <div id="heapSortGame">
+        <div class="topnav-centered">
+          <p id="UI-Text1" class="UI-Text">Click on Something to Interact!</p>
+        </div>
+        <div class="topnav-instructions">
+          <p id="UI-Instructions1" class="UI-Text"></p>
+        </div>
+        <div class="Score">
+          <div id="health-bar">
+            <svg
+              class="health-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="red"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              />
+            </svg>
+            <svg
+              class="health-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="red"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              />
+            </svg>
+            <svg
+              class="health-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="red"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              />
+            </svg>
+            <svg
+              class="health-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="red"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="button-nav">
+          <button id="generate-array">Click to Generate Array</button>
+        </div>
+      </div> -->
     </div>
-    <script type="module" src="/main.js"></script>
   </body>
 </html>

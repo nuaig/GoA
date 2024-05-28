@@ -1,0 +1,219 @@
+.code-container {
+  background-color: rgb(72, 121, 212);
+  padding: 15px;
+  border: solid #eaebf1 2px;
+  box-shadow: 0.5rem 0.5rem 0;
+  overflow: auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.code-block {
+  color: #ffffff;
+  font-family: "Courier New", Courier, monospace;
+  padding: 10px;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 14px;
+}
+
+.code-block .keyword {
+  color: #c586c0;
+}
+
+.code-block .function {
+  color: #4ec9b0;
+}
+
+.topnav-instructions {
+  position: absolute;
+  top: 15%;
+  left: 85%;
+  transform: translate(-50%, -50%);
+  background-color: rgb(72, 121, 212);
+  width: 25%;
+  height: 21%;
+  border: solid #eaebf1 2px;
+  padding: 15px;
+  box-shadow: 0.5rem 0.5rem 0;
+  overflow: hidden;
+  display: none;
+}
+
+.help-icon {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.button-nav {
+  float: none;
+  position: absolute;
+  top: 35%;
+  left: 85%;
+  transform: translate(-50%, -50%);
+}
+.Score {
+  float: none;
+  position: absolute;
+  top: 5%;
+  left: 5%;
+}
+.DEBUG {
+  float: none;
+  position: absolute;
+  top: 10%;
+  left: 5%;
+}
+.topnav-centered {
+  float: none;
+  position: absolute;
+  top: 90%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: black;
+  box-sizing: border-box;
+  width: 60%;
+  border: solid #eaebf1 2px;
+  padding: 15px;
+}
+button {
+  background-color: #04aa6d;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #55b893; /* Green */
+  color: white;
+}
+
+button:active {
+  background-color: #1a896a;
+  box-shadow: 5px 5px #666;
+  transform: translateY(4px);
+}
+.UI-Text {
+  text-align: center;
+  color: aliceblue;
+  font-size: larger;
+  font-family: "Inter", sans-serif;
+  font-size: 20;
+  font-weight: 300;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+#Tooltip-Box {
+  float: none;
+  position: fixed;
+  opacity: 0.5;
+  visibility: hidden;
+  background: #04aa6d;
+  display: flex;
+}
+
+.linkedListGame {
+  visibility: hidden;
+}
+.instruct-menu {
+  float: none;
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  width: 20%;
+  height: 20%;
+  border: solid #eaebf1 2px;
+  padding: 15px;
+  box-shadow: 0.5rem 0.5rem 0;
+  background-color: rgb(28, 37, 37);
+  display: block;
+  display: flex;
+
+  justify-content: center;
+
+  text-align: center;
+}
+.main-menu {
+  float: none;
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  width: 20%;
+  height: 20%;
+  border: solid #eaebf1 2px;
+  padding: 15px;
+  box-shadow: 0.5rem 0.5rem 0;
+  background-color: rgb(28, 37, 37);
+  display: block;
+  display: flex;
+
+  justify-content: center;
+
+  text-align: center;
+}
+
+h2 {
+  padding: 10px;
+  text-align: center;
+  background: #1abc9c;
+  box-shadow: 0.5rem 0.5rem 0;
+  color: white;
+  font-size: 30px;
+}
+
+#health-bar {
+  display: flex;
+  gap: 5px;
+}
+
+.health-icon {
+  width: 24px;
+  height: 24px;
+  transition: fill 0.3s;
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+  75% {
+    transform: translateX(-10px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}

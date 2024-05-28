@@ -110,38 +110,3 @@ export class KruskalAlgorithm {
     return this.selectedEdges.length === this.graph.nodes.length - 1;
   }
 }
-
-// // Example usage
-// const graph = createRandomConnectedGraph([0, 1, 2, 3, 4, 5, 6], 10);
-// const kruskal = new KruskalAlgorithm(graph);
-
-// console.log("Initial edges for Kruskal's Algorithm:", kruskal.getInitialEdges());
-
-// const selectedEdge = kruskal.getInitialEdges()[0];
-// console.log("Selected edge:", selectedEdge);
-
-// if (kruskal.selectEdge(selectedEdge)) {
-//   console.log("Selected edges after first selection:", kruskal.selectedEdges);
-//   console.log("Remaining edges after first selection:", kruskal.remainingEdges);
-//   console.log("Next edges for Kruskal's Algorithm:", kruskal.getNextEdges());
-//   console.log("Current weight of the spanning tree:", kruskal.currentWeight);
-// } else {
-//   console.log("Failed to select edge:", selectedEdge);
-// }
-
-// // Repeat selection process until the algorithm is complete
-// while (!kruskal.isComplete()) {
-//   const nextEdges = kruskal.getNextEdges();
-//   if (nextEdges.length > 0) {
-//     const nextEdge = nextEdges[0];
-//     if (kruskal.selectEdge(nextEdge)) {
-//       console.log("Selected edges:", kruskal.selectedEdges);
-//       console.log("Remaining edges:", kruskal.remainingEdges);
-//       console.log("Current weight of the spanning tree:", kruskal.currentWeight);
-//     } else {
-//       console.log("Failed to select edge:", nextEdge);
-//     }
-//   } else {
-//     break;
-//   }
-// }
