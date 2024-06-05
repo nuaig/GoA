@@ -3,24 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Page Title</title>
+    <title>Prim's Algorithm</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
-    <script type="module" src="mainv2.js"></script>
+    <script type="module" src="main.js"></script>
   </head>
   <body>
     <div id="Renderer">
-      <!-- <div id="MainMenu">
-        <div class="main-menu">
-          <button id="Start Game">Start Game</button>
-          <button id="Instructions">Instructions</button>
-        </div>
-        <div class="instruct-menu" id="InstructMenu">
-          <img src="instructions.png" width="500" height="600" />
-          <button id="return">X</button>
-        </div>
-      </div> -->
       <div id="linkedListGame">
+        <div class="world" id="world"></div>
         <div class="topnav-centered">
           <p id="UI-Text" class="UI-Text">
             Click on the Edge to Create Minimum Spanning Tree!
@@ -46,114 +37,88 @@ For each edge (u, v) ∈ G.E ordered by increasing order by weight(u, v):
         A = A ∪ {(u, v)}
         <span class="function">UNION</span>(u, v)
 return A
-          </pre>
-        </div>
-        <div class="Score">
-          <div id="health-bar">
-            <svg
-              class="health-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="red"
-            >
-              <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-              />
-            </svg>
-            <svg
-              class="health-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="red"
-            >
-              <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-              />
-            </svg>
-            <svg
-              class="health-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="red"
-            >
-              <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-              />
-            </svg>
-            <svg
-              class="health-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="red"
-            >
-              <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-              />
-            </svg>
-          </div>
-        </div>
-
-        <!-- <div class="button-nav">
-          <button id="Node-Creator">Generate New Node</button>
-          <button id="Check-Answer">Check Answer</button>
-          <button id="Clear-List">Try Again?</button>
-        </div> -->
-      </div>
-      <!-- <div id="heapSortGame">
-        <div class="topnav-centered">
-          <p id="UI-Text1" class="UI-Text">Click on Something to Interact!</p>
+                </pre>
         </div>
         <div class="topnav-instructions">
-          <p id="UI-Instructions1" class="UI-Text"></p>
+          <pre class="code-block">
+for each <span class="keyword">u</span> ∈ <span class="keyword">G.V</span>:
+    <span class="variable">u.key</span> = ∞
+    <span class="variable">u.π</span> = NIL
+<span class="variable">r.key</span> = 0
+<span class="variable">Q</span> = <span class="keyword">G.V</span>
+while <span class="variable">Q</span> ≠ <span class="keyword">Φ</span>:
+    <span class="variable">u</span> = <span class="function">EXTRACT-MIN(Q)</span>
+    for each <span class="variable">v</span> ∈ <span class="keyword">G.Adj[u]</span>:
+        if <span class="variable">v</span> ∈ <span class="variable">Q</span> and <span class="function">ω(u,v)</span>  <span class="variable">v.key</span>:
+            <span class="variable">v.π</span> = <span class="variable">u</span>
+            <span class="variable">v.key</span> = <span class="function">ω(u,v)</span>
+                </pre>
         </div>
-        <div class="Score">
-          <div id="health-bar">
-            <svg
-              class="health-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="red"
-            >
-              <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-              />
-            </svg>
-            <svg
-              class="health-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="red"
-            >
-              <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-              />
-            </svg>
-            <svg
-              class="health-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="red"
-            >
-              <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-              />
-            </svg>
-            <svg
-              class="health-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="red"
-            >
-              <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-              />
-            </svg>
+        <div class="header">
+          <div class="header-content">
+            <div class="health">
+              <div class="health-label">Health</div>
+              <div id="health-bar">
+                <svg
+                  class="health-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="red"
+                >
+                  <path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  />
+                </svg>
+                <svg
+                  class="health-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="red"
+                >
+                  <path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  />
+                </svg>
+                <svg
+                  class="health-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="red"
+                >
+                  <path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  />
+                </svg>
+                <svg
+                  class="health-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="red"
+                >
+                  <path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div class="score">
+              <div class="score-label">Score</div>
+              <div class="score-label-2">01</div>
+            </div>
           </div>
         </div>
-        <div class="button-nav">
-          <button id="generate-array">Click to Generate Array</button>
-        </div>
-      </div> -->
+      </div>
     </div>
+    <div class="modal hidden">
+      <h2 class="modal__header">
+        Congratulations! <br />
+        You have successfully completed level 1 of Kruskal's Algorithm!</span>
+      </h2>
+      <div class="button__holder">
+      <button class="btn">Try again</button>
+      <button class="btn">Next Level &rarr;</button>
+    </div>
+    </div>
+    <div class="overlay hidden"></div>
   </body>
 </html>

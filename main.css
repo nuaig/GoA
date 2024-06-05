@@ -1,3 +1,7 @@
+body {
+  margin: 0;
+}
+
 .code-container {
   background-color: rgb(72, 121, 212);
   padding: 15px;
@@ -28,6 +32,10 @@
   color: #4ec9b0;
 }
 
+.code-block .variable {
+  color: #dcdcaa;
+}
+
 .topnav-instructions {
   position: absolute;
   top: 15%;
@@ -48,7 +56,7 @@
   width: 70px;
   height: 70px;
   top: 20px;
-  right: 20px;
+  right: 25px;
   cursor: pointer;
   z-index: 1;
 }
@@ -60,12 +68,160 @@
   left: 85%;
   transform: translate(-50%, -50%);
 }
-.Score {
-  float: none;
+
+.header {
   position: absolute;
-  top: 5%;
-  left: 5%;
+  font-family: "Courier New", Courier, monospace;
+  color: #a5d8ff;
+  top: 2vh;
+  left: 1vw;
+  width: 20%;
+  text-align: center;
+  pointer-events: none;
+  background-color: #343a40;
+  border: solid #eaebf1 2px;
+  padding: 15px;
+  /* box-shadow: 0.5rem 0.5rem 0; */
+  overflow: hidden;
+  font-weight: 600;
+  border-radius: 10px;
 }
+
+.header-content {
+  position: relative;
+  display: inline-block;
+  padding: 0 1em;
+  vertical-align: top;
+  display: flex;
+}
+
+.health-label,
+.score-label {
+  text-transform: uppercase;
+  font-size: 18px;
+  padding-bottom: 6px;
+}
+.health {
+  float: none;
+  flex: 1;
+  padding: 0 1em;
+
+  border-right: 1px solid #d0ebff;
+}
+
+#health-bar {
+  width: 100%;
+  display: flex;
+  gap: 5px;
+}
+
+.health-icon {
+  flex: 1;
+  width: 20px;
+  height: 20px;
+  transition: fill 0.3s;
+}
+
+.score {
+  float: none;
+  flex: 1;
+  padding: 0 1em;
+}
+
+/*Modal*/
+
+/* MODAL WINDOW */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 40rem;
+  background-color: #343a40;
+  padding: 2.5rem 3rem;
+  box-shadow: 0 4rem 6rem rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  transition: all 0.5s;
+  border-radius: 18px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  transition: all 0.5s;
+}
+
+.modal__header {
+  font-size: 2rem;
+
+  line-height: 1.5;
+  text-align: center;
+  color: #a5d8ff;
+  padding: 1rem;
+}
+
+.button__holder {
+  display: flex;
+}
+
+.button__holder .btn {
+  flex: 1;
+}
+
+.btn {
+  background-color: #1971c2;
+  border: none;
+  color: white;
+  border-radius: 5px;
+}
+
+.btn:hover {
+  background-color: #228be6; /* Green */
+  color: white;
+}
+
+.btn:active {
+  background-color: #228be6;
+  box-shadow: 5px 5px #666;
+  transform: translateY(4px);
+}
+
+.modal__form input {
+  font-size: 1.7rem;
+  padding: 1rem 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+}
+
+.modal__form button {
+  grid-column: 1 / span 2;
+  justify-self: center;
+  margin-top: 1rem;
+}
+
+.btn--close-modal {
+  font-family: inherit;
+  color: inherit;
+  position: absolute;
+  top: 0.5rem;
+  right: 2rem;
+  font-size: 4rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+
 .DEBUG {
   float: none;
   position: absolute;
@@ -78,11 +234,12 @@
   top: 90%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: black;
+  background-color: #343a40;
   box-sizing: border-box;
   width: 60%;
   border: solid #eaebf1 2px;
   padding: 15px;
+  border-radius: 10px;
 }
 button {
   background-color: #04aa6d;
@@ -109,7 +266,7 @@ button:active {
 }
 .UI-Text {
   text-align: center;
-  color: aliceblue;
+  color: #a5d8ff;
   font-size: larger;
   font-family: "Inter", sans-serif;
   font-size: 20;
@@ -176,25 +333,14 @@ button:active {
   text-align: center;
 }
 
-h2 {
+/* h2 {
   padding: 10px;
   text-align: center;
   background: #1abc9c;
   box-shadow: 0.5rem 0.5rem 0;
   color: white;
   font-size: 30px;
-}
-
-#health-bar {
-  display: flex;
-  gap: 5px;
-}
-
-.health-icon {
-  width: 24px;
-  height: 24px;
-  transition: fill 0.3s;
-}
+} */
 
 .shake {
   animation: shake 0.5s ease-in-out;

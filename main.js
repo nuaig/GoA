@@ -8,6 +8,9 @@ import { createThreePointLighting } from "./utils/threePointLighting.js";
 import { KruskalAlgorithm } from "./kruskal.js";
 import { drawLine, setFont } from "./utils/graphRelated/drawLine.js";
 
+const modal = document.querySelector(".modal");
+const overlay = document.querySelector(".overlay");
+
 // Click event to open hint
 function toggleInstructions() {
   const instructions = document.getElementsByClassName(
@@ -45,13 +48,8 @@ const camera = new THREE.PerspectiveCamera(
 const renderer = new THREE.WebGLRenderer();
 renderer.setClearColor(0xa3a3a3);
 renderer.setSize(window.innerWidth, window.innerHeight);
+
 document.body.appendChild(renderer.domElement);
-
-// const grid = new THREE.GridHelper(30, 30);
-// scene.add(grid);
-
-const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
@@ -65,14 +63,28 @@ let chestList = [];
 let openChestList = [];
 const mixers = [];
 const cubeSize = 1; // Define the size of the cube for positioning purposes
-const minDistance = cubeSize * 3.5; // Minimum distance between chests, scaled by cube size
-const gridSize = 15; // Size of the area within which chests will be placed
+const minDistance = cubeSize * 8; // Minimum distance between chests, scaled by cube size
+const gridSize = 30; // Size of the area within which chests will be placed
 const labels = []; // Array to store text labels
+let dungeonRoomMixer; // To store the mixer for the dungeon room animation
+let dungeonRoomAction; // To store the action for the dungeon room animation
+let levelComplete;
 
 // Create a random connected graph
 const nodes = Array.from({ length: 7 }, (_, i) => i);
 const totalEdges = 10; // Adjust the number of edges as needed
 const graph = createRandomConnectedGraph(nodes, totalEdges);
+
+const openModal = function (e) {
+  e.preventDefault();
+  modal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+};
+
+const closeModal = function () {
+  modal.classList.add("hidden");
+  overlay.classList.add("hidden");
+};
 
 // Initialize KruskalAlgorithm
 const kruskal = new KruskalAlgorithm(graph);
@@ -88,16 +100,20 @@ function loadModel(url, position) {
         const model = gltf.scene.clone();
         model.position.copy(position);
         scene.add(model);
-        resolve(model);
 
-        // Check for animations
+        let mixer = null;
+        let action = null;
         if (gltf.animations && gltf.animations.length) {
-          const mixer = new THREE.AnimationMixer(model);
-          gltf.animations.forEach((clip) => {
-            mixer.clipAction(clip).play();
-          });
-          mixers.push(mixer);
+          mixer = new THREE.AnimationMixer(model);
+          action = mixer.clipAction(gltf.animations[0]);
+          action.setLoop(THREE.LoopOnce); // Set the animation to play once
+          action.clampWhenFinished = true; // Stop the animation at the last frame
+          action.enabled = true;
+          action.paused = false;
+          mixers.push(mixer); // Add mixer to the mixers array
         }
+
+        resolve({ model, mixer, action });
       },
       undefined,
       function (error) {
@@ -110,6 +126,18 @@ function loadModel(url, position) {
 
 // Create and position models sequentially to maintain order
 async function createModels() {
+  // Function to check if three points form a valid triangle
+  function isTriangleInequalitySatisfied(a, b, c, margin) {
+    const ab = a.distanceTo(b);
+    const bc = b.distanceTo(c);
+    const ac = a.distanceTo(c);
+    return (
+      ab + bc > ac + margin && ab + ac > bc + margin && ac + bc > ab + margin
+    );
+  }
+
+  const margin = 0.3; // Adjust the margin as needed
+
   for (let i = 0; i < nodes.length; i++) {
     let validPosition = false;
     let position = new THREE.Vector3();
@@ -130,21 +158,39 @@ async function createModels() {
           validPosition = false;
           break;
         }
+
+        // Check against all pairs of existing chests
+        for (let y = x + 1; y < chestList.length; y++) {
+          if (
+            !isTriangleInequalitySatisfied(
+              chestList[x].position,
+              chestList[y].position,
+              position,
+              margin
+            )
+          ) {
+            validPosition = false;
+            break;
+          }
+        }
+
+        if (!validPosition) break;
       }
     }
 
     // Load the closed chest model at the valid position
     const closedModel = await loadModel(closedChestURL.href, position);
-    chestList.push(closedModel);
+    closedModel.model.scale.set(1.5, 1.5, 1.5);
+    chestList.push(closedModel.model);
 
     // Load the open chest model at the same position but keep it hidden initially
     const openModel = await loadModel(openChestURL.href, position);
-    openModel.visible = false;
-    openChestList.push(openModel);
+    openModel.model.visible = false;
+    openChestList.push(openModel.model);
 
     // Add a label in front of the chest
     const labelPosition = position.clone();
-    labelPosition.x -= 0.55; // Adjust the height if needed
+    labelPosition.x -= 0.8; // Adjust the height if needed
     labelPosition.z -= 0.5;
     createNodeLabel(`Chest ${i}`, labelPosition);
   }
@@ -162,22 +208,74 @@ fontLoader.load(
     font = loadedFont;
     setFont(font); // Set the font for text labels
     createModels(); // Start creating models after font is loaded
+    const chapterTitle = createNodeLabel(
+      "Chapter: Kruskal's Algorithm",
+      new THREE.Vector3(5, 5, -22),
+      0.7,
+      0.3,
+      0x212529
+    );
+    const levelTitle = createNodeLabel(
+      "Level 1",
+      new THREE.Vector3(9, 3, -22),
+      0.65,
+      0.3,
+      0x212529
+    );
   }
 );
 
 // Function to create node labels
-function createNodeLabel(text, position) {
+function createNodeLabel(
+  text,
+  position,
+  size = 0.35,
+  depth = 0.15,
+  color = 0xffd700
+) {
   const textGeometry = new TextGeometry(text, {
     font: font,
-    size: 0.25,
-    depth: 0.1,
+    size: size,
+    depth: depth,
   });
-  const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 }); // Gold color
+  const textMaterial = new THREE.MeshBasicMaterial({ color: color }); // Gold color
   const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-  textMesh.position.set(position.x, position.y, position.z + 1); // Position in front of the chest
+  textMesh.position.set(position.x, position.y, position.z + 1.5); // Position in front of the chest
 
   scene.add(textMesh);
+  return textMesh;
 }
+
+function createRing(innerRadius, outerRadius, depth, color) {
+  // Define the shape for the ring
+  const shape = new THREE.Shape();
+  shape.absarc(0, 0, outerRadius, 0, Math.PI * 2, false);
+  const hole = new THREE.Path();
+  hole.absarc(0, 0, innerRadius, 0, Math.PI * 2, true);
+  shape.holes.push(hole);
+
+  // Define the extrusion settings
+  const extrudeSettings = {
+    depth: depth,
+    bevelEnabled: false,
+  };
+
+  // Create the geometry and material
+  const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+  const material = new THREE.MeshBasicMaterial({
+    color: color,
+    side: THREE.DoubleSide,
+  });
+  const ring = new THREE.Mesh(geometry, material);
+  ring.rotation.x = -Math.PI / 2; // Rotate to match the label orientation
+  ring.visible = false; // Initially hidden
+  return ring;
+}
+
+// Create a ring mesh for hover effect
+const labelDepth = 0.1; // Use the same depth as the label
+const hoverRing = createRing(0.45, 0.5, labelDepth, 0x000000); // Adjust inner and outer radius and color as needed
+scene.add(hoverRing);
 
 // Function to draw lines between the chests
 function drawLines() {
@@ -214,6 +312,7 @@ function drawLines() {
     event.preventDefault();
     if (kruskal.isComplete()) {
       sphereInter.visible = false;
+      hoverRing.visible = false;
       return; // Stop hover effects when Kruskal's algorithm is complete
     }
 
@@ -228,6 +327,7 @@ function drawLines() {
       const intersectedObject = intersects[0].object;
       if (intersectedObject.userData.selected) {
         sphereInter.visible = false;
+        hoverRing.visible = false;
         return; // Skip already selected lines
       }
 
@@ -236,27 +336,23 @@ function drawLines() {
 
       if (selectedLine !== intersectedObject) {
         if (selectedLine && !selectedLine.userData.selected) {
-          selectedLine.material.color.set(0x0000ff); // Reset previous line color
-          if (selectedLine.userData.label) {
-            selectedLine.userData.label.material.color.set(0x000000); // Reset previous label color
-          }
+          selectedLine.material.color.set(0x74c0fc); // Reset previous line color
+          hoverRing.visible = false; // Hide the previous ring
         }
         selectedLine = intersectedObject;
         if (!selectedLine.userData.selected) {
           selectedLine.material.color.set(0x00ff00); // Highlight selected line
-          if (selectedLine.userData.label) {
-            selectedLine.userData.label.material.color.set(0x00ff00); // Highlight label
-          }
+          hoverRing.position.copy(selectedLine.userData.label.position); // Position the ring around the label
+          hoverRing.visible = true; // Show the ring
         }
       }
     } else {
       sphereInter.visible = false;
+      hoverRing.visible = false;
 
       if (selectedLine && !selectedLine.userData.selected) {
-        selectedLine.material.color.set(0x0000ff); // Reset previous line color
-        if (selectedLine.userData.label) {
-          selectedLine.userData.label.material.color.set(0x000000); // Reset previous label color
-        }
+        selectedLine.material.color.set(0x74c0fc); // Reset previous line color
+        hoverRing.visible = false; // Hide the previous ring
       }
       selectedLine = null;
     }
@@ -268,7 +364,6 @@ function drawLines() {
       document.body.classList.remove("shake");
     }, 500);
   }
-
   function onClick(event) {
     event.preventDefault();
 
@@ -293,9 +388,7 @@ function drawLines() {
           // Correct selection
           intersectedObject.material.color.set(0x00ff00); // Set line to green
           intersectedObject.userData.selected = true; // Mark as selected
-          if (intersectedObject.userData.label) {
-            intersectedObject.userData.label.material.color.set(0x00ff00); // Set label to green
-          }
+
           const { startCube, endCube } = intersectedObject.userData;
           const closedStart = chestList[chestList.indexOf(startCube)];
           const openStart = openChestList[chestList.indexOf(startCube)];
@@ -307,6 +400,15 @@ function drawLines() {
           closedEnd.visible = false;
           openEnd.visible = true;
 
+          // Create and position the permanent ring around the label
+          const permanentRing = createRing(0.45, 0.5, labelDepth, 0x000000);
+          permanentRing.position.copy(
+            intersectedObject.userData.label.position
+          );
+          permanentRing.position.y -= labelDepth / 2; // Adjust the y-position to align with the label depth
+          scene.add(permanentRing);
+          permanentRing.visible = true; // Make the ring visible
+
           console.log("Selected edges:", kruskal.selectedEdges);
           console.log(
             "Current weight of the spanning tree:",
@@ -314,6 +416,16 @@ function drawLines() {
           );
           if (kruskal.isComplete()) {
             uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${kruskal.currentWeight}.`;
+
+            // Play the dungeon room animation once when the game is complete
+            if (dungeonRoomMixer && dungeonRoomAction) {
+              console.log("Completed, animation should begin");
+              dungeonRoomAction.reset().play();
+              console.log(dungeonRoomAction);
+            }
+            openModal(event);
+            window.removeEventListener("mousemove", onMouseMove, false);
+            window.removeEventListener("click", onClick, false);
           } else {
             uiText.innerText = `Correct! Current weight is ${kruskal.currentWeight}.`;
           }
@@ -343,7 +455,6 @@ function drawLines() {
 }
 
 // Lighting
-
 createThreePointLighting(scene);
 camera.position.z = 15;
 camera.position.y = 10;
@@ -357,8 +468,14 @@ function onWindowResize() {
 window.addEventListener("resize", onWindowResize, false);
 
 // Function for rendering the scene
+const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
+  const deltaSeconds = clock.getDelta();
+  mixers.forEach((mixer) => {
+    mixer.update(deltaSeconds);
+    console.log("Updating mixer");
+  }); // Update mixers
   controls.update();
   renderer.render(scene, camera);
 }
@@ -366,8 +483,33 @@ animate();
 
 async function createDungeonRoom() {
   const position = new THREE.Vector3(0, -0.1, 0); // Position the floor slightly below the chests
-  const dungeonRoom = await loadModel(dungeonRoomURL.href, position);
-  dungeonRoom.scale.set(0.5, 0.5, 0.5); // Scale the floor tile if necessary
+  try {
+    const { model, mixer, action } = await loadModel(
+      dungeonRoomURL.href,
+      position
+    );
+
+    // if (model) {
+    //   model.scale.set(0.5, 0.5, 0.5); // Scale the model
+    // } else {
+    //   console.error("Model is undefined.");
+    // }
+
+    if (mixer && action) {
+      dungeonRoomMixer = mixer; // Store the mixer for later use
+      dungeonRoomAction = action; // Store the action for later use
+      console.log("Mixer and action initialized:", mixer, action);
+      dungeonRoomAction.timeScale = 0.25;
+      // Set to the last frame when the animation ends
+      dungeonRoomAction.setLoop(THREE.LoopOnce);
+      dungeonRoomAction.clampWhenFinished = true;
+      dungeonRoomAction.paused = false;
+    } else {
+      console.error("Mixer or action is undefined.");
+    }
+  } catch (error) {
+    console.error("Error loading dungeon room:", error);
+  }
 }
 
 // Call the function to load the floor tile

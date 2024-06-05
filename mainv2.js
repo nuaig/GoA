@@ -51,8 +51,8 @@ document.body.appendChild(renderer.domElement);
 // const grid = new THREE.GridHelper(30, 30);
 // scene.add(grid);
 
-const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
+// const axesHelper = new THREE.AxesHelper(5);
+// scene.add(axesHelper);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
