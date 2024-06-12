@@ -10,8 +10,6 @@ import { drawLine, setFont } from "./utils/graphRelated/drawLine.js";
 
 const modal = document.querySelector(".modal");
 const overlay = document.querySelector(".overlay");
-const buttonAgain = document.querySelector(".btn__again");
-const buttonNext = document.querySelector(".btn__next");
 
 // Click event to open hint
 function toggleInstructions() {
@@ -28,13 +26,6 @@ function toggleInstructions() {
 window.toggleInstructions = toggleInstructions;
 
 let health = 3;
-let currentLevel = 1;
-
-const levelConfig = {
-  1: { nodes: 6, edges: 9 },
-  2: { nodes: 8, edges: 13 },
-  3: { nodes: 10, edges: 18 },
-};
 
 function updateHealth() {
   const healthIcons = document.querySelectorAll(".health-icon");
@@ -80,7 +71,10 @@ let dungeonRoomAction; // To store the action for the dungeon room animation
 let levelComplete;
 
 // Create a random connected graph
-let graph;
+const nodes = Array.from({ length: 8 }, (_, i) => i);
+const totalEdges = 13; // Adjust the number of edges as needed
+const graph = createRandomConnectedGraph(nodes, totalEdges);
+
 const openModal = function (e) {
   e.preventDefault();
   modal.classList.remove("hidden");
@@ -93,13 +87,12 @@ const closeModal = function () {
 };
 
 // Initialize KruskalAlgorithm
-let kruskal;
+const kruskal = new KruskalAlgorithm(graph);
 
 console.log("Generated Graph:", graph); // Debugging statement
 
 // Function to load a model
 function loadModel(url, position) {
-  console.log(`Loading model from ${url} at position`, position);
   return new Promise((resolve, reject) => {
     assetLoader.load(
       url,
@@ -120,12 +113,11 @@ function loadModel(url, position) {
           mixers.push(mixer); // Add mixer to the mixers array
         }
 
-        console.log(`Model loaded from ${url}`);
         resolve({ model, mixer, action });
       },
       undefined,
       function (error) {
-        console.error(`Error loading model from ${url}:`, error);
+        console.error(error);
         reject(error);
       }
     );
@@ -133,12 +125,7 @@ function loadModel(url, position) {
 }
 
 // Create and position models sequentially to maintain order
-async function createModels(nodes) {
-  if (!nodes || !Array.isArray(nodes)) {
-    console.error("Nodes parameter is missing or not an array:", nodes);
-    return;
-  }
-
+async function createModels() {
   // Function to check if three points form a valid triangle
   function isTriangleInequalitySatisfied(a, b, c, margin) {
     const ab = a.distanceTo(b);
@@ -154,11 +141,9 @@ async function createModels(nodes) {
   for (let i = 0; i < nodes.length; i++) {
     let validPosition = false;
     let position = new THREE.Vector3();
-    let attempts = 0;
 
     // Loop until a valid position is found
-    while (!validPosition && attempts < 100) {
-      attempts++;
+    while (!validPosition) {
       // Set a random position in the x-z plane with y = 0
       const randomX = (Math.random() - 0.5) * gridSize;
       const randomZ = (Math.random() - 0.5) * gridSize;
@@ -193,11 +178,6 @@ async function createModels(nodes) {
       }
     }
 
-    if (!validPosition) {
-      console.warn("Could not find a valid position for node", i);
-      continue;
-    }
-
     // Load the closed chest model at the valid position
     const closedModel = await loadModel(closedChestURL.href, position);
     closedModel.model.scale.set(1.5, 1.5, 1.5);
@@ -227,11 +207,7 @@ fontLoader.load(
   (loadedFont) => {
     font = loadedFont;
     setFont(font); // Set the font for text labels
-    const initialNodes = Array.from(
-      { length: levelConfig[currentLevel].nodes },
-      (_, i) => i
-    ); // Get initial nodes
-    createModels(initialNodes); // Start creating models after font is loaded
+    createModels(); // Start creating models after font is loaded
     const chapterTitle = createNodeLabel(
       "Chapter: Kruskal's Algorithm",
       new THREE.Vector3(5, 5, -22),
@@ -538,35 +514,3 @@ async function createDungeonRoom() {
 
 // Call the function to load the floor tile
 createDungeonRoom();
-
-function resetScene() {
-  chestList.forEach((chest) => scene.remove(chest));
-  openChestList.forEach((chest) => scene.remove(chest));
-  labels.forEach((label) => scene.remove(label));
-  chestList = [];
-  openChestList = [];
-  labels.length = 0; // Clear labels
-  mixers.length = 0; // Clear mixers
-}
-
-function loadLevel(level) {
-  const { nodes: numNodes, edges: numEdges } = levelConfig[level];
-  const nodes = Array.from({ length: numNodes }, (_, i) => i);
-  graph = createRandomConnectedGraph(nodes, numEdges);
-  kruskal = new KruskalAlgorithm(graph);
-  console.log(`Loaded Level ${level}:`, graph); // Debugging statement
-  resetScene();
-  createModels(nodes);
-}
-
-buttonNext.addEventListener("click", () => {
-  currentLevel++;
-  if (currentLevel > 3) {
-    currentLevel = 1; // Loop back to level 1 after level 3
-  }
-  closeModal(); // Hide the modal
-  loadLevel(currentLevel); // Load the next level
-});
-
-// Initial load
-loadLevel(currentLevel);

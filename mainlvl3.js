@@ -12,7 +12,30 @@ const modal = document.querySelector(".modal");
 const overlay = document.querySelector(".overlay");
 const buttonAgain = document.querySelector(".btn__again");
 const buttonNext = document.querySelector(".btn__next");
+/*
+Graph related variables
+------(((******)))---------
+*/
 
+let currentLevel = 1;
+let curNodes;
+let curEdges;
+let graph;
+// const colors = [#fa5252, #e64980, #be4bdb, #7950f2, #4c6ef5, #15aabf, #12b886,#40c057 , #fab005, #fd7e14]
+const levelConfig = {
+  1: { nodes: 6, edges: 5 },
+  2: { nodes: 8, edges: 7 },
+  3: { nodes: 10, edges: 9 },
+};
+const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
+curNodes = Array.from({ length: numNodes }, (_, i) => i);
+curEdges = numEdges;
+
+//
+
+// Create a random connected graph
+
+graph = createRandomConnectedGraph(curNodes, curEdges);
 // Click event to open hint
 function toggleInstructions() {
   const instructions = document.getElementsByClassName(
@@ -28,13 +51,6 @@ function toggleInstructions() {
 window.toggleInstructions = toggleInstructions;
 
 let health = 3;
-let currentLevel = 1;
-
-const levelConfig = {
-  1: { nodes: 6, edges: 9 },
-  2: { nodes: 8, edges: 13 },
-  3: { nodes: 10, edges: 18 },
-};
 
 function updateHealth() {
   const healthIcons = document.querySelectorAll(".health-icon");
@@ -70,17 +86,24 @@ const dungeonRoomURL = new URL("./src/DungeonRoom.glb", import.meta.url);
 const assetLoader = new GLTFLoader();
 let chestList = [];
 let openChestList = [];
+
+let chestLabelList = [];
+let edgeList = [];
+let edgeLabelList = [];
+
+let ringList = [];
+
+let sphereInter;
+
 const mixers = [];
 const cubeSize = 1; // Define the size of the cube for positioning purposes
 const minDistance = cubeSize * 8; // Minimum distance between chests, scaled by cube size
-const gridSize = 30; // Size of the area within which chests will be placed
+const gridSize = 40; // Size of the area within which chests will be placed
 const labels = []; // Array to store text labels
 let dungeonRoomMixer; // To store the mixer for the dungeon room animation
 let dungeonRoomAction; // To store the action for the dungeon room animation
 let levelComplete;
 
-// Create a random connected graph
-let graph;
 const openModal = function (e) {
   e.preventDefault();
   modal.classList.remove("hidden");
@@ -93,13 +116,12 @@ const closeModal = function () {
 };
 
 // Initialize KruskalAlgorithm
-let kruskal;
+let kruskal = new KruskalAlgorithm(graph);
 
 console.log("Generated Graph:", graph); // Debugging statement
 
 // Function to load a model
 function loadModel(url, position) {
-  console.log(`Loading model from ${url} at position`, position);
   return new Promise((resolve, reject) => {
     assetLoader.load(
       url,
@@ -120,12 +142,11 @@ function loadModel(url, position) {
           mixers.push(mixer); // Add mixer to the mixers array
         }
 
-        console.log(`Model loaded from ${url}`);
         resolve({ model, mixer, action });
       },
       undefined,
       function (error) {
-        console.error(`Error loading model from ${url}:`, error);
+        console.error(error);
         reject(error);
       }
     );
@@ -133,12 +154,7 @@ function loadModel(url, position) {
 }
 
 // Create and position models sequentially to maintain order
-async function createModels(nodes) {
-  if (!nodes || !Array.isArray(nodes)) {
-    console.error("Nodes parameter is missing or not an array:", nodes);
-    return;
-  }
-
+async function createModels() {
   // Function to check if three points form a valid triangle
   function isTriangleInequalitySatisfied(a, b, c, margin) {
     const ab = a.distanceTo(b);
@@ -149,16 +165,14 @@ async function createModels(nodes) {
     );
   }
 
-  const margin = 0.3; // Adjust the margin as needed
+  const margin = 0.2; // Adjust the margin as needed
 
-  for (let i = 0; i < nodes.length; i++) {
+  for (let i = 0; i < curNodes.length; i++) {
     let validPosition = false;
     let position = new THREE.Vector3();
-    let attempts = 0;
 
     // Loop until a valid position is found
-    while (!validPosition && attempts < 100) {
-      attempts++;
+    while (!validPosition) {
       // Set a random position in the x-z plane with y = 0
       const randomX = (Math.random() - 0.5) * gridSize;
       const randomZ = (Math.random() - 0.5) * gridSize;
@@ -193,11 +207,6 @@ async function createModels(nodes) {
       }
     }
 
-    if (!validPosition) {
-      console.warn("Could not find a valid position for node", i);
-      continue;
-    }
-
     // Load the closed chest model at the valid position
     const closedModel = await loadModel(closedChestURL.href, position);
     closedModel.model.scale.set(1.5, 1.5, 1.5);
@@ -212,7 +221,7 @@ async function createModels(nodes) {
     const labelPosition = position.clone();
     labelPosition.x -= 0.8; // Adjust the height if needed
     labelPosition.z -= 0.5;
-    createNodeLabel(`Chest ${i}`, labelPosition);
+    chestLabelList.push(createNodeLabel(`Chest ${i}`, labelPosition));
   }
 
   console.log("All models loaded. Final chestList:", chestList);
@@ -222,25 +231,23 @@ async function createModels(nodes) {
 // Load font for text geometry
 const fontLoader = new FontLoader();
 let font;
+let chapterTitle;
+let levelTitle;
 fontLoader.load(
   "https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
   (loadedFont) => {
     font = loadedFont;
     setFont(font); // Set the font for text labels
-    const initialNodes = Array.from(
-      { length: levelConfig[currentLevel].nodes },
-      (_, i) => i
-    ); // Get initial nodes
-    createModels(initialNodes); // Start creating models after font is loaded
-    const chapterTitle = createNodeLabel(
-      "Chapter: Kruskal's Algorithm",
-      new THREE.Vector3(5, 5, -22),
+    createModels(); // Start creating models after font is loaded
+    chapterTitle = createNodeLabel(
+      "Kruskal's Algorithm",
+      new THREE.Vector3(7, 5, -22),
       0.7,
       0.3,
       0x212529
     );
-    const levelTitle = createNodeLabel(
-      "Level 2",
+    levelTitle = createNodeLabel(
+      "Level 1",
       new THREE.Vector3(9, 3, -22),
       0.65,
       0.3,
@@ -268,6 +275,32 @@ function createNodeLabel(
 
   scene.add(textMesh);
   return textMesh;
+}
+
+function updateNodeLabel(
+  textMesh,
+  newText,
+  size = 0.35,
+  depth = 0.15,
+  color = 0xffd700
+) {
+  // Remove the old geometry and material
+  textMesh.geometry.dispose();
+  textMesh.material.dispose();
+
+  // Create new TextGeometry with the new text
+  const newTextGeometry = new TextGeometry(newText, {
+    font: font,
+    size: size,
+    depth: depth,
+  });
+
+  // Update the geometry and material of the textMesh
+  textMesh.geometry = newTextGeometry;
+  textMesh.material = new THREE.MeshBasicMaterial({ color: color });
+
+  // If you need to update the position as well, do it here
+  // textMesh.position.set(newPosition.x, newPosition.y, newPosition.z + 1.5);
 }
 
 function createRing(innerRadius, outerRadius, depth, color) {
@@ -298,7 +331,7 @@ function createRing(innerRadius, outerRadius, depth, color) {
 
 // Create a ring mesh for hover effect
 const labelDepth = 0.1; // Use the same depth as the label
-const hoverRing = createRing(0.45, 0.5, labelDepth, 0x000000); // Adjust inner and outer radius and color as needed
+let hoverRing = createRing(0.45, 0.5, labelDepth, 0x000000); // Adjust inner and outer radius and color as needed
 scene.add(hoverRing);
 
 // Function to draw lines between the chests
@@ -317,6 +350,8 @@ function drawLines() {
       scene
     ); // Pass edge data
     lines.push(line);
+    edgeList.push(line);
+    edgeLabelList.push(line.userData.label);
   });
 
   // Hovering effect on lines
@@ -328,7 +363,7 @@ function drawLines() {
   // Create the sphere for hover effect
   const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32);
   const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-  const sphereInter = new THREE.Mesh(sphereGeometry, sphereMaterial);
+  sphereInter = new THREE.Mesh(sphereGeometry, sphereMaterial);
   sphereInter.visible = false;
   scene.add(sphereInter);
 
@@ -432,6 +467,7 @@ function drawLines() {
           permanentRing.position.y -= labelDepth / 2; // Adjust the y-position to align with the label depth
           scene.add(permanentRing);
           permanentRing.visible = true; // Make the ring visible
+          ringList.push(permanentRing);
 
           console.log("Selected edges:", kruskal.selectedEdges);
           console.log(
@@ -498,7 +534,6 @@ function animate() {
   const deltaSeconds = clock.getDelta();
   mixers.forEach((mixer) => {
     mixer.update(deltaSeconds);
-    // console.log("Updating mixer");
   }); // Update mixers
   controls.update();
   renderer.render(scene, camera);
@@ -539,34 +574,79 @@ async function createDungeonRoom() {
 // Call the function to load the floor tile
 createDungeonRoom();
 
+// Advancing Next Level
 function resetScene() {
+  // Remove all chests and labels from the scene
   chestList.forEach((chest) => scene.remove(chest));
   openChestList.forEach((chest) => scene.remove(chest));
-  labels.forEach((label) => scene.remove(label));
-  chestList = [];
-  openChestList = [];
+  chestLabelList.forEach((label) => scene.remove(label));
+  edgeList.forEach((edge) => scene.remove(edge));
+  edgeLabelList.forEach((label) => scene.remove(label));
+  ringList.forEach((ring) => scene.remove(ring));
+
+  // Clear the lists
+  chestList.length = 0;
+  openChestList.length = 0;
+  chestLabelList.length = 0;
+  edgeList.length = 0;
+  edgeLabelList.length = 0;
+  ringList.length = 0;
   labels.length = 0; // Clear labels
   mixers.length = 0; // Clear mixers
+
+  // Remove hover sphere from the scene
+  if (sphereInter) {
+    scene.remove(sphereInter);
+    sphereInter.geometry.dispose(); // Dispose of the geometry
+    sphereInter.material.dispose(); // Dispose of the material
+  }
+
+  // Hide hover ring
+  hoverRing.visible = false;
+
+  // Optionally remove hoverRing from scene if you want it to be recreated later
+  // scene.remove(hoverRing);
 }
 
-function loadLevel(level) {
-  const { nodes: numNodes, edges: numEdges } = levelConfig[level];
-  const nodes = Array.from({ length: numNodes }, (_, i) => i);
-  graph = createRandomConnectedGraph(nodes, numEdges);
+function createHoverElements() {
+  // Create the hover sphere
+  const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32);
+  const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+  sphereInter = new THREE.Mesh(sphereGeometry, sphereMaterial);
+  sphereInter.visible = false;
+  scene.add(sphereInter);
+
+  // Create the hover ring
+  hoverRing = createRing(0.45, 0.5, labelDepth, 0x000000);
+  hoverRing.visible = false;
+  scene.add(hoverRing);
+}
+
+function advanceNextLevel() {
+  // Retrieve the configuration for the next level
+  const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
+  curNodes = Array.from({ length: numNodes }, (_, i) => i);
+  curEdges = numEdges;
+
+  // Create a new random connected graph
+  graph = createRandomConnectedGraph(curNodes, curEdges);
+
+  // Initialize KruskalAlgorithm with the new graph
   kruskal = new KruskalAlgorithm(graph);
-  console.log(`Loaded Level ${level}:`, graph); // Debugging statement
-  resetScene();
-  createModels(nodes);
+
+  // Recreate the models and necessary elements for the new level
+  createModels();
+
+  // Recreate the hover elements
+  createHoverElements();
 }
 
 buttonNext.addEventListener("click", () => {
   currentLevel++;
-  if (currentLevel > 3) {
-    currentLevel = 1; // Loop back to level 1 after level 3
-  }
-  closeModal(); // Hide the modal
-  loadLevel(currentLevel); // Load the next level
+  closeModal();
+  resetScene();
+  advanceNextLevel();
+  updateNodeLabel(levelTitle, `Level ${currentLevel}`, 0.65, 0.15, 0x212529);
+  // Recreate hover sphere and ring if necessary
+  // createHoverElements(); // Implement this function if needed
 });
-
-// Initial load
-loadLevel(currentLevel);

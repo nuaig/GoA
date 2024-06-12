@@ -83,6 +83,7 @@ export class KruskalAlgorithm {
     }
 
     if (!this.uf.union(edge[0], edge[1])) {
+      console.log("edge forms a cycle");
       return false; // Edge forms a cycle
     }
 
