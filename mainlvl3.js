@@ -6,38 +6,30 @@ import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { Graph, createRandomConnectedGraph } from "./graph.js";
 import { createThreePointLighting } from "./utils/threePointLighting.js";
 import { KruskalAlgorithm } from "./kruskal.js";
-import { drawLine, setFont } from "./utils/graphRelated/drawLine.js";
-
-const colors = [
-  "#fa5252",
-  "#e64980",
-  "#be4bdb",
-  "#7950f2",
-  "#4c6ef5",
-  "#15aabf",
-  "#12b886",
-  "#40c057",
-  "#fab005",
-  "#fd7e14",
-];
-
-function toggleInstructions() {
-  const instructions = document.getElementsByClassName(
-    "topnav-instructions"
-  )[0];
-  if (instructions.style.display === "block") {
-    instructions.style.display = "none";
-  } else {
-    instructions.style.display = "block";
-  }
-}
+import { loadModel } from "./utils/threeModels.js";
+import {
+  toggleInstructions,
+  updateHealth,
+  resetHealth,
+  setStars,
+  resetStars,
+} from "./utils/ui.js";
+import {
+  effectForCorrectSelect,
+  shakeForWrongSelect,
+} from "./utils/animations.js";
+import {
+  drawLine,
+  setFont,
+  createNodeLabel,
+  updateNodeLabel,
+  updateNodeLabelColor,
+  updateComponentColors,
+  getRandomColor,
+  createRing,
+} from "./utils/graphRelated/drawLine.js";
 
 window.toggleInstructions = toggleInstructions;
-
-function getRandomColor() {
-  const randomIndex = Math.floor(Math.random() * colors.length);
-  return colors[randomIndex];
-}
 
 const uiText = document.getElementById("UI-Text");
 const scoreText = document.querySelector(".score-label-2");
@@ -58,30 +50,6 @@ buttonStart.addEventListener("click", () => {
   instructionModal.classList.add("hidden");
 });
 
-function effectForCorrectSelect() {
-  const elements = document.querySelectorAll(".correct__select");
-  elements.forEach((element) => {
-    element.classList.add("highlight__correct");
-
-    // Remove the class after the animation is done to allow re-triggering
-    setTimeout(() => {
-      element.classList.remove("highlight__correct");
-    }, 2000); // 500ms matches the animation duration
-  });
-}
-
-function shakeForWrongSelect() {
-  const elements = document.querySelectorAll(".wrong__select");
-  elements.forEach((element) => {
-    element.classList.add("highlight__wrong");
-
-    // Remove the class after the animation is done to allow re-triggering
-    setTimeout(() => {
-      element.classList.remove("highlight__wrong");
-    }, 2000); // 500ms matches the animation duration
-  });
-}
-
 let currentScore = 0;
 let currentLevel = 1;
 let curNodes;
@@ -101,67 +69,9 @@ graph = createRandomConnectedGraph(curNodes, curEdges);
 
 let componentColors = {};
 
-function updateComponentColors(uf, nodes) {
-  const newColors = {};
-  nodes.forEach((node) => {
-    const root = uf.find(node);
-    if (!newColors[root]) {
-      newColors[root] = getRandomColor();
-    }
-    componentColors[node] = newColors[root];
-  });
-}
-
-function updateNodeLabelColor(textMesh, color) {
-  textMesh.material.color.set(color);
-}
-
 let kruskal = new KruskalAlgorithm(graph);
 
 let health = 4;
-
-function updateHealth() {
-  const healthIcons = document.querySelectorAll(".health-icon");
-  if (health >= 0 && health <= 4) {
-    healthIcons[health].style.fill = "white";
-    health--;
-  } else {
-    uiText.innerHTML = `Game Over. Better luck next time!`;
-  }
-}
-
-function resetHealth() {
-  health = 4;
-  const healthIcons = document.querySelectorAll(".health-icon");
-  for (let i = 0; i <= health; i++) {
-    healthIcons[i].style.fill = "red";
-  }
-}
-
-function setStars() {
-  let numStars;
-  if (health === 4) {
-    numStars = 2;
-  } else if (health >= 2 && health < 4) {
-    // Updated the condition to prevent overlap
-    numStars = 1;
-  } else if (health >= 0 && health < 2) {
-    numStars = 0;
-  } else {
-    numStars = -1;
-  }
-  console.log(numStars);
-
-  for (let i = 0; i <= numStars; i++) {
-    stars[i].style.fill = "#fab005"; // Ensure the color is a string
-  }
-}
-
-function resetStars() {
-  for (let i = 0; i <= 2; i++) {
-    stars[i].style.fill = "#e9ecef"; // Ensure the color is a string
-  }
-}
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -185,7 +95,6 @@ const closedChestURL = new URL("./src/Prop_Chest_CLosed.gltf", import.meta.url);
 const openChestURL = new URL("./src/Prop_Chest_Gold.gltf", import.meta.url);
 const dungeonRoomURL = new URL("./src/DungeonRoom.glb", import.meta.url);
 
-const assetLoader = new GLTFLoader();
 let chestList = [];
 let openChestList = [];
 let chestLabelList = [];
@@ -212,38 +121,6 @@ const closeModal = function () {
   modal.classList.add("hidden");
   overlay.classList.add("hidden");
 };
-
-function loadModel(url, position) {
-  return new Promise((resolve, reject) => {
-    assetLoader.load(
-      url,
-      function (gltf) {
-        const model = gltf.scene.clone();
-        model.position.copy(position);
-        scene.add(model);
-
-        let mixer = null;
-        let action = null;
-        if (gltf.animations && gltf.animations.length) {
-          mixer = new THREE.AnimationMixer(model);
-          action = mixer.clipAction(gltf.animations[0]);
-          action.setLoop(THREE.LoopOnce);
-          action.clampWhenFinished = true;
-          action.enabled = true;
-          action.paused = false;
-          mixers.push(mixer);
-        }
-
-        resolve({ model, mixer, action });
-      },
-      undefined,
-      function (error) {
-        console.error(error);
-        reject(error);
-      }
-    );
-  });
-}
 
 async function createModels() {
   function isTriangleInequalitySatisfied(a, b, c, margin) {
@@ -291,11 +168,11 @@ async function createModels() {
       }
     }
 
-    const closedModel = await loadModel(closedChestURL.href, position);
+    const closedModel = await loadModel(closedChestURL.href, position, scene);
     closedModel.model.scale.set(1.5, 1.5, 1.5);
     chestList.push(closedModel.model);
 
-    const openModel = await loadModel(openChestURL.href, position);
+    const openModel = await loadModel(openChestURL.href, position, scene);
     openModel.model.visible = false;
     openChestList.push(openModel.model);
 
@@ -307,7 +184,7 @@ async function createModels() {
     labelPosition.y += 1.5;
     labelPosition.z -= 1.5;
 
-    const chestLabel = createNodeLabel(`${i}`, labelPosition);
+    const chestLabel = createNodeLabel(`${i}`, labelPosition, scene);
     chestLabelList.push(chestLabel);
   }
 
@@ -328,6 +205,7 @@ fontLoader.load(
     chapterTitle = createNodeLabel(
       "Kruskal's Algorithm",
       new THREE.Vector3(8, 6, -33),
+      scene,
       1,
       0.3,
       0x212529
@@ -335,75 +213,13 @@ fontLoader.load(
     levelTitle = createNodeLabel(
       "Level 1",
       new THREE.Vector3(11, 4, -33),
+      scene,
       0.9,
       0.3,
       0x212529
     );
   }
 );
-
-function createNodeLabel(
-  text,
-  position,
-  size = 0.8,
-  depth = 0.15,
-  color = 0xffd700
-) {
-  const textGeometry = new TextGeometry(text, {
-    font: font,
-    size: size,
-    depth: depth,
-  });
-  const textMaterial = new THREE.MeshBasicMaterial({ color: color });
-  const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-  textMesh.position.set(position.x, position.y, position.z + 1.5);
-
-  scene.add(textMesh);
-  return textMesh;
-}
-
-function updateNodeLabel(
-  textMesh,
-  newText,
-  size = 0.35,
-  depth = 0.15,
-  color = 0xffd700
-) {
-  textMesh.geometry.dispose();
-  textMesh.material.dispose();
-
-  const newTextGeometry = new TextGeometry(newText, {
-    font: font,
-    size: size,
-    depth: depth,
-  });
-
-  textMesh.geometry = newTextGeometry;
-  textMesh.material = new THREE.MeshBasicMaterial({ color: color });
-}
-
-function createRing(innerRadius, outerRadius, depth, color) {
-  const shape = new THREE.Shape();
-  shape.absarc(0, 0, outerRadius, 0, Math.PI * 2, false);
-  const hole = new THREE.Path();
-  hole.absarc(0, 0, innerRadius, 0, Math.PI * 2, true);
-  shape.holes.push(hole);
-
-  const extrudeSettings = {
-    depth: depth,
-    bevelEnabled: false,
-  };
-
-  const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-  const material = new THREE.MeshBasicMaterial({
-    color: color,
-    side: THREE.DoubleSide,
-  });
-  const ring = new THREE.Mesh(geometry, material);
-  ring.rotation.x = -Math.PI / 2;
-  ring.visible = false;
-  return ring;
-}
 
 const labelDepth = 0.1;
 let hoverRing = createRing(0.6, 0.7, labelDepth, 0x000000);
@@ -577,7 +393,7 @@ function drawLines() {
             currentScore = Math.floor(currentScore * ((health + 1) * 0.1 + 1));
             uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${kruskal.currentWeight}.`;
             finalScoreText.innerHTML = `${currentScore}`;
-            setStars();
+            setStars(health);
             if (dungeonRoomMixer && dungeonRoomAction) {
               console.log("Completed, animation should begin");
               dungeonRoomAction.reset().play();
@@ -596,7 +412,7 @@ function drawLines() {
           if (intersectedObject.userData.label) {
             intersectedObject.userData.label.material.color.set(0xff0000);
           }
-          updateHealth();
+          health = updateHealth(health);
           shakeScreen();
           uiText.innerText = "Wrong selection. Try again.";
           setTimeout(() => {
@@ -657,7 +473,9 @@ async function createDungeonRoom() {
   try {
     const { model, mixer, action } = await loadModel(
       dungeonRoomURL.href,
-      position
+      position,
+      scene,
+      mixers
     );
 
     if (mixer && action) {
@@ -729,14 +547,14 @@ function advanceNextLevel() {
   graph = createRandomConnectedGraph(curNodes, curEdges);
   kruskal = new KruskalAlgorithm(graph);
 
-  updateComponentColors(kruskal.uf, curNodes);
+  updateComponentColors(kruskal.uf, curNodes, componentColors);
   createModels();
   createHoverElements();
 }
 
 buttonNext.addEventListener("click", () => {
   uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
-  resetHealth();
+  health = resetHealth();
   currentLevel++;
   closeModal();
   resetScene();
@@ -746,7 +564,7 @@ buttonNext.addEventListener("click", () => {
 
 buttonAgain.addEventListener("click", () => {
   uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
-  resetHealth();
+  health = resetHealth();
 
   closeModal();
   resetScene();
