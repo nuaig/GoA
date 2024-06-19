@@ -13,7 +13,7 @@ export function setFont(loadedFont) {
 function createLabel(text, position, color = 0x000000, scene) {
   const textGeometry = new TextGeometry(text, {
     font: font,
-    size: 0.55,
+    size: 0.9,
     depth: 0.2,
   });
 
@@ -71,7 +71,7 @@ export function drawLine(startCube, endCube, weight, edge, scene) {
   // Create label in the middle of the line
   const midPoint = new THREE.Vector3(
     (startCube.position.x + endCube.position.x) / 2,
-    (startCube.position.y + endCube.position.y) / 2,
+    (startCube.position.y + endCube.position.y) / 2 + 0.5,
     (startCube.position.z + endCube.position.z) / 2
   );
   const label = createLabel(weight.toString(), midPoint, 0x000000, scene);

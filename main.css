@@ -21,7 +21,7 @@ body {
   border-radius: 5px;
   white-space: pre-wrap;
   word-wrap: break-word;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .code-block .keyword {
@@ -34,6 +34,24 @@ body {
 
 .code-block .variable {
   color: #dcdcaa;
+}
+
+/* .highlight {
+  color: #f1c40f;
+} */
+.highlight {
+  background-color: #1864ab;
+  display: inline-block;
+}
+
+.highlight__correct {
+  background-color: #1864ab;
+  color: #8ce99a;
+}
+
+.highlight__wrong {
+  background-color: #1864ab;
+  color: #ffa8a8;
 }
 
 .topnav-instructions {
@@ -152,18 +170,57 @@ body {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(10px);
   z-index: 100;
   transition: all 0.5s;
 }
 
-.modal__header {
-  font-size: 2rem;
+.stars__rating {
+  width: 100%;
+  display: flex;
+  gap: 26px;
+  justify-content: center;
+}
 
+.stars__rating svg {
+  width: 5.5rem;
+}
+
+.star path:last-child {
+  fill: #e9ecef;
+}
+
+.health-icon {
+  flex: 1;
+  width: 20px;
+  height: 20px;
+  transition: fill 0.3s;
+}
+
+.modal h2,
+.modal p {
   line-height: 1.5;
   text-align: center;
+
+  padding: 1rem;
+}
+
+.modal h2 {
+  text-transform: uppercase;
+  font-size: 2rem;
+  color: #fab005;
+}
+
+.modal p {
+  font-size: 1.6rem;
   color: #a5d8ff;
   padding: 1rem;
+}
+
+.modal .label__final_score {
+  font-size: 1.6rem;
+  color: #fab005;
+  padding: 0;
 }
 
 .button__holder {
@@ -189,20 +246,15 @@ body {
 .btn:active {
   background-color: #228be6;
   box-shadow: 5px 5px #666;
-  transform: translateY(4px);
+  transform: translateY(1px);
 }
 
-.modal__form input {
-  font-size: 1.7rem;
-  padding: 1rem 1.5rem;
-  border: 1px solid #ddd;
-  border-radius: 0.5rem;
+.instruction {
+  padding: 1rem;
 }
 
-.modal__form button {
-  grid-column: 1 / span 2;
-  justify-self: center;
-  margin-top: 1rem;
+.instruction__img {
+  width: 600px;
 }
 
 .btn--close-modal {
@@ -264,6 +316,7 @@ button:active {
   box-shadow: 5px 5px #666;
   transform: translateY(4px);
 }
+
 .UI-Text {
   text-align: center;
   color: #a5d8ff;

@@ -32,33 +32,29 @@ KRUSKAL(G):
 A = ∅
 For each vertex v ∈ G.V:
     <span class="function">MAKE-SET</span>(v)
-For each edge (u, v) ∈ G.E ordered by increasing order by weight(u, v):
-    if <span class="function">FIND-SET</span>(u) ≠ <span class="function">FIND-SET</span>(v):
-        A = A ∪ {(u, v)}
-        <span class="function">UNION</span>(u, v)
+<span class="hover wrong__select">For each edge (u, v) ∈ G.E ordered by increasing order by weight(u, v):</span>
+    <span class="wrong__select correct__select">if <span class="function">FIND-SET</span>(u) ≠ <span class="function">FIND-SET</span>(v):</span>
+        <span class="correct__select">A = A ∪ {(u, v)}</span>
+        <span class="correct__select"><span class="function">UNION</span>(u, v)</span>
 return A
-                </pre>
+          </pre>
         </div>
-        <div class="topnav-instructions">
-          <pre class="code-block">
-for each <span class="keyword">u</span> ∈ <span class="keyword">G.V</span>:
-    <span class="variable">u.key</span> = ∞
-    <span class="variable">u.π</span> = NIL
-<span class="variable">r.key</span> = 0
-<span class="variable">Q</span> = <span class="keyword">G.V</span>
-while <span class="variable">Q</span> ≠ <span class="keyword">Φ</span>:
-    <span class="variable">u</span> = <span class="function">EXTRACT-MIN(Q)</span>
-    for each <span class="variable">v</span> ∈ <span class="keyword">G.Adj[u]</span>:
-        if <span class="variable">v</span> ∈ <span class="variable">Q</span> and <span class="function">ω(u,v)</span>  <span class="variable">v.key</span>:
-            <span class="variable">v.π</span> = <span class="variable">u</span>
-            <span class="variable">v.key</span> = <span class="function">ω(u,v)</span>
-                </pre>
-        </div>
+
         <div class="header">
           <div class="header-content">
             <div class="health">
-              <div class="health-label">Health</div>
+              <div class="health-label">Lives</div>
               <div id="health-bar">
+                <svg
+                  class="health-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="red"
+                >
+                  <path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  />
+                </svg>
                 <svg
                   class="health-icon"
                   xmlns="http://www.w3.org/2000/svg"
@@ -103,22 +99,128 @@ while <span class="variable">Q</span> ≠ <span class="keyword">Φ</span>:
             </div>
             <div class="score">
               <div class="score-label">Score</div>
-              <div class="score-label-2">01</div>
+              <div class="score-label-2">00</div>
             </div>
           </div>
         </div>
       </div>
     </div>
     <div class="modal hidden">
-      <h2 class="modal__header">
-        Congratulations! <br />
-        You have successfully completed level 1 of Kruskal's Algorithm!</span>
-      </h2>
+      <h2 class="modal__header">Congratulations!</h2>
+      <div class="stars__rating">
+        <svg
+          class="star"
+          version="1.0"
+          id="Layer_1"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          viewBox="0 0 64 64"
+          enable-background="new 0 0 64 64"
+          xml:space="preserve"
+          fill="#000000"
+          transform="matrix(1, 0, 0, 1, 0, 0)"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g
+            id="SVGRepo_tracerCarrier"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></g>
+          <g id="SVGRepo_iconCarrier">
+            <g>
+              <path
+                fill="#F9EBB2394240"
+                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478 M31.998,0 c-0.775,0-1.48,0.448-1.811,1.15l-8.815,18.778L1.698,22.935c-0.741,0.113-1.356,0.632-1.595,1.343 c-0.238,0.71-0.059,1.494,0.465,2.031l14.294,14.657L11.484,61.67c-0.124,0.756,0.195,1.517,0.822,1.957 c0.344,0.243,0.747,0.366,1.151,0.366c0.332,0,0.666-0.084,0.968-0.25l17.572-9.719l17.572,9.719 c0.302,0.166,0.636,0.25,0.968,0.25c0.404,0,0.808-0.123,1.151-0.366c0.627-0.44,0.946-1.201,0.822-1.957l-3.378-20.704 l14.294-14.657c0.523-0.537,0.703-1.321,0.465-2.031c-0.238-0.711-0.854-1.229-1.595-1.343l-19.674-3.006L33.809,1.15 C33.479,0.448,32.773,0,31.998,0L31.998,0z"
+              ></path>
+              <path
+                fill="#F9EBB2"
+                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478"
+              ></path>
+            </g>
+          </g>
+        </svg>
+        <svg
+          class="star"
+          version="1.0"
+          id="Layer_1"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          viewBox="0 0 64 64"
+          enable-background="new 0 0 64 64"
+          xml:space="preserve"
+          fill="#000000"
+          transform="matrix(1, 0, 0, 1, 0, 0)"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g
+            id="SVGRepo_tracerCarrier"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></g>
+          <g id="SVGRepo_iconCarrier">
+            <g>
+              <path
+                fill="#F9EBB2394240"
+                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478 M31.998,0 c-0.775,0-1.48,0.448-1.811,1.15l-8.815,18.778L1.698,22.935c-0.741,0.113-1.356,0.632-1.595,1.343 c-0.238,0.71-0.059,1.494,0.465,2.031l14.294,14.657L11.484,61.67c-0.124,0.756,0.195,1.517,0.822,1.957 c0.344,0.243,0.747,0.366,1.151,0.366c0.332,0,0.666-0.084,0.968-0.25l17.572-9.719l17.572,9.719 c0.302,0.166,0.636,0.25,0.968,0.25c0.404,0,0.808-0.123,1.151-0.366c0.627-0.44,0.946-1.201,0.822-1.957l-3.378-20.704 l14.294-14.657c0.523-0.537,0.703-1.321,0.465-2.031c-0.238-0.711-0.854-1.229-1.595-1.343l-19.674-3.006L33.809,1.15 C33.479,0.448,32.773,0,31.998,0L31.998,0z"
+              ></path>
+              <path
+                fill="#F9EBB2"
+                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478"
+              ></path>
+            </g>
+          </g>
+        </svg>
+        <svg
+          class="star"
+          version="1.0"
+          id="Layer_1"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          viewBox="0 0 64 64"
+          enable-background="new 0 0 64 64"
+          xml:space="preserve"
+          fill="#000000"
+          transform="matrix(1, 0, 0, 1, 0, 0)"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g
+            id="SVGRepo_tracerCarrier"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></g>
+          <g id="SVGRepo_iconCarrier">
+            <g>
+              <path
+                fill="#F9EBB2394240"
+                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478 M31.998,0 c-0.775,0-1.48,0.448-1.811,1.15l-8.815,18.778L1.698,22.935c-0.741,0.113-1.356,0.632-1.595,1.343 c-0.238,0.71-0.059,1.494,0.465,2.031l14.294,14.657L11.484,61.67c-0.124,0.756,0.195,1.517,0.822,1.957 c0.344,0.243,0.747,0.366,1.151,0.366c0.332,0,0.666-0.084,0.968-0.25l17.572-9.719l17.572,9.719 c0.302,0.166,0.636,0.25,0.968,0.25c0.404,0,0.808-0.123,1.151-0.366c0.627-0.44,0.946-1.201,0.822-1.957l-3.378-20.704 l14.294-14.657c0.523-0.537,0.703-1.321,0.465-2.031c-0.238-0.711-0.854-1.229-1.595-1.343l-19.674-3.006L33.809,1.15 C33.479,0.448,32.773,0,31.998,0L31.998,0z"
+              ></path>
+              <path
+                fill="#F9EBB2"
+                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478"
+              ></path>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <p class="label__final_score">Final Score : <span>00</span></p>
+      <p>You have successfully completed level 1 of Kruskal's Algorithm!</p>
       <div class="button__holder">
-      <button class="btn btn__again">Try again</button>
-      <button class="btn btn__next">Next Level &rarr;</button>
+        <button class="btn btn__again">Try again</button>
+        <button class="btn btn__next">Next Level &rarr;</button>
+      </div>
     </div>
+    <div class="modal instruction">
+      <img
+        class="instruction__img"
+        src="./src/Yellow and Black Illustration Digital Marketing Infographic.jpg"
+      />
+      <div class="button__holder">
+        <!-- <button class="btn btn__again">Try again</button> -->
+        <button class="btn btn__instruction__start">
+          Start the game &rarr;
+        </button>
+      </div>
     </div>
-    <div class="overlay hidden"></div>
+    <div class="overlay"></div>
   </body>
 </html>

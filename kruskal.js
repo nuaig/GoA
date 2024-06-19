@@ -29,6 +29,12 @@ class UnionFind {
     }
     return false; // Union was not successful, x and y are already in the same set
   }
+  getAllNodesWithSameParent(node) {
+    const root = this.find(node);
+    return this.parent
+      .map((parent, idx) => (this.find(idx) === root ? idx : -1))
+      .filter((idx) => idx !== -1);
+  }
 }
 
 export class KruskalAlgorithm {
@@ -109,5 +115,9 @@ export class KruskalAlgorithm {
   // Check if the algorithm is complete
   isComplete() {
     return this.selectedEdges.length === this.graph.nodes.length - 1;
+  }
+
+  getAllNodesWithSameParent(node) {
+    return this.uf.getAllNodesWithSameParent(node);
   }
 }
