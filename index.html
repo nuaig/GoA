@@ -26,19 +26,39 @@
           alt="help"
           onclick="toggleInstructions()"
         />
-        <div class="topnav-instructions">
+        <div class="topnav-instructions kruskal-instruction">
           <pre class="code-block">
-KRUSKAL(G):
-A = ∅
-For each vertex v ∈ G.V:
-    <span class="function">MAKE-SET</span>(v)
-<span class="hover wrong__select">For each edge (u, v) ∈ G.E ordered by increasing order by weight(u, v):</span>
-    <span class="wrong__select correct__select">if <span class="function">FIND-SET</span>(u) ≠ <span class="function">FIND-SET</span>(v):</span>
-        <span class="correct__select">A = A ∪ {(u, v)}</span>
-        <span class="correct__select"><span class="function">UNION</span>(u, v)</span>
-return A
+MST-KRUSKAL(G, w):
+1.   A = ∅
+2.   For each vertex v ∈ G.V:
+3.      <span class="function">MAKE-SET</span>(v)
+4.   sort the edges of G.E into non-
+     decreasing order by weight
+5.   <span class="hover wrong__select">For each edge (u, v) ∈ G.E ordered by</span>
+     <span class="hover wrong__select">increasing order by weight(u, v):</span> 
+6.       <span class="wrong__select correct__select">if <span class="function">FIND-SET</span>(u) ≠ <span class="function">FIND-SET</span>(v):</span>
+7.           <span class="correct__select">A = A ∪ {(u, v)}</span>
+8.           <span class="correct__select"><span class="function">UNION</span>(u, v)</span>
+9.   return A
           </pre>
         </div>
+
+        <!-- <div class="topnav-instructions prim-instruction">
+          <pre class="code-block">
+MST-PRIM (G, w, r):
+1.   For each u ∈ G.V:
+2.       u.key = &#8734;
+3.       u.&#928; = NIL
+4.   r.key = 0
+5.   Q = G.V
+6.   while Q &#8800; ∅:
+7.       <span class="wrong__select correct__select">u = <span class="function">EXTRACT-MIN (Q)</span></span>
+8.           <span class="correct__select">for each v ∈ G.Adj[u]: </span>
+9.           <span class="correct__select">    if v ∈ Q and w(u,v) &#60; v.key:</span>
+10.                 v.&#928; = u
+11.                 v.key = w(u,v)
+          </pre>
+        </div> -->
 
         <div class="header">
           <div class="header-content">
@@ -212,7 +232,7 @@ return A
     <div class="modal instruction">
       <img
         class="instruction__img"
-        src="./src/Yellow and Black Illustration Digital Marketing Infographic.jpg"
+        src="./src/Yellow and Black Illustration Digital Marketing Infographic1.png"
       />
       <div class="button__holder">
         <!-- <button class="btn btn__again">Try again</button> -->

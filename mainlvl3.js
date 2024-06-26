@@ -5,7 +5,8 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { Graph, createRandomConnectedGraph } from "./graph.js";
 import { createThreePointLighting } from "./utils/threePointLighting.js";
-import { KruskalAlgorithm } from "./kruskal.js";
+import { KruskalAlgorithm } from "./utils/graphRelated/kruskal.js";
+import { PrimAlgorithm } from "./utils/graphRelated/prims.js";
 import { loadModel } from "./utils/threeModels.js";
 import {
   toggleInstructions,
@@ -17,6 +18,7 @@ import {
 import {
   effectForCorrectSelect,
   shakeForWrongSelect,
+  shakeScreen,
 } from "./utils/animations.js";
 import {
   drawLine,
@@ -27,6 +29,7 @@ import {
   updateComponentColors,
   getRandomColor,
   createRing,
+  highlightChest,
 } from "./utils/graphRelated/drawLine.js";
 
 window.toggleInstructions = toggleInstructions;
@@ -57,9 +60,12 @@ let curEdges;
 let graph;
 
 const levelConfig = {
-  1: { nodes: 6, edges: 8 },
-  2: { nodes: 8, edges: 13 },
-  3: { nodes: 10, edges: 16 },
+  1: { nodes: 3, edges: 2 },
+  2: { nodes: 8, edges: 12 },
+  3: { nodes: 4, edges: 6 },
+  4: { nodes: 6, edges: 8 },
+  5: { nodes: 8, edges: 12 },
+  6: { nodes: 9, edges: 15 },
 };
 const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
 curNodes = Array.from({ length: numNodes }, (_, i) => i);
@@ -69,7 +75,33 @@ graph = createRandomConnectedGraph(curNodes, curEdges);
 
 let componentColors = {};
 
-let kruskal = new KruskalAlgorithm(graph);
+let curAlgorithmForGraph = new KruskalAlgorithm(graph);
+let currentAlgorithm = "kruskal";
+
+let startingNodeLabelForPrim;
+let startingNodeRingForPrim;
+function primSetup() {
+  // const randomIndex = Math.floor(Math.random() * chestList.length);
+  const randomIndex = 0;
+  const startClosedChest = chestList[randomIndex];
+  const startOpenChest = openChestList[randomIndex];
+  const startLabelPosition = startClosedChest.position.clone();
+  startLabelPosition.y += 4;
+
+  startingNodeLabelForPrim = createNodeLabel(
+    "Start",
+    startLabelPosition,
+    scene
+  );
+  // Hide the closed chest and show the open chest
+  startClosedChest.visible = false;
+  startOpenChest.visible = true;
+
+  startingNodeRingForPrim = highlightChest(startOpenChest, scene);
+
+  // Set the starting node in Prim's algorithm
+  curAlgorithmForGraph.setStartingNode(randomIndex);
+}
 
 let health = 4;
 
@@ -109,7 +141,6 @@ const gridSize = 40;
 const labels = [];
 let dungeonRoomMixer;
 let dungeonRoomAction;
-let levelComplete;
 
 const openModal = function (e) {
   e.preventDefault();
@@ -173,6 +204,7 @@ async function createModels() {
     chestList.push(closedModel.model);
 
     const openModel = await loadModel(openChestURL.href, position, scene);
+    openModel.model.scale.set(1.5, 1.5, 1.5);
     openModel.model.visible = false;
     openChestList.push(openModel.model);
 
@@ -180,12 +212,16 @@ async function createModels() {
     // labelPosition.x -= 0.35;
 
     // labelPosition.z -= 0.4;
-    labelPosition.x -= 0.35;
-    labelPosition.y += 1.5;
-    labelPosition.z -= 1.5;
+    // labelPosition.x -= 0.28;
+    labelPosition.y += 2.5;
+    // labelPosition.z -= 0.5;
 
     const chestLabel = createNodeLabel(`${i}`, labelPosition, scene);
     chestLabelList.push(chestLabel);
+  }
+
+  if (currentAlgorithm == "prim") {
+    primSetup();
   }
 
   console.log("All models loaded. Final chestList:", chestList);
@@ -204,7 +240,7 @@ fontLoader.load(
     createModels();
     chapterTitle = createNodeLabel(
       "Kruskal's Algorithm",
-      new THREE.Vector3(8, 6, -33),
+      new THREE.Vector3(13, 7, -30),
       scene,
       1,
       0.3,
@@ -212,7 +248,7 @@ fontLoader.load(
     );
     levelTitle = createNodeLabel(
       "Level 1",
-      new THREE.Vector3(11, 4, -33),
+      new THREE.Vector3(11, 4, -30),
       scene,
       0.9,
       0.3,
@@ -222,8 +258,126 @@ fontLoader.load(
 );
 
 const labelDepth = 0.1;
-let hoverRing = createRing(0.6, 0.7, labelDepth, 0x000000);
+let hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
 scene.add(hoverRing);
+
+function updateNodeColorsForSameTree(edge, sameTree) {
+  if (sameTree) {
+    const color = componentColors[edge.rootStart];
+    updateNodeLabelColor(chestLabelList[edge.start], color);
+    updateNodeLabelColor(chestLabelList[edge.end], color);
+  } else {
+    const nodesWithSameParentStart =
+      curAlgorithmForGraph.getAllNodesWithSameParent(edge.start);
+    const nodesWithSameParentEnd =
+      curAlgorithmForGraph.getAllNodesWithSameParent(edge.end);
+    const newColor = getRandomColor();
+
+    nodesWithSameParentStart.concat(nodesWithSameParentEnd).forEach((node) => {
+      updateNodeLabelColor(chestLabelList[node], newColor);
+      componentColors[node] = newColor;
+    });
+  }
+}
+
+function handleSelectionEffect(intersectedObject) {
+  intersectedObject.material.color.set(0x00ff00); // Set line to green
+  intersectedObject.userData.selected = true; // Mark as selected
+
+  const { startCube, endCube } = intersectedObject.userData;
+  const closedStart = chestList[chestList.indexOf(startCube)];
+  const openStart = openChestList[chestList.indexOf(startCube)];
+  const closedEnd = chestList[chestList.indexOf(endCube)];
+  const openEnd = openChestList[chestList.indexOf(endCube)];
+
+  closedStart.visible = false;
+  openStart.visible = true;
+  closedEnd.visible = false;
+  openEnd.visible = true;
+
+  const permanentRing = createRing(0.6, 0.7, labelDepth, 0x000000);
+  permanentRing.position.copy(intersectedObject.userData.label.position);
+  permanentRing.position.y -= labelDepth / 2;
+  scene.add(permanentRing);
+  permanentRing.visible = true;
+  ringList.push(permanentRing);
+
+  currentScore += 10;
+  scoreText.innerHTML = `${currentScore}`;
+}
+
+function handleEdgeSelection(
+  intersectedObject,
+  currentAlgorithm,
+  onClick,
+  onMouseMove
+) {
+  const edge = intersectedObject.userData.edge;
+  let rootStart, rootEnd, sameTree;
+  if (currentAlgorithm === "kruskal") {
+    rootStart = curAlgorithmForGraph.uf.find(edge.start);
+    rootEnd = curAlgorithmForGraph.uf.find(edge.end);
+    sameTree = rootStart === rootEnd;
+  }
+
+  const selectEdgeResult = curAlgorithmForGraph.selectEdge([
+    edge.start,
+    edge.end,
+    edge.weight,
+  ]);
+  const isComplete = curAlgorithmForGraph.isComplete();
+  const currentWeight = curAlgorithmForGraph.currentWeight;
+
+  if (selectEdgeResult == 1) {
+    effectForCorrectSelect();
+    if (currentAlgorithm === "kruskal") {
+      updateNodeColorsForSameTree({ ...edge, rootStart, rootEnd }, sameTree);
+    }
+    handleSelectionEffect(intersectedObject);
+
+    console.log("Selected edges:", curAlgorithmForGraph.selectedEdges);
+    console.log("Current weight of the spanning tree:", currentWeight);
+
+    if (isComplete) {
+      currentScore = Math.floor(currentScore * ((health + 1) * 0.1 + 1));
+      uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
+      finalScoreText.innerHTML = `${currentScore}`;
+      setStars(health);
+      if (dungeonRoomMixer && dungeonRoomAction) {
+        console.log("Completed, animation should begin");
+        dungeonRoomAction.reset().play();
+        console.log(dungeonRoomAction);
+      }
+      openModal(event);
+      window.removeEventListener("mousemove", onMouseMove, false);
+      window.removeEventListener("click", onClick, false);
+    } else {
+      uiText.innerText = `Correct! Current weight is ${currentWeight}.`;
+    }
+  } else {
+    shakeForWrongSelect();
+    console.log("Incorrect edge selection:", edge);
+    intersectedObject.material.color.set(0xff0000); // Set line to red
+    if (intersectedObject.userData.label) {
+      intersectedObject.userData.label.material.color.set(0xff0000); // Set label to red
+    }
+    health = updateHealth(health);
+    shakeScreen();
+    if (selectEdgeResult === -1) {
+      uiText.innerText =
+        "Incorrect Selection. The selected edge forms a cycle and a tree cannot have any cycle. To create a minimum spanning tree using Kruskal's, Please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
+    } else {
+      uiText.innerText =
+        "Incorrect Selection. Although the selected edge doesn't form a cycle, it is not the edge with the minimum weight among remaining edges. To create a minimum spanning tree using Kruskal's, please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
+    }
+    setTimeout(() => {
+      intersectedObject.material.color.set(0x74c0fc);
+      if (intersectedObject.userData.label) {
+        intersectedObject.userData.label.material.color.set(0x000000);
+      }
+    }, 3000);
+  }
+}
 
 function drawLines() {
   console.log("Drawing lines between chests.");
@@ -257,7 +411,7 @@ function drawLines() {
 
   function onMouseMove(event) {
     event.preventDefault();
-    if (kruskal.isComplete()) {
+    if (curAlgorithmForGraph.isComplete()) {
       sphereInter.visible = false;
       hoverRing.visible = false;
       return;
@@ -307,13 +461,6 @@ function drawLines() {
     }
   }
 
-  function shakeScreen() {
-    document.body.classList.add("shake");
-    setTimeout(() => {
-      document.body.classList.remove("shake");
-    }, 500);
-  }
-
   function onClick(event) {
     event.preventDefault();
 
@@ -327,107 +474,19 @@ function drawLines() {
     if (intersects.length > 0) {
       const intersectedObject = intersects[0].object;
       if (intersectedObject.userData.selected) {
-        return;
+        return; // Skip already selected lines
       }
 
       if (intersectedObject.userData) {
-        const edge = intersectedObject.userData.edge;
-        const rootStart = kruskal.uf.find(edge.start);
-        const rootEnd = kruskal.uf.find(edge.end);
-        const sameTree = rootStart === rootEnd;
-
-        if (kruskal.selectEdge([edge.start, edge.end, edge.weight])) {
-          effectForCorrectSelect();
-          if (sameTree) {
-            const color = componentColors[rootStart];
-            updateNodeLabelColor(chestLabelList[edge.start], color);
-            updateNodeLabelColor(chestLabelList[edge.end], color);
-          } else {
-            const nodesWithSameParentStart = kruskal.getAllNodesWithSameParent(
-              edge.start
-            );
-            const nodesWithSameParentEnd = kruskal.getAllNodesWithSameParent(
-              edge.end
-            );
-            const newColor = getRandomColor();
-
-            nodesWithSameParentStart
-              .concat(nodesWithSameParentEnd)
-              .forEach((node) => {
-                updateNodeLabelColor(chestLabelList[node], newColor);
-                componentColors[node] = newColor;
-              });
-          }
-
-          intersectedObject.userData.selected = true;
-
-          const { startCube, endCube } = intersectedObject.userData;
-          const closedStart = chestList[chestList.indexOf(startCube)];
-          const openStart = openChestList[chestList.indexOf(startCube)];
-          const closedEnd = chestList[chestList.indexOf(endCube)];
-          const openEnd = openChestList[chestList.indexOf(endCube)];
-
-          closedStart.visible = false;
-          openStart.visible = true;
-          closedEnd.visible = false;
-          openEnd.visible = true;
-
-          const permanentRing = createRing(0.6, 0.7, labelDepth, 0x000000);
-          permanentRing.position.copy(
-            intersectedObject.userData.label.position
-          );
-          permanentRing.position.y -= labelDepth / 2;
-          scene.add(permanentRing);
-          permanentRing.visible = true;
-          ringList.push(permanentRing);
-
-          console.log("Selected edges:", kruskal.selectedEdges);
-          console.log(
-            "Current weight of the spanning tree:",
-            kruskal.currentWeight
-          );
-
-          currentScore += 10;
-          scoreText.innerHTML = `${currentScore}`;
-          if (kruskal.isComplete()) {
-            currentScore = Math.floor(currentScore * ((health + 1) * 0.1 + 1));
-            uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${kruskal.currentWeight}.`;
-            finalScoreText.innerHTML = `${currentScore}`;
-            setStars(health);
-            if (dungeonRoomMixer && dungeonRoomAction) {
-              console.log("Completed, animation should begin");
-              dungeonRoomAction.reset().play();
-              console.log(dungeonRoomAction);
-            }
-            openModal(event);
-            window.removeEventListener("mousemove", onMouseMove, false);
-            window.removeEventListener("click", onClick, false);
-          } else {
-            uiText.innerText = `Correct! Current weight is ${kruskal.currentWeight}.`;
-          }
-        } else {
-          shakeForWrongSelect();
-          console.log("Incorrect edge selection:", edge);
-          intersectedObject.material.color.set(0xff0000);
-          if (intersectedObject.userData.label) {
-            intersectedObject.userData.label.material.color.set(0xff0000);
-          }
-          health = updateHealth(health);
-          shakeScreen();
-          uiText.innerText = "Wrong selection. Try again.";
-          setTimeout(() => {
-            intersectedObject.material.color.set(0x74c0fc);
-            if (intersectedObject.userData.label) {
-              intersectedObject.userData.label.material.color.set(0x000000);
-            }
-          }, 3000);
-        }
+        handleEdgeSelection(
+          intersectedObject,
+          currentAlgorithm,
+          onClick,
+          onMouseMove
+        );
       }
     }
   }
-
-  window.addEventListener("mousemove", onMouseMove, false);
-  window.addEventListener("click", onClick, false);
 
   window.addEventListener("mousemove", onMouseMove, false);
   window.addEventListener("click", onClick, false);
@@ -466,6 +525,9 @@ function updateLabelRotation() {
     label.lookAt(camera.position);
   });
   hoverRing.lookAt(camera.position);
+  if (startingNodeLabelForPrim) {
+    startingNodeLabelForPrim.lookAt(camera.position);
+  }
 }
 
 async function createDungeonRoom() {
@@ -524,6 +586,19 @@ function resetScene() {
     sphereInter.material.dispose();
   }
 
+  if (startingNodeLabelForPrim) {
+    scene.remove(startingNodeLabelForPrim);
+    startingNodeLabelForPrim.geometry.dispose();
+    startingNodeLabelForPrim.material.dispose();
+    startingNodeLabelForPrim = null;
+  }
+  if (startingNodeRingForPrim) {
+    scene.remove(startingNodeRingForPrim);
+    startingNodeRingForPrim.geometry.dispose();
+    startingNodeRingForPrim.material.dispose();
+    startingNodeRingForPrim = null;
+  }
+
   hoverRing.visible = false;
 }
 
@@ -545,9 +620,15 @@ function advanceNextLevel() {
   curEdges = numEdges;
 
   graph = createRandomConnectedGraph(curNodes, curEdges);
-  kruskal = new KruskalAlgorithm(graph);
+  if (currentLevel >= 3) {
+    curAlgorithmForGraph = new KruskalAlgorithm(graph);
+    currentAlgorithm = "kruskal";
+  } else {
+    curAlgorithmForGraph = new PrimAlgorithm(graph);
+    currentAlgorithm = "prim";
+  }
 
-  updateComponentColors(kruskal.uf, curNodes, componentColors);
+  // updateComponentColors(curAlgorithmForGraph.uf, curNodes, componentColors);
   createModels();
   createHoverElements();
 }
@@ -559,6 +640,10 @@ buttonNext.addEventListener("click", () => {
   closeModal();
   resetScene();
   advanceNextLevel();
+  if (currentAlgorithm === "prim") {
+    updateNodeLabel(chapterTitle, "Prim's Algorithm", 1, 0.3, 0x212529);
+    chapterTitle.position.set(9.5, 6.5, -30);
+  }
   updateNodeLabel(levelTitle, `Level ${currentLevel}`, 0.9, 0.3, 0x212529);
 });
 

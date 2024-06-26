@@ -5,7 +5,7 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { Graph, createRandomConnectedGraph } from "./graph.js"; // Adjust the path as needed
 import { createThreePointLighting } from "./utils/threePointLighting.js";
-import { KruskalAlgorithm } from "./kruskal.js";
+import { KruskalAlgorithm } from "./utils/graphRelated/kruskal.js";
 import { drawLine, setFont } from "./utils/graphRelated/drawLine.js";
 
 const modal = document.querySelector(".modal");

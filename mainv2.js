@@ -5,7 +5,7 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { Graph, createRandomConnectedGraph } from "./graph.js"; // Adjust the path as needed
 import { createThreePointLighting } from "./utils/threePointLighting.js";
-import { PrimAlgorithm } from "./prims.js";
+import { PrimAlgorithm } from "./utils/graphRelated/prims.js";
 import { drawLine, setFont } from "./utils/graphRelated/drawLine.js";
 
 const uiText = document.getElementById("UI-Text");
@@ -324,12 +324,10 @@ function drawLines() {
         const edge = intersectedObject.userData.edge;
 
         if (prim.selectEdge([edge.start, edge.end, edge.weight])) {
+          effectForCorrectSelect();
           // Correct selection
           intersectedObject.material.color.set(0x00ff00); // Set line to green
           intersectedObject.userData.selected = true; // Mark as selected
-          if (intersectedObject.userData.label) {
-            intersectedObject.userData.label.material.color.set(0x00ff00); // Set label to green
-          }
           const { startCube, endCube } = intersectedObject.userData;
           const closedStart = chestList[chestList.indexOf(startCube)];
           const openStart = openChestList[chestList.indexOf(startCube)];
@@ -341,30 +339,51 @@ function drawLines() {
           closedEnd.visible = false;
           openEnd.visible = true;
 
-          console.log("Selected edges:", prim.selectedEdges);
+          const permanentRing = createRing(0.6, 0.7, labelDepth, 0x000000);
+          permanentRing.position.copy(
+            intersectedObject.userData.label.position
+          );
+          permanentRing.position.y -= labelDepth / 2;
+          scene.add(permanentRing);
+          permanentRing.visible = true;
+          ringList.push(permanentRing);
+
+          console.log("Selected edges:", curAlgorithmForGraph.selectedEdges);
           console.log(
             "Current weight of the spanning tree:",
             prim.currentWeight
           );
           if (prim.isComplete()) {
-            uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${prim.currentWeight}.`;
+            currentScore = Math.floor(currentScore * ((health + 1) * 0.1 + 1));
+            uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${curAlgorithmForGraph.currentWeight}.`;
+            finalScoreText.innerHTML = `${currentScore}`;
+            setStars(health);
+            if (dungeonRoomMixer && dungeonRoomAction) {
+              console.log("Completed, animation should begin");
+              dungeonRoomAction.reset().play();
+              console.log(dungeonRoomAction);
+            }
+            openModal(event);
+            window.removeEventListener("mousemove", onMouseMove, false);
+            window.removeEventListener("click", onClick, false);
           } else {
             uiText.innerText = `Correct! Current weight is ${prim.currentWeight}.`;
           }
         } else {
           // Incorrect selection
+          shakeForWrongSelect();
           console.log("Incorrect edge selection:", edge);
           intersectedObject.material.color.set(0xff0000); // Set line to red
           if (intersectedObject.userData.label) {
             intersectedObject.userData.label.material.color.set(0xff0000); // Set label to red
           }
-          updateHealth(); // Update health
-          shakeScreen(); // Shake screen
+          health = updateHealth(health);
+          shakeScreen();
           uiText.innerText = "Wrong selection. Try again.";
           setTimeout(() => {
-            intersectedObject.material.color.set(0x0000ff); // Reset line color
+            intersectedObject.material.color.set(0x74c0fc);
             if (intersectedObject.userData.label) {
-              intersectedObject.userData.label.material.color.set(0x000000); // Reset label color
+              intersectedObject.userData.label.material.color.set(0x000000);
             }
           }, 3000);
         }

@@ -36,7 +36,7 @@ export function createRing(innerRadius, outerRadius, depth, color) {
 function createLabel(text, position, color = 0x000000, scene) {
   const textGeometry = new TextGeometry(text, {
     font: font,
-    size: 0.9,
+    size: 1.2,
     depth: 0.2,
   });
 
@@ -67,8 +67,8 @@ export function createNodeLabel(
   text,
   position,
   scene,
-  size = 0.8,
-  depth = 0.15,
+  size = 1.2,
+  depth = 0.3,
   color = 0xffd700
 ) {
   const textGeometry = new TextGeometry(text, {
@@ -76,9 +76,18 @@ export function createNodeLabel(
     size: size,
     depth: depth,
   });
+
+  // Center the geometry
+  textGeometry.computeBoundingBox();
+  const boundingBox = textGeometry.boundingBox;
+  const centerOffsetX = -0.5 * (boundingBox.max.x - boundingBox.min.x);
+  const centerOffsetY = -0.5 * (boundingBox.max.y - boundingBox.min.y);
+  const centerOffsetZ = -0.5 * (boundingBox.max.z - boundingBox.min.z);
+  textGeometry.translate(centerOffsetX, centerOffsetY, centerOffsetZ);
+
   const textMaterial = new THREE.MeshBasicMaterial({ color: color });
   const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-  textMesh.position.set(position.x, position.y, position.z + 1.5);
+  textMesh.position.copy(position);
 
   scene.add(textMesh);
   return textMesh;
@@ -174,4 +183,19 @@ export function drawLine(startCube, endCube, weight, edge, scene) {
   mesh.userData = { startCube, endCube, label, edge, selected: false }; // Store edge data and selected state
 
   return mesh;
+}
+
+// Function to highlight a chest
+export function highlightChest(chest, scene) {
+  const circleGeometry = new THREE.CircleGeometry(1, 32);
+  const circleMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+  const circle = new THREE.Mesh(circleGeometry, circleMaterial);
+  circle.position.set(
+    chest.position.x,
+    chest.position.y + 0.1,
+    chest.position.z
+  ); // Slightly above the chest
+  circle.rotation.x = -Math.PI / 2;
+  scene.add(circle);
+  return circle;
 }

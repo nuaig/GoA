@@ -80,17 +80,23 @@ export class KruskalAlgorithm {
     // Check if the edge is in the next edges list and if it forms a cycle
     const nextEdges = this.getNextEdges();
     console.log(nextEdges);
+    const parentX = this.uf.find(edge[0]);
+    const parentY = this.uf.find(edge[1]);
+    if (parentX === parentY) {
+      console.log("edge forms a cycle");
+      return -1;
+    }
     if (
       !nextEdges.some(
         (e) => e[0] === edge[0] && e[1] === edge[1] && e[2] === edge[2]
       )
     ) {
-      return false; // Edge not in next edges list
+      console.log("edge not in the list");
+      return -2; // Edge not in next edges list
     }
-
     if (!this.uf.union(edge[0], edge[1])) {
       console.log("edge forms a cycle");
-      return false; // Edge forms a cycle
+      return -1; // Edge forms a cycle
     }
 
     // Successfully add the edge
@@ -109,7 +115,7 @@ export class KruskalAlgorithm {
     });
     console.log(this.remainingEdges, "remaining edges");
 
-    return true;
+    return 1;
   }
 
   // Check if the algorithm is complete

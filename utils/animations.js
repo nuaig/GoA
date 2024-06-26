@@ -19,3 +19,10 @@ export function shakeForWrongSelect() {
     }, 2000); // 500ms matches the animation duration
   });
 }
+
+export function shakeScreen() {
+  document.body.classList.add("shake");
+  setTimeout(() => {
+    document.body.classList.remove("shake");
+  }, 500);
+}

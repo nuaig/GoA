@@ -9,6 +9,7 @@ export class PrimAlgorithm {
 
   // Set the starting node and initialize the edges connected to the starting node
   setStartingNode(index) {
+    console.log("setting starting node", index);
     this.selectedNodes.add(index);
   }
 
@@ -39,18 +40,28 @@ export class PrimAlgorithm {
   // Select an edge and update the state
   selectEdge(edge) {
     const nextEdges = this.getNextEdges();
+    // console.log("selected node", this.selectedNodes);
+    // console.log(nextEdges);
+    // console.log(edge);
     const [node1, node2, weight] = edge;
+
+    if (this.selectedNodes.has(node1) && this.selectedNodes.has(node2)) {
+      console.log("edge forms a cycle");
+      return -1; // Edge forms a cycle
+    }
+
+    if (!this.selectedNodes.has(node1) && !this.selectedNodes.has(node2)) {
+      console.log("edge not connecting any selected nodes");
+      return -3; // Edge is not connected to any selected nodes
+    }
 
     // Check if the selected edge is in the list of next valid edges
     const isValidEdge = nextEdges.some(
       (e) => e[0] === edge[0] && e[1] === edge[1] && e[2] === edge[2]
     );
     if (!isValidEdge) {
-      return false; // Edge is not valid according to Prim's algorithm
-    }
-
-    if (this.selectedNodes.has(node1) && this.selectedNodes.has(node2)) {
-      return false; // Edge forms a cycle
+      console.log("not the edge with minimum weight");
+      return -2; // Edge is not the minimum edge connecting to
     }
 
     // Successfully add the edge
@@ -66,7 +77,7 @@ export class PrimAlgorithm {
         !(this.selectedNodes.has(e[0]) && this.selectedNodes.has(e[1]))
     );
 
-    return true;
+    return 1;
   }
 
   // Check if the algorithm is complete
