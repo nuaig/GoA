@@ -66,7 +66,7 @@ body {
   padding: 15px;
   box-shadow: 0.5rem 0.5rem 0;
   overflow: hidden;
-  display: none;
+  /* display: none; */
 }
 
 .help-icon {
@@ -270,6 +270,7 @@ body {
 }
 
 .hidden {
+  display: none;
   visibility: hidden;
   opacity: 0;
 }

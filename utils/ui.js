@@ -1,13 +1,22 @@
 const uiText = document.getElementById("UI-Text");
-export function toggleInstructions() {
-  const instructions = document.getElementsByClassName(
-    "topnav-instructions"
-  )[0];
-  if (instructions.style.display === "block") {
-    instructions.style.display = "none";
-  } else {
-    instructions.style.display = "block";
+export function toggleInstructions(currentAlgorithm) {
+  const kruskalInstructions = document.querySelector(".kruskal-instruction");
+  const primInstructions = document.querySelector(".prim-instruction");
+
+  if (currentAlgorithm === "kruskal") {
+    kruskalInstructions.classList.toggle("hidden");
+    primInstructions.classList.add("hidden");
+  } else if (currentAlgorithm === "prim") {
+    primInstructions.classList.toggle("hidden");
+    kruskalInstructions.classList.add("hidden");
   }
+}
+
+export function closePseudocode() {
+  const kruskalInstructions = document.querySelector(".kruskal-instruction");
+  const primInstructions = document.querySelector(".prim-instruction");
+  primInstructions.classList.add("hidden");
+  kruskalInstructions.classList.add("hidden");
 }
 
 export function updateHealth(health) {

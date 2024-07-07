@@ -26,7 +26,7 @@
           alt="help"
           onclick="toggleInstructions()"
         />
-        <div class="topnav-instructions kruskal-instruction">
+        <div class="topnav-instructions kruskal-instruction hidden">
           <pre class="code-block">
 MST-KRUSKAL(G, w):
 1.   A = ∅
@@ -43,7 +43,7 @@ MST-KRUSKAL(G, w):
           </pre>
         </div>
 
-        <!-- <div class="topnav-instructions prim-instruction">
+        <div class="topnav-instructions prim-instruction hidden">
           <pre class="code-block">
 MST-PRIM (G, w, r):
 1.   For each u ∈ G.V:
@@ -58,7 +58,7 @@ MST-PRIM (G, w, r):
 10.                 v.&#928; = u
 11.                 v.key = w(u,v)
           </pre>
-        </div> -->
+        </div>
 
         <div class="header">
           <div class="header-content">
@@ -230,10 +230,8 @@ MST-PRIM (G, w, r):
       </div>
     </div>
     <div class="modal instruction">
-      <img
-        class="instruction__img"
-        src="./src/Yellow and Black Illustration Digital Marketing Infographic1.png"
-      />
+      <img class="instruction__img" src="./src/Kruskal Instructions.png" />
+      <img class="instruction__img hidden" src="./src/Prim Instructions.png" />
       <div class="button__holder">
         <!-- <button class="btn btn__again">Try again</button> -->
         <button class="btn btn__instruction__start">

@@ -10,6 +10,7 @@ import { PrimAlgorithm } from "./utils/graphRelated/prims.js";
 import { loadModel } from "./utils/threeModels.js";
 import {
   toggleInstructions,
+  closePseudocode,
   updateHealth,
   resetHealth,
   setStars,
@@ -32,8 +33,6 @@ import {
   highlightChest,
 } from "./utils/graphRelated/drawLine.js";
 
-window.toggleInstructions = toggleInstructions;
-
 const uiText = document.getElementById("UI-Text");
 const scoreText = document.querySelector(".score-label-2");
 const finalScoreText = document.querySelector(".label__final_score span");
@@ -41,7 +40,7 @@ const stars = document.querySelectorAll(".star path:last-child");
 const modal = document.querySelector(".modal");
 const instructionModal = document.querySelector(".instruction");
 const overlay = document.querySelector(".overlay");
-const hoverEffect = document.querySelector(".hover");
+const hoverEffects = document.querySelectorAll(".hover");
 
 const buttonAgain = document.querySelector(".btn__again");
 const buttonNext = document.querySelector(".btn__next");
@@ -53,6 +52,17 @@ buttonStart.addEventListener("click", () => {
   instructionModal.classList.add("hidden");
 });
 
+function showPrimInstructions() {
+  overlay.classList.remove("hidden");
+  instructionModal.classList.remove("hidden");
+  document
+    .querySelector('.instruction__img[src="./src/Kruskal Instructions.png"]')
+    .classList.add("hidden");
+  document
+    .querySelector('.instruction__img[src="./src/Prim Instructions.png"]')
+    .classList.remove("hidden");
+}
+
 let currentScore = 0;
 let currentLevel = 1;
 let curNodes;
@@ -60,9 +70,9 @@ let curEdges;
 let graph;
 
 const levelConfig = {
-  1: { nodes: 3, edges: 2 },
-  2: { nodes: 8, edges: 12 },
-  3: { nodes: 4, edges: 6 },
+  1: { nodes: 6, edges: 9 },
+  2: { nodes: 3, edges: 3 },
+  3: { nodes: 3, edges: 3 },
   4: { nodes: 6, edges: 8 },
   5: { nodes: 8, edges: 12 },
   6: { nodes: 9, edges: 15 },
@@ -102,6 +112,10 @@ function primSetup() {
   // Set the starting node in Prim's algorithm
   curAlgorithmForGraph.setStartingNode(randomIndex);
 }
+
+window.toggleInstructions = function () {
+  toggleInstructions(currentAlgorithm);
+};
 
 let health = 4;
 
@@ -164,38 +178,46 @@ async function createModels() {
   }
 
   const margin = 0.1;
+  const fixed = [];
 
   for (let i = 0; i < curNodes.length; i++) {
-    let validPosition = false;
-    let position = new THREE.Vector3();
+    let position;
+    if (i < fixed.length) {
+      // Use the fixed positions for the first three nodes
+      position = new THREE.Vector3(fixed[i][0], fixed[i][1], fixed[i][2]);
+    } else {
+      // Generate random positions for the remaining nodes
+      let validPosition = false;
+      position = new THREE.Vector3();
 
-    while (!validPosition) {
-      const randomX = (Math.random() - 0.5) * gridSize;
-      const randomZ = (Math.random() - 0.5) * gridSize;
-      position.set(randomX, 0, randomZ);
-      validPosition = true;
+      while (!validPosition) {
+        const randomX = (Math.random() - 0.5) * gridSize;
+        const randomZ = (Math.random() - 0.5) * gridSize;
+        position.set(randomX, 0, randomZ);
+        validPosition = true;
 
-      for (let x = 0; x < chestList.length; x++) {
-        if (chestList[x].position.distanceTo(position) < minDistance) {
-          validPosition = false;
-          break;
-        }
-
-        for (let y = x + 1; y < chestList.length; y++) {
-          if (
-            !isTriangleInequalitySatisfied(
-              chestList[x].position,
-              chestList[y].position,
-              position,
-              margin
-            )
-          ) {
+        for (let x = 0; x < chestList.length; x++) {
+          if (chestList[x].position.distanceTo(position) < minDistance) {
             validPosition = false;
             break;
           }
-        }
 
-        if (!validPosition) break;
+          for (let y = x + 1; y < chestList.length; y++) {
+            if (
+              !isTriangleInequalitySatisfied(
+                chestList[x].position,
+                chestList[y].position,
+                position,
+                margin
+              )
+            ) {
+              validPosition = false;
+              break;
+            }
+          }
+
+          if (!validPosition) break;
+        }
       }
     }
 
@@ -209,18 +231,13 @@ async function createModels() {
     openChestList.push(openModel.model);
 
     const labelPosition = position.clone();
-    // labelPosition.x -= 0.35;
-
-    // labelPosition.z -= 0.4;
-    // labelPosition.x -= 0.28;
     labelPosition.y += 2.5;
-    // labelPosition.z -= 0.5;
 
     const chestLabel = createNodeLabel(`${i}`, labelPosition, scene);
     chestLabelList.push(chestLabel);
   }
 
-  if (currentAlgorithm == "prim") {
+  if (currentAlgorithm === "prim") {
     primSetup();
   }
 
@@ -295,7 +312,7 @@ function handleSelectionEffect(intersectedObject) {
   closedEnd.visible = false;
   openEnd.visible = true;
 
-  const permanentRing = createRing(0.6, 0.7, labelDepth, 0x000000);
+  const permanentRing = createRing(0.8, 0.9, labelDepth, 0x000000);
   permanentRing.position.copy(intersectedObject.userData.label.position);
   permanentRing.position.y -= labelDepth / 2;
   scene.add(permanentRing);
@@ -364,11 +381,24 @@ function handleEdgeSelection(
     health = updateHealth(health);
     shakeScreen();
     if (selectEdgeResult === -1) {
-      uiText.innerText =
-        "Incorrect Selection. The selected edge forms a cycle and a tree cannot have any cycle. To create a minimum spanning tree using Kruskal's, Please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
+      if (currentAlgorithm === "kruskal") {
+        uiText.innerText =
+          "Incorrect Selection. The selected edge forms a cycle and a tree cannot have any cycle. To create a minimum spanning tree using Kruskal's, please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
+      } else {
+        uiText.innerText =
+          "Incorrect Selection. The selected edge forms a cycle and a tree cannot have any cycle. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
+      }
+    } else if (selectEdgeResult === -2) {
+      if (currentAlgorithm === "kruskal") {
+        uiText.innerText =
+          "Incorrect Selection. Although the selected edge doesn't form a cycle, it is not the edge with the minimum weight among remaining edges. To create a minimum spanning tree using Kruskal's, please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
+      } else {
+        uiText.innerText =
+          "Incorrect Selection. Although the selected edge connects to the tree and doesn't form a cycle, it is not the edge with the minimum weight. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
+      }
     } else {
       uiText.innerText =
-        "Incorrect Selection. Although the selected edge doesn't form a cycle, it is not the edge with the minimum weight among remaining edges. To create a minimum spanning tree using Kruskal's, please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
+        "Incorrect Selection. The selected edge doesn't connect to the current tree. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
     }
     setTimeout(() => {
       intersectedObject.material.color.set(0x74c0fc);
@@ -425,7 +455,9 @@ function drawLines() {
     const intersects = raycaster.intersectObjects([...lines, ...labels]);
 
     if (intersects.length > 0) {
-      hoverEffect.classList.add("highlight");
+      hoverEffects.forEach((hoverEffect) => {
+        hoverEffect.classList.add("highlight");
+      });
       const intersectedObject = intersects[0].object;
       if (intersectedObject.userData.selected) {
         sphereInter.visible = false;
@@ -449,7 +481,9 @@ function drawLines() {
         }
       }
     } else {
-      hoverEffect.classList.remove("highlight");
+      hoverEffects.forEach((hoverEffect) => {
+        hoverEffect.classList.remove("highlight");
+      });
       sphereInter.visible = false;
       hoverRing.visible = false;
 
@@ -609,7 +643,7 @@ function createHoverElements() {
   sphereInter.visible = false;
   scene.add(sphereInter);
 
-  hoverRing = createRing(0.6, 0.7, labelDepth, 0x000000);
+  hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
   hoverRing.visible = false;
   scene.add(hoverRing);
 }
@@ -620,10 +654,13 @@ function advanceNextLevel() {
   curEdges = numEdges;
 
   graph = createRandomConnectedGraph(curNodes, curEdges);
-  if (currentLevel >= 3) {
+  if (currentLevel <= 3) {
     curAlgorithmForGraph = new KruskalAlgorithm(graph);
     currentAlgorithm = "kruskal";
   } else {
+    if (currentLevel == 4) {
+      showPrimInstructions();
+    }
     curAlgorithmForGraph = new PrimAlgorithm(graph);
     currentAlgorithm = "prim";
   }
@@ -638,13 +675,24 @@ buttonNext.addEventListener("click", () => {
   health = resetHealth();
   currentLevel++;
   closeModal();
+  closePseudocode();
   resetScene();
   advanceNextLevel();
   if (currentAlgorithm === "prim") {
     updateNodeLabel(chapterTitle, "Prim's Algorithm", 1, 0.3, 0x212529);
     chapterTitle.position.set(9.5, 6.5, -30);
   }
-  updateNodeLabel(levelTitle, `Level ${currentLevel}`, 0.9, 0.3, 0x212529);
+  if (currentLevel > 3) {
+    updateNodeLabel(
+      levelTitle,
+      `Level ${currentLevel - 3}`,
+      0.9,
+      0.3,
+      0x212529
+    );
+  } else {
+    updateNodeLabel(levelTitle, `Level ${currentLevel}`, 0.9, 0.3, 0x212529);
+  }
 });
 
 buttonAgain.addEventListener("click", () => {
