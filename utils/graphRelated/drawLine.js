@@ -119,16 +119,20 @@ export function updateNodeLabelColor(textMesh, color) {
 
 export function getRandomColor() {
   const colors = [
-    "#fa5252",
-    "#e64980",
-    "#be4bdb",
-    "#7950f2",
-    "#4c6ef5",
-    "#15aabf",
-    "#12b886",
-    "#40c057",
-    "#fab005",
-    "#fd7e14",
+    "#F1F6F1",
+    "#f8fa90",
+    "#6aff4c",
+    "#55F7FF",
+    "#FC5B3B",
+
+    // "#be4bdb",
+    // "#7950f2",
+    // "#4c6ef5",
+    // "#15aabf",
+    // "#12b886",
+    // "#40c057",
+    // "#fab005",
+    // "#fd7e14",
   ];
   const randomIndex = Math.floor(Math.random() * colors.length);
   return colors[randomIndex];

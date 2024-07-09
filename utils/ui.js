@@ -67,3 +67,15 @@ export function resetStars() {
     stars[i].style.fill = "#e9ecef"; // Ensure the color is a string
   }
 }
+
+export function updateHintIcons(listItem, result) {
+  const wrongIcon = listItem.querySelector("svg:first-child");
+  const correctIcon = listItem.querySelector("svg:nth-child(2)");
+  if (result === 0) {
+    wrongIcon.classList.remove("hidden");
+    correctIcon.classList.add("hidden");
+  } else {
+    wrongIcon.classList.add("hidden");
+    correctIcon.classList.remove("hidden");
+  }
+}

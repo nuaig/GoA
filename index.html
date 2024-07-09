@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
     <script type="module" src="mainlvl3.js"></script>
+    <!-- <script
+      type="module"
+      src="./utils/SortingRelated/insertionSort.js"
+    ></script> -->
   </head>
   <body>
     <div id="Renderer">
@@ -16,6 +20,100 @@
           <p id="UI-Text" class="UI-Text">
             Click on the Edge to Create Minimum Spanning Tree!
           </p>
+          <ul class="UI-Text Hint-Text hidden">
+            <li>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 48 48"
+                width="48px"
+                height="48px"
+              >
+                <path
+                  fill="#F44336"
+                  d="M21.5 4.5H26.501V43.5H21.5z"
+                  transform="rotate(45.001 24 24)"
+                />
+                <path
+                  fill="#F44336"
+                  d="M21.5 4.5H26.5V43.501H21.5z"
+                  transform="rotate(135.008 24 24)"
+                />
+              </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 48 48"
+                width="48px"
+                height="48px"
+              >
+                <path
+                  fill="#43A047"
+                  d="M40.6 12.1L17 35.7 7.4 26.1 4.6 29 17 41.3 43.4 14.9z"
+                />
+              </svg>
+
+              Select an edge with the minimum weight
+            </li>
+            <li>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 48 48"
+                width="48px"
+                height="48px"
+              >
+                <path
+                  fill="#F44336"
+                  d="M21.5 4.5H26.501V43.5H21.5z"
+                  transform="rotate(45.001 24 24)"
+                />
+                <path
+                  fill="#F44336"
+                  d="M21.5 4.5H26.5V43.501H21.5z"
+                  transform="rotate(135.008 24 24)"
+                />
+              </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 48 48"
+                width="48px"
+                height="48px"
+              >
+                <path
+                  fill="#43A047"
+                  d="M40.6 12.1L17 35.7 7.4 26.1 4.6 29 17 41.3 43.4 14.9z"
+                /></svg
+              >Select an edge that doesn't form a cycle
+            </li>
+            <li class="Prim-Hint hidden">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 48 48"
+                width="48px"
+                height="48px"
+              >
+                <path
+                  fill="#F44336"
+                  d="M21.5 4.5H26.501V43.5H21.5z"
+                  transform="rotate(45.001 24 24)"
+                />
+                <path
+                  fill="#F44336"
+                  d="M21.5 4.5H26.5V43.501H21.5z"
+                  transform="rotate(135.008 24 24)"
+                />
+              </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 48 48"
+                width="48px"
+                height="48px"
+              >
+                <path
+                  fill="#43A047"
+                  d="M40.6 12.1L17 35.7 7.4 26.1 4.6 29 17 41.3 43.4 14.9z"
+                /></svg
+              >Select an edge that connects to the tree
+            </li>
+          </ul>
         </div>
         <img
           id="helpIcon"
@@ -45,18 +143,19 @@ MST-KRUSKAL(G, w):
 
         <div class="topnav-instructions prim-instruction hidden">
           <pre class="code-block">
-MST-PRIM (G, w, r):
-1.   For each u ∈ G.V:
-2.       u.key = &#8734;
-3.       u.&#928; = NIL
-4.   r.key = 0
-5.   Q = G.V
-6.   while Q &#8800; ∅:
-7.       <span class="wrong__select correct__select">u = <span class="function">EXTRACT-MIN (Q)</span></span>
-8.           <span class="correct__select">for each v ∈ G.Adj[u]: </span>
-9.           <span class="correct__select">    if v ∈ Q and w(u,v) &#60; v.key:</span>
-10.                 v.&#928; = u
-11.                 v.key = w(u,v)
+PRIM-ALGORITHM(graph):
+1.  Empty set <span class="keyword">SN</span> for selectedNodes
+2.  Empty list <span class="keyword">SE</span> for selectedEdges
+3.  totalWeight as 0
+4.   
+5.  Choose any node as <span class="keyword">startNode</span>
+6.  Add <span class="keyword">startNode</span> to <span class="keyword">SN</span>
+7.  <span class="hover wrong__select">while <span class="keyword">SN</span> does not include all nodes:</span>
+8.       <span class="correct__select wrong__select">Find the smallest edge connecting</span>
+8.       <span class="correct__select"><span class="keyword">SN</span> to an unselected node</span>
+9.       <span class="correct__select">    Add this edge to <span class="keyword">SE</span></span>
+9.       <span class="correct__select">    Add the new node to <span class="keyword">SN</span></span>
+6.  return SE, totalWeight
           </pre>
         </div>
 

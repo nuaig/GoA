@@ -42,6 +42,7 @@ export class KruskalAlgorithm {
     this.graph = graph;
     this.remainingEdges = [...graph.edges].sort((a, b) => a[2] - b[2]);
     this.selectedEdges = [];
+    this.unSelectedEdges = [...graph.edges].sort((a, b) => a[2] - b[2]);
     this.currentWeight = 0;
     this.uf = new UnionFind(graph.nodes.length);
   }
@@ -77,31 +78,45 @@ export class KruskalAlgorithm {
 
   // Select an edge and update the state
   selectEdge(edge) {
+    console.log("Kruskal Selecting edge");
+
+    console.log(this.selectedEdges);
     // Check if the edge is in the next edges list and if it forms a cycle
     const nextEdges = this.getNextEdges();
     console.log(nextEdges);
+    const result = [1, 1];
     const parentX = this.uf.find(edge[0]);
     const parentY = this.uf.find(edge[1]);
     if (parentX === parentY) {
       console.log("edge forms a cycle");
-      return -1;
+      result[1] = 0;
+    }
+    if (this.unSelectedEdges[0][2] !== edge[2]) {
+      result[0] = 0;
     }
     if (
-      !nextEdges.some(
+      nextEdges.some(
         (e) => e[0] === edge[0] && e[1] === edge[1] && e[2] === edge[2]
       )
     ) {
-      console.log("edge not in the list");
-      return -2; // Edge not in next edges list
+      result[0] = 1;
+    }
+    console.log(result);
+    if (!(result[0] && result[1])) {
+      return result;
     }
     if (!this.uf.union(edge[0], edge[1])) {
       console.log("edge forms a cycle");
-      return -1; // Edge forms a cycle
+      result[1] = 0; // Edge forms a cycle
     }
 
     // Successfully add the edge
     this.selectedEdges.push(edge);
     this.currentWeight += edge[2];
+
+    this.unSelectedEdges = this.unSelectedEdges.filter((e) => {
+      return !(e[0] === edge[0] && e[1] === edge[1] && e[2] === edge[2]);
+    });
 
     // Update remaining edges
     this.remainingEdges = this.remainingEdges.filter((e) => {
@@ -115,7 +130,7 @@ export class KruskalAlgorithm {
     });
     console.log(this.remainingEdges, "remaining edges");
 
-    return 1;
+    return result;
   }
 
   // Check if the algorithm is complete

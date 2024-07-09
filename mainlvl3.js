@@ -15,6 +15,7 @@ import {
   resetHealth,
   setStars,
   resetStars,
+  updateHintIcons,
 } from "./utils/ui.js";
 import {
   effectForCorrectSelect,
@@ -77,6 +78,8 @@ const levelConfig = {
   5: { nodes: 8, edges: 12 },
   6: { nodes: 9, edges: 15 },
 };
+
+const usedColors = new Set();
 const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
 curNodes = Array.from({ length: numNodes }, (_, i) => i);
 curEdges = numEdges;
@@ -278,22 +281,36 @@ const labelDepth = 0.1;
 let hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
 scene.add(hoverRing);
 
-function updateNodeColorsForSameTree(edge, sameTree) {
-  if (sameTree) {
-    const color = componentColors[edge.rootStart];
-    updateNodeLabelColor(chestLabelList[edge.start], color);
-    updateNodeLabelColor(chestLabelList[edge.end], color);
-  } else {
+function updateNodeColorsForSameTree(edge) {
+  function getNodesWithSameParentsAndColor(edge, color) {
     const nodesWithSameParentStart =
       curAlgorithmForGraph.getAllNodesWithSameParent(edge.start);
     const nodesWithSameParentEnd =
       curAlgorithmForGraph.getAllNodesWithSameParent(edge.end);
-    const newColor = getRandomColor();
-
     nodesWithSameParentStart.concat(nodesWithSameParentEnd).forEach((node) => {
-      updateNodeLabelColor(chestLabelList[node], newColor);
-      componentColors[node] = newColor;
+      updateNodeLabelColor(chestLabelList[node], color);
+      componentColors[node] = color;
     });
+  }
+
+  const nodeStartColor = componentColors[edge.start];
+  const nodeEndColor = componentColors[edge.end];
+  if (nodeStartColor && nodeEndColor) {
+    getNodesWithSameParentsAndColor(edge, nodeStartColor);
+    usedColors.delete(nodeEndColor);
+  } else if (!nodeStartColor && nodeEndColor) {
+    getNodesWithSameParentsAndColor(edge, nodeEndColor);
+  } else if (nodeStartColor && !nodeEndColor) {
+    getNodesWithSameParentsAndColor(edge, nodeStartColor);
+  } else {
+    let newColor;
+    do {
+      newColor = getRandomColor();
+    } while (usedColors.has(newColor));
+
+    usedColors.add(newColor);
+
+    getNodesWithSameParentsAndColor(edge, newColor);
   }
 }
 
@@ -330,12 +347,12 @@ function handleEdgeSelection(
   onMouseMove
 ) {
   const edge = intersectedObject.userData.edge;
-  let rootStart, rootEnd, sameTree;
-  if (currentAlgorithm === "kruskal") {
-    rootStart = curAlgorithmForGraph.uf.find(edge.start);
-    rootEnd = curAlgorithmForGraph.uf.find(edge.end);
-    sameTree = rootStart === rootEnd;
-  }
+  // let rootStart, rootEnd, sameTree;
+  // if (currentAlgorithm === "kruskal") {
+  //   rootStart = curAlgorithmForGraph.uf.find(edge.start);
+  //   rootEnd = curAlgorithmForGraph.uf.find(edge.end);
+  //   sameTree = rootStart === rootEnd;
+  // }
 
   const selectEdgeResult = curAlgorithmForGraph.selectEdge([
     edge.start,
@@ -345,10 +362,12 @@ function handleEdgeSelection(
   const isComplete = curAlgorithmForGraph.isComplete();
   const currentWeight = curAlgorithmForGraph.currentWeight;
 
-  if (selectEdgeResult == 1) {
+  if (selectEdgeResult.every((res) => res === 1)) {
+    document.querySelector(".Hint-Text").classList.add("hidden");
     effectForCorrectSelect();
     if (currentAlgorithm === "kruskal") {
-      updateNodeColorsForSameTree({ ...edge, rootStart, rootEnd }, sameTree);
+      // updateNodeColorsForSameTree({ ...edge, rootStart, rootEnd }, sameTree);
+      updateNodeColorsForSameTree(edge);
     }
     handleSelectionEffect(intersectedObject);
 
@@ -380,26 +399,39 @@ function handleEdgeSelection(
     }
     health = updateHealth(health);
     shakeScreen();
-    if (selectEdgeResult === -1) {
-      if (currentAlgorithm === "kruskal") {
-        uiText.innerText =
-          "Incorrect Selection. The selected edge forms a cycle and a tree cannot have any cycle. To create a minimum spanning tree using Kruskal's, please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
-      } else {
-        uiText.innerText =
-          "Incorrect Selection. The selected edge forms a cycle and a tree cannot have any cycle. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
+    document.querySelector(".Hint-Text").classList.remove("hidden");
+    const hintItems = document.querySelectorAll(".Hint-Text li");
+    updateHintIcons(hintItems[0], selectEdgeResult[0]);
+    updateHintIcons(hintItems[1], selectEdgeResult[1]);
+    if (currentAlgorithm === "prim") {
+      const primHintItem = document.querySelector(".Prim-Hint");
+      if (primHintItem) {
+        primHintItem.classList.remove("hidden");
+        updateHintIcons(primHintItem, selectEdgeResult[2]);
       }
-    } else if (selectEdgeResult === -2) {
-      if (currentAlgorithm === "kruskal") {
-        uiText.innerText =
-          "Incorrect Selection. Although the selected edge doesn't form a cycle, it is not the edge with the minimum weight among remaining edges. To create a minimum spanning tree using Kruskal's, please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
-      } else {
-        uiText.innerText =
-          "Incorrect Selection. Although the selected edge connects to the tree and doesn't form a cycle, it is not the edge with the minimum weight. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
-      }
-    } else {
-      uiText.innerText =
-        "Incorrect Selection. The selected edge doesn't connect to the current tree. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
     }
+    uiText.innerText =
+      "Incorrect Selection. Make sure to meet the following conditions:";
+    // if (selectEdgeResult === -1) {
+    //   if (currentAlgorithm === "kruskal") {
+    //     uiText.innerText =
+    //       "Incorrect Selection. The selected edge forms a cycle and a tree cannot have any cycle. To create a minimum spanning tree using Kruskal's, please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
+    //   } else {
+    //     uiText.innerText =
+    //       "Incorrect Selection. The selected edge forms a cycle and a tree cannot have any cycle. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
+    //   }
+    // } else if (selectEdgeResult === -2) {
+    //   if (currentAlgorithm === "kruskal") {
+    //     uiText.innerText =
+    //       "Incorrect Selection. Although the selected edge doesn't form a cycle, it is not the edge with the minimum weight among remaining edges. To create a minimum spanning tree using Kruskal's, please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
+    //   } else {
+    //     uiText.innerText =
+    //       "Incorrect Selection. Although the selected edge connects to the tree and doesn't form a cycle, it is not the edge with the minimum weight. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
+    //   }
+    // } else {
+    //   uiText.innerText =
+    //     "Incorrect Selection. The selected edge doesn't connect to the current tree. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
+    // }
     setTimeout(() => {
       intersectedObject.material.color.set(0x74c0fc);
       if (intersectedObject.userData.label) {
@@ -609,6 +641,9 @@ function resetScene() {
   ringList.length = 0;
   labels.length = 0;
   mixers.length = 0;
+
+  usedColors.clear();
+  componentColors = {};
 
   currentScore = 0;
   scoreText.innerHTML = "00";

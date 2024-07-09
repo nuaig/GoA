@@ -4,6 +4,7 @@ export class PrimAlgorithm {
     this.selectedNodes = new Set();
     this.selectedEdges = [];
     this.remainingEdges = [...graph.edges]; // Initialize remainingEdges with all edges
+    this.unSelectedEdges = [...graph.edges].sort((a, b) => a[2] - b[2]);
     this.currentWeight = 0;
   }
 
@@ -44,24 +45,34 @@ export class PrimAlgorithm {
     // console.log(nextEdges);
     // console.log(edge);
     const [node1, node2, weight] = edge;
+    const result = [1, 1, 1];
 
     if (this.selectedNodes.has(node1) && this.selectedNodes.has(node2)) {
       console.log("edge forms a cycle");
-      return -1; // Edge forms a cycle
+      // return -1; // Edge forms a cycle
+      result[1] = 0;
     }
 
     if (!this.selectedNodes.has(node1) && !this.selectedNodes.has(node2)) {
       console.log("edge not connecting any selected nodes");
-      return -3; // Edge is not connected to any selected nodes
+      // return -3; // Edge is not connected to any selected nodes
+      result[2] = 0;
+    }
+
+    if (this.unSelectedEdges[0][2] !== edge[2]) {
+      result[0] = 0;
     }
 
     // Check if the selected edge is in the list of next valid edges
     const isValidEdge = nextEdges.some(
       (e) => e[0] === edge[0] && e[1] === edge[1] && e[2] === edge[2]
     );
-    if (!isValidEdge) {
+    if (isValidEdge) {
       console.log("not the edge with minimum weight");
-      return -2; // Edge is not the minimum edge connecting to
+      result[0] = 1;
+    }
+    if (!(result[0] && result[1] && result[2])) {
+      return result;
     }
 
     // Successfully add the edge
@@ -70,6 +81,10 @@ export class PrimAlgorithm {
     this.selectedNodes.add(node1);
     this.selectedNodes.add(node2);
 
+    this.unSelectedEdges = this.unSelectedEdges.filter((e) => {
+      return !(e[0] === edge[0] && e[1] === edge[1] && e[2] === edge[2]);
+    });
+
     // Remove the selected edge and any edges that would form a cycle from remainingEdges
     this.remainingEdges = this.remainingEdges.filter(
       (e) =>
@@ -77,7 +92,7 @@ export class PrimAlgorithm {
         !(this.selectedNodes.has(e[0]) && this.selectedNodes.has(e[1]))
     );
 
-    return 1;
+    return result;
   }
 
   // Check if the algorithm is complete
