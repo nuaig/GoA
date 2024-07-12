@@ -56,7 +56,7 @@ body {
 
 .topnav-instructions {
   position: absolute;
-  top: 15%;
+  top: 23%;
   left: 85%;
   transform: translate(-50%, -50%);
   background-color: rgb(72, 121, 212);
@@ -67,6 +67,29 @@ body {
   box-shadow: 0.5rem 0.5rem 0;
   overflow: hidden;
   /* display: none; */
+}
+
+.Action-Icons-Holder {
+  position: absolute;
+  top: 2vh;
+  right: 0.5vw;
+
+  /* background-color: #343a40;
+  border: solid #eaebf1 2px; */
+  border-radius: 10px;
+  padding: 0 15px;
+}
+
+.Action-Icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Action-Icons-Holder svg {
+  width: 75px;
+  height: 75px;
+  cursor: pointer;
 }
 
 .help-icon {

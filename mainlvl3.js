@@ -43,6 +43,8 @@ const instructionModal = document.querySelector(".instruction");
 const overlay = document.querySelector(".overlay");
 const hoverEffects = document.querySelectorAll(".hover");
 
+const pseudoBoxButton = document.querySelector(".Pesudocode-Box-Action");
+
 const buttonAgain = document.querySelector(".btn__again");
 const buttonNext = document.querySelector(".btn__next");
 const buttonStart = document.querySelector(".btn__instruction__start");
@@ -119,6 +121,10 @@ function primSetup() {
 window.toggleInstructions = function () {
   toggleInstructions(currentAlgorithm);
 };
+
+pseudoBoxButton.addEventListener("click", () => {
+  toggleInstructions(currentAlgorithm);
+});
 
 let health = 4;
 
