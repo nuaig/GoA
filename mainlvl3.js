@@ -24,6 +24,8 @@ import {
 } from "./utils/animations.js";
 import {
   drawLine,
+  updateLinePosition,
+  isTriangleInequalitySatisfied,
   setFont,
   createNodeLabel,
   updateNodeLabel,
@@ -44,6 +46,7 @@ const overlay = document.querySelector(".overlay");
 const hoverEffects = document.querySelectorAll(".hover");
 
 const pseudoBoxButton = document.querySelector(".Pesudocode-Box-Action");
+const reArrangeButton = document.querySelector(".Rearrange-Action");
 
 const buttonAgain = document.querySelector(".btn__again");
 const buttonNext = document.querySelector(".btn__next");
@@ -66,6 +69,60 @@ function showPrimInstructions() {
     .classList.remove("hidden");
 }
 
+reArrangeButton.addEventListener("click", () => {
+  console.log("Rearrange Button Clicked");
+  const margin = 0.1;
+  // Recompute positions for chests
+  for (let i = 0; i < curNodes.length; i++) {
+    let validPosition = false;
+    let position = new THREE.Vector3();
+
+    while (!validPosition) {
+      const randomX = (Math.random() - 0.5) * gridSize;
+      const randomZ = (Math.random() - 0.5) * gridSize;
+      position.set(randomX, 0, randomZ);
+      validPosition = true;
+
+      for (let x = 0; x < chestList.length; x++) {
+        if (chestList[x].position.distanceTo(position) < minDistance) {
+          validPosition = false;
+          break;
+        }
+
+        for (let y = x + 1; y < chestList.length; y++) {
+          if (
+            !isTriangleInequalitySatisfied(
+              chestList[x].position,
+              chestList[y].position,
+              position,
+              margin
+            )
+          ) {
+            validPosition = false;
+            break;
+          }
+        }
+
+        if (!validPosition) break;
+      }
+    }
+
+    // Update the position of the chests and their labels
+    chestList[i].position.copy(position);
+    openChestList[i].position.copy(position);
+    chestLabelList[i].position.copy(position.clone().setY(position.y + 2.5));
+  }
+
+  console.log(edgeList[0].userData.startCube);
+
+  // Update the positions of the lines and their labels
+  edgeList.forEach((line, index) => {
+    console.log(graph.edges[index]);
+    const [start, end, weight] = graph.edges[index];
+    updateLinePosition(line, chestList[start], chestList[end]);
+  });
+});
+
 let currentScore = 0;
 let currentLevel = 1;
 let curNodes;
@@ -76,6 +133,7 @@ const levelConfig = {
   1: { nodes: 6, edges: 9 },
   2: { nodes: 3, edges: 3 },
   3: { nodes: 3, edges: 3 },
+
   4: { nodes: 6, edges: 8 },
   5: { nodes: 8, edges: 12 },
   6: { nodes: 9, edges: 15 },
@@ -165,8 +223,7 @@ const labels = [];
 let dungeonRoomMixer;
 let dungeonRoomAction;
 
-const openModal = function (e) {
-  e.preventDefault();
+const openModal = function () {
   modal.classList.remove("hidden");
   overlay.classList.remove("hidden");
 };
@@ -177,15 +234,6 @@ const closeModal = function () {
 };
 
 async function createModels() {
-  function isTriangleInequalitySatisfied(a, b, c, margin) {
-    const ab = a.distanceTo(b);
-    const bc = b.distanceTo(c);
-    const ac = a.distanceTo(c);
-    return (
-      ab + bc > ac + margin && ab + ac > bc + margin && ac + bc > ab + margin
-    );
-  }
-
   const margin = 0.1;
   const fixed = [];
 
@@ -341,6 +389,7 @@ function handleSelectionEffect(intersectedObject) {
   scene.add(permanentRing);
   permanentRing.visible = true;
   ringList.push(permanentRing);
+  intersectedObject.userData.ring = permanentRing;
 
   currentScore += 10;
   scoreText.innerHTML = `${currentScore}`;
@@ -390,7 +439,7 @@ function handleEdgeSelection(
         dungeonRoomAction.reset().play();
         console.log(dungeonRoomAction);
       }
-      openModal(event);
+      openModal();
       window.removeEventListener("mousemove", onMouseMove, false);
       window.removeEventListener("click", onClick, false);
     } else {
@@ -465,6 +514,7 @@ function drawLines() {
     edgeList.push(line);
     edgeLabelList.push(line.userData.label);
   });
+  console.log(edgeList[0].userData.startCube);
 
   const raycaster = new THREE.Raycaster();
   raycaster.params.Line.threshold = 0.5;

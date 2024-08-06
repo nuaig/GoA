@@ -189,6 +189,53 @@ export function drawLine(startCube, endCube, weight, edge, scene) {
   return mesh;
 }
 
+export function updateLinePosition(mesh, startCube, endCube) {
+  const points = [];
+
+  const numSegments = 50; // Same number of segments as used in drawLine
+  for (let i = 0; i <= numSegments; i++) {
+    const t = i / numSegments;
+    const x =
+      startCube.position.x + t * (endCube.position.x - startCube.position.x);
+    const y =
+      startCube.position.y + t * (endCube.position.y - startCube.position.y);
+    const z =
+      startCube.position.z + t * (endCube.position.z - startCube.position.z);
+    points.push(new THREE.Vector3(x, y, z));
+  }
+
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const line = new MeshLine();
+  line.setGeometry(geometry);
+
+  mesh.geometry.dispose(); // Dispose of the old geometry
+  mesh.geometry = line.geometry; // Set the new geometry
+
+  // Update the label position
+  const midPoint = new THREE.Vector3(
+    (startCube.position.x + endCube.position.x) / 2,
+    (startCube.position.y + endCube.position.y) / 2 + 0.5,
+    (startCube.position.z + endCube.position.z) / 2
+  );
+  mesh.userData.label.position.copy(midPoint);
+  if (mesh.userData.ring) {
+    mesh.userData.ring.position.copy(mesh.userData.label.position);
+  }
+}
+
+// Usage:
+// Assume 'lineMesh' is the mesh returned from drawLine function
+// updateLinePosition(lineMesh, newStartCube, newEndCube);
+
+export function isTriangleInequalitySatisfied(a, b, c, margin) {
+  const ab = a.distanceTo(b);
+  const bc = b.distanceTo(c);
+  const ac = a.distanceTo(c);
+  return (
+    ab + bc > ac + margin && ab + ac > bc + margin && ac + bc > ab + margin
+  );
+}
+
 // Function to highlight a chest
 export function highlightChest(chest, scene) {
   const circleGeometry = new THREE.CircleGeometry(1, 32);
