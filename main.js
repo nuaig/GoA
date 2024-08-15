@@ -1,276 +1,197 @@
 import * as THREE from "three";
 import { loadModel } from "./utils/threeModels.js";
+import * as CANNON from "cannon-es";
 import { createThreePointLighting } from "./utils/threePointLighting.js";
-
-class InputController {
-  constructor() {
-    this.KEYS = {
-      w: 87,
-      a: 65,
-      s: 83,
-      d: 68,
-      space: 32,
-      shift: 16,
-    };
-    this.MOUSE_MOVE_THRESHOLD = 0.3; // Small threshold to ignore minor movements
-    this.initialize();
-  }
-
-  initialize() {
-    this.current = {
-      leftButton: false,
-      rightButton: false,
-      mouseX: 0,
-      mouseY: 0,
-      mouseXDelta: 0,
-      mouseYDelta: 0,
-    };
-    this.previous = {
-      mouseX: 0,
-      mouseY: 0,
-    };
-    this.keys = {};
-    this.target = document;
-    this.target.addEventListener(
-      "mousedown",
-      (e) => this.onMouseDown(e),
-      false
-    );
-    this.target.addEventListener(
-      "mousemove",
-      (e) => this.onMouseMove(e),
-      false
-    );
-    this.target.addEventListener("mouseup", (e) => this.onMouseUp(e), false);
-    this.target.addEventListener("keydown", (e) => this.onKeyDown(e), false);
-    this.target.addEventListener("keyup", (e) => this.onKeyUp(e), false);
-    this.target.addEventListener("mouseout", () => this.onMouseLeave(), false);
-    this.target.addEventListener(
-      "mouseleave",
-      () => this.onMouseLeave(),
-      false
-    );
-  }
-
-  onMouseDown(e) {
-    switch (e.button) {
-      case 0: {
-        this.current.leftButton = true;
-        break;
-      }
-      case 2: {
-        this.current.rightButton = true;
-        break;
-      }
-    }
-  }
-
-  onMouseUp(e) {
-    switch (e.button) {
-      case 0: {
-        this.current.leftButton = false;
-        break;
-      }
-      case 2: {
-        this.current.rightButton = false;
-        break;
-      }
-    }
-  }
-
-  onMouseMove(e) {
-    this.current.mouseX = e.pageX - window.innerWidth / 2;
-    this.current.mouseY = e.pageY - window.innerHeight / 2;
-
-    const deltaX = this.current.mouseX - this.previous.mouseX;
-    const deltaY = this.current.mouseY - this.previous.mouseY;
-
-    // Only update deltas if the movement is above the threshold
-    this.current.mouseXDelta =
-      Math.abs(deltaX) > this.MOUSE_MOVE_THRESHOLD ? deltaX : 0;
-    this.current.mouseYDelta =
-      Math.abs(deltaY) > this.MOUSE_MOVE_THRESHOLD ? deltaY : 0;
-
-    // Update previous values
-    this.previous.mouseX = this.current.mouseX;
-    this.previous.mouseY = this.current.mouseY;
-  }
-
-  onMouseLeave() {
-    // Reset mouse deltas when the mouse leaves the viewport
-    this.current.mouseXDelta = 0;
-    this.current.mouseYDelta = 0;
-  }
-
-  onKeyDown(e) {
-    this.keys[e.keyCode] = true;
-  }
-
-  onKeyUp(e) {
-    this.keys[e.keyCode] = false;
-  }
-
-  update() {
-    // Reset deltas after processing to prevent residual movement
-    this.current.mouseXDelta = 0;
-    this.current.mouseYDelta = 0;
-  }
-
-  key(keyCode) {
-    return this.keys[keyCode] || false;
-  }
-}
-
-class FirstPersonCamera {
-  constructor(camera) {
-    this.camera = camera;
-    this.input = new InputController();
-    this.rotation = new THREE.Quaternion();
-    this.translation = new THREE.Vector3();
-    this.phi = 0;
-    this.phiSpeed = 8;
-    this.theta = 0;
-    this.thetaSpeed = 5;
-    this.walkSpeed = 20;
-    this.strafeSpeed = 20;
-  }
-
-  update(timeElapsedS) {
-    this.updateRotation(timeElapsedS);
-    this.updateTranslation(timeElapsedS);
-    this.updateCamera();
-    this.input.update();
-  }
-
-  updateCamera() {
-    this.camera.quaternion.copy(this.rotation);
-    this.camera.position.add(this.translation);
-  }
-
-  updateTranslation(timeElapsedS) {
-    const forwardVelocity =
-      (this.input.key(this.input.KEYS.w) ? 1 : 0) +
-      (this.input.key(this.input.KEYS.s) ? -1 : 0);
-    const strafeVelocity =
-      (this.input.key(this.input.KEYS.a) ? 1 : 0) +
-      (this.input.key(this.input.KEYS.d) ? -1 : 0);
-
-    const qx = new THREE.Quaternion();
-    qx.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.phi);
-
-    const forward = new THREE.Vector3(0, 0, -1);
-    forward.applyQuaternion(qx);
-    forward.multiplyScalar(forwardVelocity * timeElapsedS * this.walkSpeed);
-
-    const left = new THREE.Vector3(-1, 0, 0);
-    left.applyQuaternion(qx);
-    left.multiplyScalar(strafeVelocity * timeElapsedS * this.strafeSpeed);
-
-    this.translation.add(forward);
-    this.translation.add(left);
-
-    if (forwardVelocity === 0 && strafeVelocity === 0) {
-      this.translation.set(0, 0, 0); // Reset translation only if no movement keys are pressed
-    }
-  }
-
-  updateRotation(timeElapsedS) {
-    const xh = this.input.current.mouseXDelta / window.innerWidth;
-    const yh = this.input.current.mouseYDelta / window.innerHeight;
-
-    this.phi += -xh * this.phiSpeed;
-    this.theta = clamp(
-      this.theta + -yh * this.thetaSpeed,
-      -Math.PI / 3,
-      Math.PI / 3
-    );
-
-    const qx = new THREE.Quaternion();
-    qx.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.phi);
-    const qz = new THREE.Quaternion();
-    qz.setFromAxisAngle(new THREE.Vector3(1, 0, 0), this.theta);
-
-    const q = new THREE.Quaternion();
-    q.multiply(qx);
-    q.multiply(qz);
-
-    this.rotation.copy(q);
-  }
-}
-
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
+import { Player } from "./utils/lockedFirstPersonCam/player.js";
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-const mixers = [];
+const world = new CANNON.World();
+world.gravity.set(0, 0, 0);
+world.doors = [];
 const renderer = new THREE.WebGLRenderer();
 renderer.setClearColor("#000");
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-camera.position.set(-0.3, 1.5, 12); // Set the camera position
-camera.lookAt(0, 1, 0);
 
-const axesHelper = new THREE.AxesHelper(5); // 5 is the size of the axes lines
-scene.add(axesHelper);
-
-const fpsCamera = new FirstPersonCamera(camera);
+const player = new Player(scene, world);
 
 const mainDungeonURL = new URL("./src/main_dungeon.glb", import.meta.url);
 
 async function createMainDungeon() {
   const position = new THREE.Vector3(0, 0, 0);
   try {
-    const { model, mixer, action } = await loadModel(
-      mainDungeonURL.href,
-      position,
-      scene,
-      mixers
-    );
-    console.log("Model loaded successfully:", model);
+    const { model } = await loadModel(mainDungeonURL.href, position, scene);
 
-    // Log the model's position, scale, and bounding box
-    console.log("Model Position:", model.position);
-    console.log("Model Scale:", model.scale);
+    model.traverse((child) => {
+      if (child.isMesh) {
+        if (child.name.includes("wall")) {
+          console.log(child.name);
+          addPhysicsToMesh(child, world, { mass: 0 });
+        }
 
-    const bbox = new THREE.Box3().setFromObject(model);
-    console.log("Bounding Box:", bbox);
+        if (child.name.includes("door")) {
+          world.doors.push(child);
+        }
+      }
+    });
   } catch (error) {
     console.log("Error loading dungeon", error);
+  }
+}
+
+const floorGeometry = new THREE.PlaneGeometry(100, 100);
+const floorMaterial = new THREE.MeshStandardMaterial({
+  color: 0x808080,
+  side: THREE.DoubleSide,
+});
+const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
+
+// Rotate the floor to be horizontal
+floorMesh.rotation.x = -Math.PI / 2;
+floorMesh.position.y = 0; // Adjust height if necessary
+scene.add(floorMesh);
+
+const floorShape = new CANNON.Plane();
+const floorBody = new CANNON.Body({
+  mass: 0, // mass = 0 makes the body static
+  shape: floorShape,
+  position: new CANNON.Vec3(0, 0, 0),
+});
+floorBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); // Align the plane with the floor
+world.addBody(floorBody);
+
+function createBoundingBoxHelper(body, color = 0xff0000) {
+  let shape = body.shapes[0]; // Assuming one shape per body for simplicity
+  let mesh;
+
+  switch (shape.type) {
+    case CANNON.Shape.types.BOX:
+      const boxGeometry = new THREE.BoxGeometry(
+        shape.halfExtents.x * 2,
+        shape.halfExtents.y * 2,
+        shape.halfExtents.z * 2
+      );
+      const boxMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        wireframe: true,
+      });
+      mesh = new THREE.Mesh(boxGeometry, boxMaterial);
+      break;
+
+    case CANNON.Shape.types.SPHERE:
+      const sphereGeometry = new THREE.SphereGeometry(shape.radius, 16, 16);
+      const sphereMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        wireframe: true,
+      });
+      mesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      break;
+
+    // Add cases for other shapes (e.g., Plane, Cylinder) if needed
+
+    default:
+      console.warn("Shape type not supported for visualization");
+      break;
+  }
+
+  if (mesh) {
+    // Sync the position and rotation with the Cannon.js body
+    mesh.position.copy(body.position);
+    mesh.quaternion.copy(body.quaternion);
+  }
+
+  return mesh;
+}
+
+function addBoundingBoxToMesh(mesh, scene) {
+  // Create a Box3 bounding box that fits the mesh exactly
+  const boundingBox = new THREE.Box3().setFromObject(mesh);
+
+  // Create a Box3Helper to visualize the bounding box with red color
+  const boxHelper = new THREE.Box3Helper(boundingBox, 0xff0000); // Red color
+
+  // Add the box helper to the scene
+  scene.add(boxHelper);
+}
+
+function addPhysicsToMesh(mesh, world, options) {
+  // Create a Box3 bounding box that fits the mesh exactly
+  const boundingBox = new THREE.Box3().setFromObject(mesh);
+
+  // Get the size and center of the bounding box
+  const size = boundingBox.getSize(new THREE.Vector3());
+  const center = boundingBox.getCenter(new THREE.Vector3());
+
+  // Create a Cannon.js box shape based on the exact size of the bounding box
+  const shape = new CANNON.Box(
+    new CANNON.Vec3(size.x / 2, size.y / 2, size.z / 2)
+  );
+
+  // Create a physics body for the mesh with the exact shape and position
+  const body = new CANNON.Body({
+    mass: options.mass, // Use 0 for static objects like walls
+    shape: shape,
+    position: new CANNON.Vec3(center.x, center.y, center.z),
+  });
+
+  // Add the physics body to the world
+  world.addBody(body);
+
+  // Optional: Add collision detection for the player
+  body.addEventListener("collide", (event) => {
+    if (event.body === player.body) {
+      console.log("Player collided with a wall");
+    }
+  });
+
+  mesh.userData.physicsBody = body;
+
+  // Add a bounding box helper for visualization (with red color)
+  const helper = createBoundingBoxHelper(body, 0xff0000); // Red color for bounding box
+  if (helper) {
+    scene.add(helper);
   }
 }
 
 createMainDungeon();
 createThreePointLighting(scene);
 
-const clock = new THREE.Clock();
+document.body.addEventListener("click", () => {
+  player.controls.lock();
+});
+
+let previousTime = performance.now();
+
+function onMouseDown(event) {
+  if (player.controls.isLocked && player.selectedDoor) {
+    // then guide the window to kruskal.html
+    if (player.selectedDoor.name.includes("kruskal"))
+      window.location.href = "Kruskal.html";
+    if (player.selectedDoor.name.includes("heapsort"))
+      window.location.href = "heapsort.html";
+  }
+}
+
+document.addEventListener("mousedown", onMouseDown);
+
 function animate() {
   requestAnimationFrame(animate);
-  const deltaSeconds = clock.getDelta();
-  mixers.forEach((mixer) => {
-    mixer.update(deltaSeconds);
-  });
-  step(deltaSeconds);
 
-  renderer.render(scene, camera);
+  const currentTime = performance.now();
+  const dt = (currentTime - previousTime) / 1000;
+
+  player.update(dt);
+  player.updateRaycaster(world);
+  world.step(1 / 60, dt); // Update physics world
+
+  renderer.render(scene, player.camera);
+  previousTime = currentTime;
 }
 
 animate();
 
 // Handle window resize
 window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+  player.camera.aspect = window.innerWidth / window.innerHeight;
+  player.camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
-function step(timeElapsed) {
-  const timeElapsedSpeed = timeElapsed * 0.001;
-  fpsCamera.update(timeElapsedSpeed);
-}

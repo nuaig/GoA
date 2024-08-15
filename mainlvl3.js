@@ -16,12 +16,12 @@ import {
   setStars,
   resetStars,
   updateHintIcons,
-} from "./utils/ui.js";
+} from "./utils/UI/ui.js";
 import {
   effectForCorrectSelect,
   shakeForWrongSelect,
   shakeScreen,
-} from "./utils/animations.js";
+} from "./utils/UI/animations.js";
 import {
   drawLine,
   updateLinePosition,
