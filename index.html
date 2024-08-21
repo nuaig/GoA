@@ -18,156 +18,14 @@
     <!-- <a target="_blank" href="https://icons8.com/icon/67410/synchronize">Synchronize</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a> -->
     <div id="Renderer">
       <div id="linkedListGame">
-        <div class="world" id="world"></div>
         <div class="topnav-centered">
           <p id="UI-Text" class="UI-Text">
-            Click on the Edge to Create Minimum Spanning Tree!
+            Brave adventurer! Solve the Algorithmic riddles in each room to
+            gather clues and unlock the gate to the treasure!
           </p>
-          <ul class="UI-Text Hint-Text hidden">
-            <li>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 48 48"
-                width="48px"
-                height="48px"
-              >
-                <path
-                  fill="#F44336"
-                  d="M21.5 4.5H26.501V43.5H21.5z"
-                  transform="rotate(45.001 24 24)"
-                />
-                <path
-                  fill="#F44336"
-                  d="M21.5 4.5H26.5V43.501H21.5z"
-                  transform="rotate(135.008 24 24)"
-                />
-              </svg>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 48 48"
-                width="48px"
-                height="48px"
-              >
-                <path
-                  fill="#43A047"
-                  d="M40.6 12.1L17 35.7 7.4 26.1 4.6 29 17 41.3 43.4 14.9z"
-                />
-              </svg>
-
-              Select an edge with the minimum weight
-            </li>
-            <li>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 48 48"
-                width="48px"
-                height="48px"
-              >
-                <path
-                  fill="#F44336"
-                  d="M21.5 4.5H26.501V43.5H21.5z"
-                  transform="rotate(45.001 24 24)"
-                />
-                <path
-                  fill="#F44336"
-                  d="M21.5 4.5H26.5V43.501H21.5z"
-                  transform="rotate(135.008 24 24)"
-                />
-              </svg>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 48 48"
-                width="48px"
-                height="48px"
-              >
-                <path
-                  fill="#43A047"
-                  d="M40.6 12.1L17 35.7 7.4 26.1 4.6 29 17 41.3 43.4 14.9z"
-                /></svg
-              >Select an edge that doesn't form a cycle
-            </li>
-            <li class="Prim-Hint hidden">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 48 48"
-                width="48px"
-                height="48px"
-              >
-                <path
-                  fill="#F44336"
-                  d="M21.5 4.5H26.501V43.5H21.5z"
-                  transform="rotate(45.001 24 24)"
-                />
-                <path
-                  fill="#F44336"
-                  d="M21.5 4.5H26.5V43.501H21.5z"
-                  transform="rotate(135.008 24 24)"
-                />
-              </svg>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 48 48"
-                width="48px"
-                height="48px"
-              >
-                <path
-                  fill="#43A047"
-                  d="M40.6 12.1L17 35.7 7.4 26.1 4.6 29 17 41.3 43.4 14.9z"
-                /></svg
-              >Select an edge that connects to the tree
-            </li>
-          </ul>
         </div>
         <div class="Action-Icons-Holder">
           <div class="Action-Icons">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              viewBox="0,0,256,256"
-              width="100px"
-              height="100px"
-            >
-              <g
-                class="Rearrange-Action"
-                fill="none"
-                fill-rule="nonzero"
-                stroke="none"
-                stroke-width="1"
-                stroke-linecap="butt"
-                stroke-linejoin="miter"
-                stroke-miterlimit="10"
-                stroke-dasharray=""
-                stroke-dashoffset="0"
-                font-family="none"
-                font-weight="none"
-                font-size="none"
-                text-anchor="none"
-                style="mix-blend-mode: normal"
-              >
-                <g transform="scale(2.56,2.56)">
-                  <path
-                    d="M70,82h-40c-6.627,0 -12,-5.373 -12,-12v-40c0,-6.627 5.373,-12 12,-12h40c6.627,0 12,5.373 12,12v40c0,6.627 -5.373,12 -12,12z"
-                    fill="#78a1d1"
-                  />
-                  <path
-                    d="M67.889,50.5c-0.753,0 -1.399,0.559 -1.481,1.308c-0.9,8.262 -7.9,14.692 -16.402,14.692c-6.004,0 -11.258,-3.206 -14.145,-8v0h3.145c0.828,0 1.5,-0.672 1.5,-1.5c0,-0.828 -0.672,-1.5 -1.5,-1.5h-8.5v8.5c0,0.828 0.672,1.5 1.5,1.5c0.828,0 1.5,-0.672 1.5,-1.5v-3.603c3.454,5.47 9.553,9.103 16.5,9.103c10.037,0 18.303,-7.583 19.381,-17.333c0.098,-0.888 -0.604,-1.667 -1.498,-1.667zM68,34.5c-0.828,0 -1.5,0.672 -1.5,1.5v3.603c-3.454,-5.47 -9.553,-9.103 -16.5,-9.103c-10.037,0 -18.303,7.583 -19.381,17.333c-0.098,0.888 0.604,1.667 1.498,1.667c0.753,0 1.399,-0.559 1.481,-1.308c0.9,-8.262 7.9,-14.692 16.402,-14.692c6.004,0 11.258,3.206 14.145,8v0h-3.145c-0.828,0 -1.5,0.672 -1.5,1.5c0,0.828 0.672,1.5 1.5,1.5h8.5v-8.5c0,-0.828 -0.672,-1.5 -1.5,-1.5z"
-                    fill="#fefdef"
-                  />
-                  <path
-                    d="M70,83h-40c-7.168,0 -13,-5.832 -13,-13v-40c0,-7.168 5.832,-13 13,-13h40c7.168,0 13,5.832 13,13v40c0,7.168 -5.832,13 -13,13zM30,19c-6.065,0 -11,4.935 -11,11v40c0,6.065 4.935,11 11,11h40c6.065,0 11,-4.935 11,-11v-40c0,-6.065 -4.935,-11 -11,-11z"
-                    fill="#1f212b"
-                  />
-                  <path
-                    d="M67.5,78h-35c-5.79,0 -10.5,-4.71 -10.5,-10.5v-35c0,-5.79 4.71,-10.5 10.5,-10.5h34c0.276,0 0.5,0.224 0.5,0.5c0,0.276 -0.224,0.5 -0.5,0.5h-34c-5.238,0 -9.5,4.262 -9.5,9.5v35c0,5.238 4.262,9.5 9.5,9.5h35c5.238,0 9.5,-4.262 9.5,-9.5v-20c0,-0.276 0.224,-0.5 0.5,-0.5c0.276,0 0.5,0.224 0.5,0.5v20c0,5.79 -4.71,10.5 -10.5,10.5z"
-                    fill="#1f212b"
-                  />
-                  <path
-                    d="M77.5,46c-0.276,0 -0.5,-0.224 -0.5,-0.5v-4c0,-0.276 0.224,-0.5 0.5,-0.5c0.276,0 0.5,0.224 0.5,0.5v4c0,0.276 -0.224,0.5 -0.5,0.5zM77.5,40c-0.276,0 -0.5,-0.224 -0.5,-0.5v-2c0,-0.276 0.224,-0.5 0.5,-0.5c0.276,0 0.5,0.224 0.5,0.5v2c0,0.276 -0.224,0.5 -0.5,0.5zM32.117,50c-0.569,0 -1.115,-0.244 -1.496,-0.67c-0.38,-0.424 -0.562,-0.99 -0.499,-1.553c1.121,-10.134 9.666,-17.777 19.878,-17.777c6.36,0 12.229,2.961 16,7.996v-1.996c0,-1.103 0.897,-2 2,-2c1.103,0 2,0.897 2,2v8.5c0,0.276 -0.224,0.5 -0.5,0.5h-8.5c-1.103,0 -2,-0.897 -2,-2c0,-1.103 0.897,-2 2,-2h2.231c-2.987,-4.4 -7.869,-7 -13.231,-7c-8.183,0 -15.021,6.124 -15.905,14.245c-0.109,1 -0.958,1.755 -1.978,1.755zM50,31c-9.701,0 -17.819,7.26 -18.884,16.888c-0.031,0.285 0.057,0.56 0.25,0.775c0.192,0.214 0.465,0.337 0.751,0.337c0.508,0 0.93,-0.371 0.983,-0.862c0.941,-8.63 8.207,-15.138 16.9,-15.138c6.018,0 11.465,3.081 14.573,8.242c0.093,0.154 0.096,0.347 0.007,0.504c-0.089,0.157 -0.255,0.254 -0.435,0.254h-3.145c-0.552,0 -1,0.448 -1,1c0,0.552 0.448,1 1,1h8v-8c0,-0.552 -0.448,-1 -1,-1c-0.552,0 -1,0.448 -1,1v3.604c0,0.223 -0.147,0.418 -0.361,0.48c-0.213,0.06 -0.442,-0.024 -0.562,-0.214c-3.507,-5.554 -9.516,-8.87 -16.077,-8.87zM50.006,70c-6.36,0 -12.229,-2.961 -16,-7.996v1.996c0,1.103 -0.897,2 -2,2c-1.103,0 -2,-0.897 -2,-2v-8.5c0,-0.276 0.224,-0.5 0.5,-0.5h8.5c1.103,0 2,0.897 2,2c0,1.103 -0.897,2 -2,2h-2.231c2.987,4.4 7.869,7 13.231,7c8.183,0 15.021,-6.124 15.905,-14.245c0.11,-1.001 0.96,-1.755 1.979,-1.755c0.569,0 1.114,0.244 1.495,0.67c0.38,0.424 0.562,0.989 0.499,1.553c-1.12,10.134 -9.665,17.777 -19.878,17.777zM33.506,59.896c0.168,0 0.329,0.085 0.423,0.233c3.507,5.555 9.516,8.871 16.077,8.871c9.702,0 17.82,-7.26 18.884,-16.888c0.032,-0.285 -0.057,-0.561 -0.25,-0.775c-0.192,-0.214 -0.465,-0.337 -0.75,-0.337c-0.508,0 -0.931,0.371 -0.984,0.863c-0.941,8.629 -8.207,15.137 -16.9,15.137c-6.018,0 -11.465,-3.081 -14.573,-8.242c-0.093,-0.154 -0.096,-0.347 -0.007,-0.504c0.089,-0.157 0.255,-0.254 0.435,-0.254h3.145c0.552,0 1,-0.448 1,-1c0,-0.552 -0.448,-1 -1,-1h-8v8c0,0.552 0.448,1 1,1c0.552,0 1,-0.448 1,-1v-3.604c0,-0.223 0.147,-0.418 0.361,-0.48c0.046,-0.013 0.093,-0.02 0.139,-0.02z"
-                    fill="#1f212b"
-                  />
-                </g>
-              </g>
-            </svg>
             <svg
               class="Pesudocode-Box-Action"
               xmlns="http://www.w3.org/2000/svg"
@@ -665,111 +523,53 @@
             </svg>
           </div>
         </div>
-        <!-- <img
-          id="helpIcon"
-          class="help-icon"
-          width="100"
-          height="100"
-          src="https://img.icons8.com/plasticine/100/help.png"
-          alt="help"
-          onclick="toggleInstructions()"
-        /> -->
-        <div class="topnav-instructions kruskal-instruction hidden">
-          <pre class="code-block">
-MST-KRUSKAL(G, w):
-1.   A = ∅
-2.   For each vertex v ∈ G.V:
-3.      <span class="function">MAKE-SET</span>(v)
-4.   sort the edges of G.E into non-
-     decreasing order by weight
-5.   <span class="hover wrong__select">For each edge (u, v) ∈ G.E ordered by</span>
-     <span class="hover wrong__select">increasing order by weight(u, v):</span> 
-6.       <span class="wrong__select correct__select">if <span class="function">FIND-SET</span>(u) ≠ <span class="function">FIND-SET</span>(v):</span>
-7.           <span class="correct__select">A = A ∪ {(u, v)}</span>
-8.           <span class="correct__select"><span class="function">UNION</span>(u, v)</span>
-9.   return A
-          </pre>
-        </div>
+        <div class="overlay hidden"></div>
+        <div class="modal hidden">
+          <h2 class="modal__header control__header">Controls</h2>
+          <ul class="controls__holder">
+            <li>
+              <p>W</p>
+              <p>Go forward</p>
+            </li>
+            <li>
+              <p>S</p>
+              <p>Go backward</p>
+            </li>
+            <li>
+              <p>A</p>
+              <p>Go left</p>
+            </li>
+            <li>
+              <p>A</p>
+              <p>Go right</p>
+            </li>
+            <li>
+              <p>Enter</p>
+              <p>Lock mouse to explore the game</p>
+            </li>
+            <li>
+              <p>Escape</p>
+              <p>Remove mouse lock</p>
+            </li>
 
-        <div class="topnav-instructions prim-instruction hidden">
-          <pre class="code-block">
-PRIM-ALGORITHM(graph):
-1.  Empty set <span class="keyword">SN</span> for selectedNodes
-2.  Empty list <span class="keyword">SE</span> for selectedEdges
-3.  totalWeight as 0
-4.   
-5.  Choose any node as <span class="keyword">startNode</span>
-6.  Add <span class="keyword">startNode</span> to <span class="keyword">SN</span>
-7.  <span class="hover wrong__select">while <span class="keyword">SN</span> does not include all nodes:</span>
-8.       <span class="correct__select wrong__select">Find the smallest edge connecting</span>
-9.       <span class="correct__select"><span class="keyword">SN</span> to an unselected node</span>
-10.      <span class="correct__select">    Add this edge to <span class="keyword">SE</span></span>
-11.      <span class="correct__select">    Add the new node to <span class="keyword">SN</span></span>
-12. return SE, totalWeight
-          </pre>
-        </div>
+            <li>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="36px"
+                viewBox="0 -960 960 960"
+                width="36px"
+                fill="#A5D8FF"
+              >
+                <path
+                  d="M468-240q-96-5-162-74t-66-166q0-100 70-170t170-70q97 0 166 66t74 162l-84-25q-13-54-56-88.5T480-640q-66 0-113 47t-47 113q0 57 34.5 100t88.5 56l25 84Zm48 158q-9 2-18 2h-18q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480v18q0 9-2 18l-78-24v-12q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93h12l24 78Zm305 22L650-231 600-80 480-480l400 120-151 50 171 171-79 79Z"
+                />
+              </svg>
+              <p>Click to interact with the game</p>
+            </li>
+          </ul>
 
-        <div class="header">
-          <div class="header-content">
-            <div class="health">
-              <div class="health-label">Lives</div>
-              <div id="health-bar">
-                <svg
-                  class="health-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="red"
-                >
-                  <path
-                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                  />
-                </svg>
-                <svg
-                  class="health-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="red"
-                >
-                  <path
-                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                  />
-                </svg>
-                <svg
-                  class="health-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="red"
-                >
-                  <path
-                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                  />
-                </svg>
-                <svg
-                  class="health-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="red"
-                >
-                  <path
-                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                  />
-                </svg>
-                <svg
-                  class="health-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="red"
-                >
-                  <path
-                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div class="score">
-              <div class="score-label">Score</div>
-              <div class="score-label-2">00</div>
-            </div>
+          <div class="button__holder">
+            <button class="btn btn__close">Close</button>
           </div>
         </div>
       </div>

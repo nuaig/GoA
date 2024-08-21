@@ -3,6 +3,56 @@ import { loadModel } from "./utils/threeModels.js";
 import * as CANNON from "cannon-es";
 import { createThreePointLighting } from "./utils/threePointLighting.js";
 import { Player } from "./utils/lockedFirstPersonCam/player.js";
+
+document.addEventListener("DOMContentLoaded", function () {
+  const focusIcon = document.querySelector(".Pesudocode-Box-Action");
+
+  // Check if the effect has already been shown
+  const effectShown = localStorage.getItem("effectShown");
+
+  if (!effectShown) {
+    // Create and append the overlay
+    const overlay = document.createElement("div");
+    overlay.classList.add("focus-overlay");
+    document.body.appendChild(overlay);
+
+    // Function to remove the pulse effect and overlay
+    function removeFocusEffectAndShowControls() {
+      overlay.remove(); // Remove the overlay
+      focusIcon.style.animation = "none"; // Stop the pulse animation
+      focusIcon.classList.remove("focus-effect"); // Remove the class if it still exists
+      openModal();
+
+      // Store a flag in localStorage to indicate the effect has been shown
+      localStorage.setItem("effectShown", "true");
+    }
+
+    // Remove focus mode after a certain time or on click
+    focusIcon.addEventListener("click", removeFocusEffectAndShowControls);
+  } else {
+    focusIcon.style.animation = "none"; // Stop the pulse animation
+    focusIcon.classList.remove("focus-effect");
+  }
+});
+
+const modal = document.querySelector(".modal");
+const overlay = document.querySelector(".overlay");
+const buttonClose = document.querySelector(".btn__close");
+
+const openModal = function () {
+  modal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+};
+
+const closeModal = function () {
+  modal.classList.add("hidden");
+  overlay.classList.add("hidden");
+};
+
+buttonClose.addEventListener("click", () => {
+  closeModal();
+});
+
 const scene = new THREE.Scene();
 const world = new CANNON.World();
 world.gravity.set(0, 0, 0);
@@ -13,7 +63,6 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const player = new Player(scene, world);
-
 const mainDungeonURL = new URL("./src/main_dungeon.glb", import.meta.url);
 
 async function createMainDungeon() {
@@ -23,12 +72,12 @@ async function createMainDungeon() {
 
     model.traverse((child) => {
       if (child.isMesh) {
-        if (child.name.includes("wall")) {
-          console.log(child.name);
+        if (child.name.includes("wall") || child.name.includes("pillar")) {
           addPhysicsToMesh(child, world, { mass: 0 });
         }
 
-        if (child.name.includes("door")) {
+        if (child.name.includes("wall_doorway_door")) {
+          console.log(child.name);
           world.doors.push(child);
         }
       }
@@ -49,6 +98,7 @@ const floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
 floorMesh.rotation.x = -Math.PI / 2;
 floorMesh.position.y = 0; // Adjust height if necessary
 scene.add(floorMesh);
+floorMesh.visible = false;
 
 const floorShape = new CANNON.Plane();
 const floorBody = new CANNON.Body({
@@ -102,17 +152,6 @@ function createBoundingBoxHelper(body, color = 0xff0000) {
   return mesh;
 }
 
-function addBoundingBoxToMesh(mesh, scene) {
-  // Create a Box3 bounding box that fits the mesh exactly
-  const boundingBox = new THREE.Box3().setFromObject(mesh);
-
-  // Create a Box3Helper to visualize the bounding box with red color
-  const boxHelper = new THREE.Box3Helper(boundingBox, 0xff0000); // Red color
-
-  // Add the box helper to the scene
-  scene.add(boxHelper);
-}
-
 function addPhysicsToMesh(mesh, world, options) {
   // Create a Box3 bounding box that fits the mesh exactly
   const boundingBox = new THREE.Box3().setFromObject(mesh);
@@ -146,23 +185,50 @@ function addPhysicsToMesh(mesh, world, options) {
   mesh.userData.physicsBody = body;
 
   // Add a bounding box helper for visualization (with red color)
-  const helper = createBoundingBoxHelper(body, 0xff0000); // Red color for bounding box
-  if (helper) {
-    scene.add(helper);
-  }
+  // const helper = createBoundingBoxHelper(body, 0xff0000); // Red color for bounding box
+  // if (helper) {
+  //   scene.add(helper);
+  // }
 }
 
 createMainDungeon();
 createThreePointLighting(scene);
 
-document.body.addEventListener("click", () => {
-  player.controls.lock();
+document.body.addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
+    player.controls.lock();
+  }
 });
 
 let previousTime = performance.now();
 
+function storeCameraLookAt(camera) {
+  // Create a direction vector
+  const direction = new THREE.Vector3();
+  camera.getWorldDirection(direction);
+
+  // Calculate the global look-at position
+  const globalLookAt = camera.position
+    .clone()
+    .add(direction.multiplyScalar(10)); // Multiply by a scalar to move the point further away
+
+  // Store the global look-at position
+  localStorage.setItem("player_lookAt", JSON.stringify(globalLookAt));
+}
+
 function onMouseDown(event) {
   if (player.controls.isLocked && player.selectedDoor) {
+    const position = {
+      x: player.position.x,
+      y: player.position.y,
+      z: player.position.z,
+    };
+
+    const lookAt = new THREE.Vector3();
+    player.camera.getWorldDirection(lookAt);
+
+    localStorage.setItem("player_pos", JSON.stringify(position));
+    storeCameraLookAt(player.camera);
     // then guide the window to kruskal.html
     if (player.selectedDoor.name.includes("kruskal"))
       window.location.href = "Kruskal.html";
@@ -194,4 +260,13 @@ window.addEventListener("resize", () => {
   player.camera.aspect = window.innerWidth / window.innerHeight;
   player.camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "F5") {
+    event.preventDefault(); // Prevent the default F5 behavior
+    localStorage.clear(); // Clear localStorage
+
+    window.location.reload(); // Reload the page
+  }
 });

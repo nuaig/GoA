@@ -3,6 +3,11 @@ import { PointerLockControls } from "three/examples/jsm/Addons.js";
 import * as CANNON from "cannon-es";
 
 const CENTER_SCREEN = new THREE.Vector2();
+const uiTextHolder = document.querySelector(".UI-Text");
+const roomEnterText = "Click to enter this room!";
+const generalText =
+  "Brave adventurer! Solve the Algorithmic riddles in each room to gather clues and unlock the gate to the treasure!";
+const lockedDoorText = "This door is locked. Please try another door.";
 
 export class Player {
   camera = new THREE.PerspectiveCamera(
@@ -14,7 +19,7 @@ export class Player {
   cameraHelper = new THREE.CameraHelper(this.camera);
   controls = new PointerLockControls(this.camera, document.body);
 
-  maxSpeed = 20;
+  maxSpeed = 40;
   velocity = new THREE.Vector3();
   input = new THREE.Vector3();
 
@@ -27,10 +32,28 @@ export class Player {
   selectedDoor = null;
 
   constructor(scene, world) {
-    this.position.set(-0.3, 2, 6);
-    this.camera.lookAt(0, 1, 0);
+    // Restore the player's position from localStorage if it exists
+    const storedPosition = localStorage.getItem("player_pos");
+    const storedLookAt = localStorage.getItem("player_lookAt");
+    if (storedPosition) {
+      console.log(storedPosition);
+      const position = JSON.parse(storedPosition);
+      this.position.set(position.x, position.y, position.z);
+    } else {
+      // Default starting position
+      this.position.set(-0.3, 2, 6);
+    }
+
+    if (storedLookAt) {
+      const lookAt = JSON.parse(storedLookAt);
+      this.camera.lookAt(lookAt.x, lookAt.y, lookAt.z);
+    } else {
+      this.camera.lookAt(0, 1, 0); // Default lookAt direction
+      console.log("Camera is looking at default direction.");
+    }
     scene.add(this.camera);
     scene.add(this.cameraHelper);
+
     const playerShape = new CANNON.Sphere(0.5); // Using a sphere for simplicity
     this.body = new CANNON.Body({
       mass: 1, // Dynamic object
@@ -42,6 +65,7 @@ export class Player {
       ),
     });
     world.addBody(this.body);
+
     document.addEventListener("keyup", this.onKeyUp.bind(this));
     document.addEventListener("keydown", this.onKeyDown.bind(this));
   }
@@ -95,11 +119,42 @@ export class Player {
 
     if (intersections.length > 0) {
       const intersectedDoor = intersections[0].object;
-      console.log("Intersected with a door:", intersectedDoor.name);
-      this.selectedDoor = intersectedDoor;
-      // Handle door interaction logic here (e.g., open the door)
+      if (!intersectedDoor.name.includes("ready")) {
+        uiTextHolder.innerHTML = lockedDoorText;
+
+        // Ensure generalText is restored if the player moves away from a locked door
+        this.selectedDoor = intersectedDoor;
+
+        return;
+      }
+      if (intersectedDoor.isMesh) {
+        // Ensure it's a mesh with a rotation property
+        console.log("Intersected with a door:", intersectedDoor.name);
+
+        if (this.selectedDoor !== intersectedDoor) {
+          if (this.selectedDoor && this.selectedDoor.rotation) {
+            this.selectedDoor.rotation.y = 0;
+          }
+
+          this.selectedDoor = intersectedDoor;
+
+          // Slightly open the door by rotating it (you might need to adjust the axis and angle)
+          this.selectedDoor.rotation.y += THREE.MathUtils.degToRad(10); // Rotate by 10 degrees on the Y axis
+          uiTextHolder.innerHTML = roomEnterText;
+        }
+      }
     } else {
-      this.selectedDoor = null;
+      if (this.selectedDoor) {
+        if (this.selectedDoor.rotation) {
+          // Reset the selected door's rotation when no door is intersected
+          this.selectedDoor.rotation.y = 0;
+        }
+
+        this.selectedDoor = null;
+
+        // Reset the UI text to generalText if the door was previously locked or interacted with
+        uiTextHolder.innerHTML = generalText;
+      }
     }
   }
 
