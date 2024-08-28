@@ -36,10 +36,13 @@ import {
   shakeForWrongSelect,
   shakeScreen,
 } from "./utils/UI/animations.js";
+
+import { loadModel } from "./utils/threeModels.js";
+import gsap from "gsap";
 //create an export function with your scene name that takes a scene object and renderer as a constructor
 
 //basic scene management
-
+let mixers;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -47,20 +50,47 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
+
+const dungeonRoomURL = new URL(
+  "./src/dungeonroom_heapsort.glb",
+  import.meta.url
+);
+
+async function createDungeonRoom() {
+  const position = new THREE.Vector3(0, -4, 36);
+  try {
+    const { model, mixer, action } = await loadModel(
+      dungeonRoomURL.href,
+      position,
+      scene,
+      mixers
+    );
+
+    model.scale.set(1.75, 1.75, 1.75);
+  } catch (error) {
+    console.error("Error loading dungeon room:", error);
+  }
+}
+
+createDungeonRoom();
 const renderer = new THREE.WebGLRenderer();
 renderer.setClearColor(0xa3a3a3);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
-scene.background = new THREE.Color(0x87ceeb); // Sky blue
+scene.background = new THREE.Color(0x000); // Sky blue
 createThreePointLighting(scene);
 
 const instancedObjects = new THREE.Group();
 scene.add(instancedObjects);
 
-//change the starting camera position here
-camera.position.set(0, 2, 10);
-camera.lookAt(new THREE.Vector3(0, 2, 0)); // Updated the camera's lookAt position
+const startPosition = { x: 0, y: 2, z: 80 };
+const endPosition = { x: 0, y: 2, z: 10 };
+
+// Set the camera to the start position
+camera.position.set(startPosition.x, startPosition.y, startPosition.z);
+
+// Animate the camera position with GSAP
 
 const uiInstructions = document.getElementById("UI-Text");
 const scoreText = document.querySelector(".score-label-2");
@@ -78,6 +108,17 @@ const buttonAgain = document.querySelector(".btn__again");
 buttonStart.addEventListener("click", () => {
   overlay.classList.add("hidden");
   instructionModal.classList.add("hidden");
+  gsap.to(camera.position, {
+    x: endPosition.x,
+    y: endPosition.y,
+    z: endPosition.z,
+    duration: 4, // Duration of the animation in seconds
+    ease: "power2.inOut", // Easing function for smooth movement
+    onUpdate: () => {
+      // Ensure the camera keeps looking at the target point
+      camera.lookAt(new THREE.Vector3(0, 2, 0));
+    },
+  });
 });
 
 pseudoBoxButton.addEventListener("click", () => {
@@ -103,11 +144,11 @@ function openCompleteModal(currentScore, health, finalScoreHolder) {
   return currentScore;
 }
 
-const picture = new THREE.Object3D();
-loadStaticObject("./src/painting.glb", picture, scene);
-picture.rotation.y = Math.PI / 2;
-picture.position.set(0, 2, -0.5);
-picture.scale.set(1, 3, 4);
+// const picture = new THREE.Object3D();
+// loadStaticObject("./src/painting.glb", picture, scene);
+// picture.rotation.y = Math.PI / 2;
+// picture.position.set(0, 2, -0.5);
+// picture.scale.set(1, 3, 4);
 
 var cameraOrbit = new OrbitControls(camera, renderer.domElement);
 cameraOrbit.target.set(0, 2, 0); // Set the OrbitControls target
@@ -228,9 +269,9 @@ async function generateArray() {
 
 async function addArrayAndTreeNodeElement(value, index, positionIndex) {
   console.log(`Creating elements for value: ${value}, index: ${index}`);
-  const width = 0.6;
+  const width = 0.65;
   const height = 0.5;
-  const depth = 0.3;
+  const depth = 0.12;
   // const color = 0xd55920; // Color for stationary mesh
   const color = "#15aabf"; // Color for stationary mesh
 
@@ -242,12 +283,14 @@ async function addArrayAndTreeNodeElement(value, index, positionIndex) {
   stationaryMesh.position.set(positionIndex * (width + 0.15), 5, 0.1);
 
   // Create text mesh for the value and position
-  const valueTextMesh = await createTextMesh(value.toString(), 0.2, "#ffffff");
+  const valueTextMesh = await createTextMesh(value.toString(), 0.18, "#ffffff");
+  valueTextMesh.geometry.center();
   valueTextMesh.position.set(positionIndex * (width + 0.15), 5, 0.3);
   valueTextMesh.userData.index = index;
 
   // Create text mesh for the index and position idx above the cube
   const indexTextMesh = await createTextMesh(`[${index}]`, 0.12, "#ffff00");
+  indexTextMesh.geometry.center();
   indexTextMesh.position.set(positionIndex * (width + 0.15), 5.5, 0.1);
   indexTextMesh.userData.index = index;
 
@@ -264,9 +307,10 @@ async function addArrayAndTreeNodeElement(value, index, positionIndex) {
   // Create draggable text for the tree node
   const treeNodeTextMesh = await createTextMesh(
     value.toString(),
-    0.2,
+    0.18,
     "#060e37"
   );
+  treeNodeTextMesh.geometry.center();
   treeNodeTextMesh.position.set(positionIndex * (width + 0.15), 5, 0.3);
   treeNodeTextMesh.userData.index = index;
   instancedObjects.add(treeNodeTextMesh);
@@ -929,10 +973,10 @@ function resetScene() {
 }
 
 function render() {
-  updateLabelRotations(indexTexts, camera);
-  updateLabelRotations(valueTexts, camera);
-  updateLabelRotations(treeNodeTexts, camera);
-  updateLabelRotations(DebossedAreaTexts, camera);
+  // updateLabelRotations(indexTexts, camera);
+  // updateLabelRotations(valueTexts, camera);
+  // updateLabelRotations(treeNodeTexts, camera);
+  // updateLabelRotations(DebossedAreaTexts, camera);
   renderer.render(scene, camera);
   requestAnimationFrame(render);
 }
@@ -955,3 +999,9 @@ buttonNext.addEventListener("click", () => {
   curlvlNodesNum = levels[currentLevel];
   generateArray();
 });
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}

@@ -8,6 +8,7 @@ import { createThreePointLighting } from "./utils/threePointLighting.js";
 import { KruskalAlgorithm } from "./utils/graphRelated/kruskal.js";
 import { PrimAlgorithm } from "./utils/graphRelated/prims.js";
 import { loadModel } from "./utils/threeModels.js";
+import gsap from "gsap";
 import {
   toggleInstructions,
   closePseudocode,
@@ -194,15 +195,48 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 const renderer = new THREE.WebGLRenderer();
-renderer.setClearColor(0xa3a3a3);
+renderer.setClearColor(0x000);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
-
-camera.position.set(0, 26, 26); // Set the camera position
-
+const startPosition = { x: 0, y: 5, z: 35 };
+const midPosition = { x: 0, y: 5, z: 26 };
+const endPosition = { x: 0, y: 26, z: 26 };
+// camera.position.set(0, 26, 26); // Set the camera position
+camera.position.set(startPosition.x, startPosition.y, startPosition.z);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 4);
+
+buttonStart.addEventListener("click", () => {
+  overlay.classList.add("hidden");
+  instructionModal.classList.add("hidden");
+
+  const timeline = gsap.timeline();
+
+  // First animation to move to the midPosition
+  timeline.to(camera.position, {
+    x: midPosition.x,
+    y: midPosition.y,
+    z: midPosition.z,
+    duration: 2, // Duration of the first animation
+    ease: "power2.inOut",
+    onUpdate: () => {
+      camera.lookAt(new THREE.Vector3(0, 0, 4)); // Keep looking at the target
+    },
+  });
+
+  // Second animation to move to the endPosition
+  timeline.to(camera.position, {
+    x: endPosition.x,
+    y: endPosition.y,
+    z: endPosition.z,
+    duration: 2, // Duration of the second animation
+    ease: "power2.inOut",
+    onUpdate: () => {
+      camera.lookAt(new THREE.Vector3(0, 0, 4)); // Keep looking at the target
+    },
+  });
+});
 
 const closedChestURL = new URL("./src/Prop_Chest_CLosed.gltf", import.meta.url);
 const openChestURL = new URL("./src/Prop_Chest_Gold.gltf", import.meta.url);
@@ -631,6 +665,7 @@ function animate() {
     mixer.update(deltaSeconds);
   });
   controls.update();
+
   updateLabelRotation(); // Update label rotation on each frame
   renderer.render(scene, camera);
 }

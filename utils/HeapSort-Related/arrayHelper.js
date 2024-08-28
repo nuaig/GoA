@@ -32,7 +32,7 @@ export async function createTextMesh(text, size, color, index) {
   const geometry = new TextGeometry(text, {
     font: font,
     size: size * 1.5,
-    depth: 0.1,
+    depth: 0,
     curveSegments: 12,
     bevelEnabled: false,
   });
@@ -53,7 +53,7 @@ export async function createTextMesh1(text, size, color, index) {
   const textGeometry = new TextGeometry(text, {
     font: font,
     size: size * 1.5,
-    depth: 0.05,
+    depth: 0,
   });
 
   // Center the geometry

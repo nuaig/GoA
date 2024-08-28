@@ -10,7 +10,7 @@ export async function createDebossedAreas(
   const depthOffset = 0.1;
   const cubeSize = { width: 0.6, height: 0.5, depth: 0.1 };
   const wallSize = { width: 10, height: 9 };
-  const startPosition = { x: 0, y: wallSize.height / 2 - 1.5, z: 0.1 };
+  const startPosition = { x: 0, y: wallSize.height / 2 - 1, z: 0.1 };
 
   for (let i = 0; i < currentLevelNodes; i++) {
     const cube = await createCube(cubeSize, 0x04aa6d); // Await the promise

@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
       overlay.remove(); // Remove the overlay
       focusIcon.style.animation = "none"; // Stop the pulse animation
       focusIcon.classList.remove("focus-effect"); // Remove the class if it still exists
-      openModal();
+      openModal(controlsModal);
 
       // Store a flag in localStorage to indicate the effect has been shown
       localStorage.setItem("effectShown", "true");
@@ -35,22 +35,39 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-const modal = document.querySelector(".modal");
+const controlsModal = document.querySelector(".modal__control");
 const overlay = document.querySelector(".overlay");
-const buttonClose = document.querySelector(".btn__close");
+const controlsCloseButton = document.querySelector(
+  ".modal__control .btn__close"
+);
+const settingsCloseButton = document.querySelector(
+  ".modal__settings .btn__close"
+);
 
-const openModal = function () {
-  modal.classList.remove("hidden");
+const settingsModal = document.querySelector(".modal__settings");
+const settingsTogglerEle = document.querySelector(".settings__icon");
+
+const openModal = function (modalType) {
+  modalType.classList.remove("hidden");
   overlay.classList.remove("hidden");
 };
 
-const closeModal = function () {
-  modal.classList.add("hidden");
+const closeModal = function (modalType) {
+  modalType.classList.add("hidden");
   overlay.classList.add("hidden");
 };
 
-buttonClose.addEventListener("click", () => {
-  closeModal();
+controlsCloseButton.addEventListener("click", () => {
+  closeModal(controlsModal);
+});
+
+settingsCloseButton.addEventListener("click", () => {
+  closeModal(settingsModal);
+});
+
+// Event listener for opening the settings modal
+settingsTogglerEle.addEventListener("click", () => {
+  openModal(settingsModal);
 });
 
 const scene = new THREE.Scene();

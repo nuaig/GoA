@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "cannon-es": "^0.20.0",
+    "gsap": "^3.12.5",
     "three": "^0.164.1",
     "three.meshline": "^1.4.0"
   }
