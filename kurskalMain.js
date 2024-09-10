@@ -41,7 +41,7 @@ const uiText = document.getElementById("UI-Text");
 const scoreText = document.querySelector(".score-label-2");
 const finalScoreText = document.querySelector(".label__final_score span");
 const stars = document.querySelectorAll(".star path:last-child");
-const modal = document.querySelector(".modal");
+
 const instructionModal = document.querySelector(".instruction");
 const overlay = document.querySelector(".overlay");
 const hoverEffects = document.querySelectorAll(".hover");
@@ -49,14 +49,290 @@ const hoverEffects = document.querySelectorAll(".hover");
 const pseudoBoxButton = document.querySelector(".Pesudocode-Box-Action");
 const reArrangeButton = document.querySelector(".Rearrange-Action");
 
+const buttonNextLevel = document.querySelector(".btn__next");
+const modalCompletion = document.querySelector(".modal__completion");
+
 const buttonAgain = document.querySelector(".btn__again");
-const buttonNext = document.querySelector(".btn__next");
 const buttonStart = document.querySelector(".btn__instruction__start");
 
-buttonStart.addEventListener("click", () => {
-  console.log("clicked");
+const settingsModal = document.querySelector(".modal__settings");
+const settingsTogglerEle = document.querySelector(".settings__icon");
+const btnSettingsRestart = document.querySelector(".btn__setting__restart");
+const btnSettingsDiffLvl = document.querySelector(".btn__setting__diffLvl");
+const btnSettingsGoMainDungeon = document.querySelector(
+  ".btn__setting__mainDungeon"
+);
+const restartHandler = document.querySelector(".btn__setting__restart");
+const settingsCloseButton = document.querySelector(
+  ".modal__settings .btn__close"
+);
+
+const levelsModal = document.querySelector(".modal__level__selection");
+
+// Select all level buttons
+const levelButtons = document.querySelectorAll(".level__btn__holder");
+const btnLevelClose = document.querySelector(".btn__level__close");
+
+let currentScore = 0;
+let currentLevel = 1;
+let curNodes;
+let curEdges;
+let graph;
+
+const levelConfig = {
+  1: { nodes: 6, edges: 9 },
+  2: { nodes: 3, edges: 3 },
+  3: { nodes: 3, edges: 3 },
+
+  4: { nodes: 6, edges: 8 },
+  5: { nodes: 8, edges: 12 },
+  6: { nodes: 9, edges: 15 },
+};
+
+const usedColors = new Set();
+const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
+curNodes = Array.from({ length: numNodes }, (_, i) => i);
+curEdges = numEdges;
+
+graph = createRandomConnectedGraph(curNodes, curEdges);
+
+let componentColors = {};
+
+let curAlgorithmForGraph = new KruskalAlgorithm(graph);
+let currentAlgorithm = "kruskal";
+
+let startingNodeLabelForPrim;
+let startingNodeRingForPrim;
+
+let health = 4;
+
+let onMouseMove;
+let onClick;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+const renderer = new THREE.WebGLRenderer();
+renderer.setClearColor(0x000);
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+document.body.appendChild(renderer.domElement);
+
+const closedChestURL = new URL("./src/Prop_Chest_CLosed.gltf", import.meta.url);
+const openChestURL = new URL("./src/Prop_Chest_Gold.gltf", import.meta.url);
+const dungeonRoomURL = new URL("./src/DungeonRoom.glb", import.meta.url);
+
+let chestList = [];
+let openChestList = [];
+let chestLabelList = [];
+let edgeList = [];
+let edgeLabelList = [];
+let ringList = [];
+let sphereInter;
+const mixers = [];
+const cubeSize = 1;
+const minDistance = cubeSize * 10;
+const gridSize = 40;
+let labels = [];
+let dungeonRoomMixer;
+let dungeonRoomAction;
+
+settingsTogglerEle.addEventListener("click", () => {
+  settingsModal.classList.toggle("hidden");
+  overlay.classList.toggle("hidden");
+});
+
+settingsCloseButton.addEventListener("click", () => {
+  settingsModal.classList.toggle("hidden");
+  overlay.classList.toggle("hidden");
+});
+
+function closeLevelModal() {
+  levelsModal.classList.add("hidden");
   overlay.classList.add("hidden");
+}
+
+function openLevelModal() {
+  levelsModal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+}
+
+function closeSettingModal() {
+  settingsModal.classList.add("hidden");
+  overlay.classList.add("hidden");
+}
+
+function openSettingModal() {
+  settingsModal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+}
+
+const startPosition = { x: 0, y: 5, z: 35 };
+const midPosition = { x: 0, y: 5, z: 26 };
+const endPosition = { x: 0, y: 26, z: 26 };
+// camera.position.set(0, 26, 26); // Set the camera position
+camera.position.set(startPosition.x, startPosition.y, startPosition.z);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 4);
+
+function initailCameraAnimationGSAP() {
+  const timeline = gsap.timeline();
+
+  // First animation to move to the midPosition
+  timeline.to(camera.position, {
+    x: midPosition.x,
+    y: midPosition.y,
+    z: midPosition.z,
+    duration: 2, // Duration of the first animation
+    ease: "power2.inOut",
+    onUpdate: () => {
+      camera.lookAt(new THREE.Vector3(0, 0, 4)); // Keep looking at the target
+    },
+  });
+
+  // Second animation to move to the endPosition
+  timeline.to(camera.position, {
+    x: endPosition.x,
+    y: endPosition.y,
+    z: endPosition.z,
+    duration: 2, // Duration of the second animation
+    ease: "power2.inOut",
+    onUpdate: () => {
+      camera.lookAt(new THREE.Vector3(0, 0, 4)); // Keep looking at the target
+    },
+  });
+}
+
+// function initializeLevelStatus() {
+//   let highestCompletedLevel = 0; // Track the highest completed level
+
+//   // Loop through each level and check if there is stored data
+//   for (let level = 1; level <= Object.keys(levelConfig).length; level++) {
+//     const storedData = localStorage.getItem(`kruskal_level_${level}`);
+//     if (storedData) {
+//       const { score, stars } = JSON.parse(storedData);
+//       updateLevelStatus(level, stars); // Update the stars display
+
+//       // Update the highest completed level
+//       highestCompletedLevel = level;
+//     }
+//   }
+
+//   // Unlock the next level if any level was completed
+//   if (highestCompletedLevel > 0) {
+//     const nextLevel = highestCompletedLevel + 1;
+//     const nextLevelButton = document.querySelector(`.btn__level__${nextLevel}`);
+//     if (nextLevelButton) {
+//       nextLevelButton.classList.remove("level__locked");
+//       const lockIcon = nextLevelButton.querySelector(".feather-lock");
+//       if (lockIcon) {
+//         lockIcon.style.display = "none"; // Hide the lock icon
+//       }
+//     }
+//   }
+// }
+
+// Call this function on page load
+// window.addEventListener("load", () => {
+//   initializeLevelStatus();
+// });
+
+btnSettingsDiffLvl.addEventListener("click", (e) => {
+  e.preventDefault();
+  closeSettingModal();
+  btnLevelClose.classList.remove("hidden");
+  openLevelModal();
+});
+
+btnLevelClose.addEventListener("click", (e) => {
+  e.preventDefault();
+  closeLevelModal();
+});
+// Add event listeners to each button
+// levelButtons.forEach((button, index) => {
+//   button.addEventListener("click", () => {
+//     if (button.classList.contains("level__locked")) {
+//       console.log(`Level ${index + 1} is locked.`);
+//       return;
+//     }
+
+//     closeLevelModal();
+
+//     const chosenLevel = index + 1; // Set the current level to the selected level
+//     console.log(`Level ${chosenLevel} selected.`); // Corrected the log message
+//     if (chosenLevel != currentLevel) {
+//       currentLevel = chosenLevel;
+//       resetLevel(chosenLevel); // Ensure this fully resets the scene
+//     }
+
+//     initailCameraAnimationGSAP();
+//   });
+// });
+
+function updateLevelStatus(level, starsCount) {
+  const currentLevelButton = document.querySelector(`.btn__level__${level}`);
+  const currentStarsHolder = currentLevelButton.querySelector(
+    ".level__stars__holder"
+  );
+
+  // Update stars based on the zero-based starsCount
+  const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
+  for (let i = 0; i < stars.length; i++) {
+    if (i <= starsCount) {
+      stars[i].classList.add("filled");
+      stars[i].style.fill = "#a5d8ff"; // Gold color for filled stars
+    } else {
+      stars[i].classList.remove("filled");
+      stars[i].style.fill = "none"; // Default color for unfilled stars
+    }
+  }
+
+  // Unlock the next level
+  const nextLevel = level + 1;
+  const nextLevelButton = document.querySelector(`.btn__level__${nextLevel}`);
+  if (nextLevelButton) {
+    nextLevelButton.classList.remove("level__locked");
+    const lockIcon = nextLevelButton.querySelector(".feather-lock");
+    if (lockIcon) {
+      lockIcon.style.display = "none"; // Hide the lock icon
+    }
+  }
+}
+
+levelButtons.forEach((button, index) => {
+  button.addEventListener("click", () => {
+    if (button.classList.contains("level__locked")) {
+      console.log(`Level ${index + 1} is locked.`);
+      return;
+    }
+
+    closeLevelModal();
+
+    const chosenLevel = index + 1; // Set the current level to the selected level
+    console.log(`Level ${chosenLevel} selected.`);
+    if (chosenLevel != currentLevel) {
+      currentLevel = chosenLevel;
+      window.removeEventListener("mousemove", onMouseMove, false);
+      window.removeEventListener("click", onClick, false);
+      resetLevel(currentLevel); // This will now reset the scene fully
+    }
+
+    initailCameraAnimationGSAP();
+  });
+});
+
+btnSettingsGoMainDungeon.addEventListener("click", () => {
+  window.location.href = "index.html";
+});
+
+buttonStart.addEventListener("click", () => {
+  // overlay.classList.add("hidden");
   instructionModal.classList.add("hidden");
+  levelsModal.classList.remove("hidden");
 });
 
 function showPrimInstructions() {
@@ -124,36 +400,6 @@ reArrangeButton.addEventListener("click", () => {
   });
 });
 
-let currentScore = 0;
-let currentLevel = 1;
-let curNodes;
-let curEdges;
-let graph;
-
-const levelConfig = {
-  1: { nodes: 6, edges: 9 },
-  2: { nodes: 3, edges: 3 },
-  3: { nodes: 3, edges: 3 },
-
-  4: { nodes: 6, edges: 8 },
-  5: { nodes: 8, edges: 12 },
-  6: { nodes: 9, edges: 15 },
-};
-
-const usedColors = new Set();
-const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
-curNodes = Array.from({ length: numNodes }, (_, i) => i);
-curEdges = numEdges;
-
-graph = createRandomConnectedGraph(curNodes, curEdges);
-
-let componentColors = {};
-
-let curAlgorithmForGraph = new KruskalAlgorithm(graph);
-let currentAlgorithm = "kruskal";
-
-let startingNodeLabelForPrim;
-let startingNodeRingForPrim;
 function primSetup() {
   // const randomIndex = Math.floor(Math.random() * chestList.length);
   const randomIndex = 0;
@@ -185,85 +431,13 @@ pseudoBoxButton.addEventListener("click", () => {
   toggleInstructions(currentAlgorithm);
 });
 
-let health = 4;
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-const renderer = new THREE.WebGLRenderer();
-renderer.setClearColor(0x000);
-renderer.setSize(window.innerWidth, window.innerHeight);
-
-document.body.appendChild(renderer.domElement);
-const startPosition = { x: 0, y: 5, z: 35 };
-const midPosition = { x: 0, y: 5, z: 26 };
-const endPosition = { x: 0, y: 26, z: 26 };
-// camera.position.set(0, 26, 26); // Set the camera position
-camera.position.set(startPosition.x, startPosition.y, startPosition.z);
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 0, 4);
-
-buttonStart.addEventListener("click", () => {
-  overlay.classList.add("hidden");
-  instructionModal.classList.add("hidden");
-
-  const timeline = gsap.timeline();
-
-  // First animation to move to the midPosition
-  timeline.to(camera.position, {
-    x: midPosition.x,
-    y: midPosition.y,
-    z: midPosition.z,
-    duration: 2, // Duration of the first animation
-    ease: "power2.inOut",
-    onUpdate: () => {
-      camera.lookAt(new THREE.Vector3(0, 0, 4)); // Keep looking at the target
-    },
-  });
-
-  // Second animation to move to the endPosition
-  timeline.to(camera.position, {
-    x: endPosition.x,
-    y: endPosition.y,
-    z: endPosition.z,
-    duration: 2, // Duration of the second animation
-    ease: "power2.inOut",
-    onUpdate: () => {
-      camera.lookAt(new THREE.Vector3(0, 0, 4)); // Keep looking at the target
-    },
-  });
-});
-
-const closedChestURL = new URL("./src/Prop_Chest_CLosed.gltf", import.meta.url);
-const openChestURL = new URL("./src/Prop_Chest_Gold.gltf", import.meta.url);
-const dungeonRoomURL = new URL("./src/DungeonRoom.glb", import.meta.url);
-
-let chestList = [];
-let openChestList = [];
-let chestLabelList = [];
-let edgeList = [];
-let edgeLabelList = [];
-let ringList = [];
-let sphereInter;
-const mixers = [];
-const cubeSize = 1;
-const minDistance = cubeSize * 10;
-const gridSize = 40;
-const labels = [];
-let dungeonRoomMixer;
-let dungeonRoomAction;
-
 const openModal = function () {
-  modal.classList.remove("hidden");
+  modalCompletion.classList.remove("hidden");
   overlay.classList.remove("hidden");
 };
 
 const closeModal = function () {
-  modal.classList.add("hidden");
+  modalCompletion.classList.add("hidden");
   overlay.classList.add("hidden");
 };
 
@@ -467,12 +641,17 @@ function handleEdgeSelection(
       currentScore = Math.floor(currentScore * ((health + 1) * 0.1 + 1));
       uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
       finalScoreText.innerHTML = `${currentScore}`;
-      setStars(health);
-      if (dungeonRoomMixer && dungeonRoomAction) {
-        console.log("Completed, animation should begin");
-        dungeonRoomAction.reset().play();
-        console.log(dungeonRoomAction);
-      }
+      const totalStars = setStars(health);
+      console.log(totalStars);
+
+      // Store the score and stars in localStorage with "kruskal" included
+      const levelData = { score: currentScore, stars: totalStars };
+      localStorage.setItem(
+        `kruskal_level_${currentLevel}`,
+        JSON.stringify(levelData)
+      );
+
+      updateLevelStatus(currentLevel, totalStars);
       openModal();
       window.removeEventListener("mousemove", onMouseMove, false);
       window.removeEventListener("click", onClick, false);
@@ -501,26 +680,7 @@ function handleEdgeSelection(
     }
     uiText.innerText =
       "Incorrect Selection. Make sure to meet the following conditions:";
-    // if (selectEdgeResult === -1) {
-    //   if (currentAlgorithm === "kruskal") {
-    //     uiText.innerText =
-    //       "Incorrect Selection. The selected edge forms a cycle and a tree cannot have any cycle. To create a minimum spanning tree using Kruskal's, please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
-    //   } else {
-    //     uiText.innerText =
-    //       "Incorrect Selection. The selected edge forms a cycle and a tree cannot have any cycle. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
-    //   }
-    // } else if (selectEdgeResult === -2) {
-    //   if (currentAlgorithm === "kruskal") {
-    //     uiText.innerText =
-    //       "Incorrect Selection. Although the selected edge doesn't form a cycle, it is not the edge with the minimum weight among remaining edges. To create a minimum spanning tree using Kruskal's, please select the edge with the minimum weight that doesn't form a cycle among remaining edges.";
-    //   } else {
-    //     uiText.innerText =
-    //       "Incorrect Selection. Although the selected edge connects to the tree and doesn't form a cycle, it is not the edge with the minimum weight. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
-    //   }
-    // } else {
-    //   uiText.innerText =
-    //     "Incorrect Selection. The selected edge doesn't connect to the current tree. To create a minimum spanning tree using Prim's, please select the edge with the minimum weight connected to the tree that won't form a cycle.";
-    // }
+
     setTimeout(() => {
       intersectedObject.material.color.set(0x74c0fc);
       if (intersectedObject.userData.label) {
@@ -548,7 +708,6 @@ function drawLines() {
     edgeList.push(line);
     edgeLabelList.push(line.userData.label);
   });
-  console.log(edgeList[0].userData.startCube);
 
   const raycaster = new THREE.Raycaster();
   raycaster.params.Line.threshold = 0.5;
@@ -561,7 +720,8 @@ function drawLines() {
   sphereInter.visible = false;
   scene.add(sphereInter);
 
-  function onMouseMove(event) {
+  // Assign the function to the global variable
+  onMouseMove = function (event) {
     event.preventDefault();
     if (curAlgorithmForGraph.isComplete()) {
       sphereInter.visible = false;
@@ -615,9 +775,10 @@ function drawLines() {
       }
       selectedLine = null;
     }
-  }
+  };
 
-  function onClick(event) {
+  // Assign the function to the global variable
+  onClick = function (event) {
     event.preventDefault();
 
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -642,8 +803,9 @@ function drawLines() {
         );
       }
     }
-  }
+  };
 
+  // Add event listeners
   window.addEventListener("mousemove", onMouseMove, false);
   window.addEventListener("click", onClick, false);
 }
@@ -706,7 +868,7 @@ async function createDungeonRoom() {
       dungeonRoomAction.clampWhenFinished = true;
       dungeonRoomAction.paused = false;
     } else {
-      console.error("Mixer or action is undefined.");
+      console.log("Mixer or action is undefined.");
     }
     model.scale.set(1.5, 1.5, 1.5);
   } catch (error) {
@@ -732,6 +894,15 @@ function resetScene() {
   ringList.length = 0;
   labels.length = 0;
   mixers.length = 0;
+
+  chestList = [];
+  openChestList = [];
+  chestLabelList = [];
+  edgeList = [];
+  edgeLabelList = [];
+  ringList = [];
+  sphereInter;
+  labels = [];
 
   usedColors.clear();
   componentColors = {};
@@ -774,7 +945,15 @@ function createHoverElements() {
   scene.add(hoverRing);
 }
 
-function advanceNextLevel() {
+function setUpGameModel(currentLevel) {
+  console.log(levelConfig);
+  console.log(currentLevel);
+  if (!levelConfig[currentLevel]) {
+    console.error(
+      `Invalid level: ${currentLevel}. Level does not exist in levelConfig.`
+    );
+    return; // Exit the function if the level is invalid
+  }
   const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
   curNodes = Array.from({ length: numNodes }, (_, i) => i);
   curEdges = numEdges;
@@ -796,14 +975,25 @@ function advanceNextLevel() {
   createHoverElements();
 }
 
-buttonNext.addEventListener("click", () => {
+function resetLevel(curlvl) {
+  uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
+  health = resetHealth();
+
+  closeModal();
+  closePseudocode();
+  resetScene();
+  setUpGameModel(curlvl);
+  updateNodeLabel(levelTitle, `Level ${curlvl}`, 0.9, 0.3, 0x212529);
+}
+
+buttonNextLevel.addEventListener("click", () => {
   uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
   health = resetHealth();
   currentLevel++;
   closeModal();
   closePseudocode();
   resetScene();
-  advanceNextLevel();
+  setUpGameModel(currentLevel);
   if (currentAlgorithm === "prim") {
     updateNodeLabel(chapterTitle, "Prim's Algorithm", 1, 0.3, 0x212529);
     chapterTitle.position.set(9.5, 6.5, -30);
@@ -822,11 +1012,14 @@ buttonNext.addEventListener("click", () => {
 });
 
 buttonAgain.addEventListener("click", () => {
-  uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
-  health = resetHealth();
+  resetLevel(currentLevel);
+});
 
-  closeModal();
-  resetScene();
-  advanceNextLevel();
-  updateNodeLabel(levelTitle, `Level ${currentLevel}`, 0.9, 0.3, 0x212529);
+btnSettingsRestart.addEventListener("click", () => {
+  closeSettingModal();
+  resetLevel(currentLevel);
+});
+
+restartHandler.addEventListener("click", () => {
+  resetLevel(currentLevel);
 });

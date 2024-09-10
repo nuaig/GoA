@@ -46,6 +46,7 @@ const settingsCloseButton = document.querySelector(
 
 const settingsModal = document.querySelector(".modal__settings");
 const settingsTogglerEle = document.querySelector(".settings__icon");
+const restartHandler = document.querySelector(".btn__restart");
 
 const openModal = function (modalType) {
   modalType.classList.remove("hidden");
@@ -286,4 +287,11 @@ window.addEventListener("keydown", (event) => {
 
     window.location.reload(); // Reload the page
   }
+});
+
+restartHandler.addEventListener("click", (event) => {
+  event.preventDefault(); // Prevent the default F5 behavior
+  localStorage.clear(); // Clear localStorage
+
+  window.location.reload(); // Reload the page
 });

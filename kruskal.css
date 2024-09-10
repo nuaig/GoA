@@ -323,6 +323,9 @@ body {
 .level__stars__holder {
   text-align: left;
 }
+.filled {
+  fill: #a5d8ff; /* Gold color for filled stars */
+}
 
 .btn p {
   font-size: 20px;
@@ -337,7 +340,7 @@ body {
   background-color: #495057;
 }
 
-.btn.level__locked {
+.btn.level__btn__holder.level__locked {
   cursor: not-allowed; /* Shows the 'not-allowed' cursor */
   background-color: #495057; /* Muted background color for disabled state */
   color: #a5d8ff; /* Text color for readability */
@@ -346,14 +349,17 @@ body {
   opacity: 0.6; /* Make it look visually disabled */
 }
 
-/* Additional styles to remove hover effects */
-.btn.level__locked:hover,
-.btn.level__locked:active,
-.btn.level__locked:focus {
+.btn.level__btn__holder.level__locked:hover,
+.btn.level__btn__holder.level__locked:active,
+.btn.level__btn__holder.level__locked:focus {
   background-color: #495057; /* Keep the same muted background color */
   color: #a5d8ff; /* Maintain the text color */
   box-shadow: none; /* Ensure no shadow is applied */
   transform: none; /* Remove any transform effects */
+}
+
+.btn.level__btn__holder:hover {
+  background-color: #212529;
 }
 
 .btn {
@@ -426,7 +432,6 @@ body {
   border-radius: 10px;
 }
 button {
-  background-color: #04aa6d;
   border: none;
   color: white;
   padding: 15px 32px;
@@ -439,12 +444,10 @@ button {
 }
 
 button:hover {
-  background-color: #55b893; /* Green */
   color: white;
 }
 
 button:active {
-  background-color: #1a896a;
   box-shadow: 5px 5px #666;
   transform: translateY(4px);
 }
@@ -570,26 +573,6 @@ button:active {
   100% {
     transform: translateX(0);
   }
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-  }
-}
-
-/* To prevent the overlay from covering the pulsing icon */
-.Pesudocode-Box-Action {
-  position: relative;
-  z-index: 1000; /* Make sure the icon is above the overlay */
-  border-radius: 10px; /* Same border-radius as before */
-  animation: pulse 1.5s infinite;
 }
 
 /* Optional: Add transition to overlay to make it smoother */

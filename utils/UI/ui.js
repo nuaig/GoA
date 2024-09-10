@@ -59,6 +59,8 @@ export function setStars(health) {
   for (let i = 0; i <= numStars; i++) {
     stars[i].style.fill = "#fab005"; // Ensure the color is a string
   }
+
+  return numStars;
 }
 
 export function resetStars() {
