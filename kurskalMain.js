@@ -59,7 +59,7 @@ const settingsModal = document.querySelector(".modal__settings");
 const settingsTogglerEle = document.querySelector(".settings__icon");
 const btnSettingsRestart = document.querySelector(".btn__setting__restart");
 const btnSettingsDiffLvl = document.querySelector(".btn__setting__diffLvl");
-const btnSettingsGoMainDungeon = document.querySelector(
+const btnSettingsGoMainDungeon = document.querySelectorAll(
   ".btn__setting__mainDungeon"
 );
 const restartHandler = document.querySelector(".btn__setting__restart");
@@ -73,6 +73,8 @@ const levelsModal = document.querySelector(".modal__level__selection");
 const levelButtons = document.querySelectorAll(".level__btn__holder");
 const btnLevelClose = document.querySelector(".btn__level__close");
 
+let isModalOpen = false;
+
 let currentScore = 0;
 let currentLevel = 1;
 let curNodes;
@@ -81,8 +83,8 @@ let graph;
 
 const levelConfig = {
   1: { nodes: 6, edges: 9 },
-  2: { nodes: 3, edges: 3 },
-  3: { nodes: 3, edges: 3 },
+  2: { nodes: 7, edges: 10 },
+  3: { nodes: 8, edges: 12 },
 
   4: { nodes: 6, edges: 8 },
   5: { nodes: 8, edges: 12 },
@@ -144,31 +146,37 @@ let dungeonRoomAction;
 settingsTogglerEle.addEventListener("click", () => {
   settingsModal.classList.toggle("hidden");
   overlay.classList.toggle("hidden");
+  isModalOpen = !isModalOpen;
 });
 
 settingsCloseButton.addEventListener("click", () => {
   settingsModal.classList.toggle("hidden");
   overlay.classList.toggle("hidden");
+  isModalOpen = false;
 });
 
 function closeLevelModal() {
   levelsModal.classList.add("hidden");
   overlay.classList.add("hidden");
+  isModalOpen = false;
 }
 
 function openLevelModal() {
   levelsModal.classList.remove("hidden");
   overlay.classList.remove("hidden");
+  isModalOpen = true;
 }
 
 function closeSettingModal() {
   settingsModal.classList.add("hidden");
   overlay.classList.add("hidden");
+  isModalOpen = false;
 }
 
 function openSettingModal() {
   settingsModal.classList.remove("hidden");
   overlay.classList.remove("hidden");
+  isModalOpen = true;
 }
 
 const startPosition = { x: 0, y: 5, z: 35 };
@@ -207,39 +215,39 @@ function initailCameraAnimationGSAP() {
   });
 }
 
-// function initializeLevelStatus() {
-//   let highestCompletedLevel = 0; // Track the highest completed level
+function initializeLevelStatus() {
+  let highestCompletedLevel = 0; // Track the highest completed level
 
-//   // Loop through each level and check if there is stored data
-//   for (let level = 1; level <= Object.keys(levelConfig).length; level++) {
-//     const storedData = localStorage.getItem(`kruskal_level_${level}`);
-//     if (storedData) {
-//       const { score, stars } = JSON.parse(storedData);
-//       updateLevelStatus(level, stars); // Update the stars display
+  // Loop through each level and check if there is stored data
+  for (let level = 1; level <= Object.keys(levelConfig).length; level++) {
+    const storedData = localStorage.getItem(`kruskal_level_${level}`);
+    if (storedData) {
+      const { score, stars } = JSON.parse(storedData);
+      updateLevelStatus(level, stars); // Update the stars display
 
-//       // Update the highest completed level
-//       highestCompletedLevel = level;
-//     }
-//   }
+      // Update the highest completed level
+      highestCompletedLevel = level;
+    }
+  }
 
-//   // Unlock the next level if any level was completed
-//   if (highestCompletedLevel > 0) {
-//     const nextLevel = highestCompletedLevel + 1;
-//     const nextLevelButton = document.querySelector(`.btn__level__${nextLevel}`);
-//     if (nextLevelButton) {
-//       nextLevelButton.classList.remove("level__locked");
-//       const lockIcon = nextLevelButton.querySelector(".feather-lock");
-//       if (lockIcon) {
-//         lockIcon.style.display = "none"; // Hide the lock icon
-//       }
-//     }
-//   }
-// }
+  // Unlock the next level if any level was completed
+  if (highestCompletedLevel > 0) {
+    const nextLevel = highestCompletedLevel + 1;
+    const nextLevelButton = document.querySelector(`.btn__level__${nextLevel}`);
+    if (nextLevelButton) {
+      nextLevelButton.classList.remove("level__locked");
+      const lockIcon = nextLevelButton.querySelector(".feather-lock");
+      if (lockIcon) {
+        lockIcon.style.display = "none"; // Hide the lock icon
+      }
+    }
+  }
+}
 
 // Call this function on page load
-// window.addEventListener("load", () => {
-//   initializeLevelStatus();
-// });
+window.addEventListener("load", () => {
+  initializeLevelStatus();
+});
 
 btnSettingsDiffLvl.addEventListener("click", (e) => {
   e.preventDefault();
@@ -325,8 +333,10 @@ levelButtons.forEach((button, index) => {
   });
 });
 
-btnSettingsGoMainDungeon.addEventListener("click", () => {
-  window.location.href = "index.html";
+btnSettingsGoMainDungeon.forEach((button) => {
+  button.addEventListener("click", () => {
+    window.location.href = "index.html";
+  });
 });
 
 buttonStart.addEventListener("click", () => {
@@ -723,6 +733,7 @@ function drawLines() {
   // Assign the function to the global variable
   onMouseMove = function (event) {
     event.preventDefault();
+    if (isModalOpen) return;
     if (curAlgorithmForGraph.isComplete()) {
       sphereInter.visible = false;
       hoverRing.visible = false;
@@ -780,6 +791,7 @@ function drawLines() {
   // Assign the function to the global variable
   onClick = function (event) {
     event.preventDefault();
+    if (isModalOpen) return;
 
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;

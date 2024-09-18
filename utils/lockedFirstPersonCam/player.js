@@ -19,7 +19,7 @@ export class Player {
   cameraHelper = new THREE.CameraHelper(this.camera);
   controls = new PointerLockControls(this.camera, document.body);
 
-  maxSpeed = 40;
+  maxSpeed = 20;
   velocity = new THREE.Vector3();
   input = new THREE.Vector3();
 
