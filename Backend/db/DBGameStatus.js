@@ -103,15 +103,21 @@ function MyMongoDB() {
     try {
       const objectId = new ObjectId(userId);
 
-      // Update the game status for the user and specific game/level
+      // Use arrayFilters to match the correct element in the games array based on the level
       const response = await db.collection("game_status").updateOne(
-        { user_id: objectId, [`games.${gameName}.level`]: levelData.level }, // Match user and level
+        {
+          user_id: objectId,
+          [`games.${gameName}`]: { $exists: true }, // Ensure the game exists
+        },
         {
           $set: {
-            [`games.${gameName}.$.score`]: levelData.score,
-            [`games.${gameName}.$.stars`]: levelData.stars,
-            [`games.${gameName}.$.status`]: levelData.status,
+            [`games.${gameName}.$[elem].score`]: levelData.score,
+            [`games.${gameName}.$[elem].stars`]: levelData.stars,
+            [`games.${gameName}.$[elem].status`]: levelData.status,
           },
+        },
+        {
+          arrayFilters: [{ "elem.level": levelData.level }], // Match the level in the array
         }
       );
 
@@ -162,6 +168,51 @@ function MyMongoDB() {
       await client.close();
     }
   };
+
+  myDB.resetGameStatus = async (userId) => {
+    const { client, db } = await connect();
+    try {
+      const objectId = new ObjectId(userId);
+
+      // Define the reset game status structure
+      const resetStatus = {
+        "games.Heapsort": [
+          { level: 1, score: 0, stars: 0, status: "unlocked" },
+          { level: 2, score: 0, stars: 0, status: "locked" },
+          { level: 3, score: 0, stars: 0, status: "locked" },
+        ],
+        "games.Prim": [
+          { level: 1, score: 0, stars: 0, status: "unlocked" },
+          { level: 2, score: 0, stars: 0, status: "locked" },
+          { level: 3, score: 0, stars: 0, status: "locked" },
+        ],
+        "games.Kruskal": [
+          { level: 1, score: 0, stars: 0, status: "unlocked" },
+          { level: 2, score: 0, stars: 0, status: "locked" },
+          { level: 3, score: 0, stars: 0, status: "locked" },
+        ],
+      };
+
+      // Update the game status in the database to the reset status
+      const response = await db
+        .collection("game_status")
+        .updateOne({ user_id: objectId }, { $set: resetStatus });
+
+      if (response.modifiedCount === 0) {
+        console.log(`Failed to reset game status for user ${userId}`);
+        return { ok: false, msg: "Failed to reset game status" };
+      }
+
+      console.log(`Game status reset for user ${userId}`);
+      return { ok: true, msg: "Game status reset successfully" };
+    } catch (err) {
+      console.error("Error resetting game status", err.message);
+      return { ok: false, msg: "Error resetting game status" };
+    } finally {
+      await client.close();
+    }
+  };
+
   return myDB;
 }
 

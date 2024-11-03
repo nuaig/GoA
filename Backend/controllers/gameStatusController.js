@@ -23,9 +23,11 @@ export const getGameStatusCon = async (req, res) => {
 export const updateGameStatusCon = async (req, res) => {
   const { userId, gameName } = req.params;
   const { level, score, stars, status } = req.body;
+  console.log(req.body);
 
   try {
     const levelData = { level, score, stars, status };
+    console.log(levelData);
     const updateResponse = await myDB.updateGameStatus(
       userId,
       gameName,
@@ -35,7 +37,7 @@ export const updateGameStatusCon = async (req, res) => {
     if (updateResponse.modifiedCount === 0) {
       return res
         .status(404)
-        .json({ ok: false, msg: "Failed to update game status" });
+        .json({ ok: false, msg: "nothing was updated due to not finding any" });
     }
 
     return res
@@ -70,5 +72,25 @@ export const unlockGameLevelCon = async (req, res) => {
     return res
       .status(500)
       .json({ ok: false, msg: "Error unlocking game level" });
+  }
+};
+
+// Controller to reset all game levels for a user
+export const resetGameStatusCon = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const resetResponse = await myDB.resetGameStatus(userId);
+
+    if (!resetResponse.ok) {
+      return res.status(400).json({ ok: false, msg: resetResponse.msg });
+    }
+
+    return res.status(200).json({ ok: true, msg: resetResponse.msg });
+  } catch (e) {
+    console.error("Error in resetGameStatusCon", e.message);
+    return res
+      .status(500)
+      .json({ ok: false, msg: "Error resetting game status" });
   }
 };

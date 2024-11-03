@@ -3,6 +3,7 @@ import {
   getGameStatusCon,
   updateGameStatusCon,
   unlockGameLevelCon,
+  resetGameStatusCon,
 } from "../controllers/gameStatusController.js";
 
 const router = express.Router();
@@ -15,5 +16,8 @@ router.post("/:userId/:gameName", updateGameStatusCon);
 
 // Route to unlock game level
 router.post("/unlock/:userId/:gameName/:level", unlockGameLevelCon);
+
+// Route to reset all levels for a user
+router.put("/reset/:userId", resetGameStatusCon);
 
 export default router;

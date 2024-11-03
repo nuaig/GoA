@@ -50,8 +50,7 @@ const myStrategy = new LocalStrategy(async function verify(
         // User found and authenticated
         cb(
           null, // error
-          { id: 1, username: username }, // user object
-          { message: "Hello" } // extra info
+          { id: user._id, username: user.username } // user object
         );
       }
     );
@@ -63,12 +62,14 @@ passport.use(myStrategy);
 
 passport.serializeUser(function (user, cb) {
   process.nextTick(function () {
+    // Ensure the user object contains the 'id' field when serializing
     cb(null, { id: user.id, username: user.username });
   });
 });
 
 passport.deserializeUser(function (user, cb) {
   process.nextTick(function () {
+    // Return the full user object including 'id' and 'username'
     return cb(null, user);
   });
 });
@@ -97,7 +98,11 @@ router.post("/login", (req, res, next) => {
 
 router.get("/getUser", function (req, res) {
   console.log("getUser", req.user);
-  res.status(200).json({ username: req.user?.username });
+  if (req.user) {
+    res.status(200).json({ username: req.user?.username, id: req.user?.id });
+  } else {
+    return res.status(404).json({ ok: false, msg: "User Not Logged In" });
+  }
 });
 
 router.post("/logout", function (req, res, next) {
