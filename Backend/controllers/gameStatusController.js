@@ -51,6 +51,32 @@ export const updateGameStatusCon = async (req, res) => {
   }
 };
 
+// Controller to update status from "completed_first_time" to "completed"
+export const updateStatusToCompletedCon = async (req, res) => {
+  const { userId, gameName, level } = req.params;
+
+  try {
+    // Call the new database function to update the status
+    const updateResponse = await myDB.updateStatusToCompleted(
+      userId,
+      gameName,
+      parseInt(level)
+    );
+
+    // Check if the update was successful
+    if (!updateResponse.ok) {
+      return res.status(400).json({ ok: false, msg: updateResponse.msg });
+    }
+
+    return res.status(200).json({ ok: true, msg: updateResponse.msg });
+  } catch (e) {
+    console.error("Error in updateStatusToCompletedCon", e.message);
+    return res
+      .status(500)
+      .json({ ok: false, msg: "Error updating status to completed" });
+  }
+};
+
 // Controller to unlock game level for a user
 export const unlockGameLevelCon = async (req, res) => {
   const { userId, gameName, level } = req.params;

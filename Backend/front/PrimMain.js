@@ -9,6 +9,7 @@ import { KruskalAlgorithm } from "./utils/graphRelated/kruskal.js";
 import { PrimAlgorithm } from "./utils/graphRelated/prims.js";
 import { GameSession } from "./utils/gameRelated/gameSession.js";
 import { loadModel } from "./utils/threeModels.js";
+import { GameStatusService } from "./utils/gameStatus/gameStatusService.js";
 import gsap from "gsap";
 import {
   toggleInstructions,
@@ -41,6 +42,7 @@ import {
 const uiText = document.getElementById("UI-Text");
 const scoreText = document.querySelector(".score-label-2");
 const finalScoreText = document.querySelector(".label__final_score span");
+const labelCompletionText = document.querySelector(".label__completion_text");
 const stars = document.querySelectorAll(".star path:last-child");
 
 const instructionModal = document.querySelector(".instruction");
@@ -81,15 +83,16 @@ let currentLevel = 1;
 let curNodes;
 let curEdges;
 let graph;
-
+// Real Game Difficulty
+// const levelConfig = {
+//   1: { nodes: 6, edges: 9 },
+//   2: { nodes: 7, edges: 10 },
+//   3: { nodes: 8, edges: 12 },
+// };
 const levelConfig = {
-  1: { nodes: 6, edges: 9 },
-  2: { nodes: 7, edges: 10 },
-  3: { nodes: 8, edges: 12 },
-
-  4: { nodes: 6, edges: 8 },
-  5: { nodes: 8, edges: 12 },
-  6: { nodes: 9, edges: 15 },
+  1: { nodes: 3, edges: 3 },
+  2: { nodes: 3, edges: 3 },
+  3: { nodes: 3, edges: 3 },
 };
 
 const usedColors = new Set();
@@ -111,6 +114,159 @@ let health = 4;
 
 let onMouseMove;
 let onClick;
+let gameStatusService;
+
+// Add an event listener to initialize the game after login
+document.addEventListener("DOMContentLoaded", async function () {
+  try {
+    // Make a request to check if the user is logged in
+    const response = await fetch("/api/users/getUser", {
+      method: "GET",
+      credentials: "include", // Include cookies in the request
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      console.log("User is logged in:", userData);
+
+      // Initialize GameStatusService with the logged-in userId
+      gameStatusService = new GameStatusService(userData.id);
+
+      // Await the initialization of GameStatusService (including fetching game status)
+      await gameStatusService.init();
+
+      // Now that gameStatusService is initialized, initialize the level status
+      await initializeLevelStatus();
+    } else {
+      console.warn("User is not logged in. Redirecting to login page.");
+      window.location.href = "signInSignUp.html";
+    }
+  } catch (error) {
+    console.error("Error checking login status:", error);
+    window.location.href = "signInSignUp.html";
+  }
+});
+
+async function initializeLevelStatus() {
+  try {
+    // Fetch game status for the user
+    const gameStatus = await gameStatusService.getLocalGameStatus();
+    console.log(gameStatus);
+
+    if (!gameStatus) {
+      console.error("No game status found for this user.");
+      return;
+    }
+
+    let highestCompletedLevel = 0;
+
+    // Directly loop through the "Kruskal" levels in the game status
+    const primLevels = gameStatus.games["Prim"];
+    primLevels.forEach((gameData, index) => {
+      console.log(gameData);
+      const level = index + 1; // Levels are 1-based index
+
+      // Find the button and star elements for the current level
+      const currentLevelButton = document.querySelector(
+        `.btn__level__${level}`
+      );
+      const currentStarsHolder = currentLevelButton.querySelector(
+        ".level__stars__holder"
+      );
+
+      // Update the stars based on the level data
+      const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
+      for (let i = 0; i < stars.length; i++) {
+        if (i < gameData.stars) {
+          stars[i].classList.add("filled");
+          stars[i].style.fill = "#a5d8ff"; // Gold color for filled stars
+        } else {
+          stars[i].classList.remove("filled");
+          stars[i].style.fill = "none"; // Default color for unfilled stars
+        }
+      }
+
+      // Check if the level is completed and track the highest completed level
+      if (gameData.status === "completed") {
+        highestCompletedLevel = level;
+        unlockLevelUI(level);
+      }
+    });
+
+    // Unlock the next level if there is a completed level
+    if (
+      highestCompletedLevel > 0 &&
+      highestCompletedLevel < primLevels.length
+    ) {
+      unlockLevelUI(highestCompletedLevel + 1);
+    }
+  } catch (error) {
+    console.error("Error initializing level status:", error);
+  }
+}
+
+function unlockLevelUI(level) {
+  const nextLevelButton = document.querySelector(`.btn__level__${level}`);
+  if (nextLevelButton) {
+    nextLevelButton.classList.remove("level__locked");
+    const lockIcon = nextLevelButton.querySelector(".feather-lock");
+    if (lockIcon) {
+      lockIcon.style.display = "none"; // Hide the lock icon
+    }
+  }
+}
+
+function updateLevelStatus(level, starsCount) {
+  const currentLevelButton = document.querySelector(`.btn__level__${level}`);
+  const currentStarsHolder = currentLevelButton.querySelector(
+    ".level__stars__holder"
+  );
+
+  // Update stars based on the zero-based starsCount
+  const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
+  for (let i = 0; i < stars.length; i++) {
+    if (i <= starsCount) {
+      stars[i].classList.add("filled");
+      stars[i].style.fill = "#a5d8ff"; // Gold color for filled stars
+    } else {
+      stars[i].classList.remove("filled");
+      stars[i].style.fill = "none"; // Default color for unfilled stars
+    }
+  }
+
+  // Unlock the next level
+  const nextLevel = level + 1;
+  const nextLevelButton = document.querySelector(`.btn__level__${nextLevel}`);
+  if (nextLevelButton) {
+    nextLevelButton.classList.remove("level__locked");
+    const lockIcon = nextLevelButton.querySelector(".feather-lock");
+    if (lockIcon) {
+      lockIcon.style.display = "none"; // Hide the lock icon
+    }
+  }
+}
+
+levelButtons.forEach((button, index) => {
+  button.addEventListener("click", () => {
+    if (button.classList.contains("level__locked")) {
+      console.log(`Level ${index + 1} is locked.`);
+      return;
+    }
+
+    closeLevelModal();
+
+    const chosenLevel = index + 1; // Set the current level to the selected level
+    console.log(`Level ${chosenLevel} selected.`);
+    if (chosenLevel != currentLevel) {
+      currentLevel = chosenLevel;
+      window.removeEventListener("mousemove", onMouseMove, false);
+      window.removeEventListener("click", onClick, false);
+      resetLevel(currentLevel); // This will now reset the scene fully
+    }
+
+    initailCameraAnimationGSAP();
+  });
+});
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -216,40 +372,6 @@ function initailCameraAnimationGSAP() {
   });
 }
 
-function initializeLevelStatus() {
-  let highestCompletedLevel = 0; // Track the highest completed level
-
-  // Loop through each level and check if there is stored data
-  for (let level = 1; level <= Object.keys(levelConfig).length; level++) {
-    const storedData = localStorage.getItem(`kruskal_level_${level}`);
-    if (storedData) {
-      const { score, stars } = JSON.parse(storedData);
-      updateLevelStatus(level, stars); // Update the stars display
-
-      // Update the highest completed level
-      highestCompletedLevel = level;
-    }
-  }
-
-  // Unlock the next level if any level was completed
-  if (highestCompletedLevel > 0) {
-    const nextLevel = highestCompletedLevel + 1;
-    const nextLevelButton = document.querySelector(`.btn__level__${nextLevel}`);
-    if (nextLevelButton) {
-      nextLevelButton.classList.remove("level__locked");
-      const lockIcon = nextLevelButton.querySelector(".feather-lock");
-      if (lockIcon) {
-        lockIcon.style.display = "none"; // Hide the lock icon
-      }
-    }
-  }
-}
-
-// Call this function on page load
-window.addEventListener("load", () => {
-  initializeLevelStatus();
-});
-
 btnSettingsDiffLvl.addEventListener("click", (e) => {
   e.preventDefault();
   closeSettingModal();
@@ -261,82 +383,10 @@ btnLevelClose.addEventListener("click", (e) => {
   e.preventDefault();
   closeLevelModal();
 });
-// Add event listeners to each button
-// levelButtons.forEach((button, index) => {
-//   button.addEventListener("click", () => {
-//     if (button.classList.contains("level__locked")) {
-//       console.log(`Level ${index + 1} is locked.`);
-//       return;
-//     }
-
-//     closeLevelModal();
-
-//     const chosenLevel = index + 1; // Set the current level to the selected level
-//     console.log(`Level ${chosenLevel} selected.`); // Corrected the log message
-//     if (chosenLevel != currentLevel) {
-//       currentLevel = chosenLevel;
-//       resetLevel(chosenLevel); // Ensure this fully resets the scene
-//     }
-
-//     initailCameraAnimationGSAP();
-//   });
-// });
-
-function updateLevelStatus(level, starsCount) {
-  const currentLevelButton = document.querySelector(`.btn__level__${level}`);
-  const currentStarsHolder = currentLevelButton.querySelector(
-    ".level__stars__holder"
-  );
-
-  // Update stars based on the zero-based starsCount
-  const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
-  for (let i = 0; i < stars.length; i++) {
-    if (i <= starsCount) {
-      stars[i].classList.add("filled");
-      stars[i].style.fill = "#a5d8ff"; // Gold color for filled stars
-    } else {
-      stars[i].classList.remove("filled");
-      stars[i].style.fill = "none"; // Default color for unfilled stars
-    }
-  }
-
-  // Unlock the next level
-  const nextLevel = level + 1;
-  const nextLevelButton = document.querySelector(`.btn__level__${nextLevel}`);
-  if (nextLevelButton) {
-    nextLevelButton.classList.remove("level__locked");
-    const lockIcon = nextLevelButton.querySelector(".feather-lock");
-    if (lockIcon) {
-      lockIcon.style.display = "none"; // Hide the lock icon
-    }
-  }
-}
-
-levelButtons.forEach((button, index) => {
-  button.addEventListener("click", () => {
-    if (button.classList.contains("level__locked")) {
-      console.log(`Level ${index + 1} is locked.`);
-      return;
-    }
-
-    closeLevelModal();
-
-    const chosenLevel = index + 1; // Set the current level to the selected level
-    console.log(`Level ${chosenLevel} selected.`);
-    if (chosenLevel != currentLevel) {
-      currentLevel = chosenLevel;
-      window.removeEventListener("mousemove", onMouseMove, false);
-      window.removeEventListener("click", onClick, false);
-      resetLevel(currentLevel); // This will now reset the scene fully
-    }
-
-    initailCameraAnimationGSAP();
-  });
-});
 
 btnSettingsGoMainDungeon.forEach((button) => {
   button.addEventListener("click", () => {
-    window.location.href = "index.html";
+    window.location.href = "mainDungeon.html";
   });
 });
 
@@ -346,11 +396,8 @@ buttonStart.addEventListener("click", () => {
   // overlay.classList.add("hidden");
   instructionModal.classList.add("hidden");
   levelsModal.classList.remove("hidden");
-  curGameSession = new GameSession(
-    "66f94ed538cbdcb6fd0ea6e7",
-    "Kruskal",
-    currentLevel
-  );
+  const userId = gameStatusService.getUserId();
+  curGameSession = new GameSession(userId, "Prim", currentLevel);
   console.log(curGameSession.toObject());
 });
 
@@ -450,9 +497,22 @@ pseudoBoxButton.addEventListener("click", () => {
   toggleInstructions(currentAlgorithm);
 });
 
-const openModal = function () {
+const openModal = function (currentLevel) {
+  // Show modal and overlay
   modalCompletion.classList.remove("hidden");
   overlay.classList.remove("hidden");
+
+  // Select the "Next Level" button
+  const nextButton = document.querySelector(".btn__next");
+
+  // Check if it's level 3
+  if (currentLevel === 3) {
+    // Remove or hide the "Next Level" button if it's level 3
+    nextButton.style.display = "none";
+  } else {
+    // Ensure the "Next Level" button is visible for other levels
+    nextButton.style.display = "inline-block";
+  }
 };
 
 const closeModal = function () {
@@ -629,13 +689,6 @@ function handleEdgeSelection(
   onMouseMove
 ) {
   const edge = intersectedObject.userData.edge;
-  // let rootStart, rootEnd, sameTree;
-  // if (currentAlgorithm === "kruskal") {
-  //   rootStart = curAlgorithmForGraph.uf.find(edge.start);
-  //   rootEnd = curAlgorithmForGraph.uf.find(edge.end);
-  //   sameTree = rootStart === rootEnd;
-  // }
-
   const selectEdgeResult = curAlgorithmForGraph.selectEdge([
     edge.start,
     edge.end,
@@ -660,6 +713,10 @@ function handleEdgeSelection(
       currentScore = Math.floor(currentScore * ((health + 1) * 0.1 + 1));
       uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
       finalScoreText.innerHTML = `${currentScore}`;
+      const algoName = currentAlgorithm === "kruskal" ? "Kruskal" : "Prim";
+      labelCompletionText.innerHTML = `
+        You have successfully completed level ${currentLevel} of ${algoName}'s Algorithm!
+      `;
       const totalStars = setStars(health);
       console.log(totalStars);
 
@@ -668,7 +725,7 @@ function handleEdgeSelection(
       curGameSession.endSession();
 
       const sessionData = curGameSession.toObject();
-      fetch("http://localhost:3000/api/gamesessions", {
+      fetch("/api/gamesessions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -678,13 +735,21 @@ function handleEdgeSelection(
 
       // Store the score and stars in localStorage with "kruskal" included
       const levelData = { score: currentScore, stars: totalStars };
-      localStorage.setItem(
-        `kruskal_level_${currentLevel}`,
-        JSON.stringify(levelData)
-      );
-
+      console.log(currentLevel);
+      console.log(gameStatusService.gameStatus.games.Prim[2].status);
       updateLevelStatus(currentLevel, totalStars);
-      openModal();
+      const status_update_string =
+        currentLevel != 3 ? "completed" : "completed_first_time";
+      gameStatusService.updateGameStatus(
+        "Prim",
+        currentLevel,
+        currentScore,
+        totalStars + 1,
+        status_update_string
+      );
+      gameStatusService.unlockGameLevel("Prim", currentLevel + 1);
+
+      openModal(currentLevel);
       window.removeEventListener("mousemove", onMouseMove, false);
       window.removeEventListener("click", onClick, false);
     } else {

@@ -70,6 +70,48 @@ function MyMongoDB() {
       await client.close();
     }
   };
+
+  // Function to update status from "completed_first_time" to "completed"
+  myDB.updateStatusToCompleted = async (userId, gameName, level) => {
+    const { client, db } = await connect();
+    try {
+      const objectId = new ObjectId(userId);
+
+      // Update status from "completed_first_time" to "completed" for the specific game and level
+      const response = await db.collection("game_status").updateOne(
+        {
+          user_id: objectId,
+          [`games.${gameName}.level`]: level, // Match the game and level
+          [`games.${gameName}.status`]: "completed_first_time", // Check the current status
+        },
+        {
+          $set: {
+            [`games.${gameName}.$.status`]: "completed", // Update to "completed"
+          },
+        }
+      );
+
+      if (response.modifiedCount === 0) {
+        console.log(
+          `No status update needed for user ${userId}, game ${gameName}, level ${level}`
+        );
+        return {
+          ok: false,
+          msg: "No update needed, status was not 'completed_first_time'",
+        };
+      }
+
+      console.log(
+        `Status updated to 'completed' for user ${userId} in game ${gameName}, level ${level}`
+      );
+      return { ok: true, msg: "Status updated to completed" };
+    } catch (err) {
+      console.error("Error updating status to completed", err.message);
+      return { ok: false, msg: "Error updating status to completed" };
+    } finally {
+      await client.close();
+    }
+  };
   // Fetch game status for a user
   myDB.getGameStatus = async (userId) => {
     const { client, db } = await connect();

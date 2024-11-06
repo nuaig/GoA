@@ -151,6 +151,7 @@ async function initializeLevelStatus() {
   try {
     // Fetch game status for the user
     const gameStatus = await gameStatusService.getLocalGameStatus();
+    console.log(gameStatus);
 
     if (!gameStatus) {
       console.error("No game status found for this user.");
@@ -162,6 +163,7 @@ async function initializeLevelStatus() {
     // Directly loop through the "Kruskal" levels in the game status
     const kruskalLevels = gameStatus.games["Kruskal"];
     kruskalLevels.forEach((gameData, index) => {
+      console.log(gameData);
       const level = index + 1; // Levels are 1-based index
 
       // Find the button and star elements for the current level
@@ -733,18 +735,17 @@ function handleEdgeSelection(
 
       // Store the score and stars in localStorage with "kruskal" included
       const levelData = { score: currentScore, stars: totalStars };
-      // localStorage.setItem(
-      //   `kruskal_level_${currentLevel}`,
-      //   JSON.stringify(levelData)
-      // );
-
+      console.log(currentLevel);
+      console.log(gameStatusService.gameStatus.games.Kruskal[2].status);
       updateLevelStatus(currentLevel, totalStars);
+      const status_update_string =
+        currentLevel != 3 ? "completed" : "completed_first_time";
       gameStatusService.updateGameStatus(
         "Kruskal",
         currentLevel,
         currentScore,
         totalStars + 1,
-        "completed"
+        status_update_string
       );
       gameStatusService.unlockGameLevel("Kruskal", currentLevel + 1);
 

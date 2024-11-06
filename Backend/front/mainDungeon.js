@@ -7,6 +7,7 @@ import { GameStatusService } from "./utils/gameStatus/gameStatusService.js";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import { gsap } from "gsap";
+
 document.addEventListener("DOMContentLoaded", async function () {
   try {
     // Make a request to check if the user is logged in
@@ -137,6 +138,59 @@ const mainDungeonURL = new URL("./src/main_dungeon.glb", import.meta.url);
 let gameCompleted = false;
 
 let treasure_wall_gate;
+// Global variable to track completion of each glow effect
+let glowEffectsCompleted = { Kruskal: false, Prim: false, Heapsort: true };
+function applyGlowEffect(material, status, key) {
+  if (status === "completed_first_time") {
+    player.position.set(-0.8, 2, -20);
+    player.camera.lookAt(-0.8, 2, -20);
+
+    // Animate both color and intensity over 5 seconds
+    gsap.to(material.emissive, { r: 1, g: 1, b: 1, duration: 5 }); // Animate color to white
+    gsap.to(material, {
+      emissiveIntensity: 5,
+      duration: 5,
+      onComplete: async () => {
+        glowEffectsCompleted[key] = true; // Mark this glow effect as completed
+        checkAllGlowEffects(); // Check if all glow effects are completed
+
+        // Update the status to "completed" using updateStatusToComplete
+        try {
+          await gameStatusService.updateStatusToCompleted(key, 3); // Assuming level 3
+          console.log("Status updated to completed in the database.");
+        } catch (error) {
+          console.error("Error updating status to completed:", error);
+        }
+      },
+    });
+  } else if (status === "completed") {
+    // Set color and intensity instantly without animation
+    material.emissive.set("#fff");
+    material.emissiveIntensity = 5;
+    glowEffectsCompleted[key] = true; // Mark this glow effect as completed
+    checkAllGlowEffects(); // Check if all glow effects are completed
+  }
+}
+
+// Function to check if all glow effects are completed and trigger the gate animation
+function checkAllGlowEffects() {
+  const allCompleted = Object.values(glowEffectsCompleted).every(Boolean); // Check if all are true
+  if (allCompleted && treasure_wall_gate) {
+    // Set a new position for the player
+    player.position.set(-0.8, 2, -20);
+    player.camera.lookAt(-0.8, 2, -20);
+
+    // Use GSAP to smoothly move the Y position of the treasure wall gate
+    gsap.to(treasure_wall_gate.position, {
+      y: treasure_wall_gate.position.y - 5, // Adjust this value as needed
+      duration: 2, // 2 seconds for smooth transition
+      ease: "power2.inOut",
+      onComplete: () => {
+        console.log("Gate animation complete.");
+      },
+    });
+  }
+}
 
 async function createMainDungeon() {
   const position = new THREE.Vector3(0, 0, 0);
@@ -145,18 +199,20 @@ async function createMainDungeon() {
     console.log(gameStatusService.getLocalGameStatus());
 
     // Check if level 3 is completed for each algorithm
-    const kruskalCompleted =
-      gameStatusService.getLocalGameStatus()?.games?.Kruskal?.[2]?.status ===
-      "completed";
-    gameCompleted = kruskalCompleted;
-    const primCompleted =
-      gameStatusService.getLocalGameStatus()?.games?.Prim?.[2]?.status ===
-      "completed";
-    const heapsortCompleted =
-      gameStatusService.getLocalGameStatus()?.games?.Heapsort?.[2]?.status ===
-      "completed";
+    // Check if level 3 is completed for each algorithm
+    const kruskalStatus =
+      gameStatusService.getLocalGameStatus()?.games?.Kruskal?.[2]?.status;
+    const primStatus =
+      gameStatusService.getLocalGameStatus()?.games?.Prim?.[2]?.status;
+    const heapsortStatus =
+      gameStatusService.getLocalGameStatus()?.games?.Heapsort?.[2]?.status;
 
-    console.log(kruskalCompleted);
+    const kruskalCompleted = kruskalStatus.includes("completed");
+    const primCompleted = primStatus.includes("completed");
+    const heapsortCompleted = heapsortStatus.includes("completed");
+
+    // Set gameCompleted to true only if all statuses are completed
+    gameCompleted = kruskalCompleted && primCompleted && heapsortCompleted;
 
     model.traverse((child) => {
       if (child.isMesh) {
@@ -183,34 +239,24 @@ async function createMainDungeon() {
           world.doors.push(child);
         }
 
-        if (child.name.includes("status_symbol")) {
-          if (child.material) {
-            // Apply emissive effect for Kruskal
-            if (child.material.name === "kruskal_symbol") {
-              symbol_dict["kruskal"] = child.material;
-              if (kruskalCompleted) {
-                child.material.emissive.set("#fff"); // Set emissive color
-                child.material.emissiveIntensity = 5; // Adjust intensity as needed
-              }
-            }
+        if (child.name.includes("status_symbol") && child.material) {
+          if (child.material.name === "kruskal_symbol") {
+            symbol_dict["kruskal"] = child.material;
+            applyGlowEffect(symbol_dict["kruskal"], kruskalStatus, "Kruskal");
+          }
 
-            // Apply emissive effect for Prim
-            if (child.material.name === "prim_symbol") {
-              symbol_dict["prim"] = child.material;
-              if (primCompleted) {
-                child.material.emissive.set("#fff");
-                child.material.emissiveIntensity = 5;
-              }
-            }
+          if (child.material.name === "prim_symbol") {
+            symbol_dict["prim"] = child.material;
+            applyGlowEffect(symbol_dict["prim"], primStatus, "Prim");
+          }
 
-            // Apply emissive effect for Heapsort
-            if (child.material.name === "heapsort_symbol") {
-              symbol_dict["heapsort"] = child.material;
-              if (heapsortCompleted) {
-                child.material.emissive.set("#fff");
-                child.material.emissiveIntensity = 5;
-              }
-            }
+          if (child.material.name === "heapsort_symbol") {
+            symbol_dict["heapsort"] = child.material;
+            applyGlowEffect(
+              symbol_dict["heapsort"],
+              heapsortStatus,
+              "Heapsort"
+            );
           }
         }
       }
@@ -228,10 +274,7 @@ async function createMainDungeon() {
         y: treasure_wall_gate.position.y - 5, // Adjust this value as needed
         duration: 2, // 2 seconds for smooth transition
         ease: "power2.inOut", // Ease type for smooth animation
-        onUpdate: () => {
-          // If you need to do something on each animation frame (optional)
-          console.log("Animating gate position:", treasure_wall_gate.position);
-        },
+
         onComplete: () => {
           console.log("Gate animation complete.");
         },
@@ -243,6 +286,7 @@ async function createMainDungeon() {
     console.log("Error loading dungeon", error);
   }
 }
+
 const floorGeometry = new THREE.PlaneGeometry(100, 100);
 const floorMaterial = new THREE.MeshStandardMaterial({
   color: 0x808080,

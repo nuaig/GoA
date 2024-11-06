@@ -29,6 +29,19 @@ export class GameStatusService {
 
   // Update game status both in the class and the database
   async updateGameStatus(gameName, level, score, stars, status) {
+    // Check if current score is greater than the input score
+    const currentGameData = this.gameStatus?.games[gameName]?.[level - 1];
+
+    if (currentGameData && currentGameData.score >= score) {
+      console.log(
+        `Current score (${currentGameData.score}) is higher than or equal to the input score (${score}). No update performed.`
+      );
+      return; // Exit the function if the condition is not met
+    }
+
+    if (level === 3 && currentGameData.status === "completed") {
+      status = "completed";
+    }
     const updateData = {
       level,
       score,
@@ -58,15 +71,55 @@ export class GameStatusService {
     }
   }
 
+  // Function to update status from "completed_first_time" to "completed"
+  async updateStatusToCompleted(gameName, level) {
+    console.log(this.gameStatus.games[gameName][level - 1].status);
+    if (this.gameStatus.games[gameName][level - 1].status === "completed") {
+      return;
+    }
+    try {
+      const response = await fetch(
+        `/api/status/updateToCompleted/${this.userId}/${gameName}/${level}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update the gameStatus property in the class
+        if (this.gameStatus?.games[gameName]?.[level - 1]) {
+          this.gameStatus.games[gameName][level - 1].status = "completed";
+        }
+        console.log("Status updated to 'completed' successfully:", data.msg);
+      } else {
+        console.error("Error updating status to 'completed':", data.msg);
+      }
+    } catch (error) {
+      console.error("Error in updateStatusToCompleted:", error);
+    }
+  }
   // Unlock game level both in the class and the database
   async unlockGameLevel(gameName, level) {
     try {
-      const currentLevelStatus = this.gameStatus.games[gameName][level - 1];
+      if (level > 3) {
+        return;
+      }
+      const currentLevelStatus =
+        this.gameStatus.games[gameName][level - 1].status;
 
       // Check if the level is already unlocked
-      if (level > 3 || currentLevelStatus.status === "unlocked") {
-        console.log(`Level ${level} is already unlocked. No changes made.`);
-        return; // Exit the function since the level is already unlocked
+      if (
+        currentLevelStatus === "unlocked" ||
+        currentLevelStatus.includes("completed")
+      ) {
+        console.log(
+          `Level ${level} is already unlocked or completed. No changes made.`
+        );
+        return; // Exit the function since the level is already unlocked or completed
       }
       const response = await fetch(
         `/api/status/unlock/${this.userId}/${gameName}/${level}`,
