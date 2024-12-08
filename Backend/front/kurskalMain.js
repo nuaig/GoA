@@ -40,6 +40,7 @@ import {
 } from "./utils/graphRelated/drawLine.js";
 
 const uiText = document.getElementById("UI-Text");
+const scoreElements = document.querySelectorAll(".score-label-2");
 const scoreText = document.querySelector(".score-label-2");
 const finalScoreText = document.querySelector(".label__final_score span");
 const labelCompletionText = document.querySelector(".label__completion_text");
@@ -65,7 +66,7 @@ const btnSettingsDiffLvl = document.querySelector(".btn__setting__diffLvl");
 const btnSettingsGoMainDungeon = document.querySelectorAll(
   ".btn__setting__mainDungeon"
 );
-const restartHandler = document.querySelector(".btn__setting__restart");
+
 const settingsCloseButton = document.querySelector(
   ".modal__settings .btn__close"
 );
@@ -75,6 +76,78 @@ const levelsModal = document.querySelector(".modal__level__selection");
 // Select all level buttons
 const levelButtons = document.querySelectorAll(".level__btn__holder");
 const btnLevelClose = document.querySelector(".btn__level__close");
+
+// Function to update the score
+function updateScore(newScore) {
+  // Iterate over each element and update its text content
+  scoreElements.forEach((element) => {
+    element.textContent = newScore.toString().padStart(2, "0"); // Ensures a two-digit format (e.g., '00')
+  });
+}
+
+// Function to hide stars
+function hideStars() {
+  const svgStars = document.querySelectorAll(
+    ".level__stars__holder svg.feather-star"
+  );
+  svgStars.forEach((star) => {
+    star.style.visibility = "hidden"; // Hide stars
+  });
+}
+
+// Function to show stars
+function showStars() {
+  const svgStars = document.querySelectorAll(
+    ".level__stars__holder svg.feather-star"
+  );
+  svgStars.forEach((star) => {
+    star.style.visibility = "visible"; // Show stars
+  });
+}
+
+// Function to toggle headers
+function toggleHeader(showHealth) {
+  const headerWithHealth = document.getElementById("header-with-health");
+  const headerWithoutHealth = document.getElementById("header-without-health");
+
+  if (showHealth) {
+    headerWithHealth.classList.remove("hidden");
+    headerWithoutHealth.classList.add("hidden");
+  } else {
+    headerWithHealth.classList.add("hidden");
+    headerWithoutHealth.classList.remove("hidden");
+  }
+}
+
+// Update toggleMode function to include health bar visibility logic
+function toggleMode(mode) {
+  const trainingBtn = document.getElementById("training-mode-btn");
+  const regularBtn = document.getElementById("regular-mode-btn");
+
+  if (mode === "training") {
+    trainingBtn.classList.add("active");
+    regularBtn.classList.remove("active");
+    hideStars(); // Hide stars for training mode
+    toggleHeader(false); // Hide health bar for training mode
+  } else if (mode === "regular") {
+    regularBtn.classList.add("active");
+    trainingBtn.classList.remove("active");
+    showStars(); // Show stars for regular mode
+    toggleHeader(true); // Show health bar for regular mode
+  }
+}
+
+// Event listeners for mode buttons
+document.getElementById("training-mode-btn").addEventListener("click", () => {
+  toggleMode("training");
+});
+
+document.getElementById("regular-mode-btn").addEventListener("click", () => {
+  toggleMode("regular");
+});
+
+// Initialize to regular mode
+toggleMode("regular");
 
 let isModalOpen = false;
 
@@ -90,7 +163,7 @@ let graph;
 //   3: { nodes: 8, edges: 12 },
 // };
 const levelConfig = {
-  1: { nodes: 3, edges: 3 },
+  1: { nodes: 6, edges: 10 },
   2: { nodes: 3, edges: 3 },
   3: { nodes: 3, edges: 3 },
 };
@@ -679,6 +752,7 @@ function handleSelectionEffect(intersectedObject) {
   intersectedObject.userData.ring = permanentRing;
 
   currentScore += 10;
+  updateScore(currentScore);
   scoreText.innerHTML = `${currentScore}`;
 }
 
@@ -891,7 +965,7 @@ function drawLines() {
     if (intersects.length > 0) {
       const intersectedObject = intersects[0].object;
       if (intersectedObject.userData.selected) {
-        return; // Skip already selected lines
+        return;
       }
 
       if (intersectedObject.userData) {
@@ -1009,6 +1083,7 @@ function resetScene() {
 
   currentScore = 0;
   scoreText.innerHTML = "00";
+  updateScore(0);
   resetStars();
 
   if (sphereInter) {
@@ -1117,9 +1192,5 @@ buttonAgain.addEventListener("click", () => {
 
 btnSettingsRestart.addEventListener("click", () => {
   closeSettingModal();
-  resetLevel(currentLevel);
-});
-
-restartHandler.addEventListener("click", () => {
   resetLevel(currentLevel);
 });

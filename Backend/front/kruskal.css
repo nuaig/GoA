@@ -170,6 +170,18 @@ body {
   padding: 0 1em;
 }
 
+/* Header without health-specific styling */
+#header-without-health {
+  width: 10%;
+  padding: 15px;
+  text-align: center;
+  pointer-events: none;
+  background-color: #343a40;
+  border: solid #eaebf1 2px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
 /*Modal*/
 
 .stars__rating {
@@ -313,6 +325,50 @@ body {
   right: 20px; /* Adjust to your liking */
   cursor: pointer;
   transform: translate(0, 0); /* Ensure proper alignment */
+}
+
+/* Parent container styles */
+.mode-selection {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+
+  border-radius: 10px; /* Optional for rounded corners */
+  padding: 5px; /* Add padding inside the container */
+}
+
+/* Buttons filling space */
+.btn.mode-btn {
+  flex-grow: 1; /* Allows buttons to fill the container evenly */
+  background-color: #495057;
+  text-transform: uppercase;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 15px 0;
+  text-align: center;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.training-mode {
+  background-color: #38c172; /* Default green for Training Mode */
+}
+
+.regular-mode {
+  background-color: #e3342f; /* Default red for Regular Mode */
+}
+
+/* Active button styling */
+.mode-btn.active {
+  background-color: #1971c2;
+}
+
+/* Inactive button hover effect */
+.mode-btn:not(.active):hover {
+  background-color: #228be6;
+  color: white;
 }
 
 .level__btn__holder {

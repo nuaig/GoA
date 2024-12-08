@@ -710,7 +710,7 @@ PRIM-ALGORITHM(graph):
           </pre>
         </div>
 
-        <div class="header">
+        <div id="header-with-health" class="header">
           <div class="header-content">
             <div class="health">
               <div class="health-label">Lives</div>
@@ -773,6 +773,14 @@ PRIM-ALGORITHM(graph):
             </div>
           </div>
         </div>
+        <div id="header-without-health" class="header hidden">
+          <div class="header-content">
+            <div class="score">
+              <div class="score-label">Score</div>
+              <div class="score-label-2">00</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="modal modal__settings hidden">
@@ -807,6 +815,17 @@ PRIM-ALGORITHM(graph):
       <h2 class="modal__header level__selection__header">
         Kruskal Room Levels
       </h2>
+      <div id="mode-container" class="mode-selection">
+        <button
+          id="training-mode-btn"
+          class="btn mode-btn training-mode active"
+        >
+          Training Mode
+        </button>
+        <button id="regular-mode-btn" class="btn mode-btn regular-mode">
+          Regular Mode
+        </button>
+      </div>
       <button class="btn btn__level__1 level__btn__holder">
         <p class="btn__level">Level 1</p>
         <div class="level__stars__holder">
