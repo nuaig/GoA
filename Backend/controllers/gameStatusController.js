@@ -19,25 +19,27 @@ export const getGameStatusCon = async (req, res) => {
   }
 };
 
-// Controller to update game status for a user
 export const updateGameStatusCon = async (req, res) => {
-  const { userId, gameName } = req.params;
+  const { userId, gameName, mode } = req.params;
   const { level, score, stars, status } = req.body;
-  console.log(req.body);
+
+  console.log("Params:", req.params); // Log the params
+  console.log("Body:", req.body); // Log the body
 
   try {
     const levelData = { level, score, stars, status };
-    console.log(levelData);
+    console.log("Level Data:", levelData); // Log the level data before sending it
     const updateResponse = await myDB.updateGameStatus(
       userId,
       gameName,
+      mode,
       levelData
     );
 
     if (updateResponse.modifiedCount === 0) {
       return res
         .status(404)
-        .json({ ok: false, msg: "nothing was updated due to not finding any" });
+        .json({ ok: false, msg: "No updates made. Record not found." });
     }
 
     return res
@@ -51,19 +53,18 @@ export const updateGameStatusCon = async (req, res) => {
   }
 };
 
-// Controller to update status from "completed_first_time" to "completed"
+// Controller to update status from "completed_first_time" to "completed" for a specific mode
 export const updateStatusToCompletedCon = async (req, res) => {
-  const { userId, gameName, level } = req.params;
+  const { userId, gameName, mode, level } = req.params;
 
   try {
-    // Call the new database function to update the status
     const updateResponse = await myDB.updateStatusToCompleted(
       userId,
       gameName,
+      mode, // Specify the mode
       parseInt(level)
     );
 
-    // Check if the update was successful
     if (!updateResponse.ok) {
       return res.status(400).json({ ok: false, msg: updateResponse.msg });
     }
@@ -77,14 +78,15 @@ export const updateStatusToCompletedCon = async (req, res) => {
   }
 };
 
-// Controller to unlock game level for a user
+// Controller to unlock a game level for a user in a specific mode
 export const unlockGameLevelCon = async (req, res) => {
-  const { userId, gameName, level } = req.params;
+  const { userId, gameName, mode, level } = req.params;
 
   try {
     const unlockResponse = await myDB.unlockGameLevel(
       userId,
       gameName,
+      mode,
       parseInt(level)
     );
 
@@ -101,7 +103,7 @@ export const unlockGameLevelCon = async (req, res) => {
   }
 };
 
-// Controller to reset all game levels for a user
+// Controller to reset all game statuses (both modes) for a user
 export const resetGameStatusCon = async (req, res) => {
   const { userId } = req.params;
 

@@ -27,37 +27,55 @@ function MyMongoDB() {
   myDB.createGameStatus = async (userId) => {
     const { client, db } = await connect();
     try {
-      // Ensure userId is in ObjectId format if it's not already
       let objectId;
       if (ObjectId.isValid(userId) && String(new ObjectId(userId)) === userId) {
         objectId = new ObjectId(userId);
       } else {
-        objectId = userId; // Treat as string if not ObjectId
+        objectId = userId;
       }
 
-      // Step 2: Set up the initial game status with all three games and their levels
       const initialGameStatus = {
         user_id: objectId,
         games: {
-          Heapsort: [
-            { level: 1, score: 0, stars: 0, status: "unlocked" },
-            { level: 2, score: 0, stars: 0, status: "locked" },
-            { level: 3, score: 0, stars: 0, status: "locked" },
-          ],
-          Prim: [
-            { level: 1, score: 0, stars: 0, status: "unlocked" },
-            { level: 2, score: 0, stars: 0, status: "locked" },
-            { level: 3, score: 0, stars: 0, status: "locked" },
-          ],
-          Kruskal: [
-            { level: 1, score: 0, stars: 0, status: "unlocked" },
-            { level: 2, score: 0, stars: 0, status: "locked" },
-            { level: 3, score: 0, stars: 0, status: "locked" },
-          ],
+          Heapsort: {
+            regular: [
+              { level: 1, score: 0, stars: 0, status: "unlocked" },
+              { level: 2, score: 0, stars: 0, status: "locked" },
+              { level: 3, score: 0, stars: 0, status: "locked" },
+            ],
+            training: [
+              { level: 1, score: 0, stars: 0, status: "unlocked" },
+              { level: 2, score: 0, stars: 0, status: "locked" },
+              { level: 3, score: 0, stars: 0, status: "locked" },
+            ],
+          },
+          Prim: {
+            regular: [
+              { level: 1, score: 0, stars: 0, status: "unlocked" },
+              { level: 2, score: 0, stars: 0, status: "locked" },
+              { level: 3, score: 0, stars: 0, status: "locked" },
+            ],
+            training: [
+              { level: 1, score: 0, stars: 0, status: "unlocked" },
+              { level: 2, score: 0, stars: 0, status: "locked" },
+              { level: 3, score: 0, stars: 0, status: "locked" },
+            ],
+          },
+          Kruskal: {
+            regular: [
+              { level: 1, score: 0, stars: 0, status: "unlocked" },
+              { level: 2, score: 0, stars: 0, status: "locked" },
+              { level: 3, score: 0, stars: 0, status: "locked" },
+            ],
+            training: [
+              { level: 1, score: 0, stars: 0, status: "unlocked" },
+              { level: 2, score: 0, stars: 0, status: "locked" },
+              { level: 3, score: 0, stars: 0, status: "locked" },
+            ],
+          },
         },
       };
 
-      // Step 3: Insert the initial game status into the game_status collection
       const response = await db
         .collection("game_status")
         .insertOne(initialGameStatus);
@@ -72,28 +90,32 @@ function MyMongoDB() {
   };
 
   // Function to update status from "completed_first_time" to "completed"
-  myDB.updateStatusToCompleted = async (userId, gameName, level) => {
+  myDB.updateStatusToCompleted = async (userId, gameName, mode, level) => {
     const { client, db } = await connect();
     try {
       const objectId = new ObjectId(userId);
 
-      // Update status from "completed_first_time" to "completed" for the specific game and level
+      // Use arrayFilters to target the correct element in the array
       const response = await db.collection("game_status").updateOne(
         {
-          user_id: objectId,
-          [`games.${gameName}.level`]: level, // Match the game and level
-          [`games.${gameName}.status`]: "completed_first_time", // Check the current status
+          user_id: objectId, // Match the user
+          [`games.${gameName}.${mode}`]: { $exists: true }, // Ensure the game and mode exist
         },
         {
           $set: {
-            [`games.${gameName}.$.status`]: "completed", // Update to "completed"
+            [`games.${gameName}.${mode}.$[elem].status`]: "completed",
           },
+        },
+        {
+          arrayFilters: [
+            { "elem.level": level, "elem.status": "completed_first_time" },
+          ],
         }
       );
 
       if (response.modifiedCount === 0) {
         console.log(
-          `No status update needed for user ${userId}, game ${gameName}, level ${level}`
+          `No status update needed for user ${userId}, game ${gameName}, mode ${mode}, level ${level}`
         );
         return {
           ok: false,
@@ -102,7 +124,7 @@ function MyMongoDB() {
       }
 
       console.log(
-        `Status updated to 'completed' for user ${userId} in game ${gameName}, level ${level}`
+        `Status updated to 'completed' for user ${userId} in game ${gameName}, mode ${mode}, level ${level}`
       );
       return { ok: true, msg: "Status updated to completed" };
     } catch (err) {
@@ -140,31 +162,31 @@ function MyMongoDB() {
   };
 
   // Update game status for a specific game and level
-  myDB.updateGameStatus = async (userId, gameName, levelData) => {
+  myDB.updateGameStatus = async (userId, gameName, mode, levelData) => {
     const { client, db } = await connect();
     try {
       const objectId = new ObjectId(userId);
+      console.log(levelData);
 
-      // Use arrayFilters to match the correct element in the games array based on the level
       const response = await db.collection("game_status").updateOne(
         {
           user_id: objectId,
-          [`games.${gameName}`]: { $exists: true }, // Ensure the game exists
+          [`games.${gameName}.${mode}`]: { $exists: true }, // Ensure the game and mode exist
         },
         {
           $set: {
-            [`games.${gameName}.$[elem].score`]: levelData.score,
-            [`games.${gameName}.$[elem].stars`]: levelData.stars,
-            [`games.${gameName}.$[elem].status`]: levelData.status,
+            [`games.${gameName}.${mode}.$[elem].score`]: levelData.score,
+            [`games.${gameName}.${mode}.$[elem].stars`]: levelData.stars,
+            [`games.${gameName}.${mode}.$[elem].status`]: levelData.status,
           },
         },
         {
-          arrayFilters: [{ "elem.level": levelData.level }], // Match the level in the array
+          arrayFilters: [{ "elem.level": levelData.level }],
         }
       );
 
       console.log(
-        `Game status updated for user ${userId} in game ${gameName}, level ${levelData.level}`
+        `Game status updated for user ${userId} in game ${gameName}, mode ${mode}, level ${levelData.level}`
       );
       return response;
     } catch (err) {
@@ -175,64 +197,94 @@ function MyMongoDB() {
     }
   };
 
-  myDB.unlockGameLevel = async (userId, gameName, level) => {
+  myDB.unlockGameLevel = async (userId, gameName, mode, level) => {
     const { client, db } = await connect();
     try {
-      // Convert userId to ObjectId if necessary
       const objectId = new ObjectId(userId);
 
-      // Update the status of the specified game and level to 'unlocked'
+      // Log the document before update for debugging
+      const document = await db
+        .collection("game_status")
+        .findOne({ user_id: objectId });
+      console.log("Document before update:", JSON.stringify(document, null, 2));
+
+      // Update the status of the specified game, mode, and level to 'unlocked'
       const response = await db.collection("game_status").updateOne(
         {
           user_id: objectId,
-          [`games.${gameName}.level`]: level, // Match the specific game and level
+          [`games.${gameName}.${mode}`]: { $exists: true }, // Ensure the game and mode exist
         },
         {
           $set: {
-            [`games.${gameName}.$.status`]: "unlocked", // Unlock the level
+            [`games.${gameName}.${mode}.$[elem].status`]: "unlocked", // Unlock the level
           },
+        },
+        {
+          arrayFilters: [{ "elem.level": parseInt(level) }], // Match the level in the array
         }
       );
 
       if (response.modifiedCount === 0) {
-        console.log(`Failed to unlock level ${level} for user ${userId}`);
+        console.log(
+          `Failed to unlock level ${level} for user ${userId} in game ${gameName}, mode ${mode}`
+        );
         return { ok: false, msg: "Failed to unlock the game level" };
       }
 
       console.log(
-        `Level ${level} of game ${gameName} unlocked for user ${userId}`
+        `Level ${level} of game ${gameName} in mode ${mode} unlocked for user ${userId}`
       );
       return { ok: true, msg: `Level ${level} unlocked successfully` };
     } catch (err) {
-      console.error("Error unlocking game level", err.message);
+      console.error("Error unlocking game level:", err.message);
       return { ok: false, msg: "Error unlocking game level" };
     } finally {
       await client.close();
     }
   };
-
   myDB.resetGameStatus = async (userId) => {
     const { client, db } = await connect();
     try {
       const objectId = new ObjectId(userId);
 
-      // Define the reset game status structure
+      // Define the reset game status structure with both regular and training modes
       const resetStatus = {
-        "games.Heapsort": [
-          { level: 1, score: 0, stars: 0, status: "unlocked" },
-          { level: 2, score: 0, stars: 0, status: "locked" },
-          { level: 3, score: 0, stars: 0, status: "locked" },
-        ],
-        "games.Prim": [
-          { level: 1, score: 0, stars: 0, status: "unlocked" },
-          { level: 2, score: 0, stars: 0, status: "locked" },
-          { level: 3, score: 0, stars: 0, status: "locked" },
-        ],
-        "games.Kruskal": [
-          { level: 1, score: 0, stars: 0, status: "unlocked" },
-          { level: 2, score: 0, stars: 0, status: "locked" },
-          { level: 3, score: 0, stars: 0, status: "locked" },
-        ],
+        "games.Heapsort": {
+          regular: [
+            { level: 1, score: 0, stars: 0, status: "unlocked" },
+            { level: 2, score: 0, stars: 0, status: "locked" },
+            { level: 3, score: 0, stars: 0, status: "locked" },
+          ],
+          training: [
+            { level: 1, score: 0, stars: 0, status: "unlocked" },
+            { level: 2, score: 0, stars: 0, status: "locked" },
+            { level: 3, score: 0, stars: 0, status: "locked" },
+          ],
+        },
+        "games.Prim": {
+          regular: [
+            { level: 1, score: 0, stars: 0, status: "unlocked" },
+            { level: 2, score: 0, stars: 0, status: "locked" },
+            { level: 3, score: 0, stars: 0, status: "locked" },
+          ],
+          training: [
+            { level: 1, score: 0, stars: 0, status: "unlocked" },
+            { level: 2, score: 0, stars: 0, status: "locked" },
+            { level: 3, score: 0, stars: 0, status: "locked" },
+          ],
+        },
+        "games.Kruskal": {
+          regular: [
+            { level: 1, score: 0, stars: 0, status: "unlocked" },
+            { level: 2, score: 0, stars: 0, status: "locked" },
+            { level: 3, score: 0, stars: 0, status: "locked" },
+          ],
+          training: [
+            { level: 1, score: 0, stars: 0, status: "unlocked" },
+            { level: 2, score: 0, stars: 0, status: "locked" },
+            { level: 3, score: 0, stars: 0, status: "locked" },
+          ],
+        },
       };
 
       // Update the game status in the database to the reset status

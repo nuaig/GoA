@@ -156,7 +156,7 @@ function applyGlowEffect(material, status, key) {
 
         // Update the status to "completed" using updateStatusToComplete
         try {
-          await gameStatusService.updateStatusToCompleted(key, 3); // Assuming level 3
+          await gameStatusService.updateStatusToCompleted(key, 3, "regular"); // Assuming level 3
           console.log("Status updated to completed in the database.");
         } catch (error) {
           console.error("Error updating status to completed:", error);
@@ -201,11 +201,13 @@ async function createMainDungeon() {
     // Check if level 3 is completed for each algorithm
     // Check if level 3 is completed for each algorithm
     const kruskalStatus =
-      gameStatusService.getLocalGameStatus()?.games?.Kruskal?.[2]?.status;
+      gameStatusService.getLocalGameStatus()?.games?.Kruskal?.regular?.[2]
+        ?.status;
     const primStatus =
-      gameStatusService.getLocalGameStatus()?.games?.Prim?.[2]?.status;
+      gameStatusService.getLocalGameStatus()?.games?.Prim?.regular?.[2]?.status;
     const heapsortStatus =
-      gameStatusService.getLocalGameStatus()?.games?.Heapsort?.[2]?.status;
+      gameStatusService.getLocalGameStatus()?.games?.Heapsort?.regular?.[2]
+        ?.status;
 
     const kruskalCompleted = kruskalStatus.includes("completed");
     const primCompleted = primStatus.includes("completed");

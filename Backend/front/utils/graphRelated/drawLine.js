@@ -152,7 +152,7 @@ export function updateComponentColors(uf, nodes, componentColors) {
 export function drawLine(startCube, endCube, weight, edge, scene) {
   const lineMaterial = new MeshLineMaterial({
     color: 0x74c0fc,
-    lineWidth: 0.1, // Set the desired line width
+    lineWidth: 0.2, // Set the desired line width
   });
 
   const points = [];

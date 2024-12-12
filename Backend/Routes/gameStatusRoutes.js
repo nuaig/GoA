@@ -9,21 +9,21 @@ import {
 
 const router = express.Router();
 
-// Route to get game status
+// Route to get game status for a user
 router.get("/:userId", getGameStatusCon);
 
-// Route to update game status
-router.post("/:userId/:gameName", updateGameStatusCon);
+// Route to update game status for a specific game and mode
+router.post("/:userId/:gameName/:mode", updateGameStatusCon);
 
-// Route to unlock game level
-router.post("/unlock/:userId/:gameName/:level", unlockGameLevelCon);
+// Route to unlock a game level for a specific mode
+router.post("/unlock/:userId/:gameName/:mode/:level", unlockGameLevelCon);
 
-// Route to reset all levels for a user
+// Route to reset all game statuses (both modes) for a user
 router.put("/reset/:userId", resetGameStatusCon);
 
-// Route to update status from "completed_first_time" to "completed"
+// Route to update status from "completed_first_time" to "completed" for a specific mode
 router.post(
-  "/updateToCompleted/:userId/:gameName/:level",
+  "/updateToCompleted/:userId/:gameName/:mode/:level",
   updateStatusToCompletedCon
 );
 
