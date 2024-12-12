@@ -40,6 +40,7 @@ import {
 } from "./utils/graphRelated/drawLine.js";
 
 const uiText = document.getElementById("UI-Text");
+const scoreElements = document.querySelectorAll(".score-label-2");
 const scoreText = document.querySelector(".score-label-2");
 const finalScoreText = document.querySelector(".label__final_score span");
 const labelCompletionText = document.querySelector(".label__completion_text");
@@ -65,7 +66,7 @@ const btnSettingsDiffLvl = document.querySelector(".btn__setting__diffLvl");
 const btnSettingsGoMainDungeon = document.querySelectorAll(
   ".btn__setting__mainDungeon"
 );
-const restartHandler = document.querySelector(".btn__setting__restart");
+
 const settingsCloseButton = document.querySelector(
   ".modal__settings .btn__close"
 );
@@ -76,21 +77,100 @@ const levelsModal = document.querySelector(".modal__level__selection");
 const levelButtons = document.querySelectorAll(".level__btn__holder");
 const btnLevelClose = document.querySelector(".btn__level__close");
 
+// Function to update the score
+function updateScore(newScore) {
+  // Iterate over each element and update its text content
+  scoreElements.forEach((element) => {
+    element.textContent = newScore.toString().padStart(2, "0"); // Ensures a two-digit format (e.g., '00')
+  });
+}
+
+// Function to hide stars
+function hideStars() {
+  const svgStars = document.querySelectorAll(
+    ".level__stars__holder svg.feather-star"
+  );
+  svgStars.forEach((star) => {
+    star.style.visibility = "hidden"; // Hide stars
+  });
+}
+
+// Function to show stars
+function showStars() {
+  const svgStars = document.querySelectorAll(
+    ".level__stars__holder svg.feather-star"
+  );
+  svgStars.forEach((star) => {
+    star.style.visibility = "visible"; // Show stars
+  });
+}
+
+// Function to toggle headers
+function toggleHeader(showHealth) {
+  const headerWithHealth = document.getElementById("header-with-health");
+  const headerWithoutHealth = document.getElementById("header-without-health");
+
+  if (showHealth) {
+    headerWithHealth.classList.remove("hidden");
+    headerWithoutHealth.classList.add("hidden");
+  } else {
+    headerWithHealth.classList.add("hidden");
+    headerWithoutHealth.classList.remove("hidden");
+  }
+}
+
+async function toggleMode(mode) {
+  if (!gameStatusService) {
+    console.error("Error: gameStatusService is not initialized.");
+    return;
+  }
+
+  const trainingBtn = document.getElementById("training-mode-btn");
+  const regularBtn = document.getElementById("regular-mode-btn");
+
+  if (mode === "training") {
+    trainingBtn.classList.add("active");
+    regularBtn.classList.remove("active");
+    choosingModeNotCurrent = "training";
+    hideStars(); // Hide stars for training mode
+    // toggleHeader(false); // Hide health bar for training mode
+  } else if (mode === "regular") {
+    regularBtn.classList.add("active");
+    trainingBtn.classList.remove("active");
+    choosingModeNotCurrent = "regular";
+    console.log(choosingModeNotCurrent);
+    showStars(); // Show stars for regular mode
+    // toggleHeader(true); // Show health bar for regular mode
+  }
+
+  // Initialize level status for the selected mode
+  await initializeLevelStatus(mode);
+}
+
+// Event listeners for mode buttons
+document.getElementById("training-mode-btn").addEventListener("click", () => {
+  toggleMode("training");
+});
+
+document.getElementById("regular-mode-btn").addEventListener("click", () => {
+  toggleMode("regular");
+});
+
+// Initialize to regular mode
+// toggleMode("regular");
+
 let isModalOpen = false;
 
 let currentScore = 0;
 let currentLevel = 1;
+let currentMode;
+let choosingModeNotCurrent;
 let curNodes;
 let curEdges;
 let graph;
-// Real Game Difficulty
-// const levelConfig = {
-//   1: { nodes: 6, edges: 9 },
-//   2: { nodes: 7, edges: 10 },
-//   3: { nodes: 8, edges: 12 },
-// };
+
 const levelConfig = {
-  1: { nodes: 3, edges: 3 },
+  1: { nodes: 4, edges: 5 },
   2: { nodes: 3, edges: 3 },
   3: { nodes: 3, edges: 3 },
 };
@@ -119,10 +199,9 @@ let gameStatusService;
 // Add an event listener to initialize the game after login
 document.addEventListener("DOMContentLoaded", async function () {
   try {
-    // Make a request to check if the user is logged in
     const response = await fetch("/api/users/getUser", {
       method: "GET",
-      credentials: "include", // Include cookies in the request
+      credentials: "include",
     });
 
     if (response.ok) {
@@ -132,11 +211,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       // Initialize GameStatusService with the logged-in userId
       gameStatusService = new GameStatusService(userData.id);
 
-      // Await the initialization of GameStatusService (including fetching game status)
+      // Await the initialization of GameStatusService
       await gameStatusService.init();
 
-      // Now that gameStatusService is initialized, initialize the level status
-      await initializeLevelStatus();
+      // Ensure toggleMode is called only after initialization
+      await toggleMode("regular");
     } else {
       console.warn("User is not logged in. Redirecting to login page.");
       window.location.href = "signInSignUp.html";
@@ -146,24 +225,36 @@ document.addEventListener("DOMContentLoaded", async function () {
     window.location.href = "signInSignUp.html";
   }
 });
-
-async function initializeLevelStatus() {
+async function initializeLevelStatus(mode) {
   try {
+    if (!gameStatusService) {
+      console.error("Error: gameStatusService is not initialized.");
+      return;
+    }
+
     // Fetch game status for the user
     const gameStatus = await gameStatusService.getLocalGameStatus();
-    console.log(gameStatus);
 
     if (!gameStatus) {
       console.error("No game status found for this user.");
       return;
     }
 
+    // Reset all levels to the locked state and clear stars
+    resetAllLevels();
+
     let highestCompletedLevel = 0;
 
-    // Directly loop through the "Kruskal" levels in the game status
-    const primLevels = gameStatus.games["Prim"];
+    // Get the specific levels based on the selected mode
+    const primLevels = gameStatus.games["Prim"]?.[mode];
+    if (!primLevels) {
+      console.error(`No levels found for mode: ${mode}`);
+      return;
+    }
+
+    console.log(`Initializing levels for mode: ${mode}`, primLevels);
+
     primLevels.forEach((gameData, index) => {
-      console.log(gameData);
       const level = index + 1; // Levels are 1-based index
 
       // Find the button and star elements for the current level
@@ -179,7 +270,7 @@ async function initializeLevelStatus() {
       for (let i = 0; i < stars.length; i++) {
         if (i < gameData.stars) {
           stars[i].classList.add("filled");
-          stars[i].style.fill = "#a5d8ff"; // Gold color for filled stars
+          stars[i].style.fill = "#a5d8ff"; // Filled stars color
         } else {
           stars[i].classList.remove("filled");
           stars[i].style.fill = "none"; // Default color for unfilled stars
@@ -205,6 +296,43 @@ async function initializeLevelStatus() {
   }
 }
 
+// Function to reset all levels to the original state
+function resetAllLevels() {
+  const levelButtons = document.querySelectorAll(".level__btn__holder");
+
+  levelButtons.forEach((button, index) => {
+    button.classList.add("level__locked"); // Lock the level
+
+    // Reset stars
+    const stars = button.querySelectorAll(
+      ".level__stars__holder svg.feather-star"
+    );
+    stars.forEach((star) => {
+      star.classList.remove("filled");
+      star.style.fill = "none"; // Default color for unfilled stars
+    });
+
+    // Show lock icon
+    const lockIcon = button.querySelector(".feather-lock");
+    if (lockIcon) {
+      lockIcon.style.display = "block"; // Show the lock icon
+    }
+  });
+
+  // Always unlock the first level
+  const firstLevelButton = document.querySelector(".btn__level__1");
+  if (firstLevelButton) {
+    firstLevelButton.classList.remove("level__locked");
+    const lockIcon = firstLevelButton.querySelector(".feather-lock");
+    if (lockIcon) {
+      lockIcon.style.display = "none"; // Hide the lock icon
+    }
+  }
+
+  console.log(
+    "All levels have been reset to the original state, and the first level is unlocked."
+  );
+}
 function unlockLevelUI(level) {
   const nextLevelButton = document.querySelector(`.btn__level__${level}`);
   if (nextLevelButton) {
@@ -250,21 +378,35 @@ levelButtons.forEach((button, index) => {
   button.addEventListener("click", () => {
     if (button.classList.contains("level__locked")) {
       console.log(`Level ${index + 1} is locked.`);
-      return;
+      return; // Exit if the level is locked
     }
 
     closeLevelModal();
 
-    const chosenLevel = index + 1; // Set the current level to the selected level
+    const chosenLevel = index + 1; // Levels are 1-based
     console.log(`Level ${chosenLevel} selected.`);
-    if (chosenLevel != currentLevel) {
+
+    // Only reset the level if it is different from the current level
+    // or the mode has changed
+    if (
+      chosenLevel !== currentLevel ||
+      choosingModeNotCurrent !== currentMode
+    ) {
       currentLevel = chosenLevel;
+      currentMode = choosingModeNotCurrent; // Update the current mode
       window.removeEventListener("mousemove", onMouseMove, false);
       window.removeEventListener("click", onClick, false);
-      resetLevel(currentLevel); // This will now reset the scene fully
-    }
 
-    initailCameraAnimationGSAP();
+      resetLevel(currentLevel); // Reset the scene for the chosen level
+
+      // Show or hide the health bar based on the chosen mode
+      if (currentMode === "regular") {
+        toggleHeader(true); // Show health bar for regular mode
+      } else {
+        toggleHeader(false); // Hide health bar for training mode
+      }
+      initailCameraAnimationGSAP(); // Trigger the camera animation
+    }
   });
 });
 
@@ -304,30 +446,38 @@ settingsTogglerEle.addEventListener("click", () => {
   settingsModal.classList.toggle("hidden");
   overlay.classList.toggle("hidden");
   isModalOpen = !isModalOpen;
+  disableEventListeners();
 });
 
 settingsCloseButton.addEventListener("click", () => {
   settingsModal.classList.toggle("hidden");
   overlay.classList.toggle("hidden");
   isModalOpen = false;
+  enableEventListeners();
 });
 
 function closeLevelModal() {
   levelsModal.classList.add("hidden");
   overlay.classList.add("hidden");
   isModalOpen = false;
-}
 
+  // Delay enabling event listeners by 300ms
+  setTimeout(() => {
+    enableEventListeners();
+  }, 300);
+}
 function openLevelModal() {
   levelsModal.classList.remove("hidden");
   overlay.classList.remove("hidden");
   isModalOpen = true;
+  disableEventListeners();
 }
 
 function closeSettingModal() {
   settingsModal.classList.add("hidden");
   overlay.classList.add("hidden");
   isModalOpen = false;
+  enableEventListeners();
 }
 
 function openSettingModal() {
@@ -372,11 +522,16 @@ function initailCameraAnimationGSAP() {
   });
 }
 
-btnSettingsDiffLvl.addEventListener("click", (e) => {
+btnSettingsDiffLvl.addEventListener("click", async (e) => {
   e.preventDefault();
-  closeSettingModal();
+
+  // Close the settings modal first
+  await closeSettingModal();
+
+  // Open the levels modal after the settings modal is fully closed
   btnLevelClose.classList.remove("hidden");
   openLevelModal();
+  disableEventListeners();
 });
 
 btnLevelClose.addEventListener("click", (e) => {
@@ -391,8 +546,10 @@ btnSettingsGoMainDungeon.forEach((button) => {
 });
 
 let curGameSession;
+disableEventListeners();
 
 buttonStart.addEventListener("click", () => {
+  disableEventListeners();
   // overlay.classList.add("hidden");
   instructionModal.classList.add("hidden");
   levelsModal.classList.remove("hidden");
@@ -500,6 +657,7 @@ pseudoBoxButton.addEventListener("click", () => {
 const openModal = function (currentLevel) {
   // Show modal and overlay
   modalCompletion.classList.remove("hidden");
+  disableEventListeners();
   overlay.classList.remove("hidden");
 
   // Select the "Next Level" button
@@ -518,6 +676,7 @@ const openModal = function (currentLevel) {
 const closeModal = function () {
   modalCompletion.classList.add("hidden");
   overlay.classList.add("hidden");
+  enableEventListeners();
 };
 
 async function createModels() {
@@ -679,6 +838,7 @@ function handleSelectionEffect(intersectedObject) {
   intersectedObject.userData.ring = permanentRing;
 
   currentScore += 10;
+  updateScore(currentScore);
   scoreText.innerHTML = `${currentScore}`;
 }
 
@@ -715,9 +875,14 @@ function handleEdgeSelection(
       finalScoreText.innerHTML = `${currentScore}`;
       const algoName = currentAlgorithm === "kruskal" ? "Kruskal" : "Prim";
       labelCompletionText.innerHTML = `
-        You have successfully completed level ${currentLevel} of ${algoName}'s Algorithm!
+        You have successfully completed level ${currentLevel} of ${algoName}'s Algorithm in ${currentMode} mode!
       `;
-      const totalStars = setStars(health);
+      let totalStars;
+      if (currentMode == "regular") {
+        totalStars = setStars(health);
+      } else {
+        totalStars = setStars(4);
+      }
       console.log(totalStars);
 
       curGameSession.setFinalScore(currentScore);
@@ -736,18 +901,24 @@ function handleEdgeSelection(
       // Store the score and stars in localStorage with "kruskal" included
       const levelData = { score: currentScore, stars: totalStars };
       console.log(currentLevel);
-      console.log(gameStatusService.gameStatus.games.Prim[2].status);
+      console.log(currentMode);
+      // console.log(gameStatusService.gameStatus.games.Kruskal[2].status);
       updateLevelStatus(currentLevel, totalStars);
       const status_update_string =
         currentLevel != 3 ? "completed" : "completed_first_time";
       gameStatusService.updateGameStatus(
-        "Prim",
+        algoName,
         currentLevel,
+        currentMode,
         currentScore,
         totalStars + 1,
         status_update_string
       );
-      gameStatusService.unlockGameLevel("Prim", currentLevel + 1);
+      gameStatusService.unlockGameLevel(
+        algoName,
+        currentLevel + 1,
+        currentMode
+      );
 
       openModal(currentLevel);
       window.removeEventListener("mousemove", onMouseMove, false);
@@ -891,7 +1062,7 @@ function drawLines() {
     if (intersects.length > 0) {
       const intersectedObject = intersects[0].object;
       if (intersectedObject.userData.selected) {
-        return; // Skip already selected lines
+        return;
       }
 
       if (intersectedObject.userData) {
@@ -978,39 +1149,66 @@ async function createDungeonRoom() {
 
 createDungeonRoom();
 
-function resetScene() {
-  chestList.forEach((chest) => scene.remove(chest));
-  openChestList.forEach((chest) => scene.remove(chest));
-  chestLabelList.forEach((label) => scene.remove(label));
-  edgeList.forEach((edge) => scene.remove(edge));
-  edgeLabelList.forEach((label) => scene.remove(label));
-  ringList.forEach((ring) => scene.remove(ring));
+// Function to enable event listeners
+function enableEventListeners() {
+  window.addEventListener("mousemove", onMouseMove, false);
+  window.addEventListener("click", onClick, false);
+}
 
+// Function to disable event listeners
+function disableEventListeners() {
+  window.removeEventListener("mousemove", onMouseMove, false);
+  window.removeEventListener("click", onClick, false);
+}
+
+function resetScene() {
+  // Remove objects from the scene and dispose of their resources
+  chestList.forEach((chest) => {
+    scene.remove(chest);
+    if (chest.geometry) chest.geometry.dispose();
+    if (chest.material) chest.material.dispose();
+  });
+  openChestList.forEach((chest) => {
+    scene.remove(chest);
+    if (chest.geometry) chest.geometry.dispose();
+    if (chest.material) chest.material.dispose();
+  });
+  chestLabelList.forEach((label) => {
+    scene.remove(label);
+    if (label.geometry) label.geometry.dispose();
+    if (label.material) label.material.dispose();
+  });
+  edgeList.forEach((edge) => {
+    scene.remove(edge);
+    if (edge.geometry) edge.geometry.dispose();
+    if (edge.material) edge.material.dispose();
+  });
+  edgeLabelList.forEach((label) => {
+    scene.remove(label);
+    if (label.geometry) label.geometry.dispose();
+    if (label.material) label.material.dispose();
+  });
+  ringList.forEach((ring) => {
+    scene.remove(ring);
+    if (ring.geometry) ring.geometry.dispose();
+    if (ring.material) ring.material.dispose();
+  });
+
+  // Reset arrays and variables
   chestList.length = 0;
   openChestList.length = 0;
   chestLabelList.length = 0;
   edgeList.length = 0;
   edgeLabelList.length = 0;
   ringList.length = 0;
-  labels.length = 0;
-  mixers.length = 0;
 
-  chestList = [];
-  openChestList = [];
-  chestLabelList = [];
-  edgeList = [];
-  edgeLabelList = [];
-  ringList = [];
-  sphereInter;
-  labels = [];
+  // Clear raycaster references
+  window.removeEventListener("mousemove", onMouseMove, false);
+  window.removeEventListener("click", onClick, false);
+  onMouseMove = null;
+  onClick = null;
 
-  usedColors.clear();
-  componentColors = {};
-
-  currentScore = 0;
-  scoreText.innerHTML = "00";
-  resetStars();
-
+  // Reset any leftover resources
   if (sphereInter) {
     scene.remove(sphereInter);
     sphereInter.geometry.dispose();
@@ -1031,6 +1229,13 @@ function resetScene() {
   }
 
   hoverRing.visible = false;
+  usedColors.clear();
+  componentColors = {};
+
+  // Reset score and UI
+  currentScore = 0;
+  updateScore(0);
+  resetStars();
 }
 
 function createHoverElements() {
@@ -1078,7 +1283,7 @@ function setUpGameModel(currentLevel) {
 function resetLevel(curlvl) {
   uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
   health = resetHealth();
-
+  document.querySelector(".Hint-Text").classList.add("hidden");
   closeModal();
   closePseudocode();
   resetScene();
@@ -1117,9 +1322,5 @@ buttonAgain.addEventListener("click", () => {
 
 btnSettingsRestart.addEventListener("click", () => {
   closeSettingModal();
-  resetLevel(currentLevel);
-});
-
-restartHandler.addEventListener("click", () => {
   resetLevel(currentLevel);
 });
