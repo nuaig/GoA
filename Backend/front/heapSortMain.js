@@ -28,7 +28,7 @@ import {
   updateLabelRotations,
   removeFromScene,
 } from "./utils/UI/ui.js";
-
+import { GameStatusService } from "./utils/gameStatus/gameStatusService.js";
 import {
   effectForHoverSelect,
   removingEffectForHoverSelect,
@@ -92,63 +92,43 @@ camera.position.set(startPosition.x, startPosition.y, startPosition.z);
 
 // Animate the camera position with GSAP
 
-const uiInstructions = document.getElementById("UI-Text");
+const uiText = document.getElementById("UI-Text");
+const scoreElements = document.querySelectorAll(".score-label-2");
 const scoreText = document.querySelector(".score-label-2");
+const finalScoreText = document.querySelector(".label__final_score span");
+const labelCompletionText = document.querySelector(".label__completion_text");
+const stars = document.querySelectorAll(".star path:last-child");
 
-const modal = document.querySelector(".modal");
 const instructionModal = document.querySelector(".instruction");
 const overlay = document.querySelector(".overlay");
+const hoverEffects = document.querySelectorAll(".hover");
+
 const pseudoBoxButton = document.querySelector(".Pesudocode-Box-Action");
-const finalScoreText = document.querySelector(".label__final_score span");
+const reArrangeButton = document.querySelector(".Rearrange-Action");
 
-const buttonStart = document.querySelector(".btn__instruction__start");
-const buttonNext = document.querySelector(".btn__next");
+const buttonNextLevel = document.querySelector(".btn__next");
+const modalCompletion = document.querySelector(".modal__completion");
+
 const buttonAgain = document.querySelector(".btn__again");
+const buttonStart = document.querySelector(".btn__instruction__start");
 
-buttonStart.addEventListener("click", () => {
-  overlay.classList.add("hidden");
-  instructionModal.classList.add("hidden");
-  gsap.to(camera.position, {
-    x: endPosition.x,
-    y: endPosition.y,
-    z: endPosition.z,
-    duration: 4, // Duration of the animation in seconds
-    ease: "power2.inOut", // Easing function for smooth movement
-    onUpdate: () => {
-      // Ensure the camera keeps looking at the target point
-      camera.lookAt(new THREE.Vector3(0, 2, 0));
-    },
-  });
-});
+const settingsModal = document.querySelector(".modal__settings");
+const settingsTogglerEle = document.querySelector(".settings__icon");
+const btnSettingsRestart = document.querySelector(".btn__setting__restart");
+const btnSettingsDiffLvl = document.querySelector(".btn__setting__diffLvl");
+const btnSettingsGoMainDungeon = document.querySelectorAll(
+  ".btn__setting__mainDungeon"
+);
 
-pseudoBoxButton.addEventListener("click", () => {
-  toggleInstructions();
-});
+const settingsCloseButton = document.querySelector(
+  ".modal__settings .btn__close"
+);
 
-const openModal = function () {
-  modal.classList.remove("hidden");
-  overlay.classList.remove("hidden");
-};
+const levelsModal = document.querySelector(".modal__level__selection");
 
-const closeModal = function () {
-  modal.classList.add("hidden");
-  overlay.classList.add("hidden");
-};
-
-function openCompleteModal(currentScore, health, finalScoreHolder) {
-  currentScore = Math.floor(currentScore * ((health + 1) * 0.1 + 1));
-
-  finalScoreHolder.innerHTML = `${currentScore}`;
-  setStars(health);
-  openModal();
-  return currentScore;
-}
-
-// const picture = new THREE.Object3D();
-// loadStaticObject("./src/painting.glb", picture, scene);
-// picture.rotation.y = Math.PI / 2;
-// picture.position.set(0, 2, -0.5);
-// picture.scale.set(1, 3, 4);
+// Select all level buttons
+const levelButtons = document.querySelectorAll(".level__btn__holder");
+const btnLevelClose = document.querySelector(".btn__level__close");
 
 var cameraOrbit = new OrbitControls(camera, renderer.domElement);
 cameraOrbit.target.set(0, 2, 0); // Set the OrbitControls target
@@ -167,6 +147,8 @@ let correctPositions = new Map();
 let currentSwapIndices = null;
 let lastUnsortedIndex = arrayElements.length;
 let currentStep = 0;
+let currentMode;
+let choosingModeNotCurrent = null; // Initialize variable
 
 // Step 1 : Building Binary Heap Tree
 let currentIndexForBuildingBinaryHeap = 0;
@@ -184,12 +166,15 @@ let indexTexts = [];
 let valueTexts = [];
 let treeNodeTexts = [];
 let DebossedAreaTexts = [];
+let trackedObjects = [];
 
 let health = 4;
 
-const levels = [9, 2, 5];
+const levels = [5, 7, 9];
 let currentLevel = 0;
 let curlvlNodesNum = levels[currentLevel];
+
+let isModalOpen = false;
 
 const levelDescriptions = [
   "Build the original binary heap from the array",
@@ -203,6 +188,417 @@ const stepInstructions = [
   "For this step, find the lowest non-leaf node that is smaller than its children and swap it with the largest child to maintain heap property.",
   "For this step, repeatedly remove the largest node (the root of the heap) and place it at the end of the array, then reheapify.",
 ];
+// Function to update the score
+function updateScore(newScore) {
+  // Iterate over each element and update its text content
+  scoreElements.forEach((element) => {
+    element.textContent = newScore.toString().padStart(2, "0"); // Ensures a two-digit format (e.g., '00')
+  });
+}
+
+// Function to hide stars
+function hideStars() {
+  const svgStars = document.querySelectorAll(
+    ".level__stars__holder svg.feather-star"
+  );
+  svgStars.forEach((star) => {
+    star.style.visibility = "hidden"; // Hide stars
+  });
+}
+
+// Function to show stars
+function showStars() {
+  const svgStars = document.querySelectorAll(
+    ".level__stars__holder svg.feather-star"
+  );
+  svgStars.forEach((star) => {
+    star.style.visibility = "visible"; // Show stars
+  });
+}
+
+// Function to toggle headers
+function toggleHeader(showHealth) {
+  const headerWithHealth = document.getElementById("header-with-health");
+  const headerWithoutHealth = document.getElementById("header-without-health");
+
+  if (showHealth) {
+    headerWithHealth.classList.remove("hidden");
+    headerWithoutHealth.classList.add("hidden");
+  } else {
+    headerWithHealth.classList.add("hidden");
+    headerWithoutHealth.classList.remove("hidden");
+  }
+}
+
+async function toggleMode(mode) {
+  if (!gameStatusService) {
+    console.error("Error: gameStatusService is not initialized.");
+    return;
+  }
+
+  const trainingBtn = document.getElementById("training-mode-btn");
+  const regularBtn = document.getElementById("regular-mode-btn");
+
+  if (mode === "training") {
+    trainingBtn.classList.add("active");
+    regularBtn.classList.remove("active");
+    choosingModeNotCurrent = "training";
+    hideStars(); // Hide stars for training mode
+    // toggleHeader(false); // Hide health bar for training mode
+  } else if (mode === "regular") {
+    regularBtn.classList.add("active");
+    trainingBtn.classList.remove("active");
+    choosingModeNotCurrent = "regular";
+    console.log(choosingModeNotCurrent);
+    showStars(); // Show stars for regular mode
+    // toggleHeader(true); // Show health bar for regular mode
+  }
+
+  // Initialize level status for the selected mode
+  await initializeLevelStatus(mode);
+}
+
+// Event listeners for mode buttons
+document.getElementById("training-mode-btn").addEventListener("click", () => {
+  toggleMode("training");
+});
+
+document.getElementById("regular-mode-btn").addEventListener("click", () => {
+  toggleMode("regular");
+});
+
+let gameStatusService;
+
+// Add an event listener to initialize the game after login
+document.addEventListener("DOMContentLoaded", async function () {
+  try {
+    const response = await fetch("/api/users/getUser", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      console.log("User is logged in:", userData);
+
+      // Initialize GameStatusService with the logged-in userId
+      gameStatusService = new GameStatusService(userData.id);
+
+      // Await the initialization of GameStatusService
+      await gameStatusService.init();
+
+      // Ensure toggleMode is called only after initialization
+      await toggleMode("regular");
+    } else {
+      console.warn("User is not logged in. Redirecting to login page.");
+      // window.location.href = "signInSignUp.html";
+    }
+  } catch (error) {
+    console.error("Error checking login status:", error);
+    // window.location.href = "signInSignUp.html";
+  }
+});
+async function initializeLevelStatus(mode) {
+  try {
+    if (!gameStatusService) {
+      console.error("Error: gameStatusService is not initialized.");
+      return;
+    }
+
+    // Fetch game status for the user
+    const gameStatus = await gameStatusService.getLocalGameStatus();
+
+    if (!gameStatus) {
+      console.error("No game status found for this user.");
+      return;
+    }
+
+    // Reset all levels to the locked state and clear stars
+    resetAllLevels();
+
+    let highestCompletedLevel = 0;
+
+    // Get the specific levels based on the selected mode
+    const heapSortLevels = gameStatus.games["Heapsort"]?.[mode];
+    if (!heapSortLevels) {
+      console.error(`No levels found for mode: ${mode}`);
+      return;
+    }
+
+    console.log(`Initializing levels for mode: ${mode}`, heapSortLevels);
+
+    heapSortLevels.forEach((gameData, index) => {
+      const level = index + 1; // Levels are 1-based index
+
+      // Find the button and star elements for the current level
+      const currentLevelButton = document.querySelector(
+        `.btn__level__${level}`
+      );
+      const currentStarsHolder = currentLevelButton.querySelector(
+        ".level__stars__holder"
+      );
+
+      // Update the stars based on the level data
+      const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
+      for (let i = 0; i < stars.length; i++) {
+        if (i < gameData.stars) {
+          stars[i].classList.add("filled");
+          stars[i].style.fill = "#a5d8ff"; // Filled stars color
+        } else {
+          stars[i].classList.remove("filled");
+          stars[i].style.fill = "none"; // Default color for unfilled stars
+        }
+      }
+
+      // Check if the level is completed and track the highest completed level
+      if (gameData.status === "completed") {
+        highestCompletedLevel = level;
+        unlockLevelUI(level);
+      }
+    });
+
+    // Unlock the next level if there is a completed level
+    if (
+      highestCompletedLevel > 0 &&
+      highestCompletedLevel < heapSortLevels.length
+    ) {
+      unlockLevelUI(highestCompletedLevel + 1);
+    }
+  } catch (error) {
+    console.error("Error initializing level status:", error);
+  }
+}
+
+// Function to reset all levels to the original state
+function resetAllLevels() {
+  const levelButtons = document.querySelectorAll(".level__btn__holder");
+
+  levelButtons.forEach((button, index) => {
+    button.classList.add("level__locked"); // Lock the level
+
+    // Reset stars
+    const stars = button.querySelectorAll(
+      ".level__stars__holder svg.feather-star"
+    );
+    stars.forEach((star) => {
+      star.classList.remove("filled");
+      star.style.fill = "none"; // Default color for unfilled stars
+    });
+
+    // Show lock icon
+    const lockIcon = button.querySelector(".feather-lock");
+    if (lockIcon) {
+      lockIcon.style.display = "block"; // Show the lock icon
+    }
+  });
+
+  // Always unlock the first level
+  const firstLevelButton = document.querySelector(".btn__level__1");
+  if (firstLevelButton) {
+    firstLevelButton.classList.remove("level__locked");
+    const lockIcon = firstLevelButton.querySelector(".feather-lock");
+    if (lockIcon) {
+      lockIcon.style.display = "none"; // Hide the lock icon
+    }
+  }
+
+  console.log(
+    "All levels have been reset to the original state, and the first level is unlocked."
+  );
+}
+
+function unlockLevelUI(level) {
+  const nextLevelButton = document.querySelector(`.btn__level__${level}`);
+  if (nextLevelButton) {
+    nextLevelButton.classList.remove("level__locked");
+    const lockIcon = nextLevelButton.querySelector(".feather-lock");
+    if (lockIcon) {
+      lockIcon.style.display = "none"; // Hide the lock icon
+    }
+  }
+}
+
+function updateLevelStatus(level, starsCount) {
+  const currentLevelButton = document.querySelector(`.btn__level__${level}`);
+  const currentStarsHolder = currentLevelButton.querySelector(
+    ".level__stars__holder"
+  );
+
+  // Update stars based on the zero-based starsCount
+  const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
+  for (let i = 0; i < stars.length; i++) {
+    if (i <= starsCount) {
+      stars[i].classList.add("filled");
+      stars[i].style.fill = "#a5d8ff"; // Gold color for filled stars
+    } else {
+      stars[i].classList.remove("filled");
+      stars[i].style.fill = "none"; // Default color for unfilled stars
+    }
+  }
+
+  // Unlock the next level
+  const nextLevel = level + 1;
+  const nextLevelButton = document.querySelector(`.btn__level__${nextLevel}`);
+  if (nextLevelButton) {
+    nextLevelButton.classList.remove("level__locked");
+    const lockIcon = nextLevelButton.querySelector(".feather-lock");
+    if (lockIcon) {
+      lockIcon.style.display = "none"; // Hide the lock icon
+    }
+  }
+}
+
+levelButtons.forEach((button, index) => {
+  button.addEventListener("click", () => {
+    if (button.classList.contains("level__locked")) {
+      console.log(`Level ${index + 1} is locked.`);
+      return; // Exit if the level is locked
+    }
+
+    closeLevelModal();
+
+    const chosenLevel = index + 1; // Levels are 1-based
+    console.log(`Level ${chosenLevel} selected.`);
+
+    // Only reset the level if it is different from the current level
+    // or the mode has changed
+    if (
+      chosenLevel !== currentLevel ||
+      choosingModeNotCurrent !== currentMode
+    ) {
+      currentLevel = chosenLevel;
+      currentMode = choosingModeNotCurrent; // Update the current mode
+
+      resetLevel(currentLevel); // Reset the scene for the chosen level
+
+      // Show or hide the health bar based on the chosen mode
+      if (currentMode === "regular") {
+        toggleHeader(true); // Show health bar for regular mode
+      } else {
+        toggleHeader(false); // Hide health bar for training mode
+      }
+      gsap.to(camera.position, {
+        x: endPosition.x,
+        y: endPosition.y,
+        z: endPosition.z,
+        duration: 4, // Duration of the animation in seconds
+        ease: "power2.inOut", // Easing function for smooth movement
+        onUpdate: () => {
+          // Ensure the camera keeps looking at the target point
+          camera.lookAt(new THREE.Vector3(0, 2, 0));
+        },
+      });
+      // initailCameraAnimationGSAP(); // Trigger the camera animation
+    }
+  });
+});
+
+buttonStart.addEventListener("click", () => {
+  overlay.classList.add("hidden");
+  instructionModal.classList.add("hidden");
+  // gsap.to(camera.position, {
+  //   x: endPosition.x,
+  //   y: endPosition.y,
+  //   z: endPosition.z,
+  //   duration: 4, // Duration of the animation in seconds
+  //   ease: "power2.inOut", // Easing function for smooth movement
+  //   onUpdate: () => {
+  //     // Ensure the camera keeps looking at the target point
+  //     camera.lookAt(new THREE.Vector3(0, 2, 0));
+  //   },
+  // });
+});
+
+pseudoBoxButton.addEventListener("click", () => {
+  toggleInstructions();
+});
+
+const openModal = function () {
+  modalCompletion.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+};
+
+const closeModal = function () {
+  modalCompletion.classList.add("hidden");
+  overlay.classList.add("hidden");
+  // enableEventListeners();
+};
+
+function openCompleteModal(currentScore, health, finalScoreHolder) {
+  currentScore = Math.floor(currentScore * ((health + 1) * 0.1 + 1));
+
+  finalScoreHolder.innerHTML = `${currentScore}`;
+  setStars(health);
+  openModal();
+  return currentScore;
+}
+
+settingsTogglerEle.addEventListener("click", () => {
+  settingsModal.classList.toggle("hidden");
+  overlay.classList.toggle("hidden");
+  isModalOpen = !isModalOpen;
+  // disableEventListeners();
+});
+
+settingsCloseButton.addEventListener("click", () => {
+  settingsModal.classList.toggle("hidden");
+  overlay.classList.toggle("hidden");
+  isModalOpen = false;
+  // enableEventListeners();
+});
+
+function closeLevelModal() {
+  levelsModal.classList.add("hidden");
+  overlay.classList.add("hidden");
+  isModalOpen = false;
+
+  // Delay enabling event listeners by 300ms
+  // setTimeout(() => {
+  //   enableEventListeners();
+  // }, 300);
+}
+function openLevelModal() {
+  levelsModal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+  isModalOpen = true;
+  // disableEventListeners();
+}
+
+function closeSettingModal() {
+  settingsModal.classList.add("hidden");
+  overlay.classList.add("hidden");
+  isModalOpen = false;
+  // enableEventListeners();
+}
+
+btnSettingsDiffLvl.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  // Close the settings modal first
+  await closeSettingModal();
+
+  // Open the levels modal after the settings modal is fully closed
+  btnLevelClose.classList.remove("hidden");
+  openLevelModal();
+  // disableEventListeners();
+});
+
+btnLevelClose.addEventListener("click", (e) => {
+  e.preventDefault();
+  closeLevelModal();
+});
+
+btnSettingsGoMainDungeon.forEach((button) => {
+  button.addEventListener("click", () => {
+    window.location.href = "mainDungeon.html";
+  });
+});
+
+// const picture = new THREE.Object3D();
+// loadStaticObject("./src/painting.glb", picture, scene);
+// picture.rotation.y = Math.PI / 2;
+// picture.position.set(0, 2, -0.5);
+// picture.scale.set(1, 3, 4);
 
 document.addEventListener("DOMContentLoaded", generateArray);
 
@@ -257,12 +653,12 @@ async function generateArray() {
   }
   lastUnsortedIndex = arrayElements.length;
 
-  // createBinaryHeapTree(); wrote createDebossedAreas() instead
   createDebossedAreas(
     curlvlNodesNum,
     correctPositions,
     scene,
-    DebossedAreaTexts
+    DebossedAreaTexts,
+    trackedObjects
   );
   checkLevelCompletionAndUpdate();
 }
@@ -345,14 +741,14 @@ function advanceStep() {
     );
     displayMessage(
       "Congratulations! Level completed. Moving to the next step...",
-      uiInstructions
+      uiText
     );
     setTimeout(() => {
       if (currentStep == 1) {
         makeTextMeshesVisible();
-        displayMessage(stepInstructions[currentStep], uiInstructions);
+        displayMessage(stepInstructions[currentStep], uiText);
       } else if (currentStep == 2) {
-        displayMessage(stepInstructions[currentStep], uiInstructions);
+        displayMessage(stepInstructions[currentStep], uiText);
       }
     }, 1000);
 
@@ -360,7 +756,7 @@ function advanceStep() {
   } else {
     displayMessage(
       "Congratulations! You've completed the heap sort game!",
-      uiInstructions
+      uiText
     );
   }
 }
@@ -392,7 +788,25 @@ function checkLevelCompletionAndUpdate() {
       isLevelComplete = arraySorted(arrayElements);
       if (isLevelComplete) {
         score = openCompleteModal(score, health, finalScoreText);
+        const status_update_string =
+          currentLevel != 3 ? "completed" : "completed_first_time";
+        let totalStars;
+        if (currentMode == "regular") {
+          totalStars = setStars(health);
+        } else {
+          totalStars = setStars(4);
+        }
+        updateLevelStatus(currentLevel, totalStars);
+        gameStatusService.updateGameStatus(
+          "Heapsort",
+          currentLevel,
+          currentMode,
+          score,
+          totalStars + 1,
+          status_update_string
+        );
       }
+
       break;
   }
 
@@ -405,7 +819,7 @@ function evaluateActionAndUpdateScore(isCorrect, nodeIndex) {
   let message;
 
   message = `Correct! Node ${nodeIndex} is correctly swapped.`;
-  if (isCorrect) displayMessage(message, uiInstructions);
+  if (isCorrect) displayMessage(message, uiText);
   score += isCorrect ? 10 : 0;
 
   // Increment correctly placed tree nodes if placement is correct
@@ -469,7 +883,7 @@ controls.addEventListener("dragend", function (event) {
     draggableTextMesh.position.copy(initialPositionDragged);
     displayMessage(
       "Please make sure to drag the element close to the index box",
-      uiInstructions
+      uiText
     );
   }
 });
@@ -521,15 +935,15 @@ function handleStepOnePlacement(
       // );
       displayMessage(
         `Wrong Move! Please check if there are any remaining nodes to the left of this node.`,
-        uiInstructions
+        uiText
       );
     } else if (placeAlreadyTaken) {
       displayMessage(
         `Wrong Move! The place is already occupied by another node. Please select next available spot!`,
-        uiInstructions
+        uiText
       );
     } else {
-      displayMessage(hintForWrongChoice, uiInstructions);
+      displayMessage(hintForWrongChoice, uiText);
     }
   }
 }
@@ -688,12 +1102,12 @@ function showHintsForStepTwoHeapify(draggableIndex, targetIndex) {
       // );
       displayMessage(
         "Wrong Move! Make sure that the sub-tree affected by the previous swap still satisfies the heap property",
-        uiInstructions
+        uiText
       );
     } else if (indexSwappingWithParent === currentSwapIndices[0]) {
       displayMessage(
         "Wrong Move! You cannot swap the child node with its parent",
-        uiInstructions
+        uiText
       );
     } else {
       console.log("Going into showhintsforwrongmovebetweenparentsandchild");
@@ -716,18 +1130,18 @@ function showHintsForStepTwoHeapify(draggableIndex, targetIndex) {
       if (parentIndexAmongTwo < currentNonLeafIndexToHeapify) {
         displayMessage(
           `Wrong Move! This is currently not the turn for this node. You should find the lowest leaf that is smaller than its children`,
-          uiInstructions
+          uiText
         );
       } else if (parentIndexAmongTwo > currentNonLeafIndexToHeapify) {
         displayMessage(
           `Wrong Move! The sub-tree starting with this node already maintains heap property`,
-          uiInstructions
+          uiText
         );
       }
     } else if (indexSwappingWithParent === currentNonLeafIndexToHeapify) {
       displayMessage(
         "Wrong Move! You cannot swap the child node with its parent",
-        uiInstructions
+        uiText
       );
     } else {
       console.log("Going into showhintsforwrongmovebetweenparentsandchild");
@@ -754,17 +1168,17 @@ function showHintsForStepThreeSwappingWithLastIndex(
   if (parentIndexAmongTwo !== 0) {
     displayMessage(
       "Wrong Move! This is already max heap. Remove the largest node and swap it with the node at the end of unsorted array.",
-      uiInstructions
+      uiText
     );
   } else if (indexSwappingWithParent > lastUnsortedIndex - 1) {
     displayMessage(
       "Wrong Move! You don't need to swap the nodes that are already sorted",
-      uiInstructions
+      uiText
     );
   } else {
     displayMessage(
       "Wrong Move! This is already max heap. Remove the largest node and swap it with the node at the end of unsorted array.",
-      uiInstructions
+      uiText
     );
   }
 }
@@ -786,12 +1200,12 @@ function showHintsForStepThreeHeapSort(draggableIndex, targetIndex) {
   if (indexSwappingWithParent === lastUnsortedIndex - 1) {
     displayMessage(
       "Wrong Move! Make sure that the current tree, except those already sorted, maintains the heap property.",
-      uiInstructions
+      uiText
     );
   } else if (indexSwappingWithParent > lastUnsortedIndex - 1) {
     displayMessage(
       "Wrong Move! You don't need to swap the nodes that are already sorted",
-      uiInstructions
+      uiText
     );
   } else {
     if (
@@ -804,12 +1218,12 @@ function showHintsForStepThreeHeapSort(draggableIndex, targetIndex) {
       // );
       displayMessage(
         "Wrong Move! Make sure that the sub-tree affected by the previous swap still satisfies the heap property",
-        uiInstructions
+        uiText
       );
     } else if (indexSwappingWithParent === currentSwapIndices[0]) {
       displayMessage(
         "Wrong Move! You cannot swap the child node with its parent",
-        uiInstructions
+        uiText
       );
     } else {
       console.log("Going into showhintsforwrongmovebetweenparentsandchild");
@@ -841,7 +1255,7 @@ function showHintsForWrongMovesBetweenParentsAndChild(
   ) {
     displayMessage(
       "You can only swap a node with its children. Swapping with other nodes is not allowed",
-      uiInstructions
+      uiText
     );
     return;
   }
@@ -851,7 +1265,7 @@ function showHintsForWrongMovesBetweenParentsAndChild(
   ) {
     displayMessage(
       "Wrong Move! There's no need to swap if the parent node is larger than the child",
-      uiInstructions
+      uiText
     );
     return;
   }
@@ -866,12 +1280,12 @@ function showHintsForWrongMovesBetweenParentsAndChild(
     ) {
       displayMessage(
         "Wrong Move! Check the left child first. Swap it with the parent if it's larger.",
-        uiInstructions
+        uiText
       );
     } else {
       displayMessage(
         "Wrong Move! Please make sure to swap the parent node with the larger child",
-        uiInstructions
+        uiText
       );
     }
     return;
@@ -948,7 +1362,19 @@ function resetScene() {
   removeFromScene(treeNodeTexts, scene);
   removeFromScene(DebossedAreaTexts, scene);
   removeFromScene(instancedObjects.children, instancedObjects);
-
+  trackedObjects.forEach((object) => {
+    scene.remove(object);
+    if (object.geometry) object.geometry.dispose(); // Dispose geometry
+    if (object.material) {
+      if (Array.isArray(object.material)) {
+        object.material.forEach((mat) => mat.dispose());
+      } else {
+        object.material.dispose(); // Dispose material
+      }
+    }
+  });
+  trackedObjects = []; // Clear the array after removing all objects
+  correctPositions.clear(); // Reset correctPositions
   arrayElements = [];
   indexTexts = [];
   valueTexts = [];
@@ -972,6 +1398,15 @@ function resetScene() {
   resetStars();
 }
 
+function resetLevel(curlvl) {
+  resetScene();
+  closeModal();
+  closePseudocode();
+  currentLevel = curlvl;
+  curlvlNodesNum = levels[currentLevel - 1];
+  generateArray();
+}
+
 function render() {
   // updateLabelRotations(indexTexts, camera);
   // updateLabelRotations(valueTexts, camera);
@@ -983,15 +1418,15 @@ function render() {
 render();
 
 buttonAgain.addEventListener("click", () => {
-  uiInstructions.innerHTML = stepInstructions[0];
+  uiText.innerHTML = stepInstructions[0];
   console.log("clicked");
   closeModal();
   resetScene();
   generateArray();
 });
 
-buttonNext.addEventListener("click", () => {
-  uiInstructions.innerHTML = stepInstructions[0];
+buttonNextLevel.addEventListener("click", () => {
+  uiText.innerHTML = stepInstructions[0];
   console.log("clicked");
   closeModal();
   resetScene();

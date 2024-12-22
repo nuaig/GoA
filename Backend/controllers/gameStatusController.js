@@ -122,3 +122,25 @@ export const resetGameStatusCon = async (req, res) => {
       .json({ ok: false, msg: "Error resetting game status" });
   }
 };
+
+// Controller to fetch the leaderboard
+export const getLeaderboardCon = async (req, res) => {
+  try {
+    // Fetch the leaderboard from the database
+    const leaderboard = await myDB.getLeaderboard();
+    console.log("leaderboard controller");
+
+    if (!leaderboard || leaderboard.length === 0) {
+      return res
+        .status(404)
+        .json({ ok: false, msg: "No leaderboard data found." });
+    }
+
+    return res.status(200).json({ ok: true, leaderboard });
+  } catch (e) {
+    console.error("Error in getLeaderboardCon", e.message);
+    return res
+      .status(500)
+      .json({ ok: false, msg: "Error fetching leaderboard data" });
+  }
+};

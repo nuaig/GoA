@@ -91,6 +91,8 @@ const settingsCloseButton = document.querySelector(
   ".modal__settings .btn__close"
 );
 
+const leaderboardTogglerEle = document.querySelector(".Leaderboard-icon");
+
 const settingsModal = document.querySelector(".modal__settings");
 const settingsTogglerEle = document.querySelector(".settings__icon");
 const restartHandler = document.querySelector(".btn__restart");
@@ -118,6 +120,8 @@ controlsCloseButton.addEventListener("click", () => {
 settingsCloseButton.addEventListener("click", () => {
   closeModal(settingsModal);
 });
+
+leaderboardTogglerEle.addEventListener("click", () => {});
 
 // Event listener for opening the settings modal
 settingsTogglerEle.addEventListener("click", () => {

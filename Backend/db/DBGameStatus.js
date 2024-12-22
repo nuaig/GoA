@@ -307,6 +307,71 @@ function MyMongoDB() {
     }
   };
 
+  myDB.getLeaderboard = async () => {
+    const { client, db } = await connect();
+    try {
+      const pipeline = [
+        {
+          $lookup: {
+            from: "useraccounts",
+            localField: "user_id",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        { $unwind: "$userDetails" },
+        {
+          $project: {
+            username: "$userDetails.username",
+            scores: {
+              $concatArrays: [
+                "$games.Heapsort.regular",
+                "$games.Prim.regular",
+                "$games.Kruskal.regular",
+              ],
+            },
+          },
+        },
+        { $unwind: "$scores" },
+        {
+          $group: {
+            _id: "$username",
+            totalScore: { $sum: "$scores.score" },
+          },
+        },
+        { $sort: { totalScore: -1 } },
+        {
+          $setWindowFields: {
+            sortBy: { totalScore: -1 },
+            output: {
+              rank: { $rank: {} },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            rank: 1,
+            username: "$_id",
+            totalScore: 1,
+          },
+        },
+      ];
+
+      const leaderboard = await db
+        .collection("game_status")
+        .aggregate(pipeline)
+        .toArray();
+      console.log("Leaderboard generated:", leaderboard);
+      return leaderboard;
+    } catch (err) {
+      console.error("Error generating leaderboard", err.message);
+      return false;
+    } finally {
+      await client.close();
+    }
+  };
+
   return myDB;
 }
 

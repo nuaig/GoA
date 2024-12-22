@@ -5,10 +5,12 @@ import {
   unlockGameLevelCon,
   resetGameStatusCon,
   updateStatusToCompletedCon,
+  getLeaderboardCon,
 } from "../controllers/gameStatusController.js";
 
 const router = express.Router();
 
+router.get("/leaderboard", getLeaderboardCon);
 // Route to get game status for a user
 router.get("/:userId", getGameStatusCon);
 

@@ -5,7 +5,8 @@ export async function createDebossedAreas(
   currentLevelNodes,
   correctPositions,
   scene,
-  DebossedAreaTexts
+  DebossedAreaTexts,
+  trackedObjects // Pass an array to track objects
 ) {
   const depthOffset = 0.1;
   const cubeSize = { width: 0.6, height: 0.5, depth: 0.1 };
@@ -32,6 +33,7 @@ export async function createDebossedAreas(
     );
     cube.userData.index = i;
     scene.add(cube);
+    trackedObjects.push(cube); // Track the cube
 
     // Create and add a text mesh for the index
     const indexTextMesh = await createTextMesh(`[${i}]`, 0.12, "#111213");
@@ -41,12 +43,12 @@ export async function createDebossedAreas(
       startPosition.z + depthOffset
     );
     scene.add(indexTextMesh);
+    trackedObjects.push(indexTextMesh); // Track the text mesh
     indexTextMesh.visible = false;
     DebossedAreaTexts.push(indexTextMesh);
   }
-  drawLines(scene, correctPositions);
+  drawLines(scene, correctPositions, trackedObjects); // Pass tracked objects to `drawLines`
 }
-
 // async function createDebossedAreas() {
 //   const depthOffset = 0.1;
 //   const cubeSize = { width: 0.6, height: 0.5, depth: 0.1 };
@@ -131,24 +133,24 @@ export function findClosestDebossedIndex(
 //   return closestIndex;
 // }
 
-function drawLines(scene, correctPositions) {
+function drawLines(scene, correctPositions, trackedObjects) {
   correctPositions.forEach((parentPos, i) => {
     const leftChildIndex = 2 * i + 1;
     const rightChildIndex = 2 * i + 2;
 
     if (correctPositions.has(leftChildIndex)) {
       const leftChildPos = correctPositions.get(leftChildIndex);
-      createLine(scene, parentPos, leftChildPos);
+      createLine(scene, parentPos, leftChildPos, trackedObjects);
     }
 
     if (correctPositions.has(rightChildIndex)) {
       const rightChildPos = correctPositions.get(rightChildIndex);
-      createLine(scene, parentPos, rightChildPos);
+      createLine(scene, parentPos, rightChildPos, trackedObjects);
     }
   });
 }
 
-function createLine(scene, startVector, endVector) {
+function createLine(scene, startVector, endVector, trackedObjects) {
   const material = new MeshLineMaterial({
     color: "#000",
     lineWidth: 0.3, // Set the desired line width
@@ -160,6 +162,7 @@ function createLine(scene, startVector, endVector) {
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
   const line = new THREE.Line(geometry, material);
   scene.add(line);
+  trackedObjects.push(line); // Track the line
 }
 
 export function updateNextSwapIndices(lastUnsortedIndex, arrayElements) {

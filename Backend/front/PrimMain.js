@@ -171,8 +171,8 @@ let graph;
 
 const levelConfig = {
   1: { nodes: 4, edges: 5 },
-  2: { nodes: 3, edges: 3 },
-  3: { nodes: 3, edges: 3 },
+  2: { nodes: 6, edges: 8 },
+  3: { nodes: 7, edges: 10 },
 };
 
 const usedColors = new Set();

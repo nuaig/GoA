@@ -15,8 +15,10 @@ export function toggleInstructions(currentAlgorithm) {
 export function closePseudocode() {
   const kruskalInstructions = document.querySelector(".kruskal-instruction");
   const primInstructions = document.querySelector(".prim-instruction");
-  primInstructions.classList.add("hidden");
-  kruskalInstructions.classList.add("hidden");
+  const heapSortInstructions = document.querySelector(".heapsort-instruction");
+  primInstructions?.classList.add("hidden");
+  kruskalInstructions?.classList.add("hidden");
+  heapSortInstructions?.classList.add("hidden");
 }
 
 export function updateHealth(health) {

@@ -236,6 +236,7 @@ body {
 
 .control__header,
 .settings__header,
+.leaderboard__header,
 .level__selection__header {
   color: #a5d8ff;
   border-bottom: solid #a5d8ff;
@@ -247,9 +248,34 @@ body {
   padding: 1rem;
 }
 
+/* Leaderboard Modal */
+.leaderboard__holder li {
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr; /* Adjust fractions as needed */
+  align-items: center; /* Aligns items vertically if needed */
+}
+.leaderboard__holder li p:nth-child(2) {
+  justify-self: left;
+}
+
+.leaderboard__holder li:nth-of-type(odd) {
+  background: #212529;
+}
+
+.leaderboard__holder li:first-of-type {
+  background: #1971c2;
+  box-shadow: 0 0.2rem 0.5rem #79798e;
+  /* transform: scale(1.03); */
+}
+
+.leaderboard__holder li:first-of-type p {
+  color: #fff;
+}
+
 /* Controls list */
 .controls__holder,
-.settings__holder {
+.settings__holder,
+.leaderboard__holder {
   list-style-type: none;
   padding: 0;
 }
@@ -265,7 +291,8 @@ body {
 }
 
 .controls__holder p,
-.settings__holder p {
+.settings__holder p,
+.leaderboard__holder p {
   margin: 0;
   font-size: 18px;
 }
@@ -306,7 +333,8 @@ body {
 }
 
 .modal.modal__settings .btn__close,
-.modal.modal__level__selection .btn__close {
+.modal.modal__level__selection .btn__close,
+.modal.modal__leaderboard .btn__close {
   position: absolute;
   top: 20px; /* Adjust to your liking */
   right: 20px; /* Adjust to your liking */
