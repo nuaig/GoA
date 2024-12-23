@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const username = signUpForm.querySelector(
       'input[placeholder="Username"]'
     ).value;
-    const email = signUpForm.querySelector('input[placeholder="Email"]').value;
+
     const password = signUpForm.querySelector(
       'input[placeholder="Password"]'
     ).value;
@@ -50,7 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Create the JSON body for the request
     const userData = {
       username,
-      email,
       password,
     };
 

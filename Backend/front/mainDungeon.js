@@ -90,9 +90,12 @@ const controlsCloseButton = document.querySelector(
 const settingsCloseButton = document.querySelector(
   ".modal__settings .btn__close"
 );
+const leaderboardCloseButton = document.querySelector(
+  ".modal__leaderboard .btn__close"
+);
 
 const leaderboardTogglerEle = document.querySelector(".Leaderboard-icon");
-
+const leaderboardModal = document.querySelector(".modal__leaderboard");
 const settingsModal = document.querySelector(".modal__settings");
 const settingsTogglerEle = document.querySelector(".settings__icon");
 const restartHandler = document.querySelector(".btn__restart");
@@ -121,7 +124,13 @@ settingsCloseButton.addEventListener("click", () => {
   closeModal(settingsModal);
 });
 
-leaderboardTogglerEle.addEventListener("click", () => {});
+leaderboardCloseButton.addEventListener("click", () => {
+  closeModal(leaderboardModal);
+});
+
+leaderboardTogglerEle.addEventListener("click", () => {
+  openModal(leaderboardModal);
+});
 
 // Event listener for opening the settings modal
 settingsTogglerEle.addEventListener("click", () => {
@@ -462,6 +471,54 @@ function animate() {
 }
 
 animate();
+
+// Function to fetch leaderboard data from an API
+async function fetchLeaderboard() {
+  try {
+    const response = await fetch("/api/status/leaderboard", {
+      method: "GET",
+      credentials: "include", // Include cookies in the request
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return await response.json(); // Assuming the response is a JSON array of leaderboard entries
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    return []; // Return an empty array on error
+  }
+}
+
+// Function to populate the leaderboard
+async function populateLeaderboard() {
+  const leaderboardData = await fetchLeaderboard();
+  console.log(leaderboardData);
+  const leaderboardHolder = document.querySelector("ul.leaderboard__holder");
+  const leaderboardItems = leaderboardHolder.querySelectorAll("li");
+
+  leaderboardItems.forEach((item, index) => {
+    const rankElement = item.querySelector(".leaderboard__rank");
+    const nameElement = item.querySelector(".leaderboard__name");
+    const scoreElement = item.querySelector(".leaderboard__score");
+    console.log(leaderboardData.leaderboard.length);
+    if (index < leaderboardData.leaderboard.length) {
+      // Fill with actual data
+      const userData = leaderboardData.leaderboard[index];
+      rankElement.textContent = index + 1; // Rank starts at 1
+      nameElement.textContent = userData.username || "Anonymous";
+      scoreElement.textContent = userData.totalScore || 0;
+    } else {
+      // Fill with default data
+      rankElement.textContent = index + 1;
+      nameElement.textContent = "Anonymous";
+      scoreElement.textContent = 0;
+    }
+  });
+}
+
+// Initialize the leaderboard population
+populateLeaderboard();
 
 // Handle window resize
 window.addEventListener("resize", () => {

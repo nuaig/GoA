@@ -25,7 +25,7 @@ export const insertUserCon = async (req, res) => {
         const insertResponse = await myDB.insertUser({
           username: req.body.username,
           hashedPassword: hashedPassword.toString("hex"),
-          email: req.body.email,
+
           salt: salt.toString("hex"),
         });
 
