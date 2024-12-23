@@ -423,7 +423,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
 
-const closedChestURL = new URL("./src/Prop_Chest_CLosed.gltf", import.meta.url);
+const closedChestURL = new URL("./src/Prop_Chest_Closed.gltf", import.meta.url);
 const openChestURL = new URL("./src/Prop_Chest_Gold.gltf", import.meta.url);
 const dungeonRoomURL = new URL("./src/DungeonRoom.glb", import.meta.url);
 
