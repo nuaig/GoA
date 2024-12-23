@@ -508,11 +508,16 @@ async function populateLeaderboard() {
     const nameElement = item.querySelector(".leaderboard__name");
     const scoreElement = item.querySelector(".leaderboard__score");
     console.log(leaderboardData.leaderboard.length);
+
     if (index < leaderboardData.leaderboard.length) {
       // Fill with actual data
       const userData = leaderboardData.leaderboard[index];
       rankElement.textContent = index + 1; // Rank starts at 1
-      nameElement.textContent = userData.username || "Anonymous";
+      if (userData.totalScore > 0) {
+        nameElement.textContent = userData.username || "Anonymous";
+      } else {
+        nameElement.textContent = "Anonymous";
+      }
       scoreElement.textContent = userData.totalScore || 0;
     } else {
       // Fill with default data

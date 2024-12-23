@@ -170,8 +170,8 @@ let curEdges;
 let graph;
 
 const levelConfig = {
-  1: { nodes: 4, edges: 5 },
-  2: { nodes: 6, edges: 8 },
+  1: { nodes: 5, edges: 7 },
+  2: { nodes: 6, edges: 9 },
   3: { nodes: 7, edges: 10 },
 };
 
