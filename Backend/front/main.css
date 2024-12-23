@@ -334,7 +334,8 @@ body {
 
 .modal.modal__settings .btn__close,
 .modal.modal__level__selection .btn__close,
-.modal.modal__leaderboard .btn__close {
+.modal.modal__leaderboard .btn__close,
+.modal.modal__control .btn__close {
   position: absolute;
   top: 20px; /* Adjust to your liking */
   right: 20px; /* Adjust to your liking */

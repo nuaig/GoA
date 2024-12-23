@@ -82,6 +82,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 });
 
+const controlsTogllerEle = document.querySelector(".Pesudocode-Box-Action");
 const controlsModal = document.querySelector(".modal__control");
 const overlay = document.querySelector(".overlay");
 const controlsCloseButton = document.querySelector(
@@ -98,6 +99,7 @@ const leaderboardTogglerEle = document.querySelector(".Leaderboard-icon");
 const leaderboardModal = document.querySelector(".modal__leaderboard");
 const settingsModal = document.querySelector(".modal__settings");
 const settingsTogglerEle = document.querySelector(".settings__icon");
+
 const restartHandler = document.querySelector(".btn__restart");
 const symbol_dict = {
   kruskal: null,
@@ -115,6 +117,10 @@ const closeModal = function (modalType) {
   modalType.classList.add("hidden");
   overlay.classList.add("hidden");
 };
+
+controlsTogllerEle.addEventListener("click", () => {
+  openModal(controlsModal);
+});
 
 controlsCloseButton.addEventListener("click", () => {
   closeModal(controlsModal);
