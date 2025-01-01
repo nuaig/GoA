@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1"
+    />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/lykmapipo/themify-icons@0.1.2/css/themify-icons.css"
+    />
+    <link rel="stylesheet" href="dashboard_style.css" />
+  </head>
+  <body>
+    <input type="checkbox" id="sidebar-toggle" />
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h3 class="brand">
+          <!-- <span class="ti-game"></span> -->
+          <span>GoA</span>
+        </h3>
+        <label for="sidebar-toggle" class="ti-menu-alt"></label>
+      </div>
+
+      <div class="sidebar-menu">
+        <ul>
+          <li>
+            <a href="#" id="home-link">
+              <span class="ti-home"></span>
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" id="charts-link">
+              <span class="ti-pie-chart"></span>
+              <span>Charts</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="">
+              <span class="ti-settings"></span>
+              <span>Account</span>
+            </a>
+          </li>
+        </ul>
+        <ul>
+          <li>
+            <a href="mainDungeon.html">
+              <span class="ti-game"></span>
+              <span>Play</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- <header>
+        <div class="search-wrapper">
+          <span class="ti-search"></span>
+          <input type="search" placeholder="Search" />
+        </div>
+
+        <div class="social-icons">
+          <span class="ti-bell"></span>
+          <span class="ti-comment"></span>
+          <div></div>
+        </div>
+      </header> -->
+
+      <main>
+        <div class="overview-section">
+          <h2 class="dash-title">Overview</h2>
+
+          <div class="dash-cards">
+            <div class="card-single">
+              <div class="card-body">
+                <span class="ti-id-badge"></span>
+                <div>
+                  <h5>Adventures Joined</h5>
+                  <h4>23</h4>
+                </div>
+              </div>
+              <!-- <div class="card-footer">
+              <a href="">View all</a>
+            </div> -->
+            </div>
+
+            <div class="card-single">
+              <div class="card-body">
+                <span class="ti-pencil-alt"></span>
+                <div>
+                  <h5>Average Trials Per adventurer</h5>
+                  <h4>30</h4>
+                </div>
+              </div>
+              <!-- <div class="card-footer">
+              <a href="">View all</a>
+            </div> -->
+            </div>
+
+            <div class="card-single">
+              <div class="card-body">
+                <span class="ti-check-box"></span>
+                <div>
+                  <h5>Adventure Fully Completed</h5>
+                  <h4>6</h4>
+                </div>
+              </div>
+              <!-- <div class="card-footer">
+              <a href="">View all</a>
+            </div> -->
+            </div>
+          </div>
+        </div>
+        <div class="charts-section">
+          <div class="charts-header">
+            <h2 class="dash-title">Data Visualizations</h2>
+            <select id="chart-filter" class="chart-dropdown">
+              <option value="all">All</option>
+              <option value="kruskal">Kruskal</option>
+              <option value="prim">Prim</option>
+              <option value="heapsort">Heapsort</option>
+            </select>
+          </div>
+          <div class="charts">
+            <div class="charts-card">
+              <p class="chart-title">Completion Rate</p>
+              <div id="completion-chart"></div>
+            </div>
+            <div class="charts-card">
+              <p class="chart-title">Average Mistakes per Level</p>
+              <div id="average-mistakes-chart"></div>
+            </div>
+            <div class="charts-card">
+              <p class="chart-title">Score Distribution</p>
+              <div id="score-distribution-chart"></div>
+            </div>
+            <div class="charts-card">
+              <p class="chart-title">
+                Average Mistake Reduction Over Time (By Level)
+              </p>
+              <div id="mistake-reduction-chart"></div>
+            </div>
+            <div class="charts-card">
+              <p class="chart-title">Level Completion Time</p>
+              <div id="completion-time-chart"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- <section class="recent">
+          <div class="activity-grid">
+            <div class="activity-card">
+              <h3>Recent activity</h3>
+
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Project</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                      <th>Team</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>App Development</td>
+                      <td>15 Aug, 2020</td>
+                      <td>22 Aug, 2020</td>
+                      <td class="td-team">
+                        <div class="img-1"></div>
+                        <div class="img-2"></div>
+                        <div class="img-3"></div>
+                      </td>
+                      <td>
+                        <span class="badge success">Success</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Logo Design</td>
+                      <td>15 Aug, 2020</td>
+                      <td>22 Aug, 2020</td>
+                      <td class="td-team">
+                        <div class="img-1"></div>
+                        <div class="img-2"></div>
+                        <div class="img-3"></div>
+                      </td>
+                      <td>
+                        <span class="badge warning">Processing</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Server setup</td>
+                      <td>15 Aug, 2020</td>
+                      <td>22 Aug, 2020</td>
+                      <td class="td-team">
+                        <div class="img-1"></div>
+                        <div class="img-2"></div>
+                        <div class="img-3"></div>
+                      </td>
+                      <td>
+                        <span class="badge success">Success</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Front-end Design</td>
+                      <td>15 Aug, 2020</td>
+                      <td>22 Aug, 2020</td>
+                      <td class="td-team">
+                        <div class="img-1"></div>
+                        <div class="img-2"></div>
+                        <div class="img-3"></div>
+                      </td>
+                      <td>
+                        <span class="badge warning">Processing</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Web Development</td>
+                      <td>15 Aug, 2020</td>
+                      <td>22 Aug, 2020</td>
+                      <td class="td-team">
+                        <div class="img-1"></div>
+                        <div class="img-2"></div>
+                        <div class="img-3"></div>
+                      </td>
+                      <td>
+                        <span class="badge success">Success</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="summary">
+              <div class="summary-card">
+                <div class="summary-single">
+                  <span class="ti-id-badge"></span>
+                  <div>
+                    <h5>196</h5>
+                    <small>Number of staff</small>
+                  </div>
+                </div>
+                <div class="summary-single">
+                  <span class="ti-calendar"></span>
+                  <div>
+                    <h5>16</h5>
+                    <small>Number of leave</small>
+                  </div>
+                </div>
+                <div class="summary-single">
+                  <span class="ti-face-smile"></span>
+                  <div>
+                    <h5>12</h5>
+                    <small>Profile update request</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bday-card">
+                <div class="bday-flex">
+                  <div class="bday-img"></div>
+                  <div class="bday-info">
+                    <h5>Dwayne F. Sanders</h5>
+                    <small>Birthday Today</small>
+                  </div>
+                </div>
+
+                <div class="text-center">
+                  <button>
+                    <span class="ti-gift"></span>
+                    Wish him
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section> -->
+      </main>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.35.3/apexcharts.min.js"></script>
+    <script src="/dashboard.js"></script>
+  </body>
+</html>

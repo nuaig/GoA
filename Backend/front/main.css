@@ -616,7 +616,7 @@ button:active {
 /* To prevent the overlay from covering the pulsing icon */
 .Pesudocode-Box-Action {
   position: relative;
-  z-index: 1000; /* Make sure the icon is above the overlay */
+  z-index: 1000;
   border-radius: 10px; /* Same border-radius as before */
   animation: pulse 1.5s infinite;
 }

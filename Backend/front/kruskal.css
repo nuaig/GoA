@@ -57,17 +57,21 @@ body {
 
 .topnav-instructions {
   position: absolute;
-  top: 23%;
+  top: calc(2vh + 75px);
   left: 85%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 0%);
   background-color: rgb(72, 121, 212);
   width: 25%;
-  height: 25%;
+  height: 27%;
   border: solid #eaebf1 2px;
   padding: 15px;
   box-shadow: 0.5rem 0.5rem 0;
   overflow: hidden;
   /* display: none; */
+}
+
+.topnav-instructions.heapify-instruction {
+  height: 38%;
 }
 
 .Action-Icons-Holder {

@@ -103,8 +103,8 @@ const instructionModal = document.querySelector(".instruction");
 const overlay = document.querySelector(".overlay");
 const hoverEffects = document.querySelectorAll(".hover");
 
-const pseudoBoxButton = document.querySelector(".Pesudocode-Box-Action");
-const reArrangeButton = document.querySelector(".Rearrange-Action");
+const pseudoBoxButton = document.querySelector(".Pesudocode-Icon");
+const helpInstructionButton = document.querySelector(".Instruction-Icon");
 
 const buttonNextLevel = document.querySelector(".btn__next");
 const modalCompletion = document.querySelector(".modal__completion");
@@ -161,7 +161,7 @@ let score = 0;
 let hasSortingStarted = false;
 let correctlyPlacedTreeNodes = 0;
 let stepText;
-
+let levelModalOpen = true;
 let indexTexts = [];
 let valueTexts = [];
 let treeNodeTexts = [];
@@ -185,7 +185,7 @@ const levelDescriptions = [
 
 const stepInstructions = [
   "Drag the numbers into the green boxes to create binary heap tree!",
-  "For this step, find the lowest non-leaf node that is smaller than its children and swap it with the largest child to maintain heap property.",
+  "For this step, find the highest index non-leaf node that is smaller than its children and swap it with the largest child to maintain heap property. Then proceed to lower index",
   "For this step, repeatedly remove the largest node (the root of the heap) and place it at the end of the array, then reheapify.",
 ];
 // Function to update the score
@@ -291,11 +291,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       await toggleMode("regular");
     } else {
       console.warn("User is not logged in. Redirecting to login page.");
-      // window.location.href = "signInSignUp.html";
+      window.location.href = "signInSignUp.html";
     }
   } catch (error) {
     console.error("Error checking login status:", error);
-    // window.location.href = "signInSignUp.html";
+    window.location.href = "signInSignUp.html";
   }
 });
 async function initializeLevelStatus(mode) {
@@ -494,8 +494,11 @@ levelButtons.forEach((button, index) => {
 });
 
 buttonStart.addEventListener("click", () => {
-  overlay.classList.add("hidden");
+  if (!levelModalOpen) {
+    overlay.classList.add("hidden");
+  }
   instructionModal.classList.add("hidden");
+  levelModalOpen = false;
   // gsap.to(camera.position, {
   //   x: endPosition.x,
   //   y: endPosition.y,
@@ -510,7 +513,15 @@ buttonStart.addEventListener("click", () => {
 });
 
 pseudoBoxButton.addEventListener("click", () => {
-  toggleInstructions();
+  console.log("clicked");
+  toggleInstructions("heapsort");
+});
+
+helpInstructionButton.addEventListener("click", () => {
+  instructionModal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+  document.querySelector(".btn__instruction__start").textContent =
+    "Close Instruction";
 });
 
 const openModal = function () {
@@ -1440,3 +1451,4 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
+window.addEventListener("resize", onWindowResize, false);

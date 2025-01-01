@@ -2,6 +2,7 @@ const uiText = document.getElementById("UI-Text");
 export function toggleInstructions(currentAlgorithm) {
   const kruskalInstructions = document.querySelector(".kruskal-instruction");
   const primInstructions = document.querySelector(".prim-instruction");
+  const heapSortInstructions = document.querySelector(".heapify-instruction");
 
   if (currentAlgorithm === "kruskal") {
     kruskalInstructions.classList.toggle("hidden");
@@ -9,6 +10,8 @@ export function toggleInstructions(currentAlgorithm) {
   } else if (currentAlgorithm === "prim") {
     primInstructions.classList.toggle("hidden");
     kruskalInstructions.classList.add("hidden");
+  } else if (currentAlgorithm === "heapsort") {
+    heapSortInstructions.classList.toggle("hidden");
   }
 }
 

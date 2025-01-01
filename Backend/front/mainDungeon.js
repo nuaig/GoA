@@ -64,10 +64,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     document.body.appendChild(overlay);
 
     // Function to remove the pulse effect and overlay
+    // Function to remove the pulse effect, overlay, and reset z-index
     function removeFocusEffectAndShowControls() {
       overlay.remove(); // Remove the overlay
       focusIcon.style.animation = "none"; // Stop the pulse animation
       focusIcon.classList.remove("focus-effect"); // Remove the class if it still exists
+
+      // Revert the z-index to default
+      focusIcon.style.zIndex = "1"; // Or use the initial/default z-index value
+
       openModal(controlsModal);
 
       // Store a flag in localStorage to indicate the effect has been shown
@@ -95,11 +100,13 @@ const leaderboardCloseButton = document.querySelector(
   ".modal__leaderboard .btn__close"
 );
 
-const leaderboardTogglerEle = document.querySelector(".Leaderboard-icon");
+const leaderboardTogglerIconEle = document.querySelector(".Leaderboard-icon");
+const leaderboardButtonEle = document.querySelector(".btn__leaderboard");
 const leaderboardModal = document.querySelector(".modal__leaderboard");
 const settingsModal = document.querySelector(".modal__settings");
 const settingsTogglerEle = document.querySelector(".settings__icon");
-
+const dashboardHandler = document.querySelector(".btn__dashboard");
+const signOutHandler = document.querySelector(".btn__signout");
 const restartHandler = document.querySelector(".btn__restart");
 const symbol_dict = {
   kruskal: null,
@@ -111,6 +118,12 @@ let gameStatusService;
 const openModal = function (modalType) {
   modalType.classList.remove("hidden");
   overlay.classList.remove("hidden");
+
+  // Lower the z-index of Pesudocode-Box-Action
+  const pesudocodeBoxAction = document.querySelector(".Pesudocode-Box-Action");
+  if (pesudocodeBoxAction) {
+    pesudocodeBoxAction.style.zIndex = "0"; // Push it below the overlay
+  }
 };
 
 const closeModal = function (modalType) {
@@ -134,13 +147,21 @@ leaderboardCloseButton.addEventListener("click", () => {
   closeModal(leaderboardModal);
 });
 
-leaderboardTogglerEle.addEventListener("click", () => {
+leaderboardTogglerIconEle.addEventListener("click", () => {
+  openModal(leaderboardModal);
+});
+
+leaderboardButtonEle.addEventListener("click", () => {
+  closeModal(settingsModal);
   openModal(leaderboardModal);
 });
 
 // Event listener for opening the settings modal
 settingsTogglerEle.addEventListener("click", () => {
   openModal(settingsModal);
+});
+dashboardHandler.addEventListener("click", () => {
+  window.location.href = "dashboard.html";
 });
 
 const scene = new THREE.Scene();
@@ -550,6 +571,5 @@ window.addEventListener("keydown", (event) => {
 restartHandler.addEventListener("click", (event) => {
   event.preventDefault(); // Prevent the default F5 behavior
   localStorage.clear(); // Clear localStorage
-
   window.location.reload(); // Reload the page
 });
