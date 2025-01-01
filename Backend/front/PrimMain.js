@@ -50,8 +50,9 @@ const instructionModal = document.querySelector(".instruction");
 const overlay = document.querySelector(".overlay");
 const hoverEffects = document.querySelectorAll(".hover");
 
-const pseudoBoxButton = document.querySelector(".Pesudocode-Box-Action");
+const pseudoBoxButton = document.querySelector(".Pesudocode-Icon");
 const reArrangeButton = document.querySelector(".Rearrange-Action");
+const helpInstructionButton = document.querySelector(".Instruction-Icon");
 
 const buttonNextLevel = document.querySelector(".btn__next");
 const modalCompletion = document.querySelector(".modal__completion");
@@ -77,6 +78,8 @@ const levelsModal = document.querySelector(".modal__level__selection");
 const levelButtons = document.querySelectorAll(".level__btn__holder");
 const btnLevelClose = document.querySelector(".btn__level__close");
 
+let curGameSession;
+let levelModalOpen = false;
 // Function to update the score
 function updateScore(newScore) {
   // Iterate over each element and update its text content
@@ -213,7 +216,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       // Await the initialization of GameStatusService
       await gameStatusService.init();
-
+      const userId = gameStatusService.getUserId();
+      curGameSession = new GameSession(userId, "Kruskal", currentLevel);
+      console.log(curGameSession.toObject());
       // Ensure toggleMode is called only after initialization
       await toggleMode("regular");
     } else {
@@ -545,17 +550,22 @@ btnSettingsGoMainDungeon.forEach((button) => {
   });
 });
 
-let curGameSession;
 disableEventListeners();
 
 buttonStart.addEventListener("click", () => {
-  disableEventListeners();
+  // disableEventListeners();
   // overlay.classList.add("hidden");
+  if (!levelModalOpen) {
+    overlay.classList.add("hidden");
+    enableEventListeners();
+  }
   instructionModal.classList.add("hidden");
-  levelsModal.classList.remove("hidden");
-  const userId = gameStatusService.getUserId();
-  curGameSession = new GameSession(userId, "Prim", currentLevel);
-  console.log(curGameSession.toObject());
+  levelModalOpen = false;
+
+  // levelsModal.classList.remove("hidden");
+  // const userId = gameStatusService.getUserId();
+  // curGameSession = new GameSession(userId, "Kruskal", currentLevel);
+  // console.log(curGameSession.toObject());
 });
 
 function showPrimInstructions() {
@@ -652,6 +662,13 @@ window.toggleInstructions = function () {
 
 pseudoBoxButton.addEventListener("click", () => {
   toggleInstructions(currentAlgorithm);
+});
+
+helpInstructionButton.addEventListener("click", () => {
+  instructionModal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+  document.querySelector(".btn__instruction__start").textContent =
+    "Close Instruction";
 });
 
 const openModal = function (currentLevel) {

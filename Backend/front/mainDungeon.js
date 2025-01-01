@@ -174,7 +174,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const player = new Player(scene, world);
-const mainDungeonURL = new URL("./src/main_dungeon.glb", import.meta.url);
+const mainDungeonURL = new URL("./src/main_dungeon_v2.glb", import.meta.url);
 let gameCompleted = false;
 
 let treasure_wall_gate;

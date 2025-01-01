@@ -135,7 +135,16 @@ cameraOrbit.target.set(0, 2, 0); // Set the OrbitControls target
 cameraOrbit.update(); // Update the OrbitControls to apply the new target
 cameraOrbit.enabled = false;
 
-var controls = new DragControls(
+// var controls = new DragControls(
+//   instancedObjects.children,
+//   camera,
+//   renderer.domElement
+// );
+// console.log("hello");
+// console.log(controls);
+// console.log(controls.raycaster);
+// Initialize DragControls
+const controls = new DragControls(
   instancedObjects.children,
   camera,
   renderer.domElement
@@ -674,6 +683,27 @@ async function generateArray() {
   checkLevelCompletionAndUpdate();
 }
 
+const createHitbox = (object, sizeMultiplier = 2) => {
+  const boundingBox = new THREE.Box3().setFromObject(object);
+  const boxSize = new THREE.Vector3();
+  boundingBox.getSize(boxSize);
+
+  const geometry = new THREE.BoxGeometry(
+    boxSize.x * sizeMultiplier,
+    boxSize.y * sizeMultiplier,
+    boxSize.z * sizeMultiplier
+  );
+
+  const material = new THREE.MeshBasicMaterial({
+    transparent: true,
+    opacity: 0, // Invisible
+  });
+
+  const hitbox = new THREE.Mesh(geometry, material);
+  hitbox.position.copy(object.position); // Match position of the original object
+  return hitbox;
+};
+
 async function addArrayAndTreeNodeElement(value, index, positionIndex) {
   console.log(`Creating elements for value: ${value}, index: ${index}`);
   const width = 0.65;
@@ -722,7 +752,11 @@ async function addArrayAndTreeNodeElement(value, index, positionIndex) {
   treeNodeTextMesh.userData.index = index;
   instancedObjects.add(treeNodeTextMesh);
 
-  treeNodeTexts.push(treeNodeTextMesh);
+  // treeNodeTexts.push(treeNodeTextMesh);
+  // const hitbox = createHitbox(treeNodeTextMesh, 2); // 2x larger hitbox
+  // hitbox.userData.originalMesh = treeNodeTextMesh; // Link hitbox to treeNodeTextMesh
+  // scene.add(hitbox); // Add hitbox to the scene
+  // instancedObjects.add(hitbox); // Add hitbox to DragControls
 
   scene.add(stationaryGroup);
 
@@ -854,6 +888,14 @@ controls.addEventListener("dragstart", function (event) {
     draggableTextMesh.position.clone();
   effectForHoverSelect();
 });
+
+// controls.addEventListener("drag", (event) => {
+//   const hitbox = event.object; // Dragged object
+//   const originalMesh = hitbox.userData.originalMesh; // Access the linked TextMesh
+//   if (originalMesh) {
+//     originalMesh.position.copy(hitbox.position); // Sync TextMesh position with hitbox
+//   }
+// });
 
 controls.addEventListener("dragend", function (event) {
   removingEffectForHoverSelect();
