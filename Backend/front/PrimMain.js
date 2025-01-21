@@ -79,7 +79,7 @@ const levelButtons = document.querySelectorAll(".level__btn__holder");
 const btnLevelClose = document.querySelector(".btn__level__close");
 
 let curGameSession;
-let levelModalOpen = false;
+let levelModalOpen = true;
 // Function to update the score
 function updateScore(newScore) {
   // Iterate over each element and update its text content
@@ -555,6 +555,7 @@ disableEventListeners();
 buttonStart.addEventListener("click", () => {
   // disableEventListeners();
   // overlay.classList.add("hidden");
+  disableEventListeners();
   if (!levelModalOpen) {
     overlay.classList.add("hidden");
     enableEventListeners();

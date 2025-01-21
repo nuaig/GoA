@@ -554,6 +554,7 @@ btnSettingsGoMainDungeon.forEach((button) => {
 disableEventListeners();
 
 buttonStart.addEventListener("click", () => {
+  disableEventListeners();
   // overlay.classList.add("hidden");
   if (!levelModalOpen) {
     overlay.classList.add("hidden");

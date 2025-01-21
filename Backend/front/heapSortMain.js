@@ -179,7 +179,7 @@ let trackedObjects = [];
 
 let health = 4;
 
-const levels = [6, 7, 9];
+const levels = [5, 7, 9];
 let currentLevel = 0;
 let curlvlNodesNum = levels[currentLevel];
 
