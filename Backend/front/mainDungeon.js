@@ -174,7 +174,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const player = new Player(scene, world);
-const mainDungeonURL = new URL("./src/main_dungeon_v2.glb", import.meta.url);
+const mainDungeonURL = new URL("./src/main_dungeon_v3.glb", import.meta.url);
 let gameCompleted = false;
 
 let treasure_wall_gate;
@@ -483,22 +483,6 @@ function onMouseDown(event) {
 
 document.addEventListener("mousedown", onMouseDown);
 
-function animate() {
-  requestAnimationFrame(animate);
-
-  const currentTime = performance.now();
-  const dt = (currentTime - previousTime) / 1000;
-
-  player.update(dt);
-  player.updateRaycaster(world);
-  world.step(1 / 60, dt); // Update physics world
-
-  renderer.render(scene, player.camera);
-  previousTime = currentTime;
-}
-
-animate();
-
 // Function to fetch leaderboard data from an API
 async function fetchLeaderboard() {
   try {
@@ -573,3 +557,77 @@ restartHandler.addEventListener("click", (event) => {
   localStorage.clear(); // Clear localStorage
   window.location.reload(); // Reload the page
 });
+
+// Mini-map
+const miniMapCamera = new THREE.OrthographicCamera(
+  150 / -2, // left
+  150 / 2, // right
+  150 / 2, // top
+  150 / -2, // bottom
+  1, // near clipping plane
+  1000 // far clipping plane
+);
+const scale = 50; // Reduce this value to zoom in
+miniMapCamera.left = -scale;
+miniMapCamera.right = scale;
+miniMapCamera.top = scale;
+miniMapCamera.bottom = -scale;
+miniMapCamera.updateProjectionMatrix();
+miniMapCamera.position.set(0, 250, -10); // Position it above the dungeon
+miniMapCamera.lookAt(new THREE.Vector3(0, 0, -10)); // Look directly down
+const miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
+miniMapRenderer.setSize(250, 250); // Size of the mini-map
+miniMapRenderer.domElement.id = "miniMapCanvas";
+
+document.body.appendChild(miniMapRenderer.domElement); // Append it to the body or a specific element
+miniMapRenderer.domElement.style.position = "absolute";
+miniMapRenderer.domElement.style.top = "10px";
+miniMapRenderer.domElement.style.left = "10px";
+
+// function updateMiniMap() {
+//   const playerPosition = player.camera.position; // Use the camera's position instead
+//   miniMapCamera.position.x = playerPosition.x;
+//   miniMapCamera.position.z = playerPosition.z;
+//   miniMapCamera.updateProjectionMatrix();
+// }
+
+const mapBackground = new THREE.Mesh(
+  new THREE.CircleGeometry(100, 32),
+  new THREE.MeshBasicMaterial({ color: "#868e96" })
+);
+mapBackground.rotation.x = -Math.PI / 2;
+scene.add(mapBackground);
+mapBackground.position.y = player.camera.position.y;
+const playerMarker = new THREE.Mesh(
+  new THREE.CircleGeometry(3, 32),
+  new THREE.MeshBasicMaterial({ color: 0xff0000 })
+);
+playerMarker.rotation.x = -Math.PI / 2; // Rotate the marker to face up
+scene.add(playerMarker);
+
+function updatePlayerMarker() {
+  playerMarker.position.copy(player.camera.position); // Directly use the camera's position
+  playerMarker.position.y = player.camera.position.y + 0.04;
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const currentTime = performance.now();
+  const dt = (currentTime - previousTime) / 1000;
+
+  player.update(dt);
+  player.updateRaycaster(world);
+  world.step(1 / 60, dt); // Update physics world
+
+  // Update player marker and mini-map camera position based on player position
+  updatePlayerMarker();
+  // updateMiniMap();
+
+  renderer.render(scene, player.camera);
+  previousTime = currentTime;
+
+  miniMapRenderer.render(scene, miniMapCamera); // Mini-map rendering
+}
+
+animate();

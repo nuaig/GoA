@@ -179,9 +179,9 @@ let trackedObjects = [];
 
 let health = 4;
 
-const levels = [5, 7, 9];
-let currentLevel = 0;
-let curlvlNodesNum = levels[currentLevel];
+const levels = [2, 3, 3];
+let currentLevel = 1;
+let curlvlNodesNum = levels[currentLevel - 1];
 
 let isModalOpen = false;
 
@@ -508,17 +508,6 @@ buttonStart.addEventListener("click", () => {
   }
   instructionModal.classList.add("hidden");
   levelModalOpen = false;
-  // gsap.to(camera.position, {
-  //   x: endPosition.x,
-  //   y: endPosition.y,
-  //   z: endPosition.z,
-  //   duration: 4, // Duration of the animation in seconds
-  //   ease: "power2.inOut", // Easing function for smooth movement
-  //   onUpdate: () => {
-  //     // Ensure the camera keeps looking at the target point
-  //     camera.lookAt(new THREE.Vector3(0, 2, 0));
-  //   },
-  // });
 });
 
 pseudoBoxButton.addEventListener("click", () => {
@@ -536,6 +525,16 @@ helpInstructionButton.addEventListener("click", () => {
 const openModal = function () {
   modalCompletion.classList.remove("hidden");
   overlay.classList.remove("hidden");
+  const nextButton = document.querySelector(".btn__next");
+
+  // Check if it's level 3
+  if (currentLevel === 3) {
+    // Remove or hide the "Next Level" button if it's level 3
+    nextButton.style.display = "none";
+  } else {
+    // Ensure the "Next Level" button is visible for other levels
+    nextButton.style.display = "inline-block";
+  }
 };
 
 const closeModal = function () {
@@ -571,11 +570,6 @@ function closeLevelModal() {
   levelsModal.classList.add("hidden");
   overlay.classList.add("hidden");
   isModalOpen = false;
-
-  // Delay enabling event listeners by 300ms
-  // setTimeout(() => {
-  //   enableEventListeners();
-  // }, 300);
 }
 function openLevelModal() {
   levelsModal.classList.remove("hidden");
@@ -613,12 +607,6 @@ btnSettingsGoMainDungeon.forEach((button) => {
     window.location.href = "mainDungeon.html";
   });
 });
-
-// const picture = new THREE.Object3D();
-// loadStaticObject("./src/painting.glb", picture, scene);
-// picture.rotation.y = Math.PI / 2;
-// picture.position.set(0, 2, -0.5);
-// picture.scale.set(1, 3, 4);
 
 document.addEventListener("DOMContentLoaded", generateArray);
 
@@ -683,26 +671,31 @@ async function generateArray() {
   checkLevelCompletionAndUpdate();
 }
 
-const createHitbox = (object, sizeMultiplier = 2) => {
-  const boundingBox = new THREE.Box3().setFromObject(object);
-  const boxSize = new THREE.Vector3();
-  boundingBox.getSize(boxSize);
+function createTransparentPlane(mesh, sizeMultiplier = 2) {
+  const meshBox = new THREE.Box3().setFromObject(mesh);
+  const meshSize = meshBox.getSize(new THREE.Vector3());
 
-  const geometry = new THREE.BoxGeometry(
-    boxSize.x * sizeMultiplier,
-    boxSize.y * sizeMultiplier,
-    boxSize.z * sizeMultiplier
+  // Create a plane geometry larger than the mesh
+  const planeGeometry = new THREE.PlaneGeometry(
+    meshSize.x * sizeMultiplier,
+    meshSize.y * sizeMultiplier
   );
-
-  const material = new THREE.MeshBasicMaterial({
+  const planeMaterial = new THREE.MeshBasicMaterial({
     transparent: true,
-    opacity: 0, // Invisible
+    opacity: 0, // Make the plane invisible
+    depthTest: false, // Ensure the plane doesn't interfere with other clickable items
   });
+  const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 
-  const hitbox = new THREE.Mesh(geometry, material);
-  hitbox.position.copy(object.position); // Match position of the original object
-  return hitbox;
-};
+  // Position the plane in front of the mesh
+  plane.position.copy(mesh.position);
+  plane.position.z -= 0.3; // Slightly in front of the mesh for easy interaction
+
+  // Rotate the plane to face the camera if necessary (optional, depends on your camera setup)
+  plane.lookAt(camera.position);
+
+  return plane;
+}
 
 async function addArrayAndTreeNodeElement(value, index, positionIndex) {
   console.log(`Creating elements for value: ${value}, index: ${index}`);
@@ -751,12 +744,10 @@ async function addArrayAndTreeNodeElement(value, index, positionIndex) {
   treeNodeTextMesh.position.set(positionIndex * (width + 0.15), 5, 0.3);
   treeNodeTextMesh.userData.index = index;
   instancedObjects.add(treeNodeTextMesh);
-
-  // treeNodeTexts.push(treeNodeTextMesh);
-  // const hitbox = createHitbox(treeNodeTextMesh, 2); // 2x larger hitbox
-  // hitbox.userData.originalMesh = treeNodeTextMesh; // Link hitbox to treeNodeTextMesh
-  // scene.add(hitbox); // Add hitbox to the scene
-  // instancedObjects.add(hitbox); // Add hitbox to DragControls
+  const interactionPlane = createTransparentPlane(stationaryMesh, 0.9); // 2 times the size for easier interaction
+  interactionPlane.userData.linkedMesh = treeNodeTextMesh;
+  treeNodeTextMesh.userData.linkedPlane = interactionPlane;
+  instancedObjects.add(interactionPlane);
 
   scene.add(stationaryGroup);
 
@@ -883,24 +874,26 @@ function evaluateActionAndUpdateScore(isCorrect, nodeIndex) {
 // Adjust the drag event handlers to manage the draggable text meshes
 controls.addEventListener("dragstart", function (event) {
   cameraOrbit.enabled = false;
-  let draggableTextMesh = event.object;
+  // let draggableTextMesh = event.object;
+  let draggableTextMesh = event.object.userData.linkedMesh || event.object;
   draggableTextMesh.userData.initialPosition =
     draggableTextMesh.position.clone();
   effectForHoverSelect();
 });
 
-// controls.addEventListener("drag", (event) => {
-//   const hitbox = event.object; // Dragged object
-//   const originalMesh = hitbox.userData.originalMesh; // Access the linked TextMesh
-//   if (originalMesh) {
-//     originalMesh.position.copy(hitbox.position); // Sync TextMesh position with hitbox
-//   }
-// });
+controls.addEventListener("drag", function (event) {
+  let draggableTextMesh = event.object.userData.linkedMesh || event.object;
+  if (event.object.userData.linkedMesh) {
+    // Ensure the linked mesh follows the plane during the drag
+    draggableTextMesh.position.copy(event.object.position);
+    draggableTextMesh.position.z = draggableTextMesh.userData.initialPosition.z; // Maintain the initial z position if needed
+  }
+});
 
 controls.addEventListener("dragend", function (event) {
   removingEffectForHoverSelect();
   // cameraOrbit.enabled = true;
-  let draggableTextMesh = event.object; // Direct reference to the dragged text mesh
+  let draggableTextMesh = event.object.userData.linkedMesh || event.object;
   let draggableIndex = draggableTextMesh.userData.index;
   let initialPositionDragged = draggableTextMesh.userData.initialPosition;
 
@@ -910,6 +903,11 @@ controls.addEventListener("dragend", function (event) {
     correctPositions,
     currentStep
   );
+
+  if (event.object.userData.linkedMesh) {
+    draggableTextMesh.position.copy(event.object.position);
+    draggableTextMesh.position.z = initialPositionDragged.z; // Reset z to initial if needed
+  }
 
   const isValidDrag =
     typeof draggableIndex !== "undefined" && closestDebossedIndex !== null;
@@ -934,6 +932,10 @@ controls.addEventListener("dragend", function (event) {
     }
   } else {
     draggableTextMesh.position.copy(initialPositionDragged);
+    if (event.object.userData.linkedMesh) {
+      // Also reset the plane's position if the draggable object is a plane
+      event.object.position.copy(initialPositionDragged);
+    }
     displayMessage(
       "Please make sure to drag the element close to the index box",
       uiText
@@ -968,9 +970,17 @@ function handleStepOnePlacement(
       snapPosition.y,
       snapPosition.z + 0.1
     );
+    draggableTextMesh.userData.linkedPlane.position.set(
+      snapPosition.x,
+      snapPosition.y,
+      snapPosition.z + 0.2
+    );
     highlightMeshTemporarily(draggableTextMesh, "#00ff00", 3000);
   } else {
     draggableTextMesh.position.copy(initialPositionDragged);
+    draggableTextMesh.userData.linkedPlane.position.copy(
+      initialPositionDragged
+    );
     highlightMeshTemporarily(draggableTextMesh, "#f03e3e", 3000);
   }
 
@@ -1015,6 +1025,9 @@ function handleStepTwoAndThreePlacement(
 
   if (!swapSuccess) {
     draggableTextMesh.position.copy(initialPositionDragged);
+    draggableTextMesh.userData.linkedPlane.position.copy(
+      initialPositionDragged
+    );
   }
   evaluateActionAndUpdateScore(swapSuccess, draggableIndex);
 }
@@ -1367,7 +1380,9 @@ function performSwap(index1, index2, initialPosition) {
   // Swap positions of the tree node text meshes
   // const tempPosition = treeNodeMesh1.position.clone();
   treeNodeMesh1.position.copy(treeNodeMesh2.position);
+  treeNodeMesh1.userData.linkedPlane.position.copy(treeNodeMesh2.position);
   treeNodeMesh2.position.copy(initialPosition);
+  treeNodeMesh2.userData.linkedPlane.position.copy(initialPosition);
 
   const tempValuePosition = valueTextMesh1.position.clone();
   valueTextMesh1.position.copy(valueTextMesh2.position);
@@ -1484,7 +1499,7 @@ buttonNextLevel.addEventListener("click", () => {
   closeModal();
   resetScene();
   currentLevel++;
-  curlvlNodesNum = levels[currentLevel];
+  curlvlNodesNum = levels[currentLevel - 1];
   generateArray();
 });
 
