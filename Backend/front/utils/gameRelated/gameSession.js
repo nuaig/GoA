@@ -1,8 +1,9 @@
 export class GameSession {
-  constructor(userId, gameName, level) {
+  constructor(userId, gameName, mode, level) {
     this.userId = userId;
     this.gameSession = {
       game_name: gameName,
+      mode: mode,
       level: level,
       total_mistakes: 0,
       final_score: 0,
@@ -11,6 +12,21 @@ export class GameSession {
       success: false, // Default to false until game success is determined
     };
     this.startTime = Date.now(); // Capture start time for duration calculation
+  }
+
+  resetGameSession(gameName, level, mode) {
+    this.gameSession = {
+      game_name: gameName,
+      mode: mode,
+      level: level,
+      total_mistakes: 0,
+      final_score: 0,
+      start_time: new Date().toISOString(), // Reset start time
+      duration: 0, // Reset duration
+      success: false, // Reset success status
+    };
+    this.startTime = Date.now(); // Reset start time for duration calculation
+    console.log(this.toObject());
   }
 
   incrementMistakes() {

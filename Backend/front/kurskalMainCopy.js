@@ -38,145 +38,21 @@ import {
   createRing,
   highlightChest,
 } from "./utils/graphRelated/drawLine.js";
+import GameRoomUI from "./utils/UI/gameRoomUI.js";
 
-const uiText = document.getElementById("UI-Text");
-const scoreElements = document.querySelectorAll(".score-label-2");
-const scoreText = document.querySelector(".score-label-2");
-const finalScoreText = document.querySelector(".label__final_score span");
-const labelCompletionText = document.querySelector(".label__completion_text");
-const stars = document.querySelectorAll(".star path:last-child");
-
-const instructionModal = document.querySelector(".instruction");
-const overlay = document.querySelector(".overlay");
-const hoverEffects = document.querySelectorAll(".hover");
-
-const pseudoBoxButton = document.querySelector(".Pesudocode-Icon");
 const reArrangeButton = document.querySelector(".Rearrange-Action");
-const helpInstructionButton = document.querySelector(".Instruction-Icon");
-
-const buttonNextLevel = document.querySelector(".btn__next");
-const modalCompletion = document.querySelector(".modal__completion");
-
-const buttonAgain = document.querySelector(".btn__again");
-const buttonStart = document.querySelector(".btn__instruction__start");
-
-const settingsModal = document.querySelector(".modal__settings");
-const settingsTogglerEle = document.querySelector(".settings__icon");
-const btnSettingsRestart = document.querySelector(".btn__setting__restart");
-const btnSettingsDiffLvl = document.querySelector(".btn__setting__diffLvl");
-const btnSettingsGoMainDungeon = document.querySelectorAll(
-  ".btn__setting__mainDungeon"
-);
-
-const settingsCloseButton = document.querySelector(
-  ".modal__settings .btn__close"
-);
-
-const levelsModal = document.querySelector(".modal__level__selection");
-
-// Select all level buttons
-const levelButtons = document.querySelectorAll(".level__btn__holder");
-const btnLevelClose = document.querySelector(".btn__level__close");
-
 let curGameSession;
-let levelModalOpen = true;
-// DONE
-// Function to update the score
-function updateScore(newScore) {
-  // Iterate over each element and update its text content
-  scoreElements.forEach((element) => {
-    element.textContent = newScore.toString().padStart(2, "0"); // Ensures a two-digit format (e.g., '00')
-  });
-}
-// DONE
-// Function to hide stars
-function hideStars() {
-  const svgStars = document.querySelectorAll(
-    ".level__stars__holder svg.feather-star"
-  );
-  svgStars.forEach((star) => {
-    star.style.visibility = "hidden"; // Hide stars
-  });
-}
-// DONE
-// Function to show stars
-function showStars() {
-  const svgStars = document.querySelectorAll(
-    ".level__stars__holder svg.feather-star"
-  );
-  svgStars.forEach((star) => {
-    star.style.visibility = "visible"; // Show stars
-  });
-}
-// DONE
-// Function to toggle headers
-function toggleHeader(showHealth) {
-  const headerWithHealth = document.getElementById("header-with-health");
-  const headerWithoutHealth = document.getElementById("header-without-health");
-
-  if (showHealth) {
-    headerWithHealth.classList.remove("hidden");
-    headerWithoutHealth.classList.add("hidden");
-  } else {
-    headerWithHealth.classList.add("hidden");
-    headerWithoutHealth.classList.remove("hidden");
-  }
-}
-// DONE
-async function toggleMode(mode) {
-  if (!gameStatusService) {
-    console.error("Error: gameStatusService is not initialized.");
-    return;
-  }
-
-  const trainingBtn = document.getElementById("training-mode-btn");
-  const regularBtn = document.getElementById("regular-mode-btn");
-
-  if (mode === "training") {
-    trainingBtn.classList.add("active");
-    regularBtn.classList.remove("active");
-    choosingModeNotCurrent = "training";
-    hideStars(); // Hide stars for training mode
-    // toggleHeader(false); // Hide health bar for training mode
-  } else if (mode === "regular") {
-    regularBtn.classList.add("active");
-    trainingBtn.classList.remove("active");
-    choosingModeNotCurrent = "regular";
-    console.log(choosingModeNotCurrent);
-    showStars(); // Show stars for regular mode
-    // toggleHeader(true); // Show health bar for regular mode
-  }
-
-  // Initialize level status for the selected mode
-  await initializeLevelStatus(mode);
-}
-// DONE
-// Event listeners for mode buttons
-document.getElementById("training-mode-btn").addEventListener("click", () => {
-  toggleMode("training");
-});
-// DONE
-document.getElementById("regular-mode-btn").addEventListener("click", () => {
-  toggleMode("regular");
-});
-
-// Initialize to regular mode
-// toggleMode("regular");
-
-let isModalOpen = false;
-
 let currentScore = 0;
-let currentLevel = 1;
-let currentMode;
-let choosingModeNotCurrent;
+let currentLevel = 1; // TO DO
+
 let curNodes;
 let curEdges;
 let graph;
 
 const levelConfig = {
-  1: { nodes: 5, edges: 7 },
-  2: { nodes: 6, edges: 9 },
-  3: { nodes: 7, edges: 11 },
+  1: { nodes: 3, edges: 2 },
+  2: { nodes: 4, edges: 3 },
+  3: { nodes: 5, edges: 4 },
 };
 
 const usedColors = new Set();
@@ -189,239 +65,12 @@ graph = createRandomConnectedGraph(curNodes, curEdges);
 let componentColors = {};
 
 let curAlgorithmForGraph = new KruskalAlgorithm(graph);
-let currentAlgorithm = "kruskal";
 
 let startingNodeLabelForPrim;
 let startingNodeRingForPrim;
 
-let health = 4;
-
-let onMouseMove;
-let onClick;
-let gameStatusService;
-
-// Add an event listener to initialize the game after login
-document.addEventListener("DOMContentLoaded", async function () {
-  try {
-    const response = await fetch("/api/users/getUser", {
-      method: "GET",
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      const userData = await response.json();
-      console.log("User is logged in:", userData);
-
-      // Initialize GameStatusService with the logged-in userId
-      gameStatusService = new GameStatusService(userData.id);
-
-      // Await the initialization of GameStatusService
-      await gameStatusService.init();
-      const userId = gameStatusService.getUserId();
-      curGameSession = new GameSession(userId, "Kruskal", currentLevel);
-      console.log(curGameSession.toObject());
-      // Ensure toggleMode is called only after initialization
-      await toggleMode("regular");
-    } else {
-      console.warn("User is not logged in. Redirecting to login page.");
-      window.location.href = "signInSignUp.html";
-    }
-  } catch (error) {
-    console.error("Error checking login status:", error);
-    window.location.href = "signInSignUp.html";
-  }
-});
-
-// DONE
-async function initializeLevelStatus(mode) {
-  try {
-    if (!gameStatusService) {
-      console.error("Error: gameStatusService is not initialized.");
-      return;
-    }
-
-    // Fetch game status for the user
-    const gameStatus = await gameStatusService.getLocalGameStatus();
-
-    if (!gameStatus) {
-      console.error("No game status found for this user.");
-      return;
-    }
-
-    // Reset all levels to the locked state and clear stars
-    resetAllLevels();
-
-    let highestCompletedLevel = 0;
-
-    // Get the specific levels based on the selected mode
-    const kruskalLevels = gameStatus.games["Kruskal"]?.[mode];
-    if (!kruskalLevels) {
-      console.error(`No levels found for mode: ${mode}`);
-      return;
-    }
-
-    console.log(`Initializing levels for mode: ${mode}`, kruskalLevels);
-
-    kruskalLevels.forEach((gameData, index) => {
-      const level = index + 1; // Levels are 1-based index
-
-      // Find the button and star elements for the current level
-      const currentLevelButton = document.querySelector(
-        `.btn__level__${level}`
-      );
-      const currentStarsHolder = currentLevelButton.querySelector(
-        ".level__stars__holder"
-      );
-
-      // Update the stars based on the level data
-      const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
-      for (let i = 0; i < stars.length; i++) {
-        if (i < gameData.stars) {
-          stars[i].classList.add("filled");
-          stars[i].style.fill = "#a5d8ff"; // Filled stars color
-        } else {
-          stars[i].classList.remove("filled");
-          stars[i].style.fill = "none"; // Default color for unfilled stars
-        }
-      }
-
-      // Check if the level is completed and track the highest completed level
-      if (gameData.status === "completed") {
-        highestCompletedLevel = level;
-        unlockLevelUI(level);
-      }
-    });
-
-    // Unlock the next level if there is a completed level
-    if (
-      highestCompletedLevel > 0 &&
-      highestCompletedLevel < kruskalLevels.length
-    ) {
-      unlockLevelUI(highestCompletedLevel + 1);
-    }
-  } catch (error) {
-    console.error("Error initializing level status:", error);
-  }
-}
-
-// DONE
-// Function to reset all levels to the original state
-function resetAllLevels() {
-  const levelButtons = document.querySelectorAll(".level__btn__holder");
-
-  levelButtons.forEach((button, index) => {
-    button.classList.add("level__locked"); // Lock the level
-
-    // Reset stars
-    const stars = button.querySelectorAll(
-      ".level__stars__holder svg.feather-star"
-    );
-    stars.forEach((star) => {
-      star.classList.remove("filled");
-      star.style.fill = "none"; // Default color for unfilled stars
-    });
-
-    // Show lock icon
-    const lockIcon = button.querySelector(".feather-lock");
-    if (lockIcon) {
-      lockIcon.style.display = "block"; // Show the lock icon
-    }
-  });
-
-  // Always unlock the first level
-  const firstLevelButton = document.querySelector(".btn__level__1");
-  if (firstLevelButton) {
-    firstLevelButton.classList.remove("level__locked");
-    const lockIcon = firstLevelButton.querySelector(".feather-lock");
-    if (lockIcon) {
-      lockIcon.style.display = "none"; // Hide the lock icon
-    }
-  }
-
-  console.log(
-    "All levels have been reset to the original state, and the first level is unlocked."
-  );
-}
-
-// DONE
-function unlockLevelUI(level) {
-  const nextLevelButton = document.querySelector(`.btn__level__${level}`);
-  if (nextLevelButton) {
-    nextLevelButton.classList.remove("level__locked");
-    const lockIcon = nextLevelButton.querySelector(".feather-lock");
-    if (lockIcon) {
-      lockIcon.style.display = "none"; // Hide the lock icon
-    }
-  }
-}
-
-// DONE
-function updateLevelStatus(level, starsCount) {
-  const currentLevelButton = document.querySelector(`.btn__level__${level}`);
-  const currentStarsHolder = currentLevelButton.querySelector(
-    ".level__stars__holder"
-  );
-
-  // Update stars based on the zero-based starsCount
-  const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
-  for (let i = 0; i < stars.length; i++) {
-    if (i <= starsCount) {
-      stars[i].classList.add("filled");
-      stars[i].style.fill = "#a5d8ff"; // Gold color for filled stars
-    } else {
-      stars[i].classList.remove("filled");
-      stars[i].style.fill = "none"; // Default color for unfilled stars
-    }
-  }
-
-  // Unlock the next level
-  const nextLevel = level + 1;
-  const nextLevelButton = document.querySelector(`.btn__level__${nextLevel}`);
-  if (nextLevelButton) {
-    nextLevelButton.classList.remove("level__locked");
-    const lockIcon = nextLevelButton.querySelector(".feather-lock");
-    if (lockIcon) {
-      lockIcon.style.display = "none"; // Hide the lock icon
-    }
-  }
-}
-// DONE
-levelButtons.forEach((button, index) => {
-  button.addEventListener("click", () => {
-    if (button.classList.contains("level__locked")) {
-      console.log(`Level ${index + 1} is locked.`);
-      return; // Exit if the level is locked
-    }
-
-    closeLevelModal();
-
-    const chosenLevel = index + 1; // Levels are 1-based
-    console.log(`Level ${chosenLevel} selected.`);
-
-    // Only reset the level if it is different from the current level
-    // or the mode has changed
-    if (
-      chosenLevel !== currentLevel ||
-      choosingModeNotCurrent !== currentMode
-    ) {
-      currentLevel = chosenLevel;
-      currentMode = choosingModeNotCurrent; // Update the current mode
-      window.removeEventListener("mousemove", onMouseMove, false);
-      window.removeEventListener("click", onClick, false);
-
-      resetLevel(currentLevel); // Reset the scene for the chosen level
-
-      // Show or hide the health bar based on the chosen mode
-      if (currentMode === "regular") {
-        toggleHeader(true); // Show health bar for regular mode
-      } else {
-        toggleHeader(false); // Hide health bar for training mode
-      }
-      initailCameraAnimationGSAP(); // Trigger the camera animation
-    }
-  });
-});
-
+let onMouseMove; // TO DO put it in the object
+let onClick; // TO DO put it in the object
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -453,53 +102,6 @@ const gridSize = 40;
 let labels = [];
 let dungeonRoomMixer;
 let dungeonRoomAction;
-// DONE
-// Setting Toggler for Setting Modal
-settingsTogglerEle.addEventListener("click", () => {
-  settingsModal.classList.toggle("hidden");
-  overlay.classList.toggle("hidden");
-  isModalOpen = !isModalOpen;
-  disableEventListeners();
-});
-
-// DONE
-settingsCloseButton.addEventListener("click", () => {
-  settingsModal.classList.toggle("hidden");
-  overlay.classList.toggle("hidden");
-  isModalOpen = false;
-  enableEventListeners();
-});
-// FIXME
-function closeLevelModal() {
-  levelsModal.classList.add("hidden");
-  overlay.classList.add("hidden");
-  isModalOpen = false;
-
-  // Delay enabling event listeners by 300ms
-  setTimeout(() => {
-    enableEventListeners();
-  }, 300);
-}
-// FIXME
-function openLevelModal() {
-  levelsModal.classList.remove("hidden");
-  overlay.classList.remove("hidden");
-  isModalOpen = true;
-  disableEventListeners();
-}
-// FIXME
-function closeSettingModal() {
-  settingsModal.classList.add("hidden");
-  overlay.classList.add("hidden");
-  isModalOpen = false;
-  enableEventListeners();
-}
-// FIXME
-function openSettingModal() {
-  settingsModal.classList.remove("hidden");
-  overlay.classList.remove("hidden");
-  isModalOpen = true;
-}
 
 const startPosition = { x: 0, y: 5, z: 35 };
 const midPosition = { x: 0, y: 5, z: 26 };
@@ -508,6 +110,66 @@ const endPosition = { x: 0, y: 26, z: 26 };
 camera.position.set(startPosition.x, startPosition.y, startPosition.z);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 4);
+
+const curRoomUI = new GameRoomUI("Kruskal", 1, camera);
+
+// document.addEventListener("DOMContentLoaded", () => {
+//   const swiper = new Swiper(".mySwiper", {
+//     modules: [Navigation, Pagination], // ✅ Ensure modules are included
+//     slidesPerView: 1,
+//     grabCursor: true,
+//     loop: true,
+//     pagination: {
+//       el: ".swiper-pagination",
+//       clickable: true,
+//     },
+//     navigation: {
+//       nextEl: ".swiper-button-next",
+//       prevEl: ".swiper-button-prev",
+//     },
+//   });
+
+//   console.log("Swiper initialized:", swiper);
+// });
+
+// Add an event listener to initialize the game after login
+document.addEventListener("DOMContentLoaded", async function () {
+  try {
+    const response = await fetch("/api/users/getUser", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      console.log("User is logged in:", userData);
+
+      // Initialize GameStatusService with the logged-in userId
+      const gameStatusService = new GameStatusService(userData.id);
+      curRoomUI.setGameStatusService(gameStatusService);
+      // Await the initialization of GameStatusService
+      await curRoomUI.gameStatusService.init();
+      const userId = curRoomUI.gameStatusService.getUserId();
+      curGameSession = new GameSession(
+        userId,
+        "Kruskal",
+        "regular",
+        curRoomUI.currentLevel
+      );
+      curRoomUI.setGameSession(curGameSession);
+
+      // Ensure toggleMode is called only after initialization
+      await curRoomUI.toggleMode("regular");
+    } else {
+      console.warn("User is not logged in. Redirecting to login page.");
+      window.location.href = "signInSignUp.html";
+    }
+  } catch (error) {
+    console.error("Error checking login status:", error);
+    window.location.href = "signInSignUp.html";
+  }
+});
+
 // DONE
 function initailCameraAnimationGSAP() {
   const timeline = gsap.timeline();
@@ -537,49 +199,7 @@ function initailCameraAnimationGSAP() {
   });
 }
 
-// DONE
-btnSettingsDiffLvl.addEventListener("click", async (e) => {
-  e.preventDefault();
-
-  // Close the settings modal first
-  await closeSettingModal();
-
-  // Open the levels modal after the settings modal is fully closed
-  btnLevelClose.classList.remove("hidden");
-  openLevelModal();
-  disableEventListeners();
-});
-// DONE
-btnLevelClose.addEventListener("click", (e) => {
-  e.preventDefault();
-  closeLevelModal();
-});
-
-// DONE
-btnSettingsGoMainDungeon.forEach((button) => {
-  button.addEventListener("click", () => {
-    window.location.href = "mainDungeon.html";
-  });
-});
-
-disableEventListeners();
-
-// DONE
-buttonStart.addEventListener("click", () => {
-  disableEventListeners();
-  // overlay.classList.add("hidden");
-  if (!levelModalOpen) {
-    overlay.classList.add("hidden");
-    enableEventListeners();
-  }
-  instructionModal.classList.add("hidden");
-  levelModalOpen = false;
-
-  // levelsModal.classList.remove("hidden");
-  // const userId = gameStatusService.getUserId();
-  // curGameSession = new GameSession(userId, "Kruskal", currentLevel);
-  // console.log(curGameSession.toObject());
-});
+// disableEventListeners(); // TO DO not sure if we will need this
 
 // FIXME
 function showPrimInstructions() {
@@ -670,49 +290,10 @@ function primSetup() {
   curAlgorithmForGraph.setStartingNode(randomIndex);
 }
 
-// FIXME
-window.toggleInstructions = function () {
-  toggleInstructions(currentAlgorithm);
-};
-// DONE
-pseudoBoxButton.addEventListener("click", () => {
-  toggleInstructions(currentAlgorithm);
-});
-
-// DONE
-helpInstructionButton.addEventListener("click", () => {
-  instructionModal.classList.remove("hidden");
-  overlay.classList.remove("hidden");
-  document.querySelector(".btn__instruction__start").textContent =
-    "Close Instruction";
-});
-
-// DONE
-const openModal = function (currentLevel) {
-  // Show modal and overlay
-  modalCompletion.classList.remove("hidden");
-  disableEventListeners();
-  overlay.classList.remove("hidden");
-
-  // Select the "Next Level" button
-  const nextButton = document.querySelector(".btn__next");
-
-  // Check if it's level 3
-  if (currentLevel === 3) {
-    // Remove or hide the "Next Level" button if it's level 3
-    nextButton.style.display = "none";
-  } else {
-    // Ensure the "Next Level" button is visible for other levels
-    nextButton.style.display = "inline-block";
-  }
-};
-
-// DONE
-const closeModal = function () {
-  modalCompletion.classList.add("hidden");
-  overlay.classList.add("hidden");
-  enableEventListeners();
-};
+// TO DO not sure if we will need
+// window.toggleInstructions = function () {
+//   toggleInstructions(currentAlgorithm);
+// };
 
 async function createModels() {
   const margin = 0.1;
@@ -775,7 +356,7 @@ async function createModels() {
     chestLabelList.push(chestLabel);
   }
 
-  if (currentAlgorithm === "prim") {
+  if (curRoomUI.currentAlgorithm === "Prim") {
     primSetup();
   }
 
@@ -872,9 +453,11 @@ function handleSelectionEffect(intersectedObject) {
   ringList.push(permanentRing);
   intersectedObject.userData.ring = permanentRing;
 
-  currentScore += 10;
-  updateScore(currentScore);
-  scoreText.innerHTML = `${currentScore}`;
+  curRoomUI.currentScore += 10;
+  curRoomUI.updateScore(curRoomUI.currentScore);
+  console.log(curRoomUI.currentScore);
+  console.log(curRoomUI.health);
+  // curRoomUI.scoreText.innerHTML = `${currentScore}`;
 }
 
 function handleEdgeSelection(
@@ -895,7 +478,7 @@ function handleEdgeSelection(
   if (selectEdgeResult.every((res) => res === 1)) {
     document.querySelector(".Hint-Text").classList.add("hidden");
     effectForCorrectSelect();
-    if (currentAlgorithm === "kruskal") {
+    if (currentAlgorithm === "Kruskal") {
       // updateNodeColorsForSameTree({ ...edge, rootStart, rootEnd }, sameTree);
       updateNodeColorsForSameTree(edge);
     }
@@ -905,26 +488,31 @@ function handleEdgeSelection(
     console.log("Current weight of the spanning tree:", currentWeight);
 
     if (isComplete) {
-      currentScore = Math.floor(currentScore * ((health + 1) * 0.1 + 1));
-      uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
-      finalScoreText.innerHTML = `${currentScore}`;
-      const algoName = currentAlgorithm === "kruskal" ? "Kruskal" : "Prim";
-      labelCompletionText.innerHTML = `
-        You have successfully completed level ${currentLevel} of ${algoName}'s Algorithm in ${currentMode} mode!
-      `;
-      let totalStars;
-      if (currentMode == "regular") {
-        totalStars = setStars(health);
-      } else {
-        totalStars = setStars(4);
-      }
-      console.log(totalStars);
+      curRoomUI.currentScore = Math.floor(
+        curRoomUI.currentScore * ((curRoomUI.health + 1) * 0.1 + 1)
+      );
+      curRoomUI.uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
+      curRoomUI.fillInfoSuccessCompletionModal();
+      // curRoomUI.finalScoreText.innerHTML = `${currentScore}`;
+      // const algoName = currentAlgorithm === "Kruskal" ? "Kruskal" : "Prim";
+      // curRoomUI.labelCompletionText.innerHTML = `
+      //   You have successfully completed level ${curRoomUI.currentLevel} of ${curRoomUI.gameName}'s Algorithm in ${curRoomUI.currentMode} mode!
+      // `;
+      // let totalStars;
+      // if (curRoomUI.currentMode == "regular") {
+      //   totalStars = setStars(curRoomUI.health);
+      // } else {
+      //   totalStars = setStars(4);
+      // }
+      console.log(curRoomUI.totalStars);
 
-      curGameSession.setFinalScore(currentScore);
+      curGameSession.setFinalScore(curRoomUI.currentScore);
       curGameSession.setSuccessStatus(true);
       curGameSession.endSession();
 
       const sessionData = curGameSession.toObject();
+      console.log("printing session Data");
+      console.log(sessionData);
       fetch("/api/gamesessions", {
         method: "POST",
         headers: {
@@ -934,32 +522,33 @@ function handleEdgeSelection(
       }).then((res) => res.json());
 
       // Store the score and stars in localStorage with "kruskal" included
-      const levelData = { score: currentScore, stars: totalStars };
-      console.log(currentLevel);
-      console.log(currentMode);
+      // const levelData = { score: currentScore, stars: totalStars };
+      console.log(curRoomUI.currentLevel);
+      console.log(curRoomUI.currentMode);
       // console.log(gameStatusService.gameStatus.games.Kruskal[2].status);
-      updateLevelStatus(currentLevel, totalStars);
+      curRoomUI.updateLevelStatus(curRoomUI.currentLevel, curRoomUI.totalStars);
       const status_update_string =
         currentLevel != 3 ? "completed" : "completed_first_time";
-      gameStatusService.updateGameStatus(
+      curRoomUI.gameStatusService.updateGameStatus(
         "Kruskal",
-        currentLevel,
-        currentMode,
-        currentScore,
-        totalStars + 1,
+        curRoomUI.currentLevel,
+        curRoomUI.currentMode,
+        curRoomUI.currentScore,
+        curRoomUI.totalStars + 1,
         status_update_string
       );
-      gameStatusService.unlockGameLevel(
+      curRoomUI.gameStatusService.unlockGameLevel(
         "Kruskal",
-        currentLevel + 1,
-        currentMode
+        curRoomUI.currentLevel + 1,
+        curRoomUI.currentMode
       );
-
-      openModal(currentLevel);
-      window.removeEventListener("mousemove", onMouseMove, false);
-      window.removeEventListener("click", onClick, false);
+      curRoomUI.openCompletionModal();
+      // openModal(currentLevel); // TO DO check this
+      curRoomUI.disableMouseEventListeners_K_P();
+      // window.removeEventListener("mousemove", onMouseMove, false);
+      // window.removeEventListener("click", onClick, false);
     } else {
-      uiText.innerText = `Correct! Current weight is ${currentWeight}.`;
+      curRoomUI.uiText.innerText = `Correct! Current weight is ${currentWeight}.`;
     }
   } else {
     shakeForWrongSelect();
@@ -969,20 +558,20 @@ function handleEdgeSelection(
     if (intersectedObject.userData.label) {
       intersectedObject.userData.label.material.color.set(0xff0000); // Set label to red
     }
-    health = decrementHealth(health);
+    curRoomUI.health = decrementHealth(curRoomUI.health);
     shakeScreen();
     document.querySelector(".Hint-Text").classList.remove("hidden");
     const hintItems = document.querySelectorAll(".Hint-Text li");
     updateHintIcons(hintItems[0], selectEdgeResult[0]);
     updateHintIcons(hintItems[1], selectEdgeResult[1]);
-    if (currentAlgorithm === "prim") {
+    if (currentAlgorithm === "Prim") {
       const primHintItem = document.querySelector(".Prim-Hint");
       if (primHintItem) {
         primHintItem.classList.remove("hidden");
         updateHintIcons(primHintItem, selectEdgeResult[2]);
       }
     }
-    uiText.innerText =
+    curRoomUI.uiText.innerText =
       "Incorrect Selection. Make sure to meet the following conditions:";
 
     setTimeout(() => {
@@ -991,6 +580,26 @@ function handleEdgeSelection(
         intersectedObject.userData.label.material.color.set(0x000000);
       }
     }, 3000);
+    if (curRoomUI.health < 0) {
+      curRoomUI.fillInfoFailureSuccessCompletionModal();
+      curGameSession.setFinalScore(curRoomUI.currentScore);
+      curGameSession.setSuccessStatus(false);
+      curGameSession.endSession();
+
+      const sessionData = curGameSession.toObject();
+      console.log("printing session Data");
+      console.log(sessionData);
+      fetch("/api/gamesessions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(sessionData),
+      }).then((res) => res.json());
+      curRoomUI.openCompletionModal();
+      // openModal(currentLevel); // TO DO check this
+      curRoomUI.disableMouseEventListeners_K_P();
+    }
   }
 }
 
@@ -1025,9 +634,9 @@ function drawLines() {
   scene.add(sphereInter);
 
   // Assign the function to the global variable
-  onMouseMove = function (event) {
+  const onMouseMove = function (event) {
     event.preventDefault();
-    if (isModalOpen) return;
+    if (curRoomUI.isModalOpen) return;
     if (curAlgorithmForGraph.isComplete()) {
       sphereInter.visible = false;
       hoverRing.visible = false;
@@ -1042,7 +651,7 @@ function drawLines() {
     const intersects = raycaster.intersectObjects([...lines, ...labels]);
 
     if (intersects.length > 0) {
-      hoverEffects.forEach((hoverEffect) => {
+      curRoomUI.hoverEffects.forEach((hoverEffect) => {
         hoverEffect.classList.add("highlight");
       });
       const intersectedObject = intersects[0].object;
@@ -1068,7 +677,7 @@ function drawLines() {
         }
       }
     } else {
-      hoverEffects.forEach((hoverEffect) => {
+      curRoomUI.hoverEffects.forEach((hoverEffect) => {
         hoverEffect.classList.remove("highlight");
       });
       sphereInter.visible = false;
@@ -1083,9 +692,9 @@ function drawLines() {
   };
 
   // Assign the function to the global variable
-  onClick = function (event) {
+  const onClick = function (event) {
     event.preventDefault();
-    if (isModalOpen) return;
+    if (curRoomUI.isModalOpen) return;
 
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -1103,17 +712,20 @@ function drawLines() {
       if (intersectedObject.userData) {
         handleEdgeSelection(
           intersectedObject,
-          currentAlgorithm,
+          curRoomUI.currentAlgorithm,
           onClick,
           onMouseMove
         );
       }
     }
   };
-
+  curRoomUI.callbacks.onMouseMove = onMouseMove;
+  curRoomUI.callbacks.onClick = onClick;
+  console.log("printing callbacks", curRoomUI.callbacks);
   // Add event listeners
-  window.addEventListener("mousemove", onMouseMove, false);
-  window.addEventListener("click", onClick, false);
+  curRoomUI.enableMouseEventListeners_K_P();
+  // window.addEventListener("mousemove", onMouseMove, false);
+  // window.addEventListener("click", onClick, false);
 }
 
 createThreePointLighting(scene);
@@ -1184,17 +796,24 @@ async function createDungeonRoom() {
 
 createDungeonRoom();
 
-// Function to enable event listeners
-function enableEventListeners() {
-  window.addEventListener("mousemove", onMouseMove, false);
-  window.addEventListener("click", onClick, false);
-}
+// ✅ Now assign these to GameRoomUI dynamically
+// curRoomUI.callbacks.onMouseMove = onMouseMove;
+// curRoomUI.callbacks.onClick = onClick;
 
-// Function to disable event listeners
-function disableEventListeners() {
-  window.removeEventListener("mousemove", onMouseMove, false);
-  window.removeEventListener("click", onClick, false);
-}
+// ✅ Ensure event listeners use the GameRoomUI callbacks
+// window.addEventListener("mousemove", curRoomUI.callbacks.onMouseMove, false);
+// window.addEventListener("click", curRoomUI.callbacks.onClick, false);
+// Function to enable event listeners
+// function enableEventListeners() {
+//   window.addEventListener("mousemove", onMouseMove, false);
+//   window.addEventListener("click", onClick, false);
+// }
+
+// // Function to disable event listeners
+// function disableEventListeners() {
+//   window.removeEventListener("mousemove", onMouseMove, false);
+//   window.removeEventListener("click", onClick, false);
+// }
 
 function resetScene() {
   // Remove objects from the scene and dispose of their resources
@@ -1238,10 +857,10 @@ function resetScene() {
   ringList.length = 0;
 
   // Clear raycaster references
-  window.removeEventListener("mousemove", onMouseMove, false);
-  window.removeEventListener("click", onClick, false);
-  onMouseMove = null;
-  onClick = null;
+  curRoomUI.disableMouseEventListeners_K_P();
+
+  curRoomUI.onMouseMove = null;
+  curRoomUI.onClick = null;
 
   // Reset any leftover resources
   if (sphereInter) {
@@ -1268,8 +887,7 @@ function resetScene() {
   componentColors = {};
 
   // Reset score and UI
-  currentScore = 0;
-  updateScore(0);
+  curRoomUI.updateScore(0);
   resetStars();
 }
 
@@ -1299,15 +917,15 @@ function setUpGameModel(currentLevel) {
   curEdges = numEdges;
 
   graph = createRandomConnectedGraph(curNodes, curEdges);
-  if (currentLevel <= 3) {
+  if (curRoomUI.currentLevel <= 3) {
     curAlgorithmForGraph = new KruskalAlgorithm(graph);
-    currentAlgorithm = "kruskal";
+    curRoomUI.currentAlgorithm = "Kruskal";
   } else {
     if (currentLevel == 4) {
       showPrimInstructions();
     }
     curAlgorithmForGraph = new PrimAlgorithm(graph);
-    currentAlgorithm = "prim";
+    curRoomUI.currentAlgorithm = "Prim";
   }
 
   // updateComponentColors(curAlgorithmForGraph.uf, curNodes, componentColors);
@@ -1315,47 +933,44 @@ function setUpGameModel(currentLevel) {
   createHoverElements();
 }
 
-function resetLevel(curlvl) {
-  uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
-  health = resetHealth();
+curRoomUI.callbacks.resetLevel = function (curlvl) {
+  curRoomUI.uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
+  curRoomUI.health = resetHealth();
   document.querySelector(".Hint-Text").classList.add("hidden");
-  closeModal();
-  closePseudocode();
+  curRoomUI.closeCompletionModal();
+  curRoomUI.pseudoModalClose();
   resetScene();
   setUpGameModel(curlvl);
   updateNodeLabel(levelTitle, `Level ${curlvl}`, 0.9, 0.3, 0x212529);
-}
+  curGameSession.resetGameSession(
+    curRoomUI.gameName,
+    curRoomUI.currentLevel,
+    curRoomUI.currentMode
+  );
+};
+// curRoomUI.callbacks.resetLevel = resetLevel;
 
-buttonNextLevel.addEventListener("click", () => {
-  uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
-  health = resetHealth();
-  currentLevel++;
-  closeModal();
-  closePseudocode();
-  resetScene();
-  setUpGameModel(currentLevel);
-  if (currentAlgorithm === "prim") {
-    updateNodeLabel(chapterTitle, "Prim's Algorithm", 1, 0.3, 0x212529);
-    chapterTitle.position.set(9.5, 6.5, -30);
-  }
-  if (currentLevel > 3) {
-    updateNodeLabel(
-      levelTitle,
-      `Level ${currentLevel - 3}`,
-      0.9,
-      0.3,
-      0x212529
-    );
-  } else {
-    updateNodeLabel(levelTitle, `Level ${currentLevel}`, 0.9, 0.3, 0x212529);
-  }
-});
+// curRoomUI.buttonNextLevel.addEventListener("click", () => {
+//   uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
+//   health = resetHealth();
+//   currentLevel++;
+//   closeModal();
+//   closePseudocode();
+//   resetScene();
+//   setUpGameModel(currentLevel);
+//   // if (currentAlgorithm === "prim") {
+//   //   updateNodeLabel(chapterTitle, "Prim's Algorithm", 1, 0.3, 0x212529);
+//   //   chapterTitle.position.set(9.5, 6.5, -30);
+//   // }
 
-buttonAgain.addEventListener("click", () => {
-  resetLevel(currentLevel);
-});
+//   updateNodeLabel(levelTitle, `Level ${currentLevel}`, 0.9, 0.3, 0x212529);
+// });
 
-btnSettingsRestart.addEventListener("click", () => {
-  closeSettingModal();
-  resetLevel(currentLevel);
-});
+// curRoomUI.buttonAgain.addEventListener("click", () => {
+//   curRoomUI.resetLevel(currentLevel);
+// });
+
+// curRoomUI.btnSettingsRestart.addEventListener("click", () => {
+//   closeSettingModal();
+//   resetLevel(currentLevel);
+// });

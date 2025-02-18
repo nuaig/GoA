@@ -17,6 +17,7 @@
     "express": "^4.21.0",
     "gsap": "^3.12.5",
     "mongodb": "^6.9.0",
+    "swiper": "^11.2.4",
     "three": "^0.164.1",
     "three.meshline": "^1.4.0",
     "toastify-js": "^1.12.0"

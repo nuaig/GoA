@@ -1,30 +1,30 @@
 const uiText = document.getElementById("UI-Text");
 export function toggleInstructions(currentAlgorithm) {
-  const kruskalInstructions = document.querySelector(".kruskal-instruction");
-  const primInstructions = document.querySelector(".prim-instruction");
-  const heapSortInstructions = document.querySelector(".heapify-instruction");
+  const kruskalPseudo = document.querySelector(".kruskal-pseudo");
+  const primPseudo = document.querySelector(".prim-pseudo");
+  const heapSortPseudo = document.querySelector(".heapify-pseudo");
 
   if (currentAlgorithm === "kruskal") {
-    kruskalInstructions.classList.toggle("hidden");
-    primInstructions.classList.add("hidden");
+    kruskalPseudo.classList.toggle("hidden");
+    primPseudo.classList.add("hidden");
   } else if (currentAlgorithm === "prim") {
-    primInstructions.classList.toggle("hidden");
-    kruskalInstructions.classList.add("hidden");
+    primPseudo.classList.toggle("hidden");
+    kruskalPseudo.classList.add("hidden");
   } else if (currentAlgorithm === "heapsort") {
-    heapSortInstructions.classList.toggle("hidden");
+    heapSortPseudo.classList.toggle("hidden");
   }
 }
 
 export function closePseudocode() {
-  const kruskalInstructions = document.querySelector(".kruskal-instruction");
-  const primInstructions = document.querySelector(".prim-instruction");
-  const heapSortInstructions = document.querySelector(".heapsort-instruction");
-  primInstructions?.classList.add("hidden");
-  kruskalInstructions?.classList.add("hidden");
-  heapSortInstructions?.classList.add("hidden");
+  const kruskalPseudo = document.querySelector(".kruskal-pseudo");
+  const primPseudo = document.querySelector(".prim-pseudo");
+  const heapSortPseudo = document.querySelector(".heapsort-pseudo");
+  primPseudo?.classList.add("hidden");
+  kruskalPseudo?.classList.add("hidden");
+  heapSortPseudo?.classList.add("hidden");
 }
 
-export function updateHealth(health) {
+export function decrementHealth(health) {
   const healthIcons = document.querySelectorAll(".health-icon");
   console.log(health);
   if (health >= 0 && health <= 4) {
