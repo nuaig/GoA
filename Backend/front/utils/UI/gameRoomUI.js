@@ -7,7 +7,18 @@ import "swiper/css/pagination";
 import { Navigation, Pagination } from "swiper/modules";
 
 import { setStars } from "./ui";
+
+/**
+ * GameRoomUI manages the user interface for game levels, including modals,
+ * Swiper-based instruction slides, score updates, and event listeners for UI elements.
+ */
 class GameRoomUI {
+  /**
+   * @param {string} gameName - The name of the game (e.g., "Kruskal", "Prim").
+   * @param {number} initialLevel - The starting level of the game.
+   * @param {THREE.Camera} camera - The Three.js camera for animations.
+   * @param {Object} callbacks - Callback functions for level reset, mouse movement, and clicks or any other function that needs callbacks from the main file.
+   */
   constructor(
     gameName,
     initialLevel,
@@ -51,28 +62,39 @@ class GameRoomUI {
     this.initializeUIElements();
     this.addEventListeners();
   }
-
+  /**
+   * Sets the game status service, which handles tracking game progress. This step is important if you want to sync UI and player's data.
+   * @param {Object} gameStatusService - The service managing game state.
+   */
   setGameStatusService(gameStatusService) {
     this.gameStatusService = gameStatusService;
   }
 
+  /**
+   * Sets the current game session.
+   * @param {Object} curGameSession - The game session object to store session state.
+   * This is important if you want to sync game session database with UI
+   */
   setGameSession(curGameSession) {
     this.curGameSession = curGameSession;
   }
 
+  /**
+   * Initializes all UI elements by selecting DOM elements.
+   */
   initializeUIElements() {
+    // Main UI text component for hints and any other texts
     this.uiText = document.getElementById("UI-Text");
+
+    // Score texts across page
     this.scoreElements = document.querySelectorAll(".score-label-2");
     this.scoreText = document.querySelector(".score-label-2");
 
-    this.svgStars = document.querySelectorAll(
-      ".level__stars__holder svg.feather-star"
-    );
-
-    this.instructionModal = document.querySelector(".instruction");
+    // Utility Html elements
     this.overlay = document.querySelector(".overlay");
     this.hoverEffects = document.querySelectorAll(".hover");
 
+    // action icons
     this.pseudoBoxButton = document.querySelector(".Pesudocode-Icon");
     this.reArrangeButton = document.querySelector(".Rearrange-Action");
     this.helpInstructionButton = document.querySelector(".Instruction-Icon");
@@ -90,10 +112,13 @@ class GameRoomUI {
       ".label__completion_text"
     );
 
+    // Instruction Modal
+    this.instructionModal = document.querySelector(".instruction");
     this.buttonStartInstructionModal = document.querySelector(
       ".btn__instruction__start"
     );
 
+    // Setting Modal
     this.settingsModal = document.querySelector(".modal__settings");
     this.settingsTogglerEle = document.querySelector(".settings__icon");
     this.btnSettingsRestart = document.querySelector(".btn__setting__restart");
@@ -101,45 +126,38 @@ class GameRoomUI {
     this.btnSettingsGoMainDungeon = document.querySelectorAll(
       ".btn__setting__mainDungeon"
     );
-
     this.settingsCloseButton = document.querySelector(
       ".modal__settings .btn__close"
     );
 
+    // Level Selection Modal
     this.levelsModal = document.querySelector(".modal__level__selection");
     this.levelButtons = document.querySelectorAll(".level__btn__holder");
     this.btnLevelClose = document.querySelector(".btn__level__close");
+    // headers for two modes
+    this.headerWithHealth = document.getElementById("header-with-health");
+    this.headerWithoutHealth = document.getElementById("header-without-health");
+    // buttons for modes in level selection modal
+    this.trainingBtn = document.getElementById("training-mode-btn");
+    this.regularBtn = document.getElementById("regular-mode-btn");
+    // stars for each level
+    this.svgStars = document.querySelectorAll(
+      ".level__stars__holder svg.feather-star"
+    );
 
-    // Algorithm Instruction
+    // Algorithm Instruction Modal
     this.algoInstructionModal = document.querySelector(
       ".algo-instruction-modal"
     );
     this.btnAlgoInstrClose = document.querySelector(
       ".btn-algo-instruction-close"
     );
-
-    // headers for two modes
-    this.headerWithHealth = document.getElementById("header-with-health");
-    this.headerWithoutHealth = document.getElementById("header-without-health");
-
-    // buttons for modes in level selection modal
-    this.trainingBtn = document.getElementById("training-mode-btn");
-    this.regularBtn = document.getElementById("regular-mode-btn");
   }
 
+  /**
+   * Adds event listeners for buttons and UI interactions.
+   */
   addEventListeners() {
-    // click events for mode selection buttons
-    this.trainingBtn.addEventListener("click", () =>
-      this.toggleMode("training")
-    );
-    this.regularBtn.addEventListener("click", () => this.toggleMode("regular"));
-
-    // this.levelButtons.forEach((button, index) => {
-    //   button.addEventListener("click", () =>
-    //     this.handleLevelSelection(index + 1)
-    //   );
-    // });
-
     // -------Instruction Modal---------
     this.addAllEventListenersInstructionModal();
     // -------Pseudo Modal-------
@@ -147,16 +165,20 @@ class GameRoomUI {
     // -------settings Modal-----
     this.addAllEventListenersForSettingsModal();
     // -------completion Modal-----
-    // Adding event listener to aa buttons in level selection Modal
-    this.addAllEventListenersForCompletionModal();
-    // Adding event listener to each level buttons in level selection Modal
-    this.finalizeLevelEventListener();
 
+    this.addAllEventListenersForCompletionModal();
+    // -------Level Selection Modal-----
+    this.addAllEventListenersLevelSelectionModal();
+    // -------Algorithm Instruction Modal-----
     this.addAllEventListenersAlgoInstructionModal();
   }
 
   resetAllComponents() {}
 
+  /**
+   * Updates the player's score across all score elements in the UI.
+   * @param {number} newScore - The new score value.
+   */
   updateScore(newScore) {
     this.currentScore = newScore;
     this.scoreElements.forEach((element) => {
@@ -164,35 +186,51 @@ class GameRoomUI {
     });
     this.scoreText.innerHTML = `${this.currentScore}`;
   }
-
+  /**
+   * Hides all stars from the UI.
+   * - Loops through each star element and sets its visibility to "hidden".
+   * - Used when switching to a mode where stars are not required (e.g., training mode).
+   */
   hideStars() {
     this.svgStars.forEach((star) => {
       star.style.visibility = "hidden"; // Hide stars
     });
   }
 
+  /**
+   * Displays all stars in the UI.
+   * - Loops through each star element and sets its visibility to "visible".
+   * - Used when switching to a mode where stars are relevant (e.g., regular mode).
+   */
   showStars() {
     this.svgStars.forEach((star) => {
       star.style.visibility = "visible"; // Show stars
     });
   }
 
+  /**
+   * Toggles the visibility of the game header based on the mode.
+   * - In "regular mode", the health bar is shown.
+   * - In "training mode", the header without health is shown instead.
+   *
+   * @param {boolean} showHealth - If true, displays the header with health; otherwise, hides it.
+   */
   toggleHeader(showHealth) {
     if (showHealth) {
-      this.headerWithHealth.classList.remove("hidden");
-      this.headerWithoutHealth.classList.add("hidden");
+      this.headerWithHealth.classList.remove("hidden"); // Show health bar header
+      this.headerWithoutHealth.classList.add("hidden"); // Hide non-health header
     } else {
-      this.headerWithHealth.classList.add("hidden");
-      this.headerWithoutHealth.classList.remove("hidden");
+      this.headerWithHealth.classList.add("hidden"); // Hide health bar header
+      this.headerWithoutHealth.classList.remove("hidden"); // Show non-health header
     }
   }
 
-  async toggleMode(mode) {
-    if (!this.gameStatusService) {
-      console.error("Error: gameStatusService is not initialized.");
-      return;
-    }
+  /**
+   * Toggles between training and regular game modes.
+   * @param {string} mode - The selected mode ("training" or "regular").
+   */
 
+  async toggleMode(mode) {
     if (mode === "training") {
       this.trainingBtn.classList.add("active");
       this.regularBtn.classList.remove("active");
@@ -207,7 +245,12 @@ class GameRoomUI {
 
     await this.initializeLevelStatus(mode);
   }
-  // DONE be careful with this.gameName (ex. Kruskal and kruskal)
+  /**
+   * Initializes level status based on game progress.
+   * This requires setting gameStatusService and initalizing
+   * gameStatusService class with proper data from database
+   * @param {string} mode - The selected mode.
+   */
   async initializeLevelStatus(mode) {
     try {
       if (!this.gameStatusService) {
@@ -265,9 +308,15 @@ class GameRoomUI {
     }
   }
 
-  // DONE
+  /**
+   * Resets all levels to their locked state except for the first level.
+   * - Adds the `level__locked` class to each level button.
+   * - Resets all stars to an unfilled state.
+   * - Ensures the lock icon is displayed on all levels except the first one.
+   */
   resetAllLevels() {
     this.levelButtons.forEach((button) => {
+      // Reset all stars to their unfilled state
       button.classList.add("level__locked");
       const stars = button.querySelectorAll(
         ".level__stars__holder svg.feather-star"
@@ -276,11 +325,11 @@ class GameRoomUI {
         star.classList.remove("filled");
         star.style.fill = "none";
       });
-
+      // Display the lock icon for locked levels
       const lockIcon = button.querySelector(".feather-lock");
       if (lockIcon) lockIcon.style.display = "block";
     });
-
+    // Ensure the first level is unlocked
     const firstLevelButton = document.querySelector(".btn__level__1");
     if (firstLevelButton) {
       firstLevelButton.classList.remove("level__locked");
@@ -289,23 +338,38 @@ class GameRoomUI {
     }
   }
 
-  // DONE
+  /**
+   * Unlocks a specific level by removing the locked state.
+   * - Removes the `level__locked` class from the given level.
+   * - Hides the lock icon to indicate the level is now accessible.
+   *
+   * @param {number} level - The level number to unlock.
+   */
   unlockLevelUI(level) {
     const nextLevelButton = document.querySelector(`.btn__level__${level}`);
     if (nextLevelButton) {
       nextLevelButton.classList.remove("level__locked");
+      // Hide the lock icon for the unlocked level
       const lockIcon = nextLevelButton.querySelector(".feather-lock");
       if (lockIcon) lockIcon.style.display = "none";
     }
   }
 
+  /**
+   * Updates the visual status of a specific level.
+   * - Fills in stars to reflect the player's performance.
+   * - Unlocks the next level if the current one is completed.
+   *
+   * @param {number} level - The current level number being updated.
+   * @param {number} starsCount - The number of stars achieved (0-based index).
+   */
   updateLevelStatus(level, starsCount) {
     const currentLevelButton = document.querySelector(`.btn__level__${level}`);
     const currentStarsHolder = currentLevelButton.querySelector(
       ".level__stars__holder"
     );
 
-    // Update stars based on the zero-based starsCount
+    // Update stars based on the starsCount
     const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
     for (let i = 0; i < stars.length; i++) {
       if (i <= starsCount) {
@@ -316,12 +380,12 @@ class GameRoomUI {
         stars[i].style.fill = "none"; // Default color for unfilled stars
       }
     }
-
-    // Unlock the next level
+    // Unlock the next level if the current one is completed
     const nextLevel = level + 1;
     const nextLevelButton = document.querySelector(`.btn__level__${nextLevel}`);
     if (nextLevelButton) {
       nextLevelButton.classList.remove("level__locked");
+      // Hide the lock icon for the next level
       const lockIcon = nextLevelButton.querySelector(".feather-lock");
       if (lockIcon) {
         lockIcon.style.display = "none"; // Hide the lock icon
@@ -329,53 +393,13 @@ class GameRoomUI {
     }
   }
 
-  // Level Finalize Button
-  finalizeLevelEventListener() {
-    this.levelButtons.forEach((button, index) => {
-      button.addEventListener("click", () => {
-        if (button.classList.contains("level__locked")) {
-          console.log(`Level ${index + 1} is locked.`);
-          return; // Exit if the level is locked
-        }
-
-        this.closeModal(this.levelsModal);
-
-        const chosenLevel = index + 1; // Levels are 1-based
-        console.log(`Level ${chosenLevel} selected.`);
-
-        // Only reset the level if it is different from the current level
-        // or the mode has changed
-        if (
-          chosenLevel !== this.currentLevel ||
-          this.choosingModeNotCurrent !== this.currentMode ||
-          this.health < 0
-        ) {
-          this.currentLevel = chosenLevel;
-          this.currentMode = this.choosingModeNotCurrent; // Update the current mode
-          this.disableMouseEventListeners_K_P();
-
-          this.callbacks.resetLevel(this.currentLevel); // Reset the scene for the chosen level
-
-          // Show or hide the health bar based on the chosen mode
-          if (this.currentMode === "regular") {
-            this.toggleHeader(true); // Show health bar for regular mode
-          } else {
-            this.toggleHeader(false); // Hide health bar for training mode
-          }
-
-          this.curGameSession.resetGameSession(
-            this.gameName,
-            this.currentLevel,
-            this.currentMode
-          );
-          if (this.gameName == "Kruskal" || this.gameName == "Prim") {
-            this.initailCameraAnimationGSAP(); // Trigger the camera animation
-          }
-        }
-      });
-    });
-  }
-
+  /**
+   * Creates an animated transition of the camera between two positions.
+   * - Moves the camera smoothly from the starting position to an elevated position.
+   * - Ensures the camera always looks at a fixed point (0,0,4).
+   * - Use as needed in 3D three.js renderer and scene
+   * Uses GSAP (GreenSock Animation Platform) for smooth animation effects.
+   */
   initailCameraAnimationGSAP() {
     const timeline = gsap.timeline();
     const midPosition = { x: 0, y: 5, z: 26 };
@@ -407,6 +431,10 @@ class GameRoomUI {
   }
 
   // -------Instruction Modal---------
+  /**
+   * Adds all event listeners related to the instruction modal.
+   * - Initializes click event listeners for different instruction-related UI elements.
+   */
   addAllEventListenersInstructionModal() {
     this.listenEventInstructionModalGameStart();
     this.listenEventHelpButtonInstructionModalOpen();
@@ -414,6 +442,12 @@ class GameRoomUI {
     this.listenEventAlgorithmInstrModal();
   }
 
+  /**
+   * Handles the event when the "Start Instruction" button is clicked.
+   * - Disables mouse event listeners to prevent unintended interactions.
+   * - Hides the instruction modal and the overlay.
+   * - Ensures that once the instruction modal is closed, it cannot be reopened without user action.
+   */
   listenEventInstructionModalGameStart() {
     this.buttonStartInstructionModal.addEventListener("click", () => {
       this.disableMouseEventListeners_K_P();
@@ -428,6 +462,11 @@ class GameRoomUI {
       this.levelModalOpen = false;
     });
   }
+
+  /**
+   * Handles the event when the "Help" button is clicked.
+   * - Toggles the visibility of the dropdown menu for instruction options.
+   */
   listenEventHelpButtonInstructionModalOpen() {
     this.helpInstructionButton.addEventListener("click", () => {
       // this.openModal(this.instructionModal);
@@ -438,7 +477,12 @@ class GameRoomUI {
       subMenu.classList.toggle("open-menu");
     });
   }
-
+  /**
+   * Handles the event when the "Game Features" option is selected.
+   * - Opens the main instruction modal.
+   * - Updates the start button text to indicate that the instruction modal is now open.
+   * - Toggles the submenu visibility.
+   */
   listenEventGameFeatureInstrModal() {
     const gameFeatureBtn = document.querySelector(".sub-menu-game-features");
     gameFeatureBtn.addEventListener("click", () => {
@@ -451,6 +495,11 @@ class GameRoomUI {
     });
   }
 
+  /**
+   * Handles the event when the "Algorithm Instructions" option is selected.
+   * - Opens the algorithm-specific instruction modal.
+   * - Toggles the submenu visibility.
+   */
   listenEventAlgorithmInstrModal() {
     const algoInstrBtn = document.querySelector(".sub-menu-algo-instructions");
     algoInstrBtn.addEventListener("click", () => {
@@ -462,47 +511,82 @@ class GameRoomUI {
     });
   }
 
-  // -------Algo Instruction Modal-------
+  // -------Algorithm Instruction Modal-------
+
+  /**
+   * Adds event listeners related to the algorithm instruction modal.
+   * - Currently, only includes a listener for closing the modal.
+   */
   addAllEventListenersAlgoInstructionModal() {
     this.listenEventCloseButtonAlgoInstructionModal();
   }
+
+  /**
+   * Handles the event when the "Close" button in the algorithm instruction modal is clicked.
+   * - Closes the modal when the button is clicked.
+   */
   listenEventCloseButtonAlgoInstructionModal() {
     this.btnAlgoInstrClose.addEventListener("click", () => {
       this.closeModal(this.algoInstructionModal);
     });
   }
+
   // -------Pseudo Modal-------
+
+  /**
+   * Adds an event listener to toggle the pseudo-code modal.
+   * - Listens for a click event on the pseudo-code button and toggles the modal.
+   */
   listenEventPseudoModalToggle() {
     this.pseudoBoxButton.addEventListener("click", () => {
       this.pseudoModalToggle();
     });
   }
 
+  /**
+   * Toggles the visibility of the pseudo-code modal.
+   * - If visible, hides it; if hidden, shows it.
+   */
   pseudoModalToggle() {
     const pseudoModal = document.querySelector(".pseudo");
     pseudoModal.classList.toggle("hidden");
   }
+
+  /**
+   * Ensures the pseudo-code modal is completely hidden.
+   * - Used when explicitly closing the modal.
+   */
   pseudoModalClose() {
     const pseudoModal = document.querySelector(".pseudo");
     pseudoModal.classList.add("hidden");
   }
+
   // -------Setting Modal--------
+  /**
+   * Adds event listeners for the settings modal.
+   * - Handles opening and closing the modal.
+   * - Adds functionality for restarting the level and returning to the main dungeon.
+   */
   addAllEventListenersForSettingsModal() {
     this.listenEventSettingsModalOpen();
     this.listenEventSettingsModalClose();
-    this.listenEventLvlSelectionModalOpen();
-    this.listenEventLvlSelectionModalClose();
     this.listenEventGoToMainDungeon();
     this.listenEventSettingsModalRestartLevel();
   }
-  // Event Listener for Opening Settings Modal
+  /**
+   * Adds an event listener for opening the settings modal.
+   * - When the settings toggle button is clicked, the settings modal is opened.
+   */
   listenEventSettingsModalOpen() {
     this.settingsTogglerEle.addEventListener("click", () => {
       this.openModal(this.settingsModal);
     });
   }
 
-  // Event Listener for Closing Settings Modal
+  /**
+   * Adds an event listener for closing the settings modal.
+   * - When the close button in the settings modal is clicked, the modal is closed.
+   */
   listenEventSettingsModalClose() {
     this.settingsCloseButton.addEventListener("click", () => {
       this.closeModal(this.settingsModal);
@@ -517,8 +601,36 @@ class GameRoomUI {
     });
   }
 
-  // Button to open level Selection in setting modal
+  // Button to go back to main Dungeon in setting modal
+  listenEventGoToMainDungeon() {
+    this.btnSettingsGoMainDungeon.forEach((button) => {
+      button.addEventListener("click", () => {
+        window.location.href = "mainDungeon.html";
+      });
+    });
+  }
+
   // ----------Level Modal-----------------
+  /**
+   * Adds event listeners for the level selection modal.
+   * - Handles opening and closing the modal.
+   * - Manages switching between training and regular modes.
+   * - Handles level button selections.
+   */
+  addAllEventListenersLevelSelectionModal() {
+    this.listenEventLvlSelectionModalOpen();
+    this.listenEventLvlSelectionModalClose();
+    this.listenEventLevelSelectionModalToggleModes();
+    this.listenEventLevelSelectionModalLevelButtonsSelect();
+  }
+
+  /**
+   * Adds an event listener for opening the level selection modal.
+   * - When the "Change Level" button is clicked in the settings modal:
+   *   - Closes the settings modal.
+   *   - Disables mouse event listeners temporarily.
+   *   - Opens the level selection modal.
+   */
   listenEventLvlSelectionModalOpen() {
     this.btnSettingsDiffLvl.addEventListener("click", async (e) => {
       e.preventDefault();
@@ -535,7 +647,10 @@ class GameRoomUI {
     });
   }
 
-  // Button to close level Selection in setting modal
+  /**
+   * Adds an event listener for closing the level selection modal.
+   * - When the close button is clicked in the level selection modal, the modal is closed.
+   */
   listenEventLvlSelectionModalClose() {
     this.btnLevelClose.addEventListener("click", (e) => {
       e.preventDefault();
@@ -543,45 +658,112 @@ class GameRoomUI {
     });
   }
 
-  // Button to go back to main Dungeon in setting modal
-  listenEventGoToMainDungeon() {
-    this.btnSettingsGoMainDungeon.forEach((button) => {
+  /**
+   * Adds event listeners for toggling between Training Mode and Regular Mode.
+   * - When a mode button is clicked, the corresponding mode is selected.
+   */
+  listenEventLevelSelectionModalToggleModes() {
+    // click events for mode selection buttons
+    this.trainingBtn.addEventListener("click", () =>
+      this.toggleMode("training")
+    );
+    this.regularBtn.addEventListener("click", () => this.toggleMode("regular"));
+  }
+  /**
+   * Adds event listeners to all level buttons in the level selection modal.
+   * - Ensures locked levels cannot be selected.
+   * - Closes the modal upon selecting a level.
+   * - Resets the game state if the selected level differs from the current level or mode.
+   * - Manages health display based on the selected mode.
+   * - Initializes a camera animation for certain games.
+   */
+  listenEventLevelSelectionModalLevelButtonsSelect() {
+    this.levelButtons.forEach((button, index) => {
       button.addEventListener("click", () => {
-        window.location.href = "mainDungeon.html";
+        if (button.classList.contains("level__locked")) {
+          console.log(`Level ${index + 1} is locked.`);
+          return; // Exit if the level is locked
+        }
+
+        this.closeModal(this.levelsModal);
+
+        const chosenLevel = index + 1; // Levels are 1-based
+        console.log(`Level ${chosenLevel} selected.`);
+
+        // Check if the selected level or mode has changed, or if health is depleted
+        if (
+          chosenLevel !== this.currentLevel ||
+          this.choosingModeNotCurrent !== this.currentMode ||
+          this.health < 0
+        ) {
+          // Update the current level and mode
+          this.currentLevel = chosenLevel;
+          this.currentMode = this.choosingModeNotCurrent; // Update the current mode
+          this.disableMouseEventListeners_K_P(); // Disable mouse events temporarily
+
+          // Reset the game state for the selected level (callback function needed to
+          // control your actual game components not related with UI)
+          this.callbacks.resetLevel(this.currentLevel);
+
+          // Show or hide the health bar based on the chosen mode
+          if (this.currentMode === "regular") {
+            this.toggleHeader(true); // Show health bar for regular mode
+          } else {
+            this.toggleHeader(false); // Hide health bar for training mode
+          }
+
+          // Reset game session for the new level
+          this.curGameSession.resetGameSession(
+            this.gameName,
+            this.currentLevel,
+            this.currentMode
+          );
+
+          // If the game is Kruskal or Prim, trigger the initial camera animation
+          if (this.gameName == "Kruskal" || this.gameName == "Prim") {
+            this.initailCameraAnimationGSAP(); // Trigger the camera animation
+          }
+        }
       });
     });
   }
 
   // --------Modal Completion----------
+
+  /**
+   * Adds event listeners for the completion modal.
+   * - Handles interactions when a level is completed or failed.
+   * - Provides options to retry, proceed to the next level, or select a different level.
+   */
   addAllEventListenersForCompletionModal() {
     this.listenEventPlayAgainCompletionModal();
     this.listenEventPlayNextLevelCompletionModal();
     this.listenEventChangeLevelCompletionModal();
   }
-  // TO DO used to be openModal in Kruskal
+  // open level completion modal
   openCompletionModal() {
     this.openModal(this.modalCompletion);
-    // Check if it's level 3
-    // if (this.currentLevel === 3) {
-    //   // Remove or hide the "Next Level" button if it's level 3
-    //   this.buttonNextLevel.style.display = "none";
-    // } else {
-    //   // Ensure the "Next Level" button is visible for other levels
-    //   this.buttonNextLevel.style.display = "inline-block";
-    // }
   }
 
-  // TO DO used to be closeModal in Kruskal
+  // close level completion modal
   closeCompletionModal() {
     this.closeModal(this.modalCompletion);
   }
 
+  /**
+   * Populates the completion modal with success details.
+   * - Updates UI elements to reflect successful completion.
+   * - Displays the player's final score.
+   * - Awards stars based on health in regular mode, or default stars in training mode.
+   * - Hides the "Next Level" button if the last level is reached.
+   */
   fillInfoSuccessCompletionModal() {
     this.modalCompletionHeader.innerHTML = "Congratulations!";
     this.finalScoreText.innerHTML = `${this.currentScore}`;
     this.labelCompletionText.innerHTML = `
         You have successfully completed level ${this.currentLevel} of ${this.gameName}'s Algorithm in ${this.currentMode} mode!
       `;
+    // Award stars based on mode
     if (this.currentMode == "regular") {
       this.totalStars = setStars(this.health);
     } else {
@@ -597,6 +779,13 @@ class GameRoomUI {
     }
   }
 
+  /**
+   * Populates the completion modal with failure details.
+   * - Updates UI elements to reflect level failure.
+   * - Displays the player's final score.
+   * - Hides the "Next Level" button, forcing the player to retry or change levels.
+   */
+
   fillInfoFailureSuccessCompletionModal() {
     this.modalCompletionHeader.innerHTML = "Game Over!";
     this.finalScoreText.innerHTML = `${this.currentScore}`;
@@ -609,12 +798,19 @@ class GameRoomUI {
     this.buttonNextLevel.style.display = "none";
   }
 
+  /**
+   * Adds an event listener to restart the current level when the "Play Again" button is clicked.
+   */
   listenEventPlayAgainCompletionModal() {
     this.buttonAgain.addEventListener("click", () => {
       this.callbacks.resetLevel(this.currentLevel);
     });
   }
 
+  /**
+   * Adds an event listener to proceed to the next level when the "Next Level" button is clicked.
+   * - Increments the level counter and resets the scene for the next level.
+   */
   listenEventPlayNextLevelCompletionModal() {
     this.buttonNextLevel.addEventListener("click", () => {
       this.currentLevel++;
@@ -622,6 +818,12 @@ class GameRoomUI {
     });
   }
 
+  /**
+   * Adds an event listener to allow changing levels when the "Change Level" button is clicked.
+   * - Closes the completion modal.
+   * - Opens the level selection modal after a short delay.
+   * - Ensures mouse interactions are properly managed.
+   */
   listenEventChangeLevelCompletionModal() {
     this.buttonChangeLevel.addEventListener("click", () => {
       this.closeCompletionModal();
