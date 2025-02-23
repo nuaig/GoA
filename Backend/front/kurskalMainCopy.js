@@ -128,7 +128,6 @@ const curRoomUI = new GameRoomUI("Kruskal", 1, camera);
 //       prevEl: ".swiper-button-prev",
 //     },
 //   });
-
 //   console.log("Swiper initialized:", swiper);
 // });
 

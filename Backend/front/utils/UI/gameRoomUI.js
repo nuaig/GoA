@@ -15,18 +15,17 @@ import { setStars } from "./ui";
 class GameRoomUI {
   /**
    * @param {string} gameName - The name of the game (e.g., "Kruskal", "Prim").
-   * @param {number} initialLevel - The starting level of the game.
    * @param {THREE.Camera} camera - The Three.js camera for animations.
    * @param {Object} callbacks - Callback functions for level reset, mouse movement, and clicks or any other function that needs callbacks from the main file.
    */
   constructor(
     gameName,
     initialLevel,
-    camera,
+    camera = null,
     callbacks = {} // Object containing multiple callback functions
   ) {
     this.gameName = gameName;
-    this.currentLevel = initialLevel;
+    this.currentLevel = 1;
     this.currentMode = "";
     this.gameStatusService = null;
     this.curGameSession = null;
