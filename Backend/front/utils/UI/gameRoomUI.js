@@ -25,7 +25,7 @@ class GameRoomUI {
     callbacks = {} // Object containing multiple callback functions
   ) {
     this.gameName = gameName;
-    this.currentLevel = 1;
+    this.currentLevel = initialLevel;
     this.currentMode = "";
     this.gameStatusService = null;
     this.curGameSession = null;

@@ -3,13 +3,13 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
-import { Graph, createRandomConnectedGraph } from "./graph.js";
-import { createThreePointLighting } from "./utils/threePointLighting.js";
-import { KruskalAlgorithm } from "./utils/graphRelated/kruskal.js";
-import { PrimAlgorithm } from "./utils/graphRelated/prims.js";
-import { GameSession } from "./utils/gameRelated/gameSession.js";
-import { loadModel } from "./utils/threeModels.js";
-import { GameStatusService } from "./utils/gameStatus/gameStatusService.js";
+import { Graph, createRandomConnectedGraph } from "../graph.js";
+import { createThreePointLighting } from "../utils/threePointLighting.js";
+import { KruskalAlgorithm } from "../utils/graphRelated/kruskal.js";
+import { PrimAlgorithm } from "../utils/graphRelated/prims.js";
+import { GameSession } from "../utils/gameRelated/gameSession.js";
+import { loadModel } from "../utils/threeModels.js";
+import { GameStatusService } from "../utils/gameStatus/gameStatusService.js";
 import gsap from "gsap";
 import {
   toggleInstructions,
@@ -19,12 +19,12 @@ import {
   setStars,
   resetStars,
   updateHintIcons,
-} from "./utils/UI/ui.js";
+} from "../utils/UI/ui.js";
 import {
   effectForCorrectSelect,
   shakeForWrongSelect,
   shakeScreen,
-} from "./utils/UI/animations.js";
+} from "../utils/UI/animations.js";
 import {
   drawLine,
   updateLinePosition,
@@ -37,7 +37,7 @@ import {
   getRandomColor,
   createRing,
   highlightChest,
-} from "./utils/graphRelated/drawLine.js";
+} from "../utils/graphRelated/drawLine.js";
 
 const uiText = document.getElementById("UI-Text");
 const scoreElements = document.querySelectorAll(".score-label-2");

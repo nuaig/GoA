@@ -5,18 +5,15 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { Graph, createRandomConnectedGraph } from "./graph.js";
 import { createThreePointLighting } from "./utils/threePointLighting.js";
-import { KruskalAlgorithm } from "./utils/graphRelated/kruskal.js";
+
 import { PrimAlgorithm } from "./utils/graphRelated/prims.js";
 import { GameSession } from "./utils/gameRelated/gameSession.js";
 import { loadModel } from "./utils/threeModels.js";
 import { GameStatusService } from "./utils/gameStatus/gameStatusService.js";
 import gsap from "gsap";
 import {
-  toggleInstructions,
-  closePseudocode,
   decrementHealth,
   resetHealth,
-  setStars,
   resetStars,
   updateHintIcons,
 } from "./utils/UI/ui.js";
@@ -33,16 +30,16 @@ import {
   createNodeLabel,
   updateNodeLabel,
   updateNodeLabelColor,
-  updateComponentColors,
   getRandomColor,
   createRing,
   highlightChest,
 } from "./utils/graphRelated/drawLine.js";
 import GameRoomUI from "./utils/UI/gameRoomUI.js";
+import { _checkPlugin } from "gsap/gsap-core.js";
 
 const reArrangeButton = document.querySelector(".Rearrange-Action");
 let curGameSession;
-let currentScore = 0;
+
 let currentLevel = 1; // TO DO
 
 let curNodes;
@@ -64,7 +61,7 @@ graph = createRandomConnectedGraph(curNodes, curEdges);
 
 let componentColors = {};
 
-let curAlgorithmForGraph = new KruskalAlgorithm(graph);
+let curAlgorithmForGraph = new PrimAlgorithm(graph);
 
 let startingNodeLabelForPrim;
 let startingNodeRingForPrim;
@@ -111,25 +108,7 @@ camera.position.set(startPosition.x, startPosition.y, startPosition.z);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 4);
 
-const curRoomUI = new GameRoomUI("Kruskal", 1, camera);
-
-// document.addEventListener("DOMContentLoaded", () => {
-//   const swiper = new Swiper(".mySwiper", {
-//     modules: [Navigation, Pagination], // ✅ Ensure modules are included
-//     slidesPerView: 1,
-//     grabCursor: true,
-//     loop: true,
-//     pagination: {
-//       el: ".swiper-pagination",
-//       clickable: true,
-//     },
-//     navigation: {
-//       nextEl: ".swiper-button-next",
-//       prevEl: ".swiper-button-prev",
-//     },
-//   });
-//   console.log("Swiper initialized:", swiper);
-// });
+const curRoomUI = new GameRoomUI("Prim", 1, camera);
 
 // Add an event listener to initialize the game after login
 document.addEventListener("DOMContentLoaded", async function () {
@@ -151,7 +130,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       const userId = curRoomUI.gameStatusService.getUserId();
       curGameSession = new GameSession(
         userId,
-        "Kruskal",
+        "Prim",
         "regular",
         curRoomUI.currentLevel
       );
@@ -200,18 +179,6 @@ function initailCameraAnimationGSAP() {
 
 // disableEventListeners(); // TO DO not sure if we will need this
 
-// FIXME
-function showPrimInstructions() {
-  overlay.classList.remove("hidden");
-  instructionModal.classList.remove("hidden");
-  document
-    .querySelector('.instruction__img[src="./src/Kruskal Instructions.png"]')
-    .classList.add("hidden");
-  document
-    .querySelector('.instruction__img[src="./src/Prim Instructions.png"]')
-    .classList.remove("hidden");
-}
-
 reArrangeButton.addEventListener("click", () => {
   console.log("Rearrange Button Clicked");
   const margin = 0.1;
@@ -257,7 +224,14 @@ reArrangeButton.addEventListener("click", () => {
   }
 
   console.log(edgeList[0].userData.startCube);
-
+  if (curRoomUI.currentAlgorithm == "Prim") {
+    const updatedStartingNodeLabelPosition = chestList[0].position.clone();
+    updatedStartingNodeLabelPosition.y += 4;
+    startingNodeLabelForPrim.position.copy(updatedStartingNodeLabelPosition);
+    const updatedStartingNodeRingPosition = chestList[0].position.clone();
+    updatedStartingNodeRingPosition.y += 0.1;
+    startingNodeRingForPrim.position.copy(updatedStartingNodeRingPosition);
+  }
   // Update the positions of the lines and their labels
   edgeList.forEach((line, index) => {
     console.log(graph.edges[index]);
@@ -374,7 +348,7 @@ fontLoader.load(
     setFont(font);
     createModels();
     chapterTitle = createNodeLabel(
-      "Kruskal's Algorithm",
+      "Prim's Algorithm",
       new THREE.Vector3(13, 7, -30),
       scene,
       1,
@@ -478,7 +452,6 @@ function handleEdgeSelection(
     document.querySelector(".Hint-Text").classList.add("hidden");
     effectForCorrectSelect();
     if (currentAlgorithm === "Kruskal") {
-      // updateNodeColorsForSameTree({ ...edge, rootStart, rootEnd }, sameTree);
       updateNodeColorsForSameTree(edge);
     }
     handleSelectionEffect(intersectedObject);
@@ -492,17 +465,7 @@ function handleEdgeSelection(
       );
       curRoomUI.uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
       curRoomUI.fillInfoSuccessCompletionModal();
-      // curRoomUI.finalScoreText.innerHTML = `${currentScore}`;
-      // const algoName = currentAlgorithm === "Kruskal" ? "Kruskal" : "Prim";
-      // curRoomUI.labelCompletionText.innerHTML = `
-      //   You have successfully completed level ${curRoomUI.currentLevel} of ${curRoomUI.gameName}'s Algorithm in ${curRoomUI.currentMode} mode!
-      // `;
-      // let totalStars;
-      // if (curRoomUI.currentMode == "regular") {
-      //   totalStars = setStars(curRoomUI.health);
-      // } else {
-      //   totalStars = setStars(4);
-      // }
+
       console.log(curRoomUI.totalStars);
 
       curGameSession.setFinalScore(curRoomUI.currentScore);
@@ -520,16 +483,14 @@ function handleEdgeSelection(
         body: JSON.stringify(sessionData),
       }).then((res) => res.json());
 
-      // Store the score and stars in localStorage with "kruskal" included
-      // const levelData = { score: currentScore, stars: totalStars };
       console.log(curRoomUI.currentLevel);
       console.log(curRoomUI.currentMode);
-      // console.log(gameStatusService.gameStatus.games.Kruskal[2].status);
+
       curRoomUI.updateLevelStatus(curRoomUI.currentLevel, curRoomUI.totalStars);
       const status_update_string =
-        currentLevel != 3 ? "completed" : "completed_first_time";
+        curRoomUI.currentLevel != 3 ? "completed" : "completed_first_time";
       curRoomUI.gameStatusService.updateGameStatus(
-        "Kruskal",
+        "Prim",
         curRoomUI.currentLevel,
         curRoomUI.currentMode,
         curRoomUI.currentScore,
@@ -537,7 +498,7 @@ function handleEdgeSelection(
         status_update_string
       );
       curRoomUI.gameStatusService.unlockGameLevel(
-        "Kruskal",
+        "Prim",
         curRoomUI.currentLevel + 1,
         curRoomUI.currentMode
       );
@@ -917,12 +878,6 @@ function setUpGameModel(currentLevel) {
 
   graph = createRandomConnectedGraph(curNodes, curEdges);
   if (curRoomUI.currentLevel <= 3) {
-    curAlgorithmForGraph = new KruskalAlgorithm(graph);
-    curRoomUI.currentAlgorithm = "Kruskal";
-  } else {
-    if (currentLevel == 4) {
-      showPrimInstructions();
-    }
     curAlgorithmForGraph = new PrimAlgorithm(graph);
     curRoomUI.currentAlgorithm = "Prim";
   }
@@ -947,29 +902,3 @@ curRoomUI.callbacks.resetLevel = function (curlvl) {
     curRoomUI.currentMode
   );
 };
-// curRoomUI.callbacks.resetLevel = resetLevel;
-
-// curRoomUI.buttonNextLevel.addEventListener("click", () => {
-//   uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
-//   health = resetHealth();
-//   currentLevel++;
-//   closeModal();
-//   closePseudocode();
-//   resetScene();
-//   setUpGameModel(currentLevel);
-//   // if (currentAlgorithm === "prim") {
-//   //   updateNodeLabel(chapterTitle, "Prim's Algorithm", 1, 0.3, 0x212529);
-//   //   chapterTitle.position.set(9.5, 6.5, -30);
-//   // }
-
-//   updateNodeLabel(levelTitle, `Level ${currentLevel}`, 0.9, 0.3, 0x212529);
-// });
-
-// curRoomUI.buttonAgain.addEventListener("click", () => {
-//   curRoomUI.resetLevel(currentLevel);
-// });
-
-// curRoomUI.btnSettingsRestart.addEventListener("click", () => {
-//   closeSettingModal();
-//   resetLevel(currentLevel);
-// });
