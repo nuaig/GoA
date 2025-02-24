@@ -526,9 +526,6 @@ button:active {
   display: flex;
 }
 
-.linkedListGame {
-  visibility: hidden;
-}
 .instruct-menu {
   float: none;
   position: absolute;
@@ -646,4 +643,32 @@ button:active {
   right: 10px;
   background-color: #343a40;
   border: 3px solid #ffffff;
+}
+
+.symbol {
+  position: absolute;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 800;
+  font-size: 20px;
+  z-index: 2;
+}
+
+.heapsort-symbol {
+  top: 164px;
+  left: 280px;
+}
+
+.kruskal-symbol {
+  top: 164px;
+  left: 93px;
+}
+
+.prim-symbol {
+  top: 196px;
+  left: 45px;
+}
+
+.treasure-symbol {
+  top: 82px;
+  left: 181px;
 }

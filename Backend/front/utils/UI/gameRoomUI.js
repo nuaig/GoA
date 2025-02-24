@@ -363,6 +363,14 @@ class GameRoomUI {
    * @param {number} starsCount - The number of stars achieved (0-based index).
    */
   updateLevelStatus(level, starsCount) {
+    const currentGameData =
+      this.gameStatusService.gameStatus?.games[this.gameName]?.[
+        this.currentMode
+      ]?.[level - 1];
+
+    if (starsCount + 1 < currentGameData.stars) {
+      return;
+    }
     const currentLevelButton = document.querySelector(`.btn__level__${level}`);
     const currentStarsHolder = currentLevelButton.querySelector(
       ".level__stars__holder"
@@ -399,7 +407,7 @@ class GameRoomUI {
    * - Use as needed in 3D three.js renderer and scene
    * Uses GSAP (GreenSock Animation Platform) for smooth animation effects.
    */
-  initailCameraAnimationGSAP() {
+  initailCameraAnimationGSAP_K_P() {
     const timeline = gsap.timeline();
     const midPosition = { x: 0, y: 5, z: 26 };
     const endPosition = { x: 0, y: 26, z: 26 };
@@ -425,6 +433,21 @@ class GameRoomUI {
       ease: "power2.inOut",
       onUpdate: () => {
         this.camera.lookAt(new THREE.Vector3(0, 0, 4)); // Keep looking at the target
+      },
+    });
+  }
+
+  initialCameraAnimationGSAP_HS() {
+    const endPosition = { x: 0, y: 2, z: 10 };
+    gsap.to(this.camera.position, {
+      x: endPosition.x,
+      y: endPosition.y,
+      z: endPosition.z,
+      duration: 4, // Duration of the animation in seconds
+      ease: "power2.inOut", // Easing function for smooth movement
+      onUpdate: () => {
+        // Ensure the camera keeps looking at the target point
+        this.camera.lookAt(new THREE.Vector3(0, 2, 0));
       },
     });
   }
@@ -720,7 +743,10 @@ class GameRoomUI {
 
           // If the game is Kruskal or Prim, trigger the initial camera animation
           if (this.gameName == "Kruskal" || this.gameName == "Prim") {
-            this.initailCameraAnimationGSAP(); // Trigger the camera animation
+            this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
+          }
+          if (this.gameName == "Heapsort") {
+            this.initialCameraAnimationGSAP_HS();
           }
         }
       });

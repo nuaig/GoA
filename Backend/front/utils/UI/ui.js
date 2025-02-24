@@ -31,8 +31,6 @@ export function decrementHealth(health) {
     healthIcons[health].style.fill = "white";
     health--;
     console.log(health);
-  } else {
-    uiText.innerHTML = `Game Over. Better luck next time!`;
   }
   return health;
 }

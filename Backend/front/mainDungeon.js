@@ -576,13 +576,13 @@ miniMapCamera.updateProjectionMatrix();
 miniMapCamera.position.set(0, 250, -10); // Position it above the dungeon
 miniMapCamera.lookAt(new THREE.Vector3(0, 0, -10)); // Look directly down
 const miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
-miniMapRenderer.setSize(250, 250); // Size of the mini-map
+miniMapRenderer.setSize(350, 350); // Size of the mini-map
 miniMapRenderer.domElement.id = "miniMapCanvas";
 
 document.body.appendChild(miniMapRenderer.domElement); // Append it to the body or a specific element
 miniMapRenderer.domElement.style.position = "absolute";
-miniMapRenderer.domElement.style.top = "10px";
-miniMapRenderer.domElement.style.left = "10px";
+miniMapRenderer.domElement.style.top = "15px";
+miniMapRenderer.domElement.style.left = "15px";
 
 // function updateMiniMap() {
 //   const playerPosition = player.camera.position; // Use the camera's position instead

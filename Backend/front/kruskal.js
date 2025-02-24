@@ -572,7 +572,7 @@ function handleEdgeSelection(
         intersectedObject.userData.label.material.color.set(0x000000);
       }
     }, 3000);
-    if (curRoomUI.health < 0) {
+    if (curRoomUI.health < 0 && curRoomUI.currentMode == "regular") {
       curRoomUI.fillInfoFailureSuccessCompletionModal();
       curGameSession.setFinalScore(curRoomUI.currentScore);
       curGameSession.setSuccessStatus(false);

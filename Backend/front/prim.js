@@ -35,7 +35,6 @@ import {
   highlightChest,
 } from "./utils/graphRelated/drawLine.js";
 import GameRoomUI from "./utils/UI/gameRoomUI.js";
-import { _checkPlugin } from "gsap/gsap-core.js";
 
 const reArrangeButton = document.querySelector(".Rearrange-Action");
 let curGameSession;
@@ -540,7 +539,7 @@ function handleEdgeSelection(
         intersectedObject.userData.label.material.color.set(0x000000);
       }
     }, 3000);
-    if (curRoomUI.health < 0) {
+    if (curRoomUI.health < 0 && curRoomUI.currentMode == "regular") {
       curRoomUI.fillInfoFailureSuccessCompletionModal();
       curGameSession.setFinalScore(curRoomUI.currentScore);
       curGameSession.setSuccessStatus(false);
