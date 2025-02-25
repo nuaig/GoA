@@ -36,6 +36,7 @@ function MyMongoDB() {
 
       const initialGameStatus = {
         user_id: objectId,
+        role: "user",
         games: {
           Heapsort: {
             regular: [
@@ -372,6 +373,167 @@ function MyMongoDB() {
     }
   };
 
+  myDB.getUsersProgress = async () => {
+    const { client, db } = await connect();
+    try {
+      const pipeline = [
+        {
+          $lookup: {
+            from: "useraccounts",
+            localField: "user_id",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        { $unwind: "$userDetails" },
+        {
+          $project: {
+            user_id: 1,
+            username: "$userDetails.username",
+            gameProgress: {
+              Heapsort: { $ifNull: ["$games.Heapsort.regular", []] },
+              Prim: { $ifNull: ["$games.Prim.regular", []] },
+              Kruskal: { $ifNull: ["$games.Kruskal.regular", []] },
+            },
+          },
+        },
+        {
+          $project: {
+            user_id: 1,
+            username: 1,
+            total_score: {
+              $sum: [
+                { $sum: "$gameProgress.Heapsort.score" },
+                { $sum: "$gameProgress.Prim.score" },
+                { $sum: "$gameProgress.Kruskal.score" },
+              ],
+            },
+            completed_games: {
+              $add: [
+                {
+                  $cond: {
+                    if: {
+                      $gt: [
+                        {
+                          $size: {
+                            $filter: {
+                              input: "$gameProgress.Heapsort",
+                              as: "level",
+                              cond: {
+                                $and: [
+                                  { $eq: ["$$level.level", 3] },
+                                  {
+                                    $in: [
+                                      "$$level.status",
+                                      ["completed", "completed_first_time"],
+                                    ],
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                        },
+                        0,
+                      ],
+                    },
+                    then: 1,
+                    else: 0,
+                  },
+                },
+                {
+                  $cond: {
+                    if: {
+                      $gt: [
+                        {
+                          $size: {
+                            $filter: {
+                              input: "$gameProgress.Prim",
+                              as: "level",
+                              cond: {
+                                $and: [
+                                  { $eq: ["$$level.level", 3] },
+                                  {
+                                    $in: [
+                                      "$$level.status",
+                                      ["completed", "completed_first_time"],
+                                    ],
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                        },
+                        0,
+                      ],
+                    },
+                    then: 1,
+                    else: 0,
+                  },
+                },
+                {
+                  $cond: {
+                    if: {
+                      $gt: [
+                        {
+                          $size: {
+                            $filter: {
+                              input: "$gameProgress.Kruskal",
+                              as: "level",
+                              cond: {
+                                $and: [
+                                  { $eq: ["$$level.level", 3] },
+                                  {
+                                    $in: [
+                                      "$$level.status",
+                                      ["completed", "completed_first_time"],
+                                    ],
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                        },
+                        0,
+                      ],
+                    },
+                    then: 1,
+                    else: 0,
+                  },
+                },
+              ],
+            },
+          },
+        },
+        {
+          $project: {
+            user_id: 1,
+            username: 1,
+            total_score: 1,
+            status: {
+              $cond: {
+                if: { $eq: ["$completed_games", 3] },
+                then: "Completed",
+                else: "Ongoing",
+              },
+            },
+          },
+        },
+      ];
+
+      const userProgress = await db
+        .collection("game_status")
+        .aggregate(pipeline)
+        .toArray();
+      console.log("User Progress Data:", userProgress);
+      return userProgress;
+    } catch (err) {
+      console.error("Error fetching user progress data:", err.message);
+      return false;
+    } finally {
+      await client.close();
+    }
+  };
+
   return myDB;
 }
 
@@ -379,3 +541,21 @@ function MyMongoDB() {
 const myDBInstance = MyMongoDB();
 
 export default myDBInstance;
+// async function testCompletionData() {
+//   try {
+//     // const data = await myDBInstance.getCompletionData();
+//     // const data = await myDBInstance.getAverageMistakesData();
+//     // const data = await myDBInstance.getCompletionTimeData();
+//     // myDBInstance.findNullLevels();
+//     // const data = await myDBInstance.getScoreDistributionData();
+
+//     // const data = await myDBInstance.getMistakeReductionDataForSingleUser("2");
+//     const data = await myDBInstance.getUsersProgress();
+//     // myDBInstance.resetGameSessions("66f94ed538cbdcb6fd0ea6e7");
+//     // console.log(data);
+//   } catch (error) {
+//     console.error("Failed to fetch or process data:", error);
+//   }
+// }
+
+// testCompletionData();

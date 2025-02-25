@@ -48,6 +48,7 @@ function MyMongoDB() {
         );
         const newDoc = {
           user_id: objectId,
+          role: "user",
           game_sessions: [gameSession], // Initialize the game_sessions array with the new session
         };
 

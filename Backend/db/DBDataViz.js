@@ -389,7 +389,6 @@ function MyMongoDB() {
         (val) => +(val / gameSessions.length).toFixed(2)
       );
 
-      console.log(result);
       return result;
     } catch (e) {
       console.error(
@@ -576,6 +575,179 @@ function MyMongoDB() {
     }
   };
 
+  myDB.getMistakeReductionDataForSingleUser = async (
+    userId,
+    db,
+    collection
+  ) => {
+    try {
+      const pipeline = [
+        {
+          $match: { user_id: userId }, // 🔹 Only fetch data for one user
+        },
+        {
+          $unwind: "$game_sessions",
+        },
+        {
+          $replaceRoot: { newRoot: "$game_sessions" },
+        },
+        {
+          $group: {
+            _id: { game_name: "$game_name", level: "$level" },
+            mistakeSequences: { $push: "$total_mistakes" }, // Collect all mistakes per trial
+          },
+        },
+      ];
+
+      const gameSessions = await collection.aggregate(pipeline).toArray();
+
+      // 🛠️ Transform into the required format
+      const result = gameSessions.reduce((acc, game) => {
+        const gameName = game._id.game_name.toLowerCase();
+        const level = game._id.level.toString();
+
+        if (!acc[gameName]) acc[gameName] = {};
+        acc[gameName][level] = game.mistakeSequences.slice(-5); // Just assign the collected mistakes
+
+        return acc;
+      }, {});
+
+      console.log(result);
+      return result;
+    } catch (e) {
+      console.error("Error during fetching mistake reduction data: ", e);
+    }
+  };
+
+  myDB.getAverageMistakeReduction = async () => {
+    const { client, db } = await connect();
+    const collection = db.collection("game_sessions");
+
+    try {
+      // Step 1: Find unique user_ids in the collection
+      // const userIds = ["1", "2", "3"]; // Hardcoded for now, but can be dynamically retrieved
+      const userIds = await collection.distinct("user_id");
+      // Step 2: Collect mistake data for each user
+      const userMistakeData = [];
+      for (const userId of userIds) {
+        const userData = await myDB.getMistakeReductionDataForSingleUser(
+          userId,
+          db,
+          collection
+        );
+        userMistakeData.push(userData);
+      }
+
+      // Step 3: Compute the average mistake reduction across users
+      const aggregatedData = {};
+
+      userMistakeData.forEach((userData) => {
+        Object.entries(userData).forEach(([game, levels]) => {
+          if (!aggregatedData[game]) aggregatedData[game] = {};
+
+          Object.entries(levels).forEach(([level, mistakeArray]) => {
+            if (!aggregatedData[game][level]) {
+              aggregatedData[game][level] = [];
+            }
+
+            mistakeArray.forEach((mistake, index) => {
+              if (aggregatedData[game][level][index] === undefined) {
+                aggregatedData[game][level][index] = { sum: 0, count: 0 };
+              }
+
+              // ✅ Add value only if it's not null or undefined
+              if (mistake !== null && mistake !== undefined) {
+                aggregatedData[game][level][index].sum += mistake;
+                aggregatedData[game][level][index].count += 1;
+              }
+            });
+          });
+        });
+      });
+
+      // Step 4: Convert summed values into averages based on actual contributors
+      Object.entries(aggregatedData).forEach(([game, levels]) => {
+        Object.entries(levels).forEach(([level, mistakeArray]) => {
+          aggregatedData[game][level] = mistakeArray.map((entry) =>
+            entry.count > 0
+              ? parseFloat((entry.sum / entry.count).toFixed(2))
+              : null
+          );
+        });
+      });
+
+      console.log(aggregatedData);
+      return aggregatedData;
+    } catch (e) {
+      console.error(
+        "Error during fetching average mistake reduction data: ",
+        e
+      );
+    } finally {
+      await client.close();
+    }
+  };
+
+  myDB.findNullLevels = async () => {
+    const { client, db } = await connect();
+    const collection = db.collection("game_sessions");
+    try {
+      const result = await collection
+        .aggregate([
+          {
+            $unwind: "$game_sessions", // Unwind the game_sessions array
+          },
+          {
+            $match: {
+              $or: [
+                { "game_sessions.level": null }, // Explicitly null
+                { "game_sessions.level": { $exists: false } }, // Does not exist
+              ],
+            },
+          },
+          {
+            $project: {
+              user_id: 1,
+              game_name: "$game_sessions.game_name",
+              level: "$game_sessions.level",
+              duration: "$game_sessions.duration",
+              final_score: "$game_sessions.final_score",
+            },
+          },
+        ])
+        .toArray();
+
+      console.log("Documents with null or missing level:", result);
+      return result;
+    } catch (e) {
+      console.error("Error finding null/missing levels: ", e);
+    } finally {
+      await client.close();
+    }
+  };
+
+  myDB.resetGameSessions = async (userId) => {
+    const { client, db } = await connect();
+    const collection = db.collection("game_sessions");
+
+    try {
+      const result = await collection.updateOne(
+        { user_id: new ObjectId(userId) }, // Query with ObjectId
+        { $set: { game_sessions: [] } } // Reset game_sessions to an empty array
+      );
+
+      if (result.matchedCount === 0) {
+        console.log(`No document found with user_id: ${userId}`);
+      } else {
+        console.log(`Successfully reset game_sessions for user_id: ${userId}`);
+      }
+    } catch (e) {
+      console.error("Error resetting game_sessions: ", e);
+    } finally {
+      await client.close();
+    }
+  };
+
   return myDB;
 }
 
@@ -586,15 +758,23 @@ export default myDBInstance;
 
 async function testCompletionData() {
   try {
-    const data = await myDBInstance.getCompletionData();
+    // const data = await myDBInstance.getCompletionData();
     // const data = await myDBInstance.getAverageMistakesData();
     // const data = await myDBInstance.getCompletionTimeData();
+    // myDBInstance.findNullLevels();
     // const data = await myDBInstance.getScoreDistributionData();
-    console.log(data);
+
+    // const data = await myDBInstance.getMistakeReductionDataForSingleUser("2");
+    const data = await myDBInstance.getAverageMistakeReduction();
+    // myDBInstance.resetGameSessions("66f94ed538cbdcb6fd0ea6e7");
+    // console.log(data);
   } catch (error) {
     console.error("Failed to fetch or process data:", error);
   }
 }
+
+testCompletionData();
+
 const completionData = {
   all: {
     allLevels: { success: 75, failure: 25 },
@@ -622,4 +802,4 @@ const completionData = {
   },
 };
 // console.log(completionData);
-testCompletionData();
+// testCompletionData();
