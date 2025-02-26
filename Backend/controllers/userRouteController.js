@@ -27,6 +27,7 @@ export const insertUserCon = async (req, res) => {
           hashedPassword: hashedPassword.toString("hex"),
 
           salt: salt.toString("hex"),
+          role: "user",
         });
 
         console.log("inserted", insertResponse);

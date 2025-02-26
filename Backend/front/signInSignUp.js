@@ -116,8 +116,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const result = await response.json();
       if (response.ok) {
-        window.location.href = "mainDungeon.html";
-        console.log(result);
+        if (result.role === "admin") {
+          window.location.href = "dashboard.html"; // Redirect admin to the dashboard
+        } else {
+          window.location.href = "mainDungeon.html"; // Redirect users to the main dungeon
+        }
         sessionStorage.setItem("loginSuccess", "true");
       } else {
         alert(`Login failed: ${result.message}`); // Error message

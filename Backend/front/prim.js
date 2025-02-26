@@ -4,7 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { Graph, createRandomConnectedGraph } from "./graph.js";
-import { createThreePointLighting } from "./utils/threePointLighting.js";
+import { createThreePointLightingRoom } from "./utils/threePointLighting.js";
 
 import { PrimAlgorithm } from "./utils/graphRelated/prims.js";
 import { GameSession } from "./utils/gameRelated/gameSession.js";
@@ -687,7 +687,7 @@ function drawLines() {
   // window.addEventListener("click", onClick, false);
 }
 
-createThreePointLighting(scene);
+createThreePointLightingRoom(scene);
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;

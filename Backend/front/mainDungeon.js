@@ -25,7 +25,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       // Await the initialization of GameStatusService (including fetching game status)
       await gameStatusService.init();
-
+      if (gameStatusService.gameStatus.role !== "admin") {
+        const dashboardHandler = document.querySelector(".btn__dashboard");
+        if (dashboardHandler) {
+          dashboardHandler.style.display = "none"; // Hide the dashboard access button
+        }
+      }
       createMainDungeon();
     } else {
       sessionStorage.setItem("userAuthenticated", "false");
@@ -106,8 +111,8 @@ const leaderboardModal = document.querySelector(".modal__leaderboard");
 const settingsModal = document.querySelector(".modal__settings");
 const settingsTogglerEle = document.querySelector(".settings__icon");
 const dashboardHandler = document.querySelector(".btn__dashboard");
-const signOutHandler = document.querySelector(".btn__signout");
-const restartHandler = document.querySelector(".btn__restart");
+const signOutHandler = document.querySelector(".btn__sign_out");
+
 const symbol_dict = {
   kruskal: null,
   heapsort: null,
@@ -164,6 +169,11 @@ dashboardHandler.addEventListener("click", () => {
   window.location.href = "dashboard.html";
 });
 
+function displayMessage(message) {
+  const uiTextElement = document.querySelector(".UI-Text"); // If using an ID
+  uiTextElement.innerHTML = message;
+}
+
 const scene = new THREE.Scene();
 const world = new CANNON.World();
 world.gravity.set(0, 0, 0);
@@ -174,21 +184,44 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const player = new Player(scene, world);
-const mainDungeonURL = new URL("./src/main_dungeon_v3.glb", import.meta.url);
+const mainDungeonURL = new URL("./src/main_dungeon_v4.glb", import.meta.url);
 let gameCompleted = false;
 
 let treasure_wall_gate;
 // Global variable to track completion of each glow effect
 let glowEffectsCompleted = { Kruskal: false, Prim: false, Heapsort: true };
+
+function triggerFireworks() {
+  const fireworks = document.querySelectorAll(".firework");
+  fireworks.forEach((firework) => {
+    firework.classList.add("running");
+  });
+}
+
+function stopTriggerFireworks() {
+  const fireworks = document.querySelectorAll(".firework");
+  fireworks.forEach((firework) => {
+    firework.classList.remove("running");
+    firework.style.animation = "none";
+    // Reset transform to initial state if needed
+    firework.style.transform = "translate(0, 0)";
+    firework.style.opacity = 0; // Optionally hide the element
+  });
+}
+
 function applyGlowEffect(material, status, key) {
   if (status === "completed_first_time") {
     player.position.set(-0.8, 2, -20);
     player.camera.lookAt(-0.8, 2, -20);
-
+    const message = `Congratulations! You've mastered the ${key} Room. The symbol of ${key} now glows brightly, 
+    marking your triumph. Venture forth and conquer the remaining chambers to unveil the secrets of the treasure chest. Press 'Enter' to continue your adventure.`;
+    const completionElement = document.querySelector("#completion-message");
+    triggerFireworks();
+    displayMessage(message);
     // Animate both color and intensity over 5 seconds
-    gsap.to(material.emissive, { r: 1, g: 1, b: 1, duration: 5 }); // Animate color to white
+    gsap.to(material.emissive, { r: 1, g: 1, b: 1, duration: 10 }); // Animate color to white
     gsap.to(material, {
-      emissiveIntensity: 5,
+      emissiveIntensity: 8,
       duration: 5,
       onComplete: async () => {
         glowEffectsCompleted[key] = true; // Mark this glow effect as completed
@@ -284,7 +317,12 @@ async function createMainDungeon() {
         if (child.name.includes("status_symbol") && child.material) {
           if (child.material.name === "kruskal_symbol") {
             symbol_dict["kruskal"] = child.material;
-            applyGlowEffect(symbol_dict["kruskal"], kruskalStatus, "Kruskal");
+            applyGlowEffect(symbol_dict["kruskal"], kruskalStatus, "Kruskal"); // TO DO
+            // applyGlowEffect(
+            //   symbol_dict["kruskal"],
+            //   "completed_first_time",
+            //   "Kruskal"
+            // ); // TO DO
           }
 
           if (child.material.name === "prim_symbol") {
@@ -438,6 +476,7 @@ createThreePointLighting(scene);
 
 document.body.addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
+    stopTriggerFireworks();
     player.controls.lock();
   }
 });
@@ -552,10 +591,31 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-restartHandler.addEventListener("click", (event) => {
-  event.preventDefault(); // Prevent the default F5 behavior
-  localStorage.clear(); // Clear localStorage
-  window.location.reload(); // Reload the page
+signOutHandler.addEventListener("click", async (event) => {
+  event.preventDefault(); // Prevent the default action
+  try {
+    // Make a POST request to the logout API
+    const response = await fetch("/api/users/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // Needed for cookies to be included
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      console.log("Logout successful:", result.msg); // Successful logout
+      localStorage.clear(); // Clear localStorage after successful logout
+      window.location.href = "signInSignUp.html"; // Redirect to the sign-in page
+    } else {
+      console.error("Logout failed:", result.msg); // Log failure message
+      alert("Logout failed, please try again.");
+    }
+  } catch (error) {
+    console.error("Error during logout:", error);
+    alert("An error occurred while trying to log out.");
+  }
 });
 
 // Mini-map

@@ -144,3 +144,22 @@ export const getLeaderboardCon = async (req, res) => {
       .json({ ok: false, msg: "Error fetching leaderboard data" });
   }
 };
+
+export const getUsersDataCon = async (req, res) => {
+  try {
+    console.log("Trying to get Users Data");
+    // Fetch user progress data from the database
+    const usersData = await myDB.getUsersProgress();
+
+    if (!usersData || usersData.length === 0) {
+      return res.status(404).json({ ok: false, msg: "No user data found." });
+    }
+
+    return res.status(200).json({ ok: true, usersData });
+  } catch (e) {
+    console.error("Error in getUsersDataCon:", e.message);
+    return res
+      .status(500)
+      .json({ ok: false, msg: "Error fetching user progress data" });
+  }
+};

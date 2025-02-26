@@ -6,6 +6,7 @@ import session from "express-session";
 import userRouter from "./Routes/userRoutes.js";
 import gameSessionRouter from "./Routes/gameSessionRoutes.js";
 import gameStatusRouter from "./Routes/gameStatusRoutes.js";
+import gameDataVizRouter from "./Routes/gameDataVizRoutes.js";
 import passport from "passport";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -43,6 +44,7 @@ app.use(passport.authenticate("session"));
 app.use("/api/users", userRouter);
 app.use("/api/gamesessions", gameSessionRouter);
 app.use("/api/status", gameStatusRouter);
+app.use("/api/gameDataViz", gameDataVizRouter);
 
 // Default route for serving index.html at root
 app.get("*", (req, res) => {

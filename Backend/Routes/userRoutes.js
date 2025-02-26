@@ -50,7 +50,7 @@ const myStrategy = new LocalStrategy(async function verify(
         // User found and authenticated
         cb(
           null, // error
-          { id: user._id, username: user.username } // user object
+          { id: user._id, username: user.username, role: user.role } // user object
         );
       }
     );
@@ -90,8 +90,16 @@ router.post("/login", (req, res, next) => {
       if (err) {
         return next(err);
       }
+      console.log("LOgging and what is it returning");
+      console.log(user);
       // Respond with a success message or redirect on success
-      return res.status(200).json({ message: "Logged in successfully" });
+      return res
+        .status(200)
+        .json({
+          username: user.username,
+          role: user.role,
+          message: "Logged in successfully",
+        });
     });
   })(req, res, next);
 });

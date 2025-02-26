@@ -322,6 +322,11 @@ function MyMongoDB() {
         },
         { $unwind: "$userDetails" },
         {
+          $match: {
+            "userDetails.role": { $ne: "admin" }, // Exclude admin users
+          },
+        },
+        {
           $project: {
             username: "$userDetails.username",
             scores: {
@@ -528,6 +533,26 @@ function MyMongoDB() {
       return userProgress;
     } catch (err) {
       console.error("Error fetching user progress data:", err.message);
+      return false;
+    } finally {
+      await client.close();
+    }
+  };
+
+  myDB.addRoleToGameStatus = async () => {
+    const { client, db } = await connect();
+    try {
+      console.log("Connected to MongoDB for updating game status roles");
+      const result = await db.collection("game_status").updateMany(
+        { role: { $exists: false } }, // Filter documents without a 'role' field
+        { $set: { role: "user" } } // Add 'role' with the value 'user'
+      );
+      console.log(
+        `${result.matchedCount} game status documents matched the filter, ${result.modifiedCount} were updated.`
+      );
+      return result;
+    } catch (error) {
+      console.error("Error updating game status roles:", error.message);
       return false;
     } finally {
       await client.close();

@@ -110,6 +110,26 @@ function MyMongoDB() {
     }
   };
 
+  myDB.addUserRole = async () => {
+    const { client, db } = await connect();
+    try {
+      console.log("connected to MongoDB for updating user roles");
+      const result = await db.collection("useraccounts").updateMany(
+        { role: { $exists: false } }, // filter: applies the update to documents without a 'role' field
+        { $set: { role: "user" } } // update: sets 'role' to 'user'
+      );
+      console.log(
+        `${result.matchedCount} document(s) matched the filter, ${result.modifiedCount} document(s) were updated.`
+      );
+      return result;
+    } catch (error) {
+      console.error("Error updating user roles:", error.message);
+      return false;
+    } finally {
+      await client.close();
+    }
+  };
+
   return myDB;
 }
 

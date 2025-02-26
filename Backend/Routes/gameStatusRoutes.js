@@ -6,11 +6,14 @@ import {
   resetGameStatusCon,
   updateStatusToCompletedCon,
   getLeaderboardCon,
+  getUsersDataCon,
 } from "../controllers/gameStatusController.js";
 
 const router = express.Router();
 
 router.get("/leaderboard", getLeaderboardCon);
+
+router.get("/usersData", getUsersDataCon);
 // Route to get game status for a user
 router.get("/:userId", getGameStatusCon);
 

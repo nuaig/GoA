@@ -2,214 +2,132 @@
 const dashTitle = document.querySelector(".dash-title");
 const dashCards = document.querySelector(".overview-section");
 const charts = document.querySelector(".charts-section");
+const usersDataSection = document.querySelector(".users-section");
+const indiUserDataSection = document.querySelector(".indi-user-charts-section");
+const indiUserTitle = document.querySelector(".indi-title");
 
 const homeLink = document.getElementById("home-link");
 const chartsLink = document.getElementById("charts-link");
+const usersLink = document.getElementById("users-link");
 
-// const
-
+const search = document.querySelector(".input-group input"),
+  table_headings = document.querySelectorAll("thead th");
+let table_rows = document.querySelectorAll("tbody tr");
 // Function to switch views
 function showHome() {
   dashTitle.textContent = "Overview";
   dashCards.style.display = "grid"; // Show dash-cards
   charts.style.display = "none"; // Hide charts
+  usersDataSection.style.display = "none";
+  indiUserDataSection.style.display = "none";
 }
 
 function showCharts() {
   dashTitle.textContent = "Data Visualizations";
   dashCards.style.display = "none"; // Hide dash-cards
   charts.style.display = "grid"; // Show charts
+  usersDataSection.style.display = "none";
+  indiUserDataSection.style.display = "none";
+}
+
+function showUsersData() {
+  dashCards.style.display = "none"; // Hide dash-cards
+  charts.style.display = "none"; // Show charts
+  usersDataSection.style.display = "grid";
+  indiUserDataSection.style.display = "none";
 }
 
 // Event Listeners
 homeLink.addEventListener("click", (e) => {
-  e.preventDefault(); // Prevent default link behavior
+  e.preventDefault();
   showHome();
 });
 
 chartsLink.addEventListener("click", (e) => {
-  e.preventDefault(); // Prevent default link behavior
+  e.preventDefault();
   showCharts();
 });
+
+usersLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  showUsersData();
+});
+
+// Global variables to store fetched data
+let completionData = {};
+let avgMistakesData = {};
+let scoreDistributionData = {};
+let completionTimeData = {};
+let avgMistakeReduction = {};
+
+// Fetch Data
+async function fetchGameData() {
+  try {
+    const response = await fetch("/api/gameDataViz");
+    const data = await response.json();
+    if (data.ok) {
+      const gameData = data.data; // Store fetched data
+      console.log("Fetched Game Data:", gameData);
+
+      // Destructure fetched data
+      ({
+        completionData,
+        avgMistakesData,
+        scoreDistributionData,
+        completionTimeData,
+        avgMistakeReduction,
+      } = gameData);
+
+      console.log("Data Loaded Successfully!");
+
+      // **Initialize all charts after data is fetched**
+      renderCharts();
+    } else {
+      throw new Error("Failed to fetch game data visualization");
+    }
+  } catch (error) {
+    console.error("Error fetching game data visualization:", error);
+  }
+}
 
 // Set default view to Home
 showHome();
 
-const completionData = {
-  all: {
-    allLevels: { success: 75, failure: 25 },
-    1: { success: 80, failure: 20 },
-    2: { success: 70, failure: 30 },
-    3: { success: 65, failure: 35 },
-  },
-  prim: {
-    allLevels: { success: 78, failure: 22 },
-    1: { success: 85, failure: 15 },
-    2: { success: 75, failure: 25 },
-    3: { success: 60, failure: 40 },
-  },
-  kruskal: {
-    allLevels: { success: 82, failure: 18 },
-    1: { success: 90, failure: 10 },
-    2: { success: 80, failure: 20 },
-    3: { success: 76, failure: 24 },
-  },
-  heapsort: {
-    allLevels: { success: 70, failure: 30 },
-    1: { success: 78, failure: 22 },
-    2: { success: 68, failure: 32 },
-    3: { success: 65, failure: 35 },
-  },
-};
-
-const averageMistakesData = {
-  all: {
-    1: 3.5,
-    2: 2.8,
-    3: 4.0,
-  },
-  prim: {
-    1: 3.2,
-    2: 2.5,
-    3: 4.5,
-  },
-  kruskal: {
-    1: 3.8,
-    2: 3.0,
-    3: 4.2,
-  },
-  heapsort: {
-    1: 3.0,
-    2: 2.7,
-    3: 3.8,
-  },
-};
-
-const scoreDistributionData = {
-  all: {
-    allLevels: [5, 15, 25, 35, 20], // Representing score buckets for all levels
-    1: [10, 20, 30, 25, 15],
-    2: [15, 25, 35, 20, 5],
-    3: [20, 30, 25, 15, 10],
-  },
-  prim: {
-    allLevels: [8, 18, 28, 30, 16],
-    1: [12, 22, 32, 24, 10],
-    2: [18, 26, 30, 20, 6],
-    3: [22, 28, 20, 16, 14],
-  },
-  kruskal: {
-    allLevels: [10, 15, 30, 30, 15],
-    1: [15, 25, 35, 20, 5],
-    2: [20, 30, 25, 15, 10],
-    3: [10, 20, 30, 25, 15],
-  },
-  heapsort: {
-    allLevels: [12, 18, 28, 26, 16],
-    1: [10, 18, 30, 22, 20],
-    2: [14, 24, 28, 26, 8],
-    3: [12, 20, 28, 18, 22],
-  },
-};
-
-const completionTimeData = {
-  all: [45, 50, 55], // Average times for Level 1, Level 2, Level 3 across all games
-  prim: [35, 45, 60],
-  kruskal: [50, 55, 60],
-  heapsort: [40, 50, 70],
-};
-
-const mistakeReductionData = {
-  all: {
-    1: [10, 8, 6, 5, 3], // Level 1
-    2: [12, 9, 7, 6, 4], // Level 2
-    3: [15, 12, 9, 7, 5], // Level 3
-  },
-  prim: {
-    1: [12, 10, 8, 6, 4],
-    2: [14, 12, 9, 7, 5],
-    3: [16, 13, 10, 8, 6],
-  },
-  kruskal: {
-    1: [15, 12, 10, 8, 5],
-    2: [17, 14, 11, 9, 6],
-    3: [18, 15, 12, 10, 7],
-  },
-  heapsort: {
-    1: [8, 7, 6, 5, 3],
-    2: [9, 8, 7, 6, 4],
-    3: [10, 9, 8, 7, 5],
-  },
-};
-
-// Initial selected game and level
+// Default selected game and level
 let selectedGame = "all";
 let selectedLevel = "allLevels";
 
-// Function to get chart data based on selected game and level
+// **Get chart data based on selected game and level**
 function getChartData(game, level) {
-  return completionData[game][level];
+  return completionData[game]?.[level] || { success: 0, failure: 0 };
 }
 
-// Get initial data for the chart
-const initialData = getChartData(selectedGame, selectedLevel);
+// **Initialize & Render Charts**
+function renderCharts() {
+  console.log("Rendering Charts...");
 
-// Function to render the chart
+  renderCompletionChart();
+  renderAverageMistakesChart(selectedGame);
+  renderScoreDistributionChart(selectedGame, selectedLevel);
+  renderCompletionTimeChart(selectedGame);
+  renderMistakeReductionChart(selectedGame);
+}
+
+// **Completion Rate Chart**
+let completionChart = null;
 function renderCompletionChart() {
+  const initialData = getChartData(selectedGame, selectedLevel);
+
   const chartOptions = {
     series: [initialData.success, initialData.failure],
     chart: {
       type: "pie",
       height: 380,
-      toolbar: {
-        show: true,
-        tools: {
-          selection: false,
-          zoom: false,
-          zoomin: false,
-          zoomout: false,
-          pan: false,
-          reset: false,
-          customIcons: [
-            {
-              icon: `<span class="custom-icon">Level</span>`,
-              title: "Select Level",
-              class: "custom-toolbar-icon",
-              click: () => {
-                // Define level options and determine the next level
-                const levelOptions = ["allLevels", "1", "2", "3"];
-                const currentLevelIndex = levelOptions.indexOf(selectedLevel);
-                const nextLevel =
-                  levelOptions[(currentLevelIndex + 1) % levelOptions.length];
-
-                // Update the selected level
-                selectedLevel = nextLevel;
-
-                // Get updated data based on selected game and level
-                const updatedData = getChartData(selectedGame, selectedLevel);
-
-                // Update the chart with new data
-                completionChart.updateOptions({
-                  title: {
-                    text: ` Level ${
-                      nextLevel === "allLevels" ? "All" : nextLevel
-                    }`,
-                  },
-                });
-                completionChart.updateSeries([
-                  updatedData.success,
-                  updatedData.failure,
-                ]);
-              },
-            },
-          ],
-        },
-      },
     },
     labels: ["Success", "Failure"],
     colors: ["#28a745", "#dc3545"],
     title: {
-      text: `All Levels`,
+      text: `Completion Rate: ${capitalize(selectedGame)} - All Levels`,
       align: "center",
     },
     legend: {
@@ -217,53 +135,30 @@ function renderCompletionChart() {
     },
   };
 
-  completionChart = new ApexCharts(
-    document.querySelector("#completion-chart"),
-    chartOptions
-  );
-  completionChart.render();
+  if (completionChart) {
+    completionChart.updateOptions(chartOptions);
+  } else {
+    completionChart = new ApexCharts(
+      document.querySelector("#completion-chart"),
+      chartOptions
+    );
+    completionChart.render();
+  }
 }
 
-// Utility function for capitalization
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-// Initialize the chart
-let completionChart = null;
-renderCompletionChart();
-
+// **Average Mistakes per Level Chart**
 let averageMistakesChart = null;
-
 function renderAverageMistakesChart(game) {
-  // Get the data for the selected game
-  const data = averageMistakesData[game];
+  const data = avgMistakesData[game] || { 1: 0, 2: 0, 3: 0 };
 
   const chartOptions = {
-    series: [
-      {
-        name: "Average Mistakes",
-        data: [data[1], data[2], data[3]], // Data for levels 1, 2, and 3
-      },
-    ],
+    series: [{ name: "Average Mistakes", data: [data[1], data[2], data[3]] }],
     chart: {
       type: "bar",
       height: 380,
     },
     xaxis: {
       categories: ["Level 1", "Level 2", "Level 3"],
-      title: {
-        text: "Levels",
-      },
-    },
-    yaxis: {
-      title: {
-        text: "Average Mistakes",
-      },
-    },
-    colors: ["#f39c12"],
-    dataLabels: {
-      enabled: true,
     },
     title: {
       text: `Average Mistakes per Level: ${capitalize(game)}`,
@@ -271,7 +166,6 @@ function renderAverageMistakesChart(game) {
     },
   };
 
-  // If chart already exists, update it; otherwise, create it
   if (averageMistakesChart) {
     averageMistakesChart.updateOptions(chartOptions);
   } else {
@@ -282,89 +176,17 @@ function renderAverageMistakesChart(game) {
     averageMistakesChart.render();
   }
 }
-// Initialize the "Average Mistakes per Level" chart
-renderAverageMistakesChart(selectedGame);
 
+// **Score Distribution Chart**
 let scoreDistributionChart = null;
-
 function renderScoreDistributionChart(game, level) {
-  // Get the score distribution data for the selected game and level
-  const scores = scoreDistributionData[game][level];
+  const scores = scoreDistributionData[game]?.[level] || [0, 0, 0, 0, 0];
 
   const chartOptions = {
-    series: [
-      {
-        name: "Score Buckets",
-        data: scores, // Array of scores for the level
-      },
-    ],
-    chart: {
-      type: "bar",
-      height: 380,
-      toolbar: {
-        show: true,
-        tools: {
-          selection: false,
-          zoom: false,
-          zoomin: false,
-          zoomout: false,
-          pan: false,
-          reset: false,
-          customIcons: [
-            {
-              icon: `<span class="custom-icon">Level</span>`,
-              title: "Select Level",
-              class: "custom-toolbar-icon",
-              click: () => {
-                // Define level options and determine the next level
-                const levelOptions = ["allLevels", "1", "2", "3"];
-                const currentLevelIndex = levelOptions.indexOf(selectedLevel);
-                const nextLevel =
-                  levelOptions[(currentLevelIndex + 1) % levelOptions.length];
-
-                // Update the selected level
-                selectedLevel = nextLevel;
-
-                // Get updated data based on selected game and level
-                const updatedScores =
-                  scoreDistributionData[selectedGame][selectedLevel];
-
-                // Update the chart with new data
-                scoreDistributionChart.updateOptions({
-                  title: {
-                    text: `Score Distribution: ${capitalize(
-                      selectedGame
-                    )} - Level ${
-                      nextLevel === "allLevels" ? "All" : nextLevel
-                    }`,
-                  },
-                });
-                scoreDistributionChart.updateSeries([
-                  {
-                    name: "Score Buckets",
-                    data: updatedScores,
-                  },
-                ]);
-              },
-            },
-          ],
-        },
-      },
-    },
+    series: [{ name: "Score Buckets", data: scores }],
+    chart: { type: "bar", height: 380 },
     xaxis: {
-      categories: ["0-20", "21-40", "41-60", "61-80", "81-100"], // Score ranges
-      title: {
-        text: "Score Ranges",
-      },
-    },
-    yaxis: {
-      title: {
-        text: "Number of Players",
-      },
-    },
-    colors: ["#007bff"],
-    dataLabels: {
-      enabled: true,
+      categories: ["0-20", "21-40", "41-60", "61-80", "81-100"],
     },
     title: {
       text: `Score Distribution: ${capitalize(game)} - ${
@@ -374,7 +196,6 @@ function renderScoreDistributionChart(game, level) {
     },
   };
 
-  // If the chart exists, update it; otherwise, render a new one
   if (scoreDistributionChart) {
     scoreDistributionChart.updateOptions(chartOptions);
   } else {
@@ -386,48 +207,21 @@ function renderScoreDistributionChart(game, level) {
   }
 }
 
-// Initialize the "Score Distribution" chart
-renderScoreDistributionChart(selectedGame, selectedLevel);
-
+// **Completion Time Chart**
 let completionTimeChart = null;
-
 function renderCompletionTimeChart(game) {
-  // Get completion time data for the selected game
-  const times = completionTimeData[game];
+  const times = completionTimeData[game] || [0, 0, 0];
 
   const chartOptions = {
-    series: [
-      {
-        name: "Completion Time",
-        data: times,
-      },
-    ],
-    chart: {
-      type: "bar",
-      height: 380,
-    },
-    xaxis: {
-      categories: ["Level 1", "Level 2", "Level 3"], // Always show all levels
-      title: {
-        text: "Levels",
-      },
-    },
-    yaxis: {
-      title: {
-        text: "Average Time (Seconds)",
-      },
-    },
-    colors: ["#ff9800"],
-    dataLabels: {
-      enabled: true,
-    },
+    series: [{ name: "Completion Time", data: times }],
+    chart: { type: "bar", height: 380 },
+    xaxis: { categories: ["Level 1", "Level 2", "Level 3"] },
     title: {
       text: `Completion Time: ${capitalize(game)}`,
       align: "center",
     },
   };
 
-  // If the chart exists, update it; otherwise, render a new one
   if (completionTimeChart) {
     completionTimeChart.updateOptions(chartOptions);
   } else {
@@ -439,16 +233,25 @@ function renderCompletionTimeChart(game) {
   }
 }
 
-// Initialize the "Level Completion Time" chart
-renderCompletionTimeChart(selectedGame, selectedLevel);
-
+// **Mistake Reduction Chart**
 let mistakeReductionChart = null;
-
 function renderMistakeReductionChart(game) {
-  // Get the data for the selected game
-  const gameData = mistakeReductionData[game];
+  const chartContainer = document.getElementById(
+    "mistake-reduction-chart"
+  ).parentElement;
 
-  // Prepare series data for each level
+  // 🚫 If "all" is selected, hide the chart and exit the function
+  if (game === "all") {
+    chartContainer.style.display = "none";
+    console.log("Hiding Mistake Reduction Chart for 'All'");
+    return;
+  }
+
+  // ✅ Otherwise, show the chart container
+  chartContainer.style.display = "block";
+
+  const gameData = avgMistakeReduction[game] || { 1: [], 2: [], 3: [] };
+
   const seriesData = Object.keys(gameData).map((level) => ({
     name: `Level ${level}`,
     data: gameData[level],
@@ -456,39 +259,13 @@ function renderMistakeReductionChart(game) {
 
   const chartOptions = {
     series: seriesData,
-    chart: {
-      type: "line",
-      height: 380,
-    },
+    chart: { type: "line", height: 380 },
     xaxis: {
       categories: ["Trial 1", "Trial 2", "Trial 3", "Trial 4", "Trial 5"],
-      title: {
-        text: "Trials",
-      },
     },
-    yaxis: {
-      title: {
-        text: "Average Mistakes",
-      },
-      min: 0,
-    },
-    stroke: {
-      curve: "smooth",
-    },
-    markers: {
-      size: 5,
-    },
-    colors: ["#246dec", "#f5b74f", "#cc3c43"], // Colors for each level
-    title: {
-      text: `Mistake Reduction: ${capitalize(game)}`,
-      align: "center",
-    },
-    legend: {
-      position: "bottom",
-    },
+    title: { text: `Mistake Reduction: ${capitalize(game)}`, align: "center" },
   };
 
-  // Update the chart if it already exists, otherwise render a new one
   if (mistakeReductionChart) {
     mistakeReductionChart.updateOptions(chartOptions);
   } else {
@@ -499,26 +276,594 @@ function renderMistakeReductionChart(game) {
     mistakeReductionChart.render();
   }
 }
-renderMistakeReductionChart(selectedGame);
-// Add event listener for the main game dropdown
+
+// **Event Listener for Game Selection**
 document.getElementById("chart-filter").addEventListener("change", (event) => {
-  selectedGame = event.target.value; // Update the selected game
-  selectedLevel = "allLevels"; // Reset level to allLevels
+  selectedGame = event.target.value;
+  selectedLevel = "allLevels";
 
-  // Update "Completion Rate" chart
-  const data = getChartData(selectedGame, selectedLevel);
-  completionChart.updateOptions({
-    title: {
-      text: `Completion Rate: ${capitalize(selectedGame)} - All Levels`,
-    },
-  });
-  completionChart.updateSeries([data.success, data.failure]);
-
-  // Update "Score Distribution" chart
+  renderCompletionChart();
   renderScoreDistributionChart(selectedGame, selectedLevel);
   renderAverageMistakesChart(selectedGame);
-  // Update "Level Completion Time" chart
   renderCompletionTimeChart(selectedGame);
-
   renderMistakeReductionChart(selectedGame);
+});
+
+// **Utility function for capitalization**
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Fetch Data & Render Charts when the page loads
+fetchGameData();
+
+// 1. Searching for specific data of HTML table
+search.addEventListener("input", searchTable);
+
+function searchTable() {
+  console.log("searching");
+  table_rows.forEach((row, i) => {
+    let table_data = row.textContent.toLowerCase(),
+      search_data = search.value.toLowerCase();
+
+    row.classList.toggle("hide", table_data.indexOf(search_data) < 0);
+    row.style.setProperty("--delay", i / 25 + "s");
+  });
+
+  document.querySelectorAll("tbody tr:not(.hide)").forEach((visible_row, i) => {
+    visible_row.style.backgroundColor =
+      i % 2 == 0 ? "transparent" : "#0000000b";
+  });
+}
+
+// 2. Sorting | Ordering data of HTML table
+
+table_headings.forEach((head, i) => {
+  let sort_asc = true;
+  head.onclick = () => {
+    table_headings.forEach((head) => head.classList.remove("active"));
+    head.classList.add("active");
+
+    document
+      .querySelectorAll("td")
+      .forEach((td) => td.classList.remove("active"));
+    table_rows.forEach((row) => {
+      row.querySelectorAll("td")[i].classList.add("active");
+    });
+
+    head.classList.toggle("asc", sort_asc);
+    sort_asc = head.classList.contains("asc") ? false : true;
+
+    sortTable(i, sort_asc);
+  };
+});
+
+function sortTable(column, sort_asc) {
+  [...table_rows]
+    .sort((a, b) => {
+      let first_cell = a.querySelectorAll("td")[column].textContent.trim();
+      let second_cell = b.querySelectorAll("td")[column].textContent.trim();
+
+      // 🔹 Convert to numbers if possible
+      let first_value = isNaN(first_cell)
+        ? first_cell.toLowerCase()
+        : parseFloat(first_cell);
+      let second_value = isNaN(second_cell)
+        ? second_cell.toLowerCase()
+        : parseFloat(second_cell);
+
+      return sort_asc
+        ? first_value > second_value
+          ? 1
+          : -1
+        : first_value < second_value
+        ? 1
+        : -1;
+    })
+    .forEach((sorted_row) =>
+      document.querySelector("tbody").appendChild(sorted_row)
+    );
+}
+
+async function fetchUsersData() {
+  try {
+    const response = await fetch("/api/status/usersData"); // Adjust based on your API URL
+    const data = await response.json();
+
+    if (data.ok) {
+      console.log("Fetched Users Data:", data.usersData);
+      return data.usersData; // Return the data
+    } else {
+      throw new Error("Failed to fetch user progress data");
+    }
+  } catch (error) {
+    console.error("Error fetching user progress data:", error);
+    return [];
+  }
+}
+
+async function renderUsersTable() {
+  const usersData = await fetchUsersData(); // Fetch data from API
+  const tableBody = document.querySelector("table tbody"); // Select the table body
+
+  tableBody.innerHTML = ""; // Clear previous rows
+
+  usersData.forEach((user) => {
+    const statusClass = user.status === "Completed" ? "completed" : "onGoing";
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${user.username}</td>
+      <td><p class="status ${statusClass}">${user.status}</p></td>
+      <td><strong>${user.total_score}</strong></td>
+    `;
+
+    // 🛠️ Click event to fetch individual user data & update UI
+    row.addEventListener("click", async () => {
+      indiUserTitle.textContent = `${capitalize(user.username)}'s Data`;
+      usersDataSection.style.display = "none";
+      indiUserDataSection.style.display = "grid";
+
+      console.log(`Fetching data for User ID: ${user.user_id}`);
+      await fetchIndiUserVizData(user.user_id); // Fetch and update charts dynamically
+    });
+
+    tableBody.appendChild(row); // Append row to the table
+  });
+
+  // 🛠️ **Reinitialize table_rows after updating the table**
+  table_rows = document.querySelectorAll("tbody tr");
+
+  // ✅ Apply search functionality
+  search.addEventListener("input", searchTable);
+
+  // ✅ Apply sorting functionality
+  table_headings.forEach((head, i) => {
+    let sort_asc = true;
+    head.onclick = () => {
+      table_headings.forEach((head) => head.classList.remove("active"));
+      head.classList.add("active");
+
+      document
+        .querySelectorAll("td")
+        .forEach((td) => td.classList.remove("active"));
+      table_rows.forEach((row) => {
+        row.querySelectorAll("td")[i].classList.add("active");
+      });
+
+      head.classList.toggle("asc", sort_asc);
+      sort_asc = head.classList.contains("asc") ? false : true;
+
+      sortTable(i, sort_asc);
+    };
+  });
+}
+renderUsersTable();
+let indiUserData;
+async function fetchIndiUserVizData(userId) {
+  try {
+    const response = await fetch(`/api/gameDataViz/user/${userId}`);
+    const data = await response.json();
+
+    if (data.ok) {
+      console.log("✅ Fetched Individual User Data:", data.data);
+      indiUserData = data.data;
+      updateIndiUserCharts(indiUserData); // Call function to update charts
+    } else {
+      throw new Error("Failed to fetch individual user data");
+    }
+  } catch (error) {
+    console.error("❌ Error fetching individual user data:", error);
+  }
+}
+
+function updateIndiUserCharts(userData) {
+  console.log("📊 Updating Charts for User Data:", userData);
+  console.log(userData.mistakeData);
+  renderIndiUserMistakesChart(userData.mistakeData);
+  renderIndiUserScoreChart(userData.scoreData);
+  renderIndiUserTrialsChart(userData.trialsData);
+  renderIndiUserCompletionChart(userData.completionPercentageData);
+  renderIndiUserCompletionTimeChart(userData.completionTimeData);
+  renderIndiUserMistakeReductionChart(userData.mistakeReductionData);
+}
+
+// Default selections
+let selectedGame_User = "kruskal"; // Default game
+let selectedType = "first"; // Default mistake type
+
+// **Event Listener for Game Selection**
+document
+  .getElementById("user-chart-filter")
+  .addEventListener("change", (event) => {
+    selectedGame_User = event.target.value; // Update selected game
+    console.log("selectedGame_user", selectedGame_User);
+    updateIndiUserCharts(indiUserData);
+  });
+
+// **Function to Render the Mistakes Chart**
+function renderIndiUserMistakesChart(mistakeData) {
+  if (
+    !mistakeData[selectedGame_User] ||
+    Object.keys(mistakeData[selectedGame_User]).length === 0
+  ) {
+    console.warn(`⚠️ No Mistake Data Available for ${selectedGame_User}`);
+    mistakeData[selectedGame_User] = { first: { 1: 0, 2: 0, 3: 0 } };
+  }
+
+  const data = Object.values(
+    mistakeData[selectedGame_User][selectedType] || { 1: 0, 2: 0, 3: 0 }
+  );
+
+  const chartOptions = {
+    series: [{ name: "Mistakes", data: data }],
+    chart: { type: "bar", height: 380 },
+    xaxis: {
+      categories: ["Level 1", "Level 2", "Level 3"],
+      title: { text: "Levels" },
+    },
+    yaxis: {
+      title: { text: "Number of Mistakes" },
+      min: 0,
+      forceNiceScale: true,
+    },
+    colors: ["#ff6f61"],
+    dataLabels: { enabled: true },
+    title: {
+      text: `${capitalize(selectedGame_User)} (${capitalize(selectedType)})`,
+      align: "center",
+    },
+  };
+
+  if (window.mistakesChart) {
+    window.mistakesChart.updateOptions(chartOptions);
+  } else {
+    window.mistakesChart = new ApexCharts(
+      document.querySelector("#mistakes-per-level-chart"),
+      chartOptions
+    );
+    window.mistakesChart.render();
+  }
+}
+function renderIndiUserScoreChart(scoreData) {
+  if (
+    !scoreData[selectedGame_User] ||
+    Object.keys(scoreData[selectedGame_User]).length === 0
+  ) {
+    console.warn(`⚠️ No Score Data Available for ${selectedGame_User}`);
+    scoreData[selectedGame_User] = {
+      first: { 1: 0, 2: 0, 3: 0 },
+      last: { 1: 0, 2: 0, 3: 0 },
+      average: { 1: 0, 2: 0, 3: 0 },
+      best: { 1: 0, 2: 0, 3: 0 },
+    };
+  }
+  console.log(scoreData);
+  const data = scoreData[selectedGame_User];
+  console.log(data);
+  const chartOptions = {
+    chart: { type: "bar", height: 400 },
+    series: [
+      { name: "First Attempt", data: Object.values(data.first) },
+      { name: "Last Attempt", data: Object.values(data.last) },
+      { name: "Average", data: Object.values(data.average) },
+      { name: "Best Attempt", data: Object.values(data.best) },
+    ],
+    xaxis: {
+      categories: ["Level 1", "Level 2", "Level 3"], // Levels as X-axis labels
+      title: { text: "Levels" },
+    },
+    yaxis: {
+      title: { text: "Scores" },
+      min: 0,
+    },
+    colors: ["#FF5733", "#33FF57", "#337BFF", "#FFD700"],
+    dataLabels: { enabled: true },
+    plotOptions: {
+      bar: { columnWidth: "50%", grouped: true }, // Ensure proper grouping
+    },
+    title: {
+      text: `${capitalize(selectedGame_User)}`,
+      align: "center",
+    },
+  };
+
+  // If chart exists, update it; otherwise, create a new one
+  if (window.scoreChart) {
+    window.scoreChart.updateOptions(chartOptions);
+  } else {
+    window.scoreChart = new ApexCharts(
+      document.querySelector("#score-chart"),
+      chartOptions
+    );
+    window.scoreChart.render();
+  }
+}
+
+// Function to render trials chart
+function renderIndiUserTrialsChart(trialsData) {
+  if (
+    !trialsData[selectedGame_User] ||
+    Object.keys(trialsData[selectedGame_User]).length === 0
+  ) {
+    console.warn(`⚠️ No Trials Data Available for ${selectedGame_User}`);
+    trialsData[selectedGame_User] = {
+      1: { success: 0, failure: 0 },
+      2: { success: 0, failure: 0 },
+      3: { success: 0, failure: 0 },
+    };
+  }
+  const data = trialsData[selectedGame_User];
+
+  const levels = Object.keys(data);
+  const successData = levels.map((level) => data[level].success);
+  const failureData = levels.map((level) => data[level].failure);
+
+  const chartOptions = {
+    series: [
+      { name: "Success", data: successData },
+      { name: "Failure", data: failureData },
+    ],
+    chart: { type: "bar", height: 380, stacked: true },
+    xaxis: {
+      categories: levels.map((level) => `Level ${level}`),
+      title: { text: "Levels" },
+    },
+    yaxis: { title: { text: "Number of Trials" }, min: 0 },
+    colors: ["#4CAF50", "#FF5733"], // Green for success, red for failure
+    dataLabels: { enabled: true },
+    title: {
+      text: `${capitalize(selectedGame_User)}`,
+      align: "center",
+    },
+  };
+
+  // If chart exists, update it; otherwise, create a new one
+  if (window.trialsChart) {
+    window.trialsChart.updateOptions(chartOptions);
+  } else {
+    window.trialsChart = new ApexCharts(
+      document.querySelector("#trials-chart"),
+      chartOptions
+    );
+    window.trialsChart.render();
+  }
+}
+
+// Function to render radial bar chart
+function renderIndiUserCompletionChart(completionPercentageData) {
+  const percentage = completionPercentageData[selectedGame_User] || 0;
+
+  const chartOptions = {
+    series: [percentage],
+    chart: {
+      type: "radialBar",
+      height: 380,
+    },
+    plotOptions: {
+      radialBar: {
+        hollow: { size: "70%" },
+        dataLabels: {
+          name: { show: false },
+          value: { fontSize: "22px", fontWeight: "bold", color: "#333" },
+        },
+      },
+    },
+    colors: ["#3498db"], // Blue color for completion
+    title: {
+      text: `${capitalize(selectedGame_User)}`,
+      align: "center",
+    },
+  };
+
+  // If chart exists, update it; otherwise, create a new one
+  if (window.completionChart) {
+    window.completionChart.updateOptions(chartOptions);
+  } else {
+    window.completionChart = new ApexCharts(
+      document.querySelector("#completion-chart-user"),
+      chartOptions
+    );
+    window.completionChart.render();
+  }
+}
+
+function renderIndiUserCompletionTimeChart(completionTimeTakenData) {
+  if (
+    !completionTimeTakenData[selectedGame_User] ||
+    Object.keys(completionTimeTakenData[selectedGame_User]).length === 0
+  ) {
+    console.warn(
+      `⚠️ No Completion Time Data Available for ${selectedGame_User}`
+    );
+    completionTimeTakenData[selectedGame_User] = {
+      first: { 1: 0, 2: 0, 3: 0 },
+      last: { 1: 0, 2: 0, 3: 0 },
+      average: { 1: 0, 2: 0, 3: 0 },
+      best: { 1: 0, 2: 0, 3: 0 },
+    };
+  }
+  const gameData = completionTimeTakenData[selectedGame_User];
+
+  const categories = ["Level 1", "Level 2", "Level 3"];
+
+  const series = [
+    {
+      name: "First Attempt",
+      data: Object.values(gameData.first),
+    },
+    {
+      name: "Last Attempt",
+      data: Object.values(gameData.last),
+    },
+    {
+      name: "Average",
+      data: Object.values(gameData.average),
+    },
+    {
+      name: "Best Attempt",
+      data: Object.values(gameData.best),
+    },
+  ];
+
+  const options = {
+    series: series,
+    chart: {
+      type: "line",
+      height: 380,
+      toolbar: {
+        show: true,
+      },
+    },
+    stroke: {
+      width: [2, 3, 4, 2],
+      dashArray: [0, 0, 5, 2],
+      curve: "smooth",
+    },
+    dataLabels: {
+      enabled: true,
+    },
+    tooltip: {
+      followCursor: true,
+      intersect: false,
+      shared: true,
+    },
+    markers: {
+      size: 5,
+    },
+    xaxis: {
+      categories: categories,
+      title: { text: "Levels" },
+    },
+    yaxis: {
+      title: { text: "Completion Time (seconds)" },
+      min: 0,
+    },
+    legend: {
+      show: true,
+      position: "top",
+      horizontalAlign: "left",
+    },
+    title: {
+      text: `${capitalize(selectedGame_User)}`,
+      align: "center",
+    },
+  };
+
+  // Check if chart already exists, update instead of re-rendering
+  if (window.completionTimeChart) {
+    window.completionTimeChart.updateOptions(options);
+  } else {
+    window.completionTimeChart = new ApexCharts(
+      document.querySelector("#completion-time-chart-user"),
+      options
+    );
+    window.completionTimeChart.render();
+  }
+}
+
+function renderIndiUserMistakeReductionChart(mistakeReductionUserData) {
+  const gameData = mistakeReductionUserData[selectedGame_User] || {
+    1: [],
+    2: [],
+    3: [],
+  };
+
+  // 🔹 Find the longest array length
+  const maxTrials = Math.max(
+    ...Object.values(gameData).map((arr) => arr.length),
+    1
+  );
+
+  // 🔹 Generate dynamic trial labels (e.g., Trial 1, Trial 2, ..., Trial maxTrials)
+  const trialLabels = Array.from(
+    { length: maxTrials },
+    (_, i) => `Trial ${i + 1}`
+  );
+
+  const seriesData = Object.keys(gameData).map((level) => ({
+    name: `Level ${level}`,
+    data: gameData[level], // Mistakes per trial
+  }));
+
+  const options = {
+    series: seriesData,
+    chart: {
+      type: "line",
+      height: 380,
+      toolbar: {
+        show: true,
+      },
+    },
+    stroke: {
+      width: [3, 3, 3], // 🔹 All solid lines
+      dashArray: [0, 0, 0], // 🔹 No dashed lines
+      curve: "smooth", // 🔹 Smooth curve effect
+    },
+    dataLabels: {
+      enabled: true,
+    },
+    tooltip: {
+      followCursor: true,
+      intersect: false,
+      shared: true,
+    },
+    markers: {
+      size: 5,
+    },
+    xaxis: {
+      categories: trialLabels, // 🔹 Dynamic categories based on longest sequence
+      title: { text: "Trials" },
+    },
+    yaxis: {
+      title: { text: "Number of Mistakes" },
+      min: 0,
+    },
+    legend: {
+      show: true,
+      position: "top",
+      horizontalAlign: "left",
+    },
+    title: {
+      text: `${capitalize(selectedGame_User)}`,
+      align: "center",
+    },
+  };
+
+  // If chart already exists, update instead of re-rendering
+  if (window.mistakeReductionChartUser) {
+    window.mistakeReductionChartUser.updateOptions(options);
+  } else {
+    window.mistakeReductionChartUser = new ApexCharts(
+      document.querySelector("#mistake-reduction-chart-user"),
+      options
+    );
+    window.mistakeReductionChartUser.render();
+  }
+}
+
+// **Helper Function to Capitalize First Letter**
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// **Toggle Button Event Listener for Mistake Type Selection**
+document.querySelectorAll(".toggle-btn").forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedType = button.getAttribute("data-type"); // Update selected mistake type
+
+    // Update active button style
+    document
+      .querySelectorAll(".toggle-btn")
+      .forEach((btn) => btn.classList.remove("active"));
+    button.classList.add("active");
+
+    // Update Chart
+    renderIndiUserMistakesChart(indiUserData.mistakeData);
+  });
+});
+
+document.querySelector(".back-to-table").addEventListener("click", () => {
+  usersDataSection.style.display = "grid";
+  indiUserDataSection.style.display = "none";
 });

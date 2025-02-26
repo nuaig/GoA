@@ -575,7 +575,7 @@ function MyMongoDB() {
     }
   };
 
-  myDB.getMistakeReductionDataForSingleUser = async (
+  myDB.getMistakeReductionDataForSingleUserUtil = async (
     userId,
     db,
     collection
@@ -630,7 +630,7 @@ function MyMongoDB() {
       // Step 2: Collect mistake data for each user
       const userMistakeData = [];
       for (const userId of userIds) {
-        const userData = await myDB.getMistakeReductionDataForSingleUser(
+        const userData = await myDB.getMistakeReductionDataForSingleUserUtil(
           userId,
           db,
           collection
@@ -685,6 +685,425 @@ function MyMongoDB() {
       );
     } finally {
       await client.close();
+    }
+  };
+
+  myDB.getMistakeDataForUser = async (userId) => {
+    const { client, db } = await connect();
+    const collection = db.collection("game_sessions");
+
+    try {
+      const pipeline = [
+        {
+          $match: { user_id: new ObjectId(userId) }, // Fetch data for the specific user
+        },
+        {
+          $unwind: "$game_sessions", // Unwind game sessions array
+        },
+        {
+          $match: { "game_sessions.mode": "regular" }, // ✅ Only include "regular" mode
+        },
+        {
+          $replaceRoot: { newRoot: "$game_sessions" }, // Flatten the structure
+        },
+        {
+          $group: {
+            _id: { game_name: "$game_name", level: "$level" },
+            first: { $first: "$total_mistakes" }, // First attempt
+            last: { $last: "$total_mistakes" }, // Last attempt
+            average: { $avg: "$total_mistakes" }, // Average mistakes
+            best: { $min: "$total_mistakes" }, // Best (minimum) mistakes
+          },
+        },
+        {
+          $group: {
+            _id: "$_id.game_name",
+            levels: {
+              $push: {
+                level: "$_id.level",
+                first: "$first",
+                last: "$last",
+                average: "$average",
+                best: "$best",
+              },
+            },
+          },
+        },
+      ];
+
+      const mistakeDataRaw = await collection.aggregate(pipeline).toArray();
+
+      // ✅ Transform the data into the required format
+      const formattedData = mistakeDataRaw.reduce((acc, game) => {
+        const gameName = game._id.toLowerCase();
+
+        acc[gameName] = game.levels.reduce((levelAcc, level) => {
+          levelAcc.first = levelAcc.first || {};
+          levelAcc.last = levelAcc.last || {};
+          levelAcc.average = levelAcc.average || {};
+          levelAcc.best = levelAcc.best || {};
+
+          levelAcc.first[level.level] = level.first;
+          levelAcc.last[level.level] = level.last;
+          levelAcc.average[level.level] = parseFloat(level.average.toFixed(2)); // Round average
+          levelAcc.best[level.level] = level.best;
+
+          return levelAcc;
+        }, {});
+
+        return acc;
+      }, {});
+
+      return formattedData;
+    } catch (error) {
+      console.error("❌ Error retrieving mistake data:", error);
+      return {};
+    } finally {
+      await client.close();
+    }
+  };
+
+  myDB.getScoreDataForUser = async (userId) => {
+    const { client, db } = await connect();
+    const collection = db.collection("game_sessions");
+
+    try {
+      const isObjectId = ObjectId.isValid(userId);
+      const query = isObjectId ? new ObjectId(userId) : userId;
+
+      // 🚨 Check if user exists
+      const userExists = await collection.findOne({ user_id: query });
+      if (!userExists) {
+        console.log("🚨 User not found in database.");
+        return {};
+      }
+
+      // 🔍 Confirm Data Exists
+      const userData = await collection.findOne(
+        { user_id: query },
+        { projection: { game_sessions: 1 } }
+      );
+
+      const pipeline = [
+        { $match: { user_id: query } }, // ✅ Filter by user_id
+        { $unwind: "$game_sessions" }, // Expand game_sessions array
+        { $match: { "game_sessions.mode": "regular" } }, // ✅ Only include "regular" mode
+        { $replaceRoot: { newRoot: "$game_sessions" } },
+        {
+          $group: {
+            _id: { game_name: "$game_name", level: "$level" },
+            first: { $first: "$final_score" },
+            last: { $last: "$final_score" },
+            average: { $avg: "$final_score" },
+            best: { $max: "$final_score" },
+          },
+        },
+        {
+          $group: {
+            _id: "$_id.game_name",
+            levels: {
+              $push: {
+                level: "$_id.level",
+                first: "$first",
+                last: "$last",
+                average: "$average",
+                best: "$best",
+              },
+            },
+          },
+        },
+      ];
+
+      const scoreDataRaw = await collection.aggregate(pipeline).toArray();
+
+      // ✅ Transform the data into the required format
+      const formattedData = scoreDataRaw.reduce((acc, game) => {
+        const gameName = game._id.toLowerCase();
+
+        acc[gameName] = game.levels.reduce((levelAcc, level) => {
+          levelAcc.first = levelAcc.first || {};
+          levelAcc.last = levelAcc.last || {};
+          levelAcc.average = levelAcc.average || {};
+          levelAcc.best = levelAcc.best || {};
+
+          levelAcc.first[level.level] = level.first;
+          levelAcc.last[level.level] = level.last;
+          levelAcc.average[level.level] = parseFloat(level.average.toFixed(2));
+          levelAcc.best[level.level] = level.best;
+
+          return levelAcc;
+        }, {});
+
+        return acc;
+      }, {});
+
+      return formattedData;
+    } catch (error) {
+      console.error("❌ Error retrieving score data:", error);
+      return {};
+    } finally {
+      await client.close();
+    }
+  };
+
+  myDB.getCompletionTimeDataForUser = async (userId) => {
+    const { client, db } = await connect();
+    const collection = db.collection("game_sessions");
+
+    try {
+      const pipeline = [
+        {
+          $match: { user_id: new ObjectId(userId) }, // ✅ Fetch data for the specific user
+        },
+        {
+          $unwind: "$game_sessions", // Unwind game sessions array
+        },
+        {
+          $match: {
+            "game_sessions.mode": "regular", // ✅ Only include "regular" mode
+            "game_sessions.success": true, // ✅ Only include successful attempts
+          },
+        },
+        {
+          $replaceRoot: { newRoot: "$game_sessions" }, // Flatten the structure
+        },
+        {
+          $group: {
+            _id: { game_name: "$game_name", level: "$level" },
+            first: { $first: "$duration" }, // First attempt
+            last: { $last: "$duration" }, // Last attempt
+            average: { $avg: "$duration" }, // Average time taken
+            best: { $min: "$duration" }, // Best (fastest) time
+          },
+        },
+        {
+          $group: {
+            _id: "$_id.game_name",
+            levels: {
+              $push: {
+                level: "$_id.level",
+                first: "$first",
+                last: "$last",
+                average: "$average",
+                best: "$best",
+              },
+            },
+          },
+        },
+      ];
+
+      const completionTimeRaw = await collection.aggregate(pipeline).toArray();
+
+      // ✅ Transform the data into the required format
+      const formattedData = completionTimeRaw.reduce((acc, game) => {
+        const gameName = game._id.toLowerCase();
+
+        acc[gameName] = game.levels.reduce((levelAcc, level) => {
+          levelAcc.first = levelAcc.first || {};
+          levelAcc.last = levelAcc.last || {};
+          levelAcc.average = levelAcc.average || {};
+          levelAcc.best = levelAcc.best || {};
+
+          levelAcc.first[level.level] = level.first;
+          levelAcc.last[level.level] = level.last;
+          levelAcc.average[level.level] = parseFloat(level.average.toFixed(2)); // Round average
+          levelAcc.best[level.level] = level.best;
+
+          return levelAcc;
+        }, {});
+
+        return acc;
+      }, {});
+
+      return formattedData;
+    } catch (error) {
+      console.error("❌ Error retrieving completion time data:", error);
+      return {};
+    } finally {
+      await client.close();
+    }
+  };
+
+  myDB.getTrialsDataForUser = async (userId) => {
+    const { client, db } = await connect();
+    const collection = db.collection("game_sessions");
+
+    try {
+      const pipeline = [
+        {
+          $match: { user_id: new ObjectId(userId) }, // ✅ Fetch data for the specific user
+        },
+        {
+          $unwind: "$game_sessions", // Unwind game sessions array
+        },
+        {
+          $match: { "game_sessions.mode": "regular" }, // ✅ Only include "regular" mode
+        },
+        {
+          $replaceRoot: { newRoot: "$game_sessions" }, // Flatten the structure
+        },
+        {
+          $group: {
+            _id: { game_name: "$game_name", level: "$level" },
+            total: { $sum: 1 }, // ✅ Total trials per level
+            success: { $sum: { $cond: [{ $eq: ["$success", true] }, 1, 0] } }, // ✅ Count successful trials
+            failure: { $sum: { $cond: [{ $eq: ["$success", false] }, 1, 0] } }, // ✅ Count failed trials
+          },
+        },
+        {
+          $group: {
+            _id: "$_id.game_name",
+            levels: {
+              $push: {
+                level: "$_id.level",
+                total: "$total",
+                success: "$success",
+                failure: "$failure",
+              },
+            },
+          },
+        },
+      ];
+
+      const trialsDataRaw = await collection.aggregate(pipeline).toArray();
+
+      // ✅ Transform the data into the required format
+      const formattedData = trialsDataRaw.reduce((acc, game) => {
+        const gameName = game._id.toLowerCase();
+
+        acc[gameName] = game.levels.reduce((levelAcc, level) => {
+          levelAcc[level.level] = {
+            total: level.total,
+            success: level.success,
+            failure: level.failure,
+          };
+
+          return levelAcc;
+        }, {});
+
+        return acc;
+      }, {});
+
+      return formattedData;
+    } catch (error) {
+      console.error("❌ Error retrieving trials data:", error);
+      return {};
+    } finally {
+      await client.close();
+    }
+  };
+
+  myDB.getMistakeReductionDataForUser = async (userId) => {
+    const { client, db } = await connect();
+    const collection = db.collection("game_sessions");
+
+    try {
+      const pipeline = [
+        {
+          $match: { user_id: new ObjectId(userId) }, // ✅ Fetch data for the specific user
+        },
+        {
+          $unwind: "$game_sessions", // Unwind game sessions array
+        },
+        {
+          $match: { "game_sessions.mode": "regular" }, // ✅ Only include "regular" mode
+        },
+        {
+          $replaceRoot: { newRoot: "$game_sessions" }, // Flatten the structure
+        },
+        {
+          $group: {
+            _id: { game_name: "$game_name", level: "$level" },
+            mistakeSequences: { $push: "$total_mistakes" }, // ✅ Collect all mistakes per trial
+          },
+        },
+        {
+          $group: {
+            _id: "$_id.game_name",
+            levels: {
+              $push: {
+                level: "$_id.level",
+                mistakes: "$mistakeSequences",
+              },
+            },
+          },
+        },
+      ];
+
+      const mistakeDataRaw = await collection.aggregate(pipeline).toArray();
+
+      // ✅ Transform the data into the required format
+      const formattedData = mistakeDataRaw.reduce((acc, game) => {
+        const gameName = game._id.toLowerCase();
+
+        acc[gameName] = game.levels.reduce((levelAcc, level) => {
+          levelAcc[level.level] = level.mistakes.slice(-5); // ✅ Store only the last 5 trials
+
+          return levelAcc;
+        }, {});
+
+        return acc;
+      }, {});
+
+      return formattedData;
+    } catch (error) {
+      console.error("❌ Error retrieving mistake reduction data:", error);
+      return {};
+    } finally {
+      await client.close();
+    }
+  };
+
+  myDB.getCompletionPercentageDataUser = async (userId) => {
+    const { client, db } = await connect();
+    const collection = db.collection("game_status"); // ✅ Fetch from "game_status"
+
+    try {
+      const isObjectId = ObjectId.isValid(userId);
+      const query = isObjectId ? new ObjectId(userId) : userId;
+
+      // 🔍 Fetch user game data
+      const userGameData = await collection.findOne({ user_id: query });
+
+      // ❌ If no data is found, return empty object
+      if (!userGameData || !userGameData.games) {
+        console.log(`❌ No game data found for User (${userId})`);
+        return {};
+      }
+
+      const completionData = {};
+
+      // 🔄 Iterate over each game in the "games" object
+      Object.entries(userGameData.games).forEach(([gameName, gameModes]) => {
+        // ✅ Check if "regular" mode exists
+        if (gameModes.regular && gameModes.regular.length > 0) {
+          const totalLevels = gameModes.regular.length; // 🔢 Total levels available
+          const completedLevels = gameModes.regular.filter((level) =>
+            ["completed", "completed_first_time"].includes(level.status)
+          ).length; // ✅ Count completed levels
+
+          // 🎯 Calculate completion percentage
+          completionData[gameName.toLowerCase()] = Math.round(
+            (completedLevels / totalLevels) * 100
+          );
+        }
+      });
+
+      return completionData;
+    } catch (error) {
+      console.error(
+        `❌ Error retrieving completion percentage data for User (${userId}):`,
+        error
+      );
+      return {};
+    } finally {
+      if (client) {
+        try {
+          await client.close();
+        } catch (e) {
+          console.error("⚠️ Error closing MongoDB client:", e);
+        }
+      }
     }
   };
 
@@ -763,9 +1182,26 @@ async function testCompletionData() {
     // const data = await myDBInstance.getCompletionTimeData();
     // myDBInstance.findNullLevels();
     // const data = await myDBInstance.getScoreDistributionData();
-
     // const data = await myDBInstance.getMistakeReductionDataForSingleUser("2");
-    const data = await myDBInstance.getAverageMistakeReduction();
+    // const data = await myDBInstance.getAverageMistakeReduction();
+    // const data = await myDBInstance.getMistakeDataForUser(
+    //   "66f94ed538cbdcb6fd0ea6e7"
+    // );
+    // const data = await myDBInstance.getScoreDataForUser(
+    //   "66f94ed538cbdcb6fd0ea6e7"
+    // );
+    const data = await myDBInstance.getCompletionPercentageDataUser(
+      "66f94ed538cbdcb6fd0ea6e7"
+    );
+    // const data = await myDBInstance.getMistakeReductionDataForUser(
+    //   "66f94ed538cbdcb6fd0ea6e7"
+    // );
+    // const data = await myDBInstance.getTrialsDataForUser(
+    //   "66f94ed538cbdcb6fd0ea6e7"
+    // );
+    // const data = await myDBInstance.getCompletionTimeDataForUser(
+    //   "66f94ed538cbdcb6fd0ea6e7"
+    // );
     // myDBInstance.resetGameSessions("66f94ed538cbdcb6fd0ea6e7");
     // console.log(data);
   } catch (error) {

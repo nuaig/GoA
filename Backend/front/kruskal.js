@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { createRandomConnectedGraph } from "./graph.js";
-import { createThreePointLighting } from "./utils/threePointLighting.js";
+import { createThreePointLightingRoom } from "./utils/threePointLighting.js";
 import { KruskalAlgorithm } from "./utils/graphRelated/kruskal.js";
 import { PrimAlgorithm } from "./utils/graphRelated/prims.js";
 import { GameSession } from "./utils/gameRelated/gameSession.js";
@@ -41,9 +41,10 @@ let currentLevel = 1; // TO DO
 let curNodes;
 let curEdges;
 let graph;
+let correctActionScoreAddition;
 
 const levelConfig = {
-  1: { nodes: 3, edges: 2 },
+  1: { nodes: 5, edges: 7 },
   2: { nodes: 4, edges: 3 },
   3: { nodes: 5, edges: 4 },
 };
@@ -720,7 +721,7 @@ function drawLines() {
   // window.addEventListener("click", onClick, false);
 }
 
-createThreePointLighting(scene);
+createThreePointLightingRoom(scene);
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;

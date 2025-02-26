@@ -89,6 +89,27 @@ function MyMongoDB() {
       await client.close();
     }
   };
+
+  myDB.addRoleToGameSessions = async () => {
+    const { client, db } = await connect();
+    try {
+      console.log("Connected to MongoDB for updating game sessions with roles");
+      const result = await db.collection("game_sessions").updateMany(
+        { role: { $exists: false } }, // Filter documents without a 'role' field
+        { $set: { role: "user" } } // Set 'role' to 'user'
+      );
+      console.log(
+        `${result.matchedCount} game session documents matched the filter, ${result.modifiedCount} were updated.`
+      );
+      return result;
+    } catch (error) {
+      console.error("Error updating roles in game sessions:", error.message);
+      return false;
+    } finally {
+      await client.close();
+    }
+  };
+
   return myDB;
 }
 

@@ -35,14 +35,14 @@
           <li>
             <a href="#" id="charts-link">
               <span class="ti-pie-chart"></span>
-              <span>Charts</span>
+              <span>Game Analytics</span>
             </a>
           </li>
 
           <li>
-            <a href="">
-              <span class="ti-settings"></span>
-              <span>Account</span>
+            <a href="#" id="users-link">
+              <span class="ti-agenda"></span>
+              <span>Users</span>
             </a>
           </li>
         </ul>
@@ -58,21 +58,8 @@
     </div>
 
     <div class="main-content">
-      <!-- <header>
-        <div class="search-wrapper">
-          <span class="ti-search"></span>
-          <input type="search" placeholder="Search" />
-        </div>
-
-        <div class="social-icons">
-          <span class="ti-bell"></span>
-          <span class="ti-comment"></span>
-          <div></div>
-        </div>
-      </header> -->
-
       <main>
-        <div class="overview-section">
+        <section class="overview-section">
           <h2 class="dash-title">Overview</h2>
 
           <div class="dash-cards">
@@ -84,9 +71,6 @@
                   <h4>23</h4>
                 </div>
               </div>
-              <!-- <div class="card-footer">
-              <a href="">View all</a>
-            </div> -->
             </div>
 
             <div class="card-single">
@@ -97,9 +81,6 @@
                   <h4>30</h4>
                 </div>
               </div>
-              <!-- <div class="card-footer">
-              <a href="">View all</a>
-            </div> -->
             </div>
 
             <div class="card-single">
@@ -110,15 +91,12 @@
                   <h4>6</h4>
                 </div>
               </div>
-              <!-- <div class="card-footer">
-              <a href="">View all</a>
-            </div> -->
             </div>
           </div>
-        </div>
-        <div class="charts-section">
+        </section>
+        <section class="charts-section">
           <div class="charts-header">
-            <h2 class="dash-title">Data Visualizations</h2>
+            <h2 class="dash-title">Game Analytics</h2>
             <select id="chart-filter" class="chart-dropdown">
               <option value="all">All</option>
               <option value="kruskal">Kruskal</option>
@@ -139,150 +117,205 @@
               <p class="chart-title">Score Distribution</p>
               <div id="score-distribution-chart"></div>
             </div>
+
+            <div class="charts-card">
+              <p class="chart-title">Level Completion Time</p>
+              <div id="completion-time-chart"></div>
+            </div>
             <div class="charts-card">
               <p class="chart-title">
                 Average Mistake Reduction Over Time (By Level)
               </p>
               <div id="mistake-reduction-chart"></div>
             </div>
+          </div>
+        </section>
+        <section class="users-section">
+          <div class="table" id="customers_table">
+            <section class="table__header">
+              <h1>Users' Data</h1>
+              <div class="input-group">
+                <input type="search" placeholder="Search Data..." />
+                <img src="src/search.png" alt="" />
+              </div>
+            </section>
+            <section class="table__body">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Users <span class="icon-arrow">&UpArrow;</span></th>
+                    <th>Status <span class="icon-arrow">&UpArrow;</span></th>
+                    <th>
+                      Total Score <span class="icon-arrow">&UpArrow;</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Zinzu Chan Lee</td>
+
+                    <td>
+                      <p class="status completed">Completed</p>
+                    </td>
+                    <td><strong> 128.90 </strong></td>
+                  </tr>
+                  <tr>
+                    <td>eet Saru</td>
+
+                    <td>
+                      <p class="status onGoing">On Going</p>
+                    </td>
+                    <td><strong>5350.50</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Sonal Gharti</td>
+
+                    <td>
+                      <p class="status shipped">Shipped</p>
+                    </td>
+                    <td><strong>210.40</strong></td>
+                  </tr>
+                  <tr>
+                    <td>son GC</td>
+
+                    <td>
+                      <p class="status completed">Completed</p>
+                    </td>
+                    <td><strong>149.70</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Sarita Limbu</td>
+
+                    <td>
+                      <p class="status onGoing">On Going</p>
+                    </td>
+                    <td><strong>399.99</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Alex Gonley</td>
+
+                    <td>
+                      <p class="status cancelled">Cancelled</p>
+                    </td>
+                    <td><strong>399.99</strong></td>
+                  </tr>
+                  <tr>
+                    <td>et Saru</td>
+
+                    <td>
+                      <p class="status completed">Completed</p>
+                    </td>
+                    <td><strong>399.99</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Aayat Ali Khan</td>
+
+                    <td>
+                      <p class="status onGoing">On Going</p>
+                    </td>
+                    <td><strong>149.70</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Alson GC</td>
+
+                    <td>
+                      <p class="status cancelled">Cancelled</p>
+                    </td>
+                    <td><strong>249.99</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Alson GC</td>
+
+                    <td>
+                      <p class="status cancelled">Cancelled</p>
+                    </td>
+                    <td><strong>249.99</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Alson GC</td>
+
+                    <td>
+                      <p class="status cancelled">Cancelled</p>
+                    </td>
+                    <td><strong>249.99</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Alson GC</td>
+
+                    <td>
+                      <p class="status cancelled">Cancelled</p>
+                    </td>
+                    <td><strong>249.99</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Alson GC</td>
+
+                    <td>
+                      <p class="status cancelled">Cancelled</p>
+                    </td>
+                    <td><strong>249.99</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+          </div>
+        </section>
+        <section class="indi-user-charts-section">
+          <button class="back-to-table">← Back to Table</button>
+          <div class="charts-header">
+            <h2 class="dash-title indi-title">Data Visualizations</h2>
+            <div>
+              <select id="user-chart-filter" class="chart-dropdown">
+                <option value="kruskal">Kruskal</option>
+                <option value="prim">Prim</option>
+                <option value="heapsort">Heapsort</option>
+              </select>
+            </div>
+          </div>
+          <div class="charts">
             <div class="charts-card">
-              <p class="chart-title">Level Completion Time</p>
-              <div id="completion-time-chart"></div>
+              <p class="chart-title">Game Completion Percentage</p>
+              <!-- Chart container -->
+              <div id="completion-chart-user"></div>
+            </div>
+            <div class="charts-card">
+              <p class="chart-title">Score Comparison</p>
+
+              <!-- Chart container -->
+              <div id="score-chart"></div>
+            </div>
+            <div class="charts-card">
+              <p class="chart-title">Mistakes Per Level</p>
+
+              <!-- Stylish Toggle Button Group -->
+              <div class="toggle-group">
+                <button class="toggle-btn active" data-type="first">
+                  First
+                </button>
+                <button class="toggle-btn" data-type="last">Last</button>
+                <button class="toggle-btn" data-type="average">Average</button>
+                <button class="toggle-btn" data-type="best">Best</button>
+              </div>
+
+              <div id="mistakes-per-level-chart"></div>
+            </div>
+            <div class="charts-card">
+              <p class="chart-title">Time Spent per Level for Completion</p>
+              <div id="completion-time-chart-user"></div>
+            </div>
+
+            <div class="charts-card">
+              <p class="chart-title">Total Trials (Success vs Failure)</p>
+
+              <div id="trials-chart"></div>
+            </div>
+
+            <div class="charts-card">
+              <p class="chart-title">Mistake Reduction Over Time</p>
+              <div id="mistake-reduction-chart-user"></div>
             </div>
           </div>
-        </div>
-
-        <!-- <section class="recent">
-          <div class="activity-grid">
-            <div class="activity-card">
-              <h3>Recent activity</h3>
-
-              <div class="table-responsive">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Project</th>
-                      <th>Start Date</th>
-                      <th>End Date</th>
-                      <th>Team</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>App Development</td>
-                      <td>15 Aug, 2020</td>
-                      <td>22 Aug, 2020</td>
-                      <td class="td-team">
-                        <div class="img-1"></div>
-                        <div class="img-2"></div>
-                        <div class="img-3"></div>
-                      </td>
-                      <td>
-                        <span class="badge success">Success</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Logo Design</td>
-                      <td>15 Aug, 2020</td>
-                      <td>22 Aug, 2020</td>
-                      <td class="td-team">
-                        <div class="img-1"></div>
-                        <div class="img-2"></div>
-                        <div class="img-3"></div>
-                      </td>
-                      <td>
-                        <span class="badge warning">Processing</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Server setup</td>
-                      <td>15 Aug, 2020</td>
-                      <td>22 Aug, 2020</td>
-                      <td class="td-team">
-                        <div class="img-1"></div>
-                        <div class="img-2"></div>
-                        <div class="img-3"></div>
-                      </td>
-                      <td>
-                        <span class="badge success">Success</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Front-end Design</td>
-                      <td>15 Aug, 2020</td>
-                      <td>22 Aug, 2020</td>
-                      <td class="td-team">
-                        <div class="img-1"></div>
-                        <div class="img-2"></div>
-                        <div class="img-3"></div>
-                      </td>
-                      <td>
-                        <span class="badge warning">Processing</span>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Web Development</td>
-                      <td>15 Aug, 2020</td>
-                      <td>22 Aug, 2020</td>
-                      <td class="td-team">
-                        <div class="img-1"></div>
-                        <div class="img-2"></div>
-                        <div class="img-3"></div>
-                      </td>
-                      <td>
-                        <span class="badge success">Success</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="summary">
-              <div class="summary-card">
-                <div class="summary-single">
-                  <span class="ti-id-badge"></span>
-                  <div>
-                    <h5>196</h5>
-                    <small>Number of staff</small>
-                  </div>
-                </div>
-                <div class="summary-single">
-                  <span class="ti-calendar"></span>
-                  <div>
-                    <h5>16</h5>
-                    <small>Number of leave</small>
-                  </div>
-                </div>
-                <div class="summary-single">
-                  <span class="ti-face-smile"></span>
-                  <div>
-                    <h5>12</h5>
-                    <small>Profile update request</small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="bday-card">
-                <div class="bday-flex">
-                  <div class="bday-img"></div>
-                  <div class="bday-info">
-                    <h5>Dwayne F. Sanders</h5>
-                    <small>Birthday Today</small>
-                  </div>
-                </div>
-
-                <div class="text-center">
-                  <button>
-                    <span class="ti-gift"></span>
-                    Wish him
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section> -->
+        </section>
       </main>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.35.3/apexcharts.min.js"></script>

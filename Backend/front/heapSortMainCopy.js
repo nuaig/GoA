@@ -16,7 +16,7 @@ import {
   checkMaxHeapProperties,
   findClosestDebossedIndex,
 } from "./utils/HeapSort-Related/HeapSort.js";
-import { createThreePointLighting } from "./utils/threePointLighting.js";
+import { createThreePointLightingRoom } from "./utils/threePointLighting.js";
 import {
   decrementHealth,
   closePseudocode,
@@ -79,7 +79,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
 scene.background = new THREE.Color(0x000); // Sky blue
-createThreePointLighting(scene);
+createThreePointLightingRoom(scene);
 
 const instancedObjects = new THREE.Group();
 scene.add(instancedObjects);
