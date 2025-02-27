@@ -23,7 +23,7 @@ export default defineConfig({
         // Define all the HTML pages you want to bundle
         main: resolve(__dirname, "./index.html"),
         signInSignUp: resolve(__dirname, "./signInSignUp.html"),
-        index2: resolve(__dirname, "./index2.html"),
+        // index2: resolve(__dirname, "./index2.html"),
         heapSort: resolve(__dirname, "./heapsort.html"),
         kruskal: resolve(__dirname, "./Kruskal.html"),
         mainDungeon: resolve(__dirname, "./mainDungeon.html"),

@@ -74,6 +74,7 @@ export class GameStatusService {
     try {
       const currentStatus =
         this.gameStatus?.games[gameName]?.[mode]?.[level - 1]?.status;
+      console.log(gameName, level, mode, currentStatus, "THing to note!!!!!");
       if (currentStatus === "completed") {
         console.log(`Level ${level} in mode ${mode} is already completed.`);
         return;

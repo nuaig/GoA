@@ -187,7 +187,8 @@ const player = new Player(scene, world);
 const mainDungeonURL = new URL("./src/main_dungeon_v4.glb", import.meta.url);
 let gameCompleted = false;
 
-let treasure_wall_gate;
+let treasure_wall_gate_left = [];
+let treasure_wall_gate_right = [];
 // Global variable to track completion of each glow effect
 let glowEffectsCompleted = { Kruskal: false, Prim: false, Heapsort: true };
 
@@ -245,26 +246,51 @@ function applyGlowEffect(material, status, key) {
   }
 }
 
-// Function to check if all glow effects are completed and trigger the gate animation
 function checkAllGlowEffects() {
-  const allCompleted = Object.values(glowEffectsCompleted).every(Boolean); // Check if all are true
-  if (allCompleted && treasure_wall_gate) {
+  const allCompleted = Object.values(glowEffectsCompleted).every(Boolean);
+
+  if (allCompleted) {
     // Set a new position for the player
     player.position.set(-0.8, 2, -20);
     player.camera.lookAt(-0.8, 2, -20);
 
-    // Use GSAP to smoothly move the Y position of the treasure wall gate
-    gsap.to(treasure_wall_gate.position, {
-      y: treasure_wall_gate.position.y - 5, // Adjust this value as needed
-      duration: 2, // 2 seconds for smooth transition
-      ease: "power2.inOut",
-      onComplete: () => {
-        console.log("Gate animation complete.");
-      },
+    // Open Left Door (Rotates Counterclockwise)
+    treasure_wall_gate_left.forEach((gate, index) => {
+      if (gate && gate.rotation) {
+        console.log(`Opening left gate: ${gate.name}`);
+
+        gsap.to(gate.rotation, {
+          y: -Math.PI / 2, // Rotate 90 degrees CCW
+          duration: 2,
+          ease: "power2.inOut",
+          onComplete: () => {
+            console.log(`Left gate animation complete: ${gate.name}`);
+          },
+        });
+      } else {
+        console.warn(`Left gate at index ${index} is undefined or invalid`);
+      }
+    });
+
+    // Open Right Door (Rotates Clockwise)
+    treasure_wall_gate_right.forEach((gate, index) => {
+      if (gate && gate.rotation) {
+        console.log(`Opening right gate: ${gate.name}`);
+
+        gsap.to(gate.rotation, {
+          y: -Math.PI / 2, // Rotate 90 degrees CW
+          duration: 2,
+          ease: "power2.inOut",
+          onComplete: () => {
+            console.log(`Right gate animation complete: ${gate.name}`);
+          },
+        });
+      } else {
+        console.warn(`Right gate at index ${index} is undefined or invalid`);
+      }
     });
   }
 }
-
 async function createMainDungeon() {
   const position = new THREE.Vector3(0, 0, 0);
   try {
@@ -292,18 +318,20 @@ async function createMainDungeon() {
     model.traverse((child) => {
       if (child.isMesh) {
         // Assign the treasure wall gate if it's found
-        if (child.name === "treasure_wall_gate") {
-          treasure_wall_gate = child; // Assign the gate to the variable
+        if (child.name.includes("wall_doorway_door_treasure_left_ready")) {
+          treasure_wall_gate_left.push(child); // Assign the gate to the variable
         }
-
-        if (kruskalCompleted) {
-          if (child.name === "treasure_wall_gate") {
-            console.log(
-              `Skipping physics for ${child.name} due to Kruskal level 3 completion`
-            );
-            return; // Skip adding physics for this object
-          }
+        if (child.name.includes("wall_doorway_door_treasure_right_ready")) {
+          treasure_wall_gate_right.push(child); // Assign the gate to the variable
         }
+        // if (kruskalCompleted) {
+        //   if (child.name === "treasure_wall_gate") {
+        //     console.log(
+        //       `Skipping physics for ${child.name} due to Kruskal level 3 completion`
+        //     );
+        //     return; // Skip adding physics for this object
+        //   }
+        // }
 
         if (child.name.includes("wall") || child.name.includes("pillar")) {
           addPhysicsToMesh(child, world, { mass: 0 });
@@ -341,25 +369,6 @@ async function createMainDungeon() {
         }
       }
     });
-
-    // Check if the game is completed
-    console.log(gameCompleted, treasure_wall_gate);
-    if (gameCompleted && treasure_wall_gate) {
-      // Set a new position for the player
-      player.position.set(-0.3, 2, -15);
-      player.camera.lookAt(-0.3, 2, -15);
-
-      // Use GSAP to smoothly move the Y position of the treasure wall gate
-      gsap.to(treasure_wall_gate.position, {
-        y: treasure_wall_gate.position.y - 5, // Adjust this value as needed
-        duration: 2, // 2 seconds for smooth transition
-        ease: "power2.inOut", // Ease type for smooth animation
-
-        onComplete: () => {
-          console.log("Gate animation complete.");
-        },
-      });
-    }
 
     console.log(symbol_dict);
   } catch (error) {

@@ -103,6 +103,13 @@ const controls = new DragControls(
   renderer.domElement
 );
 
+// Define max score per level
+const levelMaxScores = {
+  1: 40,
+  2: 50,
+  3: 60,
+};
+let correctActionScoreAddition;
 let arrayElements = [];
 let correctPositions = new Map();
 let currentSwapIndices = null;
@@ -126,7 +133,7 @@ let treeNodeTexts = [];
 let DebossedAreaTexts = [];
 let trackedObjects = [];
 
-const levels = [2, 3, 5];
+const levels = [2, 3, 4];
 
 const curRoomUI = new GameRoomUI("Heapsort", 1, camera);
 let curlvlNodesNum = levels[curRoomUI.currentLevel - 1];
@@ -273,11 +280,62 @@ function displayMessage(
   }
 }
 
+// ✅ Function to count swaps needed to complete HeapSort
+function countTotalSwapsForHeapSort(originalArr) {
+  let swaps = 0;
+  let arr = [...originalArr]; // ✅ Work on a copy of the array to preserve original
+  let heapSize = arr.length;
+
+  // Build Max-Heap and count swaps
+  for (let i = Math.floor(heapSize / 2) - 1; i >= 0; i--) {
+    swaps += countHeapifySwaps(arr, i, heapSize);
+  }
+
+  // Sorting: Extract elements from heap one by one
+  for (let i = heapSize - 1; i > 0; i--) {
+    swaps++; // ✅ Count the root swap with the last element
+    [arr[0], arr[i]] = [arr[i], arr[0]]; // ✅ Perform actual swap in the copy
+    swaps += countHeapifySwaps(arr, 0, i); // ✅ Reheapify after swap
+  }
+
+  // ✅ Total actions = swaps + inserting each element initially into binary heap
+  return swaps + arr.length;
+}
+
+// ✅ Helper function to count swaps during heapify
+function countHeapifySwaps(arr, index, heapSize) {
+  let swaps = 0;
+  let largest = index;
+  let left = 2 * index + 1;
+  let right = 2 * index + 2;
+
+  if (left < heapSize && arr[left] > arr[largest]) {
+    largest = left;
+  }
+
+  if (right < heapSize && arr[right] > arr[largest]) {
+    largest = right;
+  }
+
+  if (largest !== index) {
+    [arr[index], arr[largest]] = [arr[largest], arr[index]]; // ✅ Swap in copy
+    swaps++;
+    swaps += countHeapifySwaps(arr, largest, heapSize); // ✅ Recursively count further swaps
+  }
+
+  return swaps;
+}
+
 // DONE
 async function generateArray() {
   console.log("generateArray function called");
 
   const randomArray = generateRandomArray(curlvlNodesNum, 1, 99);
+
+  const totalActions = countTotalSwapsForHeapSort(randomArray);
+  correctActionScoreAddition = Math.floor(
+    levelMaxScores[curRoomUI.currentLevel] / totalActions
+  );
   // const randomArray = [73, 88, 78, 86];
   // const randomArray = [3, 2, 1];
   for (let i = 0; i < randomArray.length; i++) {
@@ -455,6 +513,10 @@ function checkLevelCompletionAndUpdate() {
     case 2:
       isLevelComplete = arraySorted(arrayElements);
       if (isLevelComplete) {
+        curRoomUI.currentScore = Math.floor(
+          levelMaxScores[curRoomUI.currentLevel] *
+            ((curRoomUI.health + 1) * 0.1 + 1)
+        );
         // score = openCompleteModal(score, health, finalScoreText);
         curRoomUI.fillInfoSuccessCompletionModal();
 
@@ -508,7 +570,7 @@ function evaluateActionAndUpdateScore(isCorrect, nodeIndex) {
 
   message = `Correct! Node ${nodeIndex} is correctly swapped.`;
   if (isCorrect) displayMessage(message, curRoomUI.uiText);
-  curRoomUI.currentScore += isCorrect ? 10 : 0;
+  curRoomUI.currentScore += isCorrect ? correctActionScoreAddition : 0;
 
   // Increment correctly placed tree nodes if placement is correct
   if (isCorrect && currentStep === 0) {

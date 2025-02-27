@@ -8,6 +8,8 @@ const roomEnterText = "Click to enter this room!";
 const generalText =
   "Brave adventurer! Solve the Algorithmic riddles in each room to gather clues and unlock the gate to the treasure!";
 const lockedDoorText = "This door is locked. Please try another door.";
+const treasureDoorText =
+  "Conquer and master all rooms to ignite every symbol above the door, for only then will the door to the treasure finally unlock.";
 
 export class Player {
   camera = new THREE.PerspectiveCamera(
@@ -125,6 +127,12 @@ export class Player {
         // Ensure generalText is restored if the player moves away from a locked door
         this.selectedDoor = intersectedDoor;
 
+        return;
+      }
+
+      if (intersectedDoor.name.includes("treasure")) {
+        uiTextHolder.innerHTML = treasureDoorText;
+        this.selectedDoor = intersectedDoor;
         return;
       }
       if (intersectedDoor.isMesh) {

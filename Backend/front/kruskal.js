@@ -43,6 +43,13 @@ let curEdges;
 let graph;
 let correctActionScoreAddition;
 
+// Define max score per level
+const levelMaxScores = {
+  1: 40,
+  2: 50,
+  3: 60,
+};
+
 const levelConfig = {
   1: { nodes: 5, edges: 7 },
   2: { nodes: 4, edges: 3 },
@@ -107,6 +114,9 @@ controls.target.set(0, 0, 4);
 
 const curRoomUI = new GameRoomUI("Kruskal", 1, camera);
 
+correctActionScoreAddition = Math.floor(
+  levelMaxScores[curRoomUI.currentLevel] / (numNodes - 1)
+);
 // document.addEventListener("DOMContentLoaded", () => {
 //   const swiper = new Swiper(".mySwiper", {
 //     modules: [Navigation, Pagination], // ✅ Ensure modules are included
@@ -446,7 +456,7 @@ function handleSelectionEffect(intersectedObject) {
   ringList.push(permanentRing);
   intersectedObject.userData.ring = permanentRing;
 
-  curRoomUI.currentScore += 10;
+  curRoomUI.currentScore += correctActionScoreAddition;
   curRoomUI.updateScore(curRoomUI.currentScore);
   console.log(curRoomUI.currentScore);
   console.log(curRoomUI.health);
@@ -481,22 +491,16 @@ function handleEdgeSelection(
     console.log("Current weight of the spanning tree:", currentWeight);
 
     if (isComplete) {
+      console.log(currentLevel, "current Level");
+
       curRoomUI.currentScore = Math.floor(
-        curRoomUI.currentScore * ((curRoomUI.health + 1) * 0.1 + 1)
+        levelMaxScores[curRoomUI.currentLevel] *
+          ((curRoomUI.health + 1) * 0.1 + 1)
       );
+      console.log(curRoomUI.currentScore);
       curRoomUI.uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
       curRoomUI.fillInfoSuccessCompletionModal();
-      // curRoomUI.finalScoreText.innerHTML = `${currentScore}`;
-      // const algoName = currentAlgorithm === "Kruskal" ? "Kruskal" : "Prim";
-      // curRoomUI.labelCompletionText.innerHTML = `
-      //   You have successfully completed level ${curRoomUI.currentLevel} of ${curRoomUI.gameName}'s Algorithm in ${curRoomUI.currentMode} mode!
-      // `;
-      // let totalStars;
-      // if (curRoomUI.currentMode == "regular") {
-      //   totalStars = setStars(curRoomUI.health);
-      // } else {
-      //   totalStars = setStars(4);
-      // }
+
       console.log(curRoomUI.totalStars);
 
       curGameSession.setFinalScore(curRoomUI.currentScore);
@@ -516,8 +520,7 @@ function handleEdgeSelection(
 
       // Store the score and stars in localStorage with "kruskal" included
       // const levelData = { score: currentScore, stars: totalStars };
-      console.log(curRoomUI.currentLevel);
-      console.log(curRoomUI.currentMode);
+
       // console.log(gameStatusService.gameStatus.games.Kruskal[2].status);
       curRoomUI.updateLevelStatus(curRoomUI.currentLevel, curRoomUI.totalStars);
       const status_update_string =
@@ -897,8 +900,6 @@ function createHoverElements() {
 }
 
 function setUpGameModel(currentLevel) {
-  console.log(levelConfig);
-  console.log(currentLevel);
   if (!levelConfig[currentLevel]) {
     console.error(
       `Invalid level: ${currentLevel}. Level does not exist in levelConfig.`
@@ -908,7 +909,9 @@ function setUpGameModel(currentLevel) {
   const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
   curNodes = Array.from({ length: numNodes }, (_, i) => i);
   curEdges = numEdges;
-
+  correctActionScoreAddition = Math.floor(
+    levelMaxScores[currentLevel] / (numNodes - 1)
+  );
   graph = createRandomConnectedGraph(curNodes, curEdges);
   if (curRoomUI.currentLevel <= 3) {
     curAlgorithmForGraph = new KruskalAlgorithm(graph);

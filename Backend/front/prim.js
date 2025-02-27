@@ -45,6 +45,13 @@ let curNodes;
 let curEdges;
 let graph;
 
+// Define max score per level
+const levelMaxScores = {
+  1: 40,
+  2: 50,
+  3: 60,
+};
+let correctActionScoreAddition;
 const levelConfig = {
   1: { nodes: 3, edges: 2 },
   2: { nodes: 4, edges: 3 },
@@ -108,6 +115,10 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 4);
 
 const curRoomUI = new GameRoomUI("Prim", 1, camera);
+
+correctActionScoreAddition = Math.floor(
+  levelMaxScores[curRoomUI.currentLevel] / (numNodes - 1)
+);
 
 // Add an event listener to initialize the game after login
 document.addEventListener("DOMContentLoaded", async function () {
@@ -425,7 +436,7 @@ function handleSelectionEffect(intersectedObject) {
   ringList.push(permanentRing);
   intersectedObject.userData.ring = permanentRing;
 
-  curRoomUI.currentScore += 10;
+  curRoomUI.currentScore += correctActionScoreAddition;
   curRoomUI.updateScore(curRoomUI.currentScore);
   console.log(curRoomUI.currentScore);
   console.log(curRoomUI.health);
@@ -460,7 +471,8 @@ function handleEdgeSelection(
 
     if (isComplete) {
       curRoomUI.currentScore = Math.floor(
-        curRoomUI.currentScore * ((curRoomUI.health + 1) * 0.1 + 1)
+        levelMaxScores[curRoomUI.currentLevel] *
+          ((curRoomUI.health + 1) * 0.1 + 1)
       );
       curRoomUI.uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
       curRoomUI.fillInfoSuccessCompletionModal();
@@ -874,7 +886,9 @@ function setUpGameModel(currentLevel) {
   const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
   curNodes = Array.from({ length: numNodes }, (_, i) => i);
   curEdges = numEdges;
-
+  correctActionScoreAddition = Math.floor(
+    levelMaxScores[currentLevel] / (numNodes - 1)
+  );
   graph = createRandomConnectedGraph(curNodes, curEdges);
   if (curRoomUI.currentLevel <= 3) {
     curAlgorithmForGraph = new PrimAlgorithm(graph);
