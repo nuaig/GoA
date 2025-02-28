@@ -500,8 +500,18 @@ class GameRoomUI {
 
   updateTutorialModalToBeTutorialCompleteModal() {
     this.tutorialModalHeaderText.innerHTML = "Well done!";
+    let message;
+    if (this.gameName == "Prim") {
+      message =
+        " Keep in mind to always select the edge with the minimum weight connected to the tree that won't form a cycle.";
+    } else {
+      message =
+        " Keep in mind to always select the edge with the minimum weight that won't form a cycle.";
+    }
+
     this.tutorialModalBodyText.innerHTML =
-      "Great work! You now have a solid understanding of how Kruskal’s Algorithm builds a Minimum Spanning Tree. You're ready to take on more challenges!";
+      `Great work! You now have a solid understanding of how ${this.gameName}’s Algorithm builds a Minimum Spanning Tree. You're ready to take on more challenges!` +
+      message;
     this.tutorialModalNoOrContinueButton.innerHTML = "Continue";
     this.tutorialModalYesButton.style.display = "none";
     this.isTutorial = false;

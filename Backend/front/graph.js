@@ -101,3 +101,18 @@ export function createSpecificGraphKruskalTutorial() {
 
   return new Graph(nodes, edges);
 }
+
+export function createSpecificGraphPrimTutorial() {
+  const nodes = [0, 1, 2, 3, 4]; // Nodes
+  const edges = [
+    [0, 1, 3],
+    [0, 2, 1],
+    [1, 2, 4],
+    [2, 3, 5],
+    [1, 3, 2],
+    [1, 4, 6],
+    [3, 4, 7],
+  ];
+
+  return new Graph(nodes, edges);
+}

@@ -226,7 +226,7 @@ let gameCompleted = false;
 let treasure_wall_gate_left = [];
 let treasure_wall_gate_right = [];
 // Global variable to track completion of each glow effect
-let glowEffectsCompleted = { Kruskal: false, Prim: false, Heapsort: true };
+let glowEffectsCompleted = { Kruskal: false, Prim: false, Heapsort: false };
 
 function triggerFireworks() {
   const fireworks = document.querySelectorAll(".firework");

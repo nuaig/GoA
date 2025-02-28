@@ -773,6 +773,18 @@ PRIM-ALGORITHM(graph):
           </pre>
     </div>
 
+    <div class="tutorial-instructions-modal hidden">
+      <h3>Tutorial Walk-through</h3>
+      <pre class="code-block">
+<strong>Instruction:</strong>  
+<span class="tuto-instruction-text">Select any edge to begin the tutorial after reading the explanation below.</span>
+
+<strong>Explanation:</strong>
+<span class="tuto-explanation-text">The treasure chests represent nodes and the lines between the treasure chests represent edges. Your goal here is to connect open all the chests, In other words, find a minimum spanning tree ("MST") for this graph. To get a MST, you have to find a subset of the edges connecting all nodes without forming cycles. The total weight must be minimum.  
+</span>
+      </pre>
+    </div>
+
     <div id="header-with-health" class="header">
       <div class="header-content">
         <div class="health">
@@ -844,7 +856,18 @@ PRIM-ALGORITHM(graph):
         </div>
       </div>
     </div>
+    <div class="modal modal__tutorial hidden">
+      <h2 class="modal__header tutorial__header">Welcome to Prim's Room!</h2>
+      <p class="label__tutorial_text">
+        Would you like to learn Prim's Algorithm through an interactive
+        walk-through tutorial?
+      </p>
 
+      <div class="button__holder">
+        <button class="btn btn__tutorial__yes">Yes</button>
+        <button class="btn btn__tutorial__no_or_continue">No</button>
+      </div>
+    </div>
     <div class="modal modal__settings hidden">
       <h2 class="modal__header settings__header">Settings</h2>
       <div class="button__holder">
@@ -873,7 +896,7 @@ PRIM-ALGORITHM(graph):
         />
       </svg>
     </div>
-    <div class="modal modal__level__selection">
+    <div class="modal modal__level__selection hidden">
       <h2 class="modal__header level__selection__header">Prim Room Levels</h2>
       <div id="mode-container" class="mode-selection">
         <button
@@ -1204,7 +1227,7 @@ PRIM-ALGORITHM(graph):
         <button class="btn btn__change__level">Change Level</button>
       </div>
     </div>
-    <div class="modal instruction">
+    <div class="modal instruction hidden">
       <object
         class="instruction__img"
         data="src/GameFeatures/Prim Game Features.svg"
@@ -1262,6 +1285,6 @@ PRIM-ALGORITHM(graph):
         <button class="btn btn-algo-instruction-close">Close</button>
       </div>
     </div>
-    <div class="overlay"></div>
+    <div class="overlay hidden"></div>
   </body>
 </html>

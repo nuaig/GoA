@@ -133,7 +133,7 @@ let treeNodeTexts = [];
 let DebossedAreaTexts = [];
 let trackedObjects = [];
 
-const levels = [2, 3, 4];
+const levels = [2, 2, 2];
 
 const curRoomUI = new GameRoomUI("Heapsort", 1, camera);
 let curlvlNodesNum = levels[curRoomUI.currentLevel - 1];

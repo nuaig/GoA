@@ -54,7 +54,7 @@ const levelMaxScores = {
 };
 
 const levelConfig = {
-  1: { nodes: 5, edges: 7 },
+  1: { nodes: 3, edges: 2 },
   2: { nodes: 4, edges: 3 },
   3: { nodes: 5, edges: 4 },
 };
@@ -126,12 +126,13 @@ const tutorialSteps = [
     instruction:
       "Select any edge to begin the tutorial after reading the explanation below.",
     explanation:
-      "The treasure chests represent nodes, and the lines between them represent edges. Your goal is to open all the chests by forming a <strong>Minimum Spanning Tree (MST)</strong>. An MST is a subset of edges that connects all nodes without forming cycles while keeping the total weight at a minimum.",
+      "The treasure chests represent nodes, and the lines between them represent edges. Node 0 will be your starting node. Your goal is to open all the chests by forming a Minimum Spanning Tree (MST). An MST is a subset of edges that connects all nodes without forming cycles while keeping the total weight at a minimum.",
     expectedEdge: null, // No specific edge expected at this step
     errorMessage: "Click on any edge to start the tutorial.",
   },
   {
-    instruction: "Select edge 0-2 with weight 1 by clicking on it.",
+    instruction:
+      "Select edge 0-2 with weight 1 by clicking on it. Make sure to read the explanation before you select the edge.",
     explanation:
       "First, sort all edges in ascending order. Select the edge with the minimum weight to be added to the MST. The first edge to be added is the edge between node 0 and 2 with weight 1 since it is the smallest.",
     expectedEdge: [0, 2, 1],
@@ -139,7 +140,8 @@ const tutorialSteps = [
       "Wrong selection! Start with the smallest edge (0-2 with weight 1).",
   },
   {
-    instruction: "Select edge 0-1 with weight 2 by clicking on it.",
+    instruction:
+      "Select edge 0-1 with weight 2 by clicking on it. Make sure to read the explanation before you select the edge.",
     explanation:
       "The next edge in the sorted list is between node 0 and 1 with weight 2. Check if it will cause a cycle. Since edge 0-1 doesn't form a cycle, it can be safely added to the MST.",
     expectedEdge: [0, 1, 2],
@@ -148,7 +150,7 @@ const tutorialSteps = [
   },
   {
     instruction:
-      "Make a mistake by selecting edge 1-2 with weight 3 by clicking on it.",
+      "Make a mistake by selecting edge 1-2 with weight 3 by clicking on it. Make sure to read the explanation before you select the edge.",
     explanation:
       "Edge 1-2 with weight 3 is the next minimum-weight edge. However, adding it to the MST will create a cycle. Therefore, this selection is incorrect.",
     expectedEdge: [1, 2, 3],
@@ -156,9 +158,10 @@ const tutorialSteps = [
       "Let's try to click edge 1-2 with weight 3 to see why that is not a good choice",
   },
   {
-    instruction: "Select edge 1-3 with weight 4 by clicking on it.",
+    instruction:
+      "Select edge 1-3 with weight 4 by clicking on it. Make sure to read the explanation before you select the edge.",
     explanation:
-      "Edge 1-3 with weight 4 is the next edge with minimum weight. Since it doesn't cause a cycle, it can be safely added to the MST.",
+      "Edge 1-3 with weight 4 is the next edge with minimum weight. Since it doesn't cause a cycle, it can be safely added to the MST and you will achieve the minimum spanning tree since all nodes are already connected.",
     expectedEdge: [1, 3, 4],
     errorMessage:
       "Wrong selection! Pick the edge between nodes 1 and 3 with weight 4.",
@@ -602,7 +605,8 @@ function handleEdgeSelection(
       // console.log(gameStatusService.gameStatus.games.Kruskal[2].status);
       curRoomUI.updateLevelStatus(curRoomUI.currentLevel, curRoomUI.totalStars);
       const status_update_string =
-        currentLevel != 3 ? "completed" : "completed_first_time";
+        curRoomUI.currentLevel != 3 ? "completed" : "completed_first_time";
+      // TO DO needs to check if it is already completed or not!
       curRoomUI.gameStatusService.updateGameStatus(
         "Kruskal",
         curRoomUI.currentLevel,
@@ -647,7 +651,7 @@ function handleEdgeSelection(
     }
     if (curRoomUI.isTutorial) {
       curRoomUI.uiText.innerText =
-        "Learn from the hints below why this choice is incorrect. Please continue following the instruction.";
+        "Learn from the hints below why this choice is incorrect. Continue following the instruction.";
     } else {
       curRoomUI.uiText.innerText =
         "Incorrect Selection. Make sure to meet the following conditions:";

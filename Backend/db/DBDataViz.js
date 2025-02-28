@@ -58,7 +58,7 @@ function MyMongoDB() {
       const pipeline = [
         {
           $match: {
-            user_id: { $in: ["1", "2", "3", "4", "5"] }, // Filter specific user IDs
+            user_id: { $nin: ["1", "2", "3", "4", "5"] }, // Exclude specific user IDs
           },
         },
         {
@@ -237,7 +237,7 @@ function MyMongoDB() {
       const pipeline = [
         {
           $match: {
-            user_id: { $in: ["1", "2", "3", "4", "5"] }, // Filter for specific user IDs
+            user_id: { $nin: ["1", "2", "3", "4", "5"] }, // Exclude specific user IDs
           },
         },
         {
@@ -407,7 +407,7 @@ function MyMongoDB() {
       const pipeline = [
         {
           $match: {
-            user_id: { $in: ["1", "2", "3", "4", "5"] }, // Filter for specific user IDs
+            user_id: { $nin: ["1", "2", "3", "4", "5"] }, // Exclude specific user IDs
           },
         },
         {
@@ -1190,9 +1190,9 @@ async function testCompletionData() {
     // const data = await myDBInstance.getScoreDataForUser(
     //   "66f94ed538cbdcb6fd0ea6e7"
     // );
-    const data = await myDBInstance.getCompletionPercentageDataUser(
-      "66f94ed538cbdcb6fd0ea6e7"
-    );
+    // const data = await myDBInstance.getCompletionPercentageDataUser(
+    //   "66f94ed538cbdcb6fd0ea6e7"
+    // );
     // const data = await myDBInstance.getMistakeReductionDataForUser(
     //   "66f94ed538cbdcb6fd0ea6e7"
     // );
@@ -1202,7 +1202,7 @@ async function testCompletionData() {
     // const data = await myDBInstance.getCompletionTimeDataForUser(
     //   "66f94ed538cbdcb6fd0ea6e7"
     // );
-    // myDBInstance.resetGameSessions("66f94ed538cbdcb6fd0ea6e7");
+    // myDBInstance.resetGameSessions("6775c78ec0bdc69e7c4b8eea");
     // console.log(data);
   } catch (error) {
     console.error("Failed to fetch or process data:", error);
