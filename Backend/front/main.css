@@ -237,7 +237,8 @@ body {
 .control__header,
 .settings__header,
 .leaderboard__header,
-.level__selection__header {
+.level__selection__header,
+.game__completion__header {
   color: #a5d8ff;
   border-bottom: solid #a5d8ff;
 }
@@ -631,6 +632,52 @@ button:active {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
   z-index: 999; /* Ensure it is above everything else */
+}
+
+/* Sub Menu */
+.sub-menu-wrap {
+  position: absolute;
+  top: 8%;
+  right: 3%;
+  width: 180px;
+  max-height: 0px;
+  overflow: hidden;
+  transition: max-height 0.5s;
+}
+.sub-menu-wrap.open-menu {
+  max-height: 400px;
+}
+.sub-menu {
+  background-color: #343a40;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+}
+
+.sub-menu hr {
+  border: 0;
+  height: 2px;
+  width: 100%;
+  background: #ccc;
+}
+.sub-menu-btn {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #525252;
+  cursor: pointer;
+}
+
+.sub-menu-btn p {
+  width: 100%;
+  color: #a5d8ff;
+}
+
+.sub-menu-btn:hover span {
+  transform: translate(5px);
+}
+.sub-menu-btn:hover p {
+  font-weight: 600;
 }
 
 #miniMapCanvas {

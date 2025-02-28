@@ -45,7 +45,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   const loginSuccess = sessionStorage.getItem("loginSuccess");
-  const kruskalSuccess = sessionStorage.getItem("kruskal");
+
+  const instructionShown = localStorage.getItem("instructionShown");
+  if (!instructionShown) {
+    openGameInstructionModal();
+    localStorage.setItem("instructionShown", "true");
+  }
   if (loginSuccess) {
     Toastify({
       text: "Logged In Successfully!",
@@ -94,6 +99,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 const controlsTogllerEle = document.querySelector(".Pesudocode-Box-Action");
 const controlsModal = document.querySelector(".modal__control");
+const gameCompletionModal = document.querySelector(".modal__game__completion");
+const gameCompletionContinueButton = document.querySelector(
+  ".btn__continue__completion"
+);
 const overlay = document.querySelector(".overlay");
 const controlsCloseButton = document.querySelector(
   ".modal__control .btn__close"
@@ -112,6 +121,13 @@ const settingsModal = document.querySelector(".modal__settings");
 const settingsTogglerEle = document.querySelector(".settings__icon");
 const dashboardHandler = document.querySelector(".btn__dashboard");
 const signOutHandler = document.querySelector(".btn__sign_out");
+const gameInstructionModal = document.querySelector(".game-instruction-modal");
+const gameInstructionStartButton = document.querySelector(
+  ".btn__game__instruction__start"
+);
+const gameInstructionSettingsButton = document.querySelector(
+  ".btn__map__game__instruction"
+);
 
 const symbol_dict = {
   kruskal: null,
@@ -135,6 +151,15 @@ const closeModal = function (modalType) {
   modalType.classList.add("hidden");
   overlay.classList.add("hidden");
 };
+
+const openGameInstructionModal = function () {
+  gameInstructionModal.classList.remove("hidden");
+  overlay.classList.remove("hidden");
+};
+
+gameInstructionStartButton.addEventListener("click", () => {
+  closeModal(gameInstructionModal);
+});
 
 controlsTogllerEle.addEventListener("click", () => {
   openModal(controlsModal);
@@ -165,8 +190,19 @@ leaderboardButtonEle.addEventListener("click", () => {
 settingsTogglerEle.addEventListener("click", () => {
   openModal(settingsModal);
 });
+
+gameInstructionSettingsButton.addEventListener("click", () => {
+  openModal(gameInstructionModal);
+});
+
 dashboardHandler.addEventListener("click", () => {
   window.location.href = "dashboard.html";
+});
+
+gameCompletionContinueButton.addEventListener("click", () => {
+  closeModal(gameCompletionModal);
+  player.controls.lock();
+  stopTriggerFireworks();
 });
 
 function displayMessage(message) {
@@ -250,10 +286,14 @@ function checkAllGlowEffects() {
   const allCompleted = Object.values(glowEffectsCompleted).every(Boolean);
 
   if (allCompleted) {
+    const message = `Well done, brave explorer! The treasure door is now unlocked. Continue to sharpen your skills by revisiting any of the rooms at your leisure.`;
+    triggerFireworks();
+    displayMessage(message);
+    triggerFireworks();
     // Set a new position for the player
     player.position.set(-0.8, 2, -20);
     player.camera.lookAt(-0.8, 2, -20);
-
+    player.setGameDone();
     // Open Left Door (Rotates Counterclockwise)
     treasure_wall_gate_left.forEach((gate, index) => {
       if (gate && gate.rotation) {
@@ -261,10 +301,11 @@ function checkAllGlowEffects() {
 
         gsap.to(gate.rotation, {
           y: -Math.PI / 2, // Rotate 90 degrees CCW
-          duration: 2,
+          duration: 6,
           ease: "power2.inOut",
           onComplete: () => {
             console.log(`Left gate animation complete: ${gate.name}`);
+            openModal(gameCompletionModal);
           },
         });
       } else {
@@ -279,7 +320,7 @@ function checkAllGlowEffects() {
 
         gsap.to(gate.rotation, {
           y: -Math.PI / 2, // Rotate 90 degrees CW
-          duration: 2,
+          duration: 6,
           ease: "power2.inOut",
           onComplete: () => {
             console.log(`Right gate animation complete: ${gate.name}`);
@@ -291,6 +332,7 @@ function checkAllGlowEffects() {
     });
   }
 }
+
 async function createMainDungeon() {
   const position = new THREE.Vector3(0, 0, 0);
   try {
@@ -595,7 +637,7 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "F5") {
     event.preventDefault(); // Prevent the default F5 behavior
     localStorage.clear(); // Clear localStorage
-
+    sessionStorage.clear();
     window.location.reload(); // Reload the page
   }
 });

@@ -35,7 +35,8 @@ class GameRoomUI {
     this.currentScore = 0;
     this.choosingModeNotCurrent = "training";
     this.totalstars = 0;
-
+    this.isTutorial = false;
+    this.tutorialStep = 0;
     this.callbacks = callbacks;
     this.camera = camera;
     this.swiper = new Swiper(".mySwiper", {
@@ -54,6 +55,7 @@ class GameRoomUI {
     });
     // Assigning callbacks with default empty functions to avoid errors
     this.callbacks = {
+      startTutorial: callbacks.startTutorial || (() => {}),
       resetLevel: callbacks.resetLevel || (() => {}),
       onMouseMove: callbacks.onMouseMove || (() => {}),
       onClick: callbacks.onClick || (() => {}),
@@ -97,6 +99,20 @@ class GameRoomUI {
     this.pseudoBoxButton = document.querySelector(".Pesudocode-Icon");
     this.reArrangeButton = document.querySelector(".Rearrange-Action");
     this.helpInstructionButton = document.querySelector(".Instruction-Icon");
+
+    // Tutorial Modal
+    this.tutorialInstructionModal = document.querySelector(
+      ".tutorial-instructions-modal"
+    );
+    this.tutorialModal = document.querySelector(".modal__tutorial");
+    this.tutorialModalNoOrContinueButton = document.querySelector(
+      ".btn__tutorial__no_or_continue"
+    );
+    this.tutorialModalYesButton = document.querySelector(".btn__tutorial__yes");
+    this.tutorialModalHeaderText = document.querySelector(".tutorial__header");
+    this.tutorialModalBodyText = document.querySelector(
+      ".label__tutorial_text"
+    );
 
     // Level Completion Modal (Both Success and Failure)
     this.modalCompletion = document.querySelector(".modal__completion");
@@ -151,12 +167,16 @@ class GameRoomUI {
     this.btnAlgoInstrClose = document.querySelector(
       ".btn-algo-instruction-close"
     );
+
+    this.openModal(this.tutorialModal);
   }
 
   /**
    * Adds event listeners for buttons and UI interactions.
    */
   addEventListeners() {
+    // -------Tutorial Modal---------
+    this.addAllEventlistenersTutorialModal();
     // -------Instruction Modal---------
     this.addAllEventListenersInstructionModal();
     // -------Pseudo Modal-------
@@ -450,6 +470,43 @@ class GameRoomUI {
         this.camera.lookAt(new THREE.Vector3(0, 2, 0));
       },
     });
+  }
+
+  // -------Tutorial Modal-----------
+  addAllEventlistenersTutorialModal() {
+    this.listenEventTutorialModalSkipTutorial();
+    this.listenEventTutorialModalStartTutorial();
+  }
+
+  listenEventTutorialModalSkipTutorial() {
+    this.tutorialModalNoOrContinueButton.addEventListener("click", () => {
+      this.closeModal(this.tutorialModal);
+      this.openModal(this.levelsModal);
+      this.openModal(this.instructionModal);
+    });
+  }
+
+  listenEventTutorialModalStartTutorial() {
+    this.tutorialModalYesButton.addEventListener("click", () => {
+      this.closeModal(this.tutorialModal);
+      this.tutorialInstructionModal.classList.remove("hidden");
+      this.isTutorial = true;
+      this.callbacks.startTutorial();
+      if (this.gameName == "Kruskal" || this.gameName == "Prim") {
+        this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
+      }
+    });
+  }
+
+  updateTutorialModalToBeTutorialCompleteModal() {
+    this.tutorialModalHeaderText.innerHTML = "Well done!";
+    this.tutorialModalBodyText.innerHTML =
+      "Great work! You now have a solid understanding of how Kruskal’s Algorithm builds a Minimum Spanning Tree. You're ready to take on more challenges!";
+    this.tutorialModalNoOrContinueButton.innerHTML = "Continue";
+    this.tutorialModalYesButton.style.display = "none";
+    this.isTutorial = false;
+    this.closeModal(this.tutorialInstructionModal);
+    this.openModal(this.tutorialModal);
   }
 
   // -------Instruction Modal---------
@@ -882,6 +939,34 @@ class GameRoomUI {
     setTimeout(() => {
       this.enableMouseEventListeners_K_P();
     }, 1000); // Re-enable mouse events when modal is closed
+  }
+
+  /**
+   * Closes all open modals and resets the UI state.
+   */
+  closeAllModals() {
+    const modals = [
+      this.tutorialModal,
+      this.modalCompletion,
+      this.instructionModal,
+      this.settingsModal,
+      this.levelsModal,
+      this.algoInstructionModal,
+    ];
+
+    modals.forEach((modal) => {
+      if (modal && !modal.classList.contains("hidden")) {
+        modal.classList.add("hidden");
+      }
+    });
+
+    this.overlay.classList.add("hidden");
+    this.isModalOpen = false;
+
+    // Re-enable mouse events after closing all modals
+    setTimeout(() => {
+      this.enableMouseEventListeners_K_P();
+    }, 1000);
   }
 
   // -------For Kruskal and Prim Only------------

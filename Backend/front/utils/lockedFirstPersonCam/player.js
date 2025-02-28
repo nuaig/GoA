@@ -5,11 +5,13 @@ import * as CANNON from "cannon-es";
 const CENTER_SCREEN = new THREE.Vector2();
 const uiTextHolder = document.querySelector(".UI-Text");
 const roomEnterText = "Click to enter this room!";
-const generalText =
+let generalText =
   "Brave adventurer! Solve the Algorithmic riddles in each room to gather clues and unlock the gate to the treasure!";
 const lockedDoorText = "This door is locked. Please try another door.";
-const treasureDoorText =
+const treasureDoorLockedText =
   "Conquer and master all rooms to ignite every symbol above the door, for only then will the door to the treasure finally unlock.";
+const treasureDoorUnlockedText =
+  "Well done, brave explorer! The treasure door is now unlocked. Continue to sharpen your skills by revisiting any of the rooms at your leisure.";
 
 export class Player {
   camera = new THREE.PerspectiveCamera(
@@ -32,6 +34,7 @@ export class Player {
     5
   );
   selectedDoor = null;
+  gameDone = false;
 
   constructor(scene, world) {
     // Restore the player's position from localStorage if it exists
@@ -131,8 +134,12 @@ export class Player {
       }
 
       if (intersectedDoor.name.includes("treasure")) {
-        uiTextHolder.innerHTML = treasureDoorText;
-        this.selectedDoor = intersectedDoor;
+        if (!this.gameDone) {
+          uiTextHolder.innerHTML = treasureDoorLockedText;
+        } else {
+          uiTextHolder.innerHTML = treasureDoorUnlockedText;
+        }
+
         return;
       }
       if (intersectedDoor.isMesh) {
@@ -164,6 +171,11 @@ export class Player {
         uiTextHolder.innerHTML = generalText;
       }
     }
+  }
+
+  setGameDone() {
+    this.gameDone = true;
+    generalText = treasureDoorUnlockedText;
   }
 
   get position() {

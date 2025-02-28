@@ -3,6 +3,56 @@ body {
   font-family: "Inter", sans-serif;
 }
 
+.topnav-instructions {
+  position: absolute;
+  top: calc(2vh + 75px);
+  left: 85%;
+  transform: translate(-50%, 0%);
+  background-color: rgb(72, 121, 212);
+  width: 25%;
+  height: 27%;
+  border: solid #eaebf1 2px;
+  padding: 15px;
+  box-shadow: 0.5rem 0.5rem 0;
+  overflow: hidden;
+  /* display: none; */
+}
+
+.tutorial-instructions-modal {
+  font-style: monospace;
+  position: absolute;
+  top: calc(2vh);
+  left: 14%;
+  transform: translate(-50%, 0%);
+  background-color: rgb(72, 121, 212);
+  width: 25%;
+
+  border: solid #eaebf1 2px;
+  padding: 15px;
+  box-shadow: 0.5rem 0.5rem 0;
+  overflow: hidden;
+  z-index: 3;
+  /* display: none; */
+}
+
+.tutorial-instructions-modal h3 {
+  color: #fff;
+  text-align: center;
+  border-bottom: solid #a5d8ff;
+  margin: 10px 0;
+  padding: 10px 0;
+}
+
+.tutorial-instructions-modal strong {
+  font-size: 18px;
+  display: block;
+  text-decoration: underline;
+}
+
+.topnav-instructions.heapify-instruction {
+  height: 38%;
+}
+
 .code-container {
   background-color: rgb(72, 121, 212);
   padding: 15px;
@@ -17,7 +67,7 @@ body {
 
 .code-block {
   color: #ffffff;
-  font-family: "Courier New", Courier, monospace;
+
   padding: 10px;
   border-radius: 5px;
   white-space: pre-wrap;
@@ -53,25 +103,6 @@ body {
 .highlight__wrong {
   background-color: #1864ab;
   color: #ffa8a8;
-}
-
-.topnav-instructions {
-  position: absolute;
-  top: calc(2vh + 75px);
-  left: 85%;
-  transform: translate(-50%, 0%);
-  background-color: rgb(72, 121, 212);
-  width: 25%;
-  height: 27%;
-  border: solid #eaebf1 2px;
-  padding: 15px;
-  box-shadow: 0.5rem 0.5rem 0;
-  overflow: hidden;
-  /* display: none; */
-}
-
-.topnav-instructions.heapify-instruction {
-  height: 38%;
 }
 
 .Action-Icons-Holder {
@@ -266,7 +297,7 @@ body {
   background-color: #343a40;
   padding: 2.5rem 3rem;
   box-shadow: 0 4rem 6rem rgba(0, 0, 0, 0.3);
-  z-index: 1000;
+  z-index: 99;
   transition: all 0.5s;
   border-radius: 18px;
 }
@@ -279,7 +310,7 @@ body {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
-  z-index: 100;
+  z-index: 98;
   transition: all 0.5s;
 }
 .modal h2,
@@ -299,7 +330,8 @@ body {
 
 .control__header,
 .settings__header,
-.level__selection__header {
+.level__selection__header,
+.tutorial__header {
   color: #a5d8ff;
   border-bottom: solid #a5d8ff;
 }
@@ -308,6 +340,10 @@ body {
   font-size: 1.6rem;
   color: #a5d8ff;
   padding: 1rem;
+}
+
+.modal__tutorial {
+  z-index: 101;
 }
 
 /* Controls list */
@@ -492,7 +528,7 @@ body {
 }
 
 .instruction__img {
-  width: 1000px;
+  width: 1050px;
 }
 
 .btn--close-modal {

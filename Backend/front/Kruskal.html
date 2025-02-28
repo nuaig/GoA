@@ -755,15 +755,7 @@
         </div>
       </div>
     </div>
-    <!-- <img
-          id="helpIcon"
-          class="help-icon"
-          width="100"
-          height="100"
-          src="https://img.icons8.com/plasticine/100/help.png"
-          alt="help"
-          onclick="toggleInstructions()"
-        /> -->
+
     <div class="topnav-instructions pseudo hidden">
       <pre class="code-block">
 MST-KRUSKAL(G, w):
@@ -781,22 +773,16 @@ MST-KRUSKAL(G, w):
           </pre>
     </div>
 
-    <div class="topnav-instructions prim-pseudo hidden">
+    <div class="tutorial-instructions-modal hidden">
+      <h3>Tutorial Walk-through</h3>
       <pre class="code-block">
-PRIM-ALGORITHM(graph):
-1.  Empty set <span class="keyword">SN</span> for selectedNodes
-2.  Empty list <span class="keyword">SE</span> for selectedEdges
-3.  totalWeight as 0
-4.   
-5.  Choose any node as <span class="keyword">startNode</span>
-6.  Add <span class="keyword">startNode</span> to <span class="keyword">SN</span>
-7.  <span class="hover wrong__select">while <span class="keyword">SN</span> does not include all nodes:</span>
-8.       <span class="correct__select wrong__select">Find the smallest edge connecting</span>
-9.       <span class="correct__select"><span class="keyword">SN</span> to an unselected node</span>
-10.      <span class="correct__select">    Add this edge to <span class="keyword">SE</span></span>
-11.      <span class="correct__select">    Add the new node to <span class="keyword">SN</span></span>
-12. return SE, totalWeight
-          </pre>
+<strong>Instruction:</strong>  
+<span class="tuto-instruction-text">Select any edge to begin the tutorial after reading the explanation below.</span>
+
+<strong>Explanation:</strong>
+<span class="tuto-explanation-text">The treasure chests represent nodes and the lines between the treasure chests represent edges. Your goal here is to connect open all the chests, In other words, find a minimum spanning tree ("MST") for this graph. To get a MST, you have to find a subset of the edges connecting all nodes without forming cycles. The total weight must be minimum.  
+</span>
+      </pre>
     </div>
 
     <div id="header-with-health" class="header">
@@ -870,7 +856,19 @@ PRIM-ALGORITHM(graph):
         </div>
       </div>
     </div>
+    <div class="modal modal__tutorial hidden">
+      <h2 class="modal__header tutorial__header">Welcome to Kruskal's Room!</h2>
+      <p class="label__tutorial_text">
+        Would you like to learn Kruskal’s Algorithm through an interactive
+        walk-through tutorial?
+      </p>
 
+      <div class="button__holder">
+        <button class="btn btn__tutorial__yes">Yes</button>
+        <button class="btn btn__tutorial__no_or_continue">No</button>
+      </div>
+    </div>
+    </div>
     <div class="modal modal__settings hidden">
       <h2 class="modal__header settings__header">Settings</h2>
       <div class="button__holder">
@@ -899,7 +897,7 @@ PRIM-ALGORITHM(graph):
         />
       </svg>
     </div>
-    <div class="modal modal__level__selection">
+    <div class="modal modal__level__selection hidden">
       <h2 class="modal__header level__selection__header">
         Kruskal Room Levels
       </h2>
@@ -1232,8 +1230,9 @@ PRIM-ALGORITHM(graph):
         <button class="btn btn__change__level">Change Level</button>
       </div>
     </div>
-    <div class="modal instruction">
-      <img class="instruction__img" src="./src/Kruskal Instructions.png" />
+    <div class="modal instruction hidden">
+      <object class="instruction__img" data="src/GameFeatures/Kruskal Game Features.svg" type="image/svg+xml"></object>
+      <!-- <img class="instruction__img" src="./src/Kruskal Instructions.png" /> -->
       <img class="instruction__img hidden" src="./src/Prim Instructions.png" />
       <div class="button__holder">
         <!-- <button class="btn btn__again">Try again</button> -->
@@ -1247,19 +1246,19 @@ PRIM-ALGORITHM(graph):
         <h2 class="modal__header">Step-by-Step Guide to Kruskal’s Algorithm</h2>
         <div class="testi-content swiper-wrapper">
           <div class="slide swiper-slide">
-            <object data="src/images1/1.svg" type="image/svg+xml"></object>
+            <object data="src/AlgorithmsInstructions/kruskalAlgo/1.svg" type="image/svg+xml"></object>
           </div>
           <div class="slide swiper-slide">
-            <object data="src/images1/2.svg" type="image/svg+xml"></object>
+            <object data="src/AlgorithmsInstructions/kruskalAlgo/2.svg" type="image/svg+xml"></object>
           </div>
           <div class="slide swiper-slide">
-            <object data="src/images1/3.svg" type="image/svg+xml"></object>
+            <object data="src/AlgorithmsInstructions/kruskalAlgo/3.svg" type="image/svg+xml"></object>
           </div>
           <div class="slide swiper-slide">
-            <object data="src/images1/4.svg" type="image/svg+xml"></object>
+            <object data="src/AlgorithmsInstructions/kruskalAlgo/4.svg" type="image/svg+xml"></object>
           </div>
           <div class="slide swiper-slide">
-            <object data="src/images1/5.svg" type="image/svg+xml"></object>
+            <object data="src/AlgorithmsInstructions/kruskalAlgo/5.svg" type="image/svg+xml"></object>
           </div>
         </div>
         <div class="swiper-button-next nav-btn"></div>
@@ -1271,6 +1270,6 @@ PRIM-ALGORITHM(graph):
         <button class="btn btn-algo-instruction-close">Close</button>
       </div>
     </div>
-    <div class="overlay"></div>
+    <div class="overlay hidden"></div>
   </body>
 </html>

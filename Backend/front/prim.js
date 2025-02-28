@@ -34,7 +34,7 @@ import {
   createRing,
   highlightChest,
 } from "./utils/graphRelated/drawLine.js";
-import GameRoomUI from "./utils/UI/gameRoomUI.js";
+import GameRoomUI from "./utils/UI/gameRoomUICopy.js";
 
 const reArrangeButton = document.querySelector(".Rearrange-Action");
 let curGameSession;

@@ -88,3 +88,16 @@ export function createRandomConnectedGraph(nodes, totalEdges) {
 
   return graph;
 }
+
+export function createSpecificGraphKruskalTutorial() {
+  const nodes = [0, 1, 2, 3]; // Nodes
+  const edges = [
+    [0, 1, 2], // Edge between 0 and 1 with weight 2
+    [0, 2, 1], // Edge between 0 and 2 with weight 1
+    [1, 2, 3], // Edge between 1 and 2 with weight 3
+    [1, 3, 4], // Edge between 1 and 3 with weight 4
+    [2, 3, 5], // Edge between 2 and 3 with weight 5
+  ];
+
+  return new Graph(nodes, edges);
+}

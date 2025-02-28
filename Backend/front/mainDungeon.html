@@ -659,10 +659,24 @@
               d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
             />
           </svg>
-
-          <!-- <div class="button__holder">
-            <button class="btn btn__close">Close</button>
-          </div> -->
+        </div>
+        <div class="modal modal__game__completion hidden">
+          <h2 class="modal__header game__completion__header">
+            Congratulations!
+          </h2>
+          <p class="label__completion_text">
+            Well done, brave explorer! The treasure door has unlocked, proving
+            your skill and determination. Your journey through the challenges
+            has led you to this moment—your efforts have paid off!
+          </p>
+          <p class="label__completion_text">
+            But the adventure doesn’t end here. Continue honing your abilities
+            by revisiting the rooms at your own pace. There’s always more to
+            discover and master.
+          </p>
+          <div class="button__holder">
+            <button class="btn btn__continue__completion">Continue</button>
+          </div>
         </div>
         <div class="modal modal__leaderboard hidden">
           <h2 class="modal__header leaderboard__header">Leaderboard</h2>
@@ -738,6 +752,11 @@
             <button class="btn btn__leaderboard">Leaderboard</button>
           </div>
           <div class="button__holder">
+            <button class="btn btn__map__game__instruction">
+              Map & Instructions
+            </button>
+          </div>
+          <div class="button__holder">
             <button class="btn btn__dashboard">Dashboard</button>
           </div>
           <div class="button__holder">
@@ -755,6 +774,30 @@
               d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
             />
           </svg>
+        </div>
+        <div class="modal game-instruction-modal hidden">
+          <object
+            class="instruction__img"
+            data="src/Game Introduction (Finalized).svg"
+            type="image/svg+xml"
+          ></object>
+          <div class="button__holder">
+            <!-- <button class="btn btn__again">Try again</button> -->
+            <button class="btn btn__game__instruction__start">
+              Start the game &rarr;
+            </button>
+          </div>
+        </div>
+        <div class="sub-menu-wrap" id="subMenu">
+          <div class="sub-menu">
+            <div class="sub-menu-btn sub-menu-game-features">
+              <p>Game Features</p>
+            </div>
+            <hr />
+            <div class="sub-menu-btn sub-menu-algo-instructions">
+              <p>Algorithm</p>
+            </div>
+          </div>
         </div>
       </div>
       <p class="symbol heapsort-symbol">H</p>

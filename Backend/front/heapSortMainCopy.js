@@ -36,7 +36,7 @@ import {
   shakeScreen,
 } from "./utils/UI/animations.js";
 import { GameSession } from "./utils/gameRelated/gameSession.js";
-import GameRoomUI from "./utils/UI/gameRoomUI.js";
+import GameRoomUI from "./utils/UI/gameRoomUICopy.js";
 import { loadModel } from "./utils/threeModels.js";
 import gsap from "gsap";
 //create an export function with your scene name that takes a scene object and renderer as a constructor

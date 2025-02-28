@@ -1,7 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
-import { createRandomConnectedGraph } from "./graph.js";
+import {
+  createRandomConnectedGraph,
+  createSpecificGraphKruskalTutorial,
+} from "./graph.js";
 import { createThreePointLightingRoom } from "./utils/threePointLighting.js";
 import { KruskalAlgorithm } from "./utils/graphRelated/kruskal.js";
 import { PrimAlgorithm } from "./utils/graphRelated/prims.js";
@@ -117,6 +120,75 @@ const curRoomUI = new GameRoomUI("Kruskal", 1, camera);
 correctActionScoreAddition = Math.floor(
   levelMaxScores[curRoomUI.currentLevel] / (numNodes - 1)
 );
+
+const tutorialSteps = [
+  {
+    instruction:
+      "Select any edge to begin the tutorial after reading the explanation below.",
+    explanation:
+      "The treasure chests represent nodes, and the lines between them represent edges. Your goal is to open all the chests by forming a <strong>Minimum Spanning Tree (MST)</strong>. An MST is a subset of edges that connects all nodes without forming cycles while keeping the total weight at a minimum.",
+    expectedEdge: null, // No specific edge expected at this step
+    errorMessage: "Click on any edge to start the tutorial.",
+  },
+  {
+    instruction: "Select edge 0-2 with weight 1 by clicking on it.",
+    explanation:
+      "First, sort all edges in ascending order. Select the edge with the minimum weight to be added to the MST. The first edge to be added is the edge between node 0 and 2 with weight 1 since it is the smallest.",
+    expectedEdge: [0, 2, 1],
+    errorMessage:
+      "Wrong selection! Start with the smallest edge (0-2 with weight 1).",
+  },
+  {
+    instruction: "Select edge 0-1 with weight 2 by clicking on it.",
+    explanation:
+      "The next edge in the sorted list is between node 0 and 1 with weight 2. Check if it will cause a cycle. Since edge 0-1 doesn't form a cycle, it can be safely added to the MST.",
+    expectedEdge: [0, 1, 2],
+    errorMessage:
+      "Wrong selection! The next smallest edge is 0-1 with weight 2.",
+  },
+  {
+    instruction:
+      "Make a mistake by selecting edge 1-2 with weight 3 by clicking on it.",
+    explanation:
+      "Edge 1-2 with weight 3 is the next minimum-weight edge. However, adding it to the MST will create a cycle. Therefore, this selection is incorrect.",
+    expectedEdge: [1, 2, 3],
+    errorMessage:
+      "Let's try to click edge 1-2 with weight 3 to see why that is not a good choice",
+  },
+  {
+    instruction: "Select edge 1-3 with weight 4 by clicking on it.",
+    explanation:
+      "Edge 1-3 with weight 4 is the next edge with minimum weight. Since it doesn't cause a cycle, it can be safely added to the MST.",
+    expectedEdge: [1, 3, 4],
+    errorMessage:
+      "Wrong selection! Pick the edge between nodes 1 and 3 with weight 4.",
+  },
+  {
+    instruction: "Voila! You've successfully built the MST.",
+    explanation:
+      "You have connected all nodes without forming cycles while maintaining the minimum total weight. Congratulations on completing the tutorial!",
+    expectedEdge: null, // No specific edge expected for completion
+    errorMessage: "You've completed the tutorial! Click anywhere to exit.",
+  },
+];
+
+let currentTutorialStep = 0;
+
+function updateTutorialStep() {
+  document.querySelector(".tuto-instruction-text").innerHTML =
+    tutorialSteps[currentTutorialStep].instruction;
+  document.querySelector(".tuto-explanation-text").innerHTML =
+    tutorialSteps[currentTutorialStep].explanation;
+}
+
+// Call this function whenever the user makes a correct selection
+function nextTutorialStep() {
+  if (currentTutorialStep < tutorialSteps.length - 1) {
+    currentTutorialStep++;
+    updateTutorialStep();
+  }
+}
+
 // document.addEventListener("DOMContentLoaded", () => {
 //   const swiper = new Swiper(".mySwiper", {
 //     modules: [Navigation, Pagination], // ✅ Ensure modules are included
@@ -491,6 +563,12 @@ function handleEdgeSelection(
     console.log("Current weight of the spanning tree:", currentWeight);
 
     if (isComplete) {
+      if (curRoomUI.isTutorial) {
+        curRoomUI.updateTutorialModalToBeTutorialCompleteModal();
+        curRoomUI.currentLevel = null;
+        curRoomUI.isTutorial = false;
+        return;
+      }
       console.log(currentLevel, "current Level");
 
       curRoomUI.currentScore = Math.floor(
@@ -567,8 +645,13 @@ function handleEdgeSelection(
         updateHintIcons(primHintItem, selectEdgeResult[2]);
       }
     }
-    curRoomUI.uiText.innerText =
-      "Incorrect Selection. Make sure to meet the following conditions:";
+    if (curRoomUI.isTutorial) {
+      curRoomUI.uiText.innerText =
+        "Learn from the hints below why this choice is incorrect. Please continue following the instruction.";
+    } else {
+      curRoomUI.uiText.innerText =
+        "Incorrect Selection. Make sure to meet the following conditions:";
+    }
 
     setTimeout(() => {
       intersectedObject.material.color.set(0x74c0fc);
@@ -576,7 +659,11 @@ function handleEdgeSelection(
         intersectedObject.userData.label.material.color.set(0x000000);
       }
     }, 3000);
-    if (curRoomUI.health < 0 && curRoomUI.currentMode == "regular") {
+    if (
+      curRoomUI.health < 0 &&
+      curRoomUI.currentMode == "regular" &&
+      !curRoomUI.isTutorial
+    ) {
       curRoomUI.fillInfoFailureSuccessCompletionModal();
       curGameSession.setFinalScore(curRoomUI.currentScore);
       curGameSession.setSuccessStatus(false);
@@ -701,8 +788,34 @@ function drawLines() {
 
     if (intersects.length > 0) {
       const intersectedObject = intersects[0].object;
+      console.log(intersectedObject.userData);
       if (intersectedObject.userData.selected) {
         return;
+      }
+
+      if (curRoomUI.isTutorial) {
+        const currentStep = tutorialSteps[currentTutorialStep];
+        console.log(currentStep);
+
+        if (currentStep.expectedEdge === null) {
+          // Allow any edge selection
+          nextTutorialStep();
+          return;
+        } else {
+          const expectedEdge = currentStep.expectedEdge;
+          const selectedEdge = intersectedObject.userData.edge;
+          console.log(expectedEdge);
+          console.log(selectedEdge);
+          if (
+            selectedEdge.start === expectedEdge[0] &&
+            selectedEdge.end === expectedEdge[1] &&
+            selectedEdge.weight === expectedEdge[2]
+          ) {
+            nextTutorialStep();
+          } else {
+            curRoomUI.uiText.innerText = currentStep.errorMessage;
+          }
+        }
       }
 
       if (intersectedObject.userData) {
@@ -913,6 +1026,7 @@ function setUpGameModel(currentLevel) {
     levelMaxScores[currentLevel] / (numNodes - 1)
   );
   graph = createRandomConnectedGraph(curNodes, curEdges);
+  console.log("Graph ==", graph);
   if (curRoomUI.currentLevel <= 3) {
     curAlgorithmForGraph = new KruskalAlgorithm(graph);
     curRoomUI.currentAlgorithm = "Kruskal";
@@ -925,6 +1039,15 @@ function setUpGameModel(currentLevel) {
   }
 
   // updateComponentColors(curAlgorithmForGraph.uf, curNodes, componentColors);
+  createModels();
+  createHoverElements();
+}
+
+function setUpTutorialModel() {
+  graph = createSpecificGraphKruskalTutorial();
+  curNodes = [0, 1, 2, 3];
+  curAlgorithmForGraph = new KruskalAlgorithm(graph);
+  curRoomUI.currentAlgorithm = "Kruskal";
   createModels();
   createHoverElements();
 }
@@ -944,29 +1067,10 @@ curRoomUI.callbacks.resetLevel = function (curlvl) {
     curRoomUI.currentMode
   );
 };
-// curRoomUI.callbacks.resetLevel = resetLevel;
 
-// curRoomUI.buttonNextLevel.addEventListener("click", () => {
-//   uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
-//   health = resetHealth();
-//   currentLevel++;
-//   closeModal();
-//   closePseudocode();
-//   resetScene();
-//   setUpGameModel(currentLevel);
-//   // if (currentAlgorithm === "prim") {
-//   //   updateNodeLabel(chapterTitle, "Prim's Algorithm", 1, 0.3, 0x212529);
-//   //   chapterTitle.position.set(9.5, 6.5, -30);
-//   // }
-
-//   updateNodeLabel(levelTitle, `Level ${currentLevel}`, 0.9, 0.3, 0x212529);
-// });
-
-// curRoomUI.buttonAgain.addEventListener("click", () => {
-//   curRoomUI.resetLevel(currentLevel);
-// });
-
-// curRoomUI.btnSettingsRestart.addEventListener("click", () => {
-//   closeSettingModal();
-//   resetLevel(currentLevel);
-// });
+curRoomUI.callbacks.startTutorial = function () {
+  curRoomUI.uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
+  resetScene();
+  updateNodeLabel(levelTitle, `Tutorial`, 0.9, 0.3, 0x212529);
+  setUpTutorialModel();
+};
