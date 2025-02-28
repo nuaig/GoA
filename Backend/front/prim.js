@@ -57,9 +57,9 @@ const levelMaxScores = {
 };
 let correctActionScoreAddition;
 const levelConfig = {
-  1: { nodes: 3, edges: 2 },
-  2: { nodes: 4, edges: 3 },
-  3: { nodes: 5, edges: 4 },
+  1: { nodes: 5, edges: 7 },
+  2: { nodes: 6, edges: 8 },
+  3: { nodes: 7, edges: 9 },
 };
 
 const usedColors = new Set();

@@ -665,7 +665,7 @@ button:active {
   width: 100%;
 }
 
-.slide object {
+.slide img {
   width: 90%; /* Increase size by 25% */
   height: auto; /* Maintain aspect ratio */
   border-radius: 4%;
