@@ -206,6 +206,7 @@ settingsTogglerEle.addEventListener("click", () => {
 });
 
 gameInstructionSettingsButton.addEventListener("click", () => {
+  closeModal(settingsModal);
   openModal(gameInstructionModal);
 });
 

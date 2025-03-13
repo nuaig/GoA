@@ -18,9 +18,6 @@ body {
   /* display: none; */
 }
 
-.prim-pseudo {
-}
-
 .tutorial-instructions-modal {
   font-style: monospace;
   position: absolute;
@@ -202,7 +199,7 @@ body {
   color: #a5d8ff;
   top: 2vh;
   left: 1vw;
-  width: 20%;
+  /* width: 20%; */
   text-align: center;
   pointer-events: none;
   background-color: #343a40;
@@ -257,7 +254,7 @@ body {
 
 /* Header without health-specific styling */
 #header-without-health {
-  width: 10%;
+  /* width: 10%; */
   padding: 15px;
   text-align: center;
   pointer-events: none;
@@ -297,7 +294,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   max-width: 80rem;
-  min-width: 40rem;
+  min-width: 40vw;
   background-color: #343a40;
   padding: 2.5rem 3rem;
   box-shadow: 0 4rem 6rem rgba(0, 0, 0, 0.3);
@@ -417,6 +414,11 @@ body {
   transform: translate(0, 0); /* Ensure proper alignment */
 }
 
+.modal__level__selection {
+  max-width: 80vw;
+  width: 35rem;
+}
+
 /* Parent container styles */
 .mode-selection {
   display: flex;
@@ -528,11 +530,14 @@ body {
 }
 
 .instruction {
-  padding: 1rem;
+  max-width: 90vw;
+  width: 65rem;
 }
 
 .instruction__img {
-  width: 1050px;
+  width: 65rem;
+  max-width: 100%; /* Prevent overflow */
+  height: auto; /* Maintain aspect ratio */
 }
 
 .btn--close-modal {
@@ -641,6 +646,8 @@ button:active {
 /* Algorithm Instruction Modal */
 
 .algo-instruction-modal {
+  max-width: 90vw;
+  width: 65rem;
   padding: 1.25rem 1.5rem;
 }
 .algo-instruction {

@@ -33,7 +33,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   max-width: 100rem;
-  min-width: 50rem;
+  min-width: 30vw;
   background-color: #343a40;
   padding: 2.5rem 3rem;
   box-shadow: 0 4rem 6rem rgba(0, 0, 0, 0.3);
@@ -82,10 +82,25 @@ body {
   color: #a5d8ff;
   padding: 1rem;
 }
+.modal__control {
+  max-width: 50vw;
+  width: 35rem;
+}
+.game-instruction-modal {
+  max-width: 90vw;
+  width: 65rem;
+}
 
 .instruction__img {
   width: 65rem;
+  max-width: 100%; /* Prevent overflow */
   height: auto; /* Maintain aspect ratio */
+}
+
+.modal__leaderboard,
+.modal__settings {
+  max-width: 80vw;
+  width: 35rem;
 }
 
 /* Leaderboard Modal */

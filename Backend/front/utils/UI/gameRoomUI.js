@@ -622,6 +622,7 @@ class GameRoomUI {
     const gameFeatureBtn = document.querySelector(".sub-menu-game-features");
     gameFeatureBtn.addEventListener("click", () => {
       this.openModal(this.instructionModal);
+      this.levelModalOpen = false;
       document.querySelector(".btn__instruction__start").textContent =
         "Close Instruction";
       let subMenu = document.getElementById("subMenu");
