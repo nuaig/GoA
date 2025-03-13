@@ -36,7 +36,12 @@ class GameRoomUI {
     this.choosingModeNotCurrent = "training";
     this.totalstars = 0;
     this.isTutorial = false;
-    this.tutorialStep = 0;
+    this.currentTutorialStep = 0;
+
+    this.localStorageKey = `hasGameFeatureInstructionModalShownBefore_${this.gameName}`;
+
+    this.hasGameFeatureInstructionModalShownBefore =
+      localStorage.getItem(this.localStorageKey) === "true";
     this.callbacks = callbacks;
     this.camera = camera;
     this.swiper = new Swiper(".mySwiper", {
@@ -138,6 +143,9 @@ class GameRoomUI {
     this.settingsTogglerEle = document.querySelector(".settings__icon");
     this.btnSettingsRestart = document.querySelector(".btn__setting__restart");
     this.btnSettingsDiffLvl = document.querySelector(".btn__setting__diffLvl");
+    this.btnSettingsTutorial = document.querySelector(
+      ".btn__setting__tutorial"
+    );
     this.btnSettingsGoMainDungeon = document.querySelectorAll(
       ".btn__setting__mainDungeon"
     );
@@ -480,14 +488,22 @@ class GameRoomUI {
 
   listenEventTutorialModalSkipTutorial() {
     this.tutorialModalNoOrContinueButton.addEventListener("click", () => {
-      this.closeModal(this.tutorialModal);
-      this.openModal(this.levelsModal);
-      this.openModal(this.instructionModal);
+      if (
+        this.tutorialModalNoOrContinueButton.innerHTML === "No" ||
+        this.tutorialModalNoOrContinueButton.innerHTML === "Continue"
+      ) {
+        this.closeModal(this.tutorialModal);
+        this.openModal(this.levelsModal);
+        this.showGameFeatureInstructionModalIfNeeded();
+      } else {
+        this.closeModal(this.tutorialModal);
+      }
     });
   }
 
   listenEventTutorialModalStartTutorial() {
     this.tutorialModalYesButton.addEventListener("click", () => {
+      this.currentTutorialStep = 0;
       this.closeModal(this.tutorialModal);
       this.tutorialInstructionModal.classList.remove("hidden");
       this.isTutorial = true;
@@ -495,22 +511,38 @@ class GameRoomUI {
       if (this.gameName == "Kruskal" || this.gameName == "Prim") {
         this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
       }
+      if (this.gameName == "Heapsort") {
+        this.initialCameraAnimationGSAP_HS();
+      }
     });
+  }
+
+  revertTutorialCompleteModalToBeTutorialModal() {
+    this.tutorialModalHeaderText.innerHTML =
+      `Welcome to ${this.gameName}'s Room`.toUpperCase();
+    this.tutorialModalBodyText.innerHTML = `Would you like to learn ${this.gameName} Algorithm through an interactive walk-through tutorial?`;
+    this.tutorialModalNoOrContinueButton.innerHTML =
+      "No and Resume Current Level";
+    this.tutorialModalYesButton.style.display = "block";
   }
 
   updateTutorialModalToBeTutorialCompleteModal() {
     this.tutorialModalHeaderText.innerHTML = "Well done!";
+    console.log(this.gameName);
     let message;
     if (this.gameName == "Prim") {
       message =
-        " Keep in mind to always select the edge with the minimum weight connected to the tree that won't form a cycle.";
-    } else {
+        "<br>Keep in mind to always select the edge with the minimum weight connected to the tree that won't form a cycle.";
+    } else if (this.gameName == "Kruskal") {
       message =
-        " Keep in mind to always select the edge with the minimum weight that won't form a cycle.";
+        "<br>Keep in mind to always select the edge with the minimum weight that won't form a cycle.";
+    } else if (this.gameName == "Heapsort") {
+      message =
+        "<br>Keep in mind to always maintain the Max-Heap property: The largest element must be at the root. Swap it with the last element, remove it, and reheapify until the array is sorted.";
     }
 
     this.tutorialModalBodyText.innerHTML =
-      `Great work! You now have a solid understanding of how ${this.gameName}’s Algorithm builds a Minimum Spanning Tree. You're ready to take on more challenges!` +
+      `Great work! You now have a solid understanding of how ${this.gameName}’s Algorithm works. You're ready to take on more challenges!` +
       message;
     this.tutorialModalNoOrContinueButton.innerHTML = "Continue";
     this.tutorialModalYesButton.style.display = "none";
@@ -531,6 +563,18 @@ class GameRoomUI {
     this.listenEventAlgorithmInstrModal();
   }
 
+  showGameFeatureInstructionModalIfNeeded() {
+    if (!this.hasGameFeatureInstructionModalShownBefore) {
+      console.log(
+        `Showing game feature instruction modal for ${this.gameName} for the first time...`
+      );
+      this.openModal(this.instructionModal);
+
+      // ✅ Store in LocalStorage to ensure this modal does not show again for this game
+      localStorage.setItem(this.localStorageKey, "true");
+    }
+  }
+
   /**
    * Handles the event when the "Start Instruction" button is clicked.
    * - Disables mouse event listeners to prevent unintended interactions.
@@ -549,6 +593,8 @@ class GameRoomUI {
       }
       this.instructionModal.classList.add("hidden");
       this.levelModalOpen = false;
+      // ✅ Store the flag so the modal doesn’t show again for this specific game
+      localStorage.setItem(this.localStorageKey, "true");
     });
   }
 
@@ -661,13 +707,20 @@ class GameRoomUI {
     this.listenEventSettingsModalClose();
     this.listenEventGoToMainDungeon();
     this.listenEventSettingsModalRestartLevel();
+    this.listenEventSettingsModalTutorial();
   }
+
   /**
    * Adds an event listener for opening the settings modal.
    * - When the settings toggle button is clicked, the settings modal is opened.
    */
   listenEventSettingsModalOpen() {
     this.settingsTogglerEle.addEventListener("click", () => {
+      if (this.isTutorial) {
+        this.btnSettingsRestart.style.display = "none";
+      } else {
+        this.btnSettingsRestart.style.display = "block";
+      }
       this.openModal(this.settingsModal);
     });
   }
@@ -687,6 +740,14 @@ class GameRoomUI {
     this.btnSettingsRestart.addEventListener("click", () => {
       this.closeModal(this.settingsModal);
       this.callbacks.resetLevel(this.currentLevel);
+    });
+  }
+
+  listenEventSettingsModalTutorial() {
+    this.btnSettingsTutorial.addEventListener("click", () => {
+      this.closeModal(this.settingsModal);
+      this.revertTutorialCompleteModalToBeTutorialModal();
+      this.openModal(this.tutorialModal);
     });
   }
 
@@ -778,7 +839,10 @@ class GameRoomUI {
 
         const chosenLevel = index + 1; // Levels are 1-based
         console.log(`Level ${chosenLevel} selected.`);
-
+        if (this.isTutorial) {
+          this.isTutorial = false;
+          this.closeModal(this.tutorialInstructionModal);
+        }
         // Check if the selected level or mode has changed, or if health is depleted
         if (
           chosenLevel !== this.currentLevel ||

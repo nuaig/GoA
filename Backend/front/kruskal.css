@@ -6,16 +6,19 @@ body {
 .topnav-instructions {
   position: absolute;
   top: calc(2vh + 75px);
-  left: 85%;
+  left: 83%;
   transform: translate(-50%, 0%);
   background-color: rgb(72, 121, 212);
-  width: 25%;
+  width: 28%;
   height: 27%;
   border: solid #eaebf1 2px;
   padding: 15px;
   box-shadow: 0.5rem 0.5rem 0;
   overflow: hidden;
   /* display: none; */
+}
+
+.prim-pseudo {
 }
 
 .tutorial-instructions-modal {
@@ -49,8 +52,9 @@ body {
   text-decoration: underline;
 }
 
-.topnav-instructions.heapify-instruction {
-  height: 38%;
+.heapsort-algo-instructions {
+  height: 40%;
+  width: 30%;
 }
 
 .code-container {
@@ -738,4 +742,18 @@ button:active {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
   z-index: 999; /* Ensure it is above everything else */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1400px) {
+  .topnav-instructions.heapsort-algo-instructions {
+    height: 44%;
+    width: 30%;
+  }
+  .topnav-instructions {
+    left: 80%;
+    width: 30%;
+    min-height: 30%;
+    max-height: 44%;
+  }
 }

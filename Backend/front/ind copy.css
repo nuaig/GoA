@@ -1,0 +1,142 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Rubik", sans-serif;
+}
+.container,
+.edu-container {
+  width: 1200px;
+  margin: 0 auto;
+  /* background-color: red; */
+}
+header {
+  /* background-color: orangered; */
+  height: 100vh; /*100% of the viewport*/
+  position: relative;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    url(/src/pexels-ahmedadly-1270163.jpg);
+  background-size: cover;
+  color: #fff;
+}
+
+/*------Navigation Bar-------*/
+
+nav {
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  /* background-image: linear-gradient(red, blue); */
+  /* background-color: green; */
+  padding-top: 32px;
+}
+
+.navi-links {
+  display: flex;
+  gap: 32px;
+}
+
+.navi-link:link,
+.navi-link:visited {
+  text-decoration: none;
+  color: #fff;
+}
+
+.navi-link:hover,
+.navi-link:active {
+  color: #e9ecef;
+}
+
+.header-container {
+  width: 1200px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  /* background-color: violet; */
+}
+
+.header-container-inner {
+  width: 50%;
+  /* background-color: red; */
+}
+
+h1 {
+  font-size: 52px;
+  margin-bottom: 32px;
+  line-height: 1.05;
+}
+
+p {
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+.header-container-inner p {
+  font-size: 20px;
+  line-height: 1.6;
+  margin-bottom: 48px;
+}
+
+.navi-button {
+  font-size: 20px;
+  font-weight: 600;
+  background-color: transparent;
+  /* background-color: #f08c00; */
+  color: #fff;
+  text-decoration: none;
+  display: inline-block;
+
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.navi-button:hover,
+.navi-button:active {
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 600;
+  background-color: transparent;
+  border: none;
+  color: #e9ecef;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.hero-btn {
+  font-size: 20px;
+  font-weight: 600;
+  background-color: #1c7ed6;
+  /* background-color: #f08c00; */
+  color: #fff;
+  text-decoration: none;
+  display: inline-block;
+  padding: 16px 32px;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+}
+
+.hero-btn:hover,
+.hero-btn:active {
+  font-size: 20px;
+  font-weight: 600;
+  background-color: #228be6;
+  border: none;
+  color: #fff;
+  text-decoration: none;
+  display: inline-block;
+  padding: 16px 32px;
+  border-radius: 9px;
+}
+
+/*Education Section!*/

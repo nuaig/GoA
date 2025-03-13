@@ -58,6 +58,11 @@ const levelConfig = {
   2: { nodes: 6, edges: 9 },
   3: { nodes: 7, edges: 10 },
 };
+// const levelConfig = {
+//   1: { nodes: 3, edges: 2 },
+//   2: { nodes: 3, edges: 2 },
+//   3: { nodes: 3, edges: 2 },
+// };
 
 const usedColors = new Set();
 const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
@@ -175,40 +180,20 @@ const tutorialSteps = [
   },
 ];
 
-let currentTutorialStep = 0;
-
 function updateTutorialStep() {
   document.querySelector(".tuto-instruction-text").innerHTML =
-    tutorialSteps[currentTutorialStep].instruction;
+    tutorialSteps[curRoomUI.currentTutorialStep].instruction;
   document.querySelector(".tuto-explanation-text").innerHTML =
-    tutorialSteps[currentTutorialStep].explanation;
+    tutorialSteps[curRoomUI.currentTutorialStep].explanation;
 }
 
 // Call this function whenever the user makes a correct selection
 function nextTutorialStep() {
-  if (currentTutorialStep < tutorialSteps.length - 1) {
-    currentTutorialStep++;
+  if (curRoomUI.currentTutorialStep < tutorialSteps.length - 1) {
+    curRoomUI.currentTutorialStep++;
     updateTutorialStep();
   }
 }
-
-// document.addEventListener("DOMContentLoaded", () => {
-//   const swiper = new Swiper(".mySwiper", {
-//     modules: [Navigation, Pagination], // ✅ Ensure modules are included
-//     slidesPerView: 1,
-//     grabCursor: true,
-//     loop: true,
-//     pagination: {
-//       el: ".swiper-pagination",
-//       clickable: true,
-//     },
-//     navigation: {
-//       nextEl: ".swiper-button-next",
-//       prevEl: ".swiper-button-prev",
-//     },
-//   });
-//   console.log("Swiper initialized:", swiper);
-// });
 
 // Add an event listener to initialize the game after login
 document.addEventListener("DOMContentLoaded", async function () {
@@ -690,6 +675,8 @@ function handleEdgeSelection(
   }
 }
 
+let raycaster;
+
 function drawLines() {
   console.log("Drawing lines between chests.");
   console.log("Graph edges:", graph.edges);
@@ -709,7 +696,12 @@ function drawLines() {
     edgeLabelList.push(line.userData.label);
   });
 
-  const raycaster = new THREE.Raycaster();
+  curRoomUI.disableMouseEventListeners_K_P();
+  curRoomUI.callbacks.onMouseMove = null;
+  curRoomUI.callbacks.onClick = null;
+
+  raycaster = new THREE.Raycaster();
+
   raycaster.params.Line.threshold = 0.5;
   const mouse = new THREE.Vector2();
   let selectedLine = null;
@@ -798,7 +790,7 @@ function drawLines() {
       }
 
       if (curRoomUI.isTutorial) {
-        const currentStep = tutorialSteps[currentTutorialStep];
+        const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
         console.log(currentStep);
 
         if (currentStep.expectedEdge === null) {
@@ -1073,6 +1065,8 @@ curRoomUI.callbacks.resetLevel = function (curlvl) {
 };
 
 curRoomUI.callbacks.startTutorial = function () {
+  curRoomUI.currentTutorialStep = 0;
+  updateTutorialStep();
   curRoomUI.uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
   resetScene();
   updateNodeLabel(levelTitle, `Tutorial`, 0.9, 0.3, 0x212529);

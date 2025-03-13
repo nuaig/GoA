@@ -8,6 +8,20 @@ import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import { gsap } from "gsap";
 
+function hideLoadingScreen() {
+  const loadingScreen = document.getElementById("loading-screen");
+  loadingScreen.style.opacity = 1;
+
+  const fadeEffect = setInterval(() => {
+    if (loadingScreen.style.opacity > 0) {
+      loadingScreen.style.opacity -= 0.1;
+    } else {
+      clearInterval(fadeEffect);
+      loadingScreen.style.display = "none";
+    }
+  }, 50); // 50ms for smooth fade
+}
+
 document.addEventListener("DOMContentLoaded", async function () {
   try {
     // Make a request to check if the user is logged in
@@ -220,7 +234,10 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const player = new Player(scene, world);
-const mainDungeonURL = new URL("./src/main_dungeon_v4.glb", import.meta.url);
+const mainDungeonURL = new URL(
+  "./src/main_dungeon_v4_compressed.glb",
+  import.meta.url
+);
 let gameCompleted = false;
 
 let treasure_wall_gate_left = [];
@@ -335,12 +352,18 @@ function checkAllGlowEffects() {
 
 async function createMainDungeon() {
   const position = new THREE.Vector3(0, 0, 0);
+
+  // Show loading screen
+  document.getElementById("loading-screen").style.display = "flex";
+
   try {
     const { model } = await loadModel(mainDungeonURL.href, position, scene);
+
     console.log(gameStatusService.getLocalGameStatus());
 
-    // Check if level 3 is completed for each algorithm
-    // Check if level 3 is completed for each algorithm
+    // Hide loading screen smoothly after model is loaded
+    hideLoadingScreen();
+
     const kruskalStatus =
       gameStatusService.getLocalGameStatus()?.games?.Kruskal?.regular?.[2]
         ?.status;
@@ -354,26 +377,16 @@ async function createMainDungeon() {
     const primCompleted = primStatus.includes("completed");
     const heapsortCompleted = heapsortStatus.includes("completed");
 
-    // Set gameCompleted to true only if all statuses are completed
     gameCompleted = kruskalCompleted && primCompleted && heapsortCompleted;
 
     model.traverse((child) => {
       if (child.isMesh) {
-        // Assign the treasure wall gate if it's found
         if (child.name.includes("wall_doorway_door_treasure_left_ready")) {
-          treasure_wall_gate_left.push(child); // Assign the gate to the variable
+          treasure_wall_gate_left.push(child);
         }
         if (child.name.includes("wall_doorway_door_treasure_right_ready")) {
-          treasure_wall_gate_right.push(child); // Assign the gate to the variable
+          treasure_wall_gate_right.push(child);
         }
-        // if (kruskalCompleted) {
-        //   if (child.name === "treasure_wall_gate") {
-        //     console.log(
-        //       `Skipping physics for ${child.name} due to Kruskal level 3 completion`
-        //     );
-        //     return; // Skip adding physics for this object
-        //   }
-        // }
 
         if (child.name.includes("wall") || child.name.includes("pillar")) {
           addPhysicsToMesh(child, world, { mass: 0 });
@@ -387,19 +400,12 @@ async function createMainDungeon() {
         if (child.name.includes("status_symbol") && child.material) {
           if (child.material.name === "kruskal_symbol") {
             symbol_dict["kruskal"] = child.material;
-            applyGlowEffect(symbol_dict["kruskal"], kruskalStatus, "Kruskal"); // TO DO
-            // applyGlowEffect(
-            //   symbol_dict["kruskal"],
-            //   "completed_first_time",
-            //   "Kruskal"
-            // ); // TO DO
+            applyGlowEffect(symbol_dict["kruskal"], kruskalStatus, "Kruskal");
           }
-
           if (child.material.name === "prim_symbol") {
             symbol_dict["prim"] = child.material;
             applyGlowEffect(symbol_dict["prim"], primStatus, "Prim");
           }
-
           if (child.material.name === "heapsort_symbol") {
             symbol_dict["heapsort"] = child.material;
             applyGlowEffect(
@@ -412,9 +418,11 @@ async function createMainDungeon() {
       }
     });
 
+    console.log("World doors:", world.doors);
     console.log(symbol_dict);
   } catch (error) {
     console.log("Error loading dungeon", error);
+    hideLoadingScreen(); // Hide loading screen even if there’s an error
   }
 }
 
@@ -721,16 +729,46 @@ function updatePlayerMarker() {
   playerMarker.position.y = player.camera.position.y + 0.04;
 }
 
+// function animate() {
+//   requestAnimationFrame(animate);
+
+//   const currentTime = performance.now();
+//   const dt = (currentTime - previousTime) / 1000;
+
+//   player.update(dt);
+//   player.updateRaycaster(world);
+//   world.step(1 / 60, dt); // Update physics world
+
+//   // Update player marker and mini-map camera position based on player position
+//   updatePlayerMarker();
+//   // updateMiniMap();
+
+//   renderer.render(scene, player.camera);
+//   previousTime = currentTime;
+
+//   miniMapRenderer.render(scene, miniMapCamera); // Mini-map rendering
+// }
+const FIXED_TIME_STEP = 1 / 60; // 60 updates per second
+let accumulatedTime = 0;
+
 function animate() {
   requestAnimationFrame(animate);
 
   const currentTime = performance.now();
-  const dt = (currentTime - previousTime) / 1000;
+  let dt = (currentTime - previousTime) / 1000; // Convert ms to seconds
+  previousTime = currentTime;
 
-  player.update(dt);
+  // Cap dt to prevent large jumps in physics (e.g., if game lags)
+  dt = Math.min(dt, 0.1); // Max 100ms per frame
+
+  // Accumulate time and perform fixed steps
+  accumulatedTime += dt;
+  while (accumulatedTime >= FIXED_TIME_STEP) {
+    world.step(FIXED_TIME_STEP); // Always use fixed step
+    player.update(FIXED_TIME_STEP); // Update player at fixed step
+    accumulatedTime -= FIXED_TIME_STEP;
+  }
   player.updateRaycaster(world);
-  world.step(1 / 60, dt); // Update physics world
-
   // Update player marker and mini-map camera position based on player position
   updatePlayerMarker();
   // updateMiniMap();
@@ -740,5 +778,4 @@ function animate() {
 
   miniMapRenderer.render(scene, miniMapCamera); // Mini-map rendering
 }
-
 animate();

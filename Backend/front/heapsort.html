@@ -659,7 +659,7 @@
         </div>
       </div>
     </div>
-    <div class="topnav-instructions pseudo hidden">
+    <div class="topnav-instructions heapsort-algo-instructions pseudo hidden">
       <pre class="code-block">
 HeapSort(Array as <span class="keyword">Arr</span>):
 1. Do <span class="function">BuildMaxHeap</span> 
@@ -677,6 +677,18 @@ Heapify():
 2.   Ensure <span class="keyword">root</span>  larger than its children
 3.   <span class="function">Swap</span> with the largest child if necessary
 4.   Recursively <span class="function">Heapify</span> the affected subtree
+      </pre>
+    </div>
+
+    <div class="tutorial-instructions-modal hidden">
+      <h3>Tutorial Walk-through</h3>
+      <pre class="code-block">
+<strong>Instruction:</strong>  
+<span class="tuto-instruction-text">Select any edge to begin the tutorial after reading the explanation below.</span>
+
+<strong>Explanation:</strong>
+<span class="tuto-explanation-text">The treasure chests represent nodes and the lines between the treasure chests represent edges. Your goal here is to connect open all the chests, In other words, find a minimum spanning tree ("MST") for this graph. To get a MST, you have to find a subset of the edges connecting all nodes without forming cycles. The total weight must be minimum.  
+</span>
       </pre>
     </div>
 
@@ -752,19 +764,38 @@ Heapify():
       </div>
     </div>
 
+    <div class="modal modal__tutorial hidden">
+      <h2 class="modal__header tutorial__header">
+        Welcome to Heapsort's Room!
+      </h2>
+      <p class="label__tutorial_text">
+        Would you like to learn Heapsort Algorithm through an interactive
+        walk-through tutorial?
+      </p>
+
+      <div class="button__holder">
+        <button class="btn btn__tutorial__yes">Yes</button>
+        <button class="btn btn__tutorial__no_or_continue">No</button>
+      </div>
+    </div>
+
     <div class="modal modal__settings hidden">
       <h2 class="modal__header settings__header">Settings</h2>
       <div class="button__holder">
-        <button class="btn btn__setting__restart">Restart this level</button>
+        <button class="btn btn__setting__restart">Restart This Level</button>
       </div>
       <div class="button__holder">
         <button class="btn btn__setting__diffLvl">
-          Choose different level
+          Choose Different Level
         </button>
       </div>
       <div class="button__holder">
+        <button class="btn btn__setting__tutorial">Tutorial</button>
+      </div>
+
+      <div class="button__holder">
         <button class="btn btn__setting__mainDungeon">
-          Go back to main dungeon
+          Go Back to Main Dungeon
         </button>
       </div>
       <svg
@@ -780,7 +811,7 @@ Heapify():
         />
       </svg>
     </div>
-    <div class="modal modal__level__selection">
+    <div class="modal modal__level__selection hidden">
       <h2 class="modal__header level__selection__header">
         Heapsort Room Levels
       </h2>
@@ -1113,7 +1144,7 @@ Heapify():
         <button class="btn btn__change__level">Change Level</button>
       </div>
     </div>
-    <div class="modal instruction">
+    <div class="modal instruction hidden">
       <img
         class="instruction__img"
         src="src/GameFeatures/heapsort-game-features.svg"
@@ -1179,6 +1210,6 @@ Heapify():
         <button class="btn btn-algo-instruction-close">Close</button>
       </div>
     </div>
-    <div class="overlay"></div>
+    <div class="overlay hidden"></div>
   </body>
 </html>
