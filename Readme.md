@@ -109,10 +109,4 @@ Then navigate to `http://localhost:3000` in your browser.
 
 ## License
 
-MIT © Hla Htoo
-
-## Connect with Me
-
-- [🌐 Portfolio](https://yourportfolio.com)
-- [🔗 LinkedIn](https://www.linkedin.com/in/yourprofile)
-- [🐙 GitHub](https://github.com/yourusername)
+MIT 
