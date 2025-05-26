@@ -7,13 +7,13 @@ export const getAllVizDataCon = async (req, res) => {
       completionData,
       avgMistakesData,
       completionTimeData,
-      scoreDistributionData,
+      scoreAnalysisData,
       avgMistakeReduction,
     ] = await Promise.all([
       myDB.getCompletionData(),
       myDB.getAverageMistakesData(),
       myDB.getCompletionTimeData(),
-      myDB.getScoreDistributionData(),
+      myDB.getScoreAnalysisData(),
       myDB.getAverageMistakeReduction(),
     ]);
 
@@ -22,10 +22,10 @@ export const getAllVizDataCon = async (req, res) => {
       completionData,
       avgMistakesData,
       completionTimeData,
-      scoreDistributionData,
+      scoreAnalysisData,
       avgMistakeReduction,
     };
-
+    console.log(combinedData.scoerAnalysisData);
     res.status(200).json({ ok: true, data: combinedData });
   } catch (e) {
     console.error("Error from getAllVizDataCon:", e.message);

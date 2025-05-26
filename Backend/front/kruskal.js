@@ -58,7 +58,7 @@ const levelConfig = {
   2: { nodes: 6, edges: 9 },
   3: { nodes: 7, edges: 10 },
 };
-// const levelConfig = {
+// const levelConfig = {`
 //   1: { nodes: 3, edges: 2 },
 //   2: { nodes: 3, edges: 2 },
 //   3: { nodes: 3, edges: 2 },

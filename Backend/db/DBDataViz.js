@@ -575,6 +575,97 @@ function MyMongoDB() {
     }
   };
 
+  myDB.getScoreAnalysisData = async () => {
+    const { client, db } = await connect();
+    const collection = db.collection("game_sessions");
+
+    try {
+      const pipeline = [
+        {
+          $match: {
+            user_id: { $nin: ["1", "2", "3", "4", "5"] },
+          },
+        },
+        {
+          $unwind: "$game_sessions",
+        },
+        {
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: ["$game_sessions", { user_id: "$user_id" }],
+            },
+          },
+        },
+        {
+          $match: {
+            mode: "regular", // ✅ Filter only regular mode after replaceRoot
+          },
+        },
+        {
+          $group: {
+            _id: {
+              user_id: "$user_id",
+              game_name: "$game_name",
+              level: "$level",
+            },
+            best_score: { $max: "$final_score" },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              game_name: "$_id.game_name",
+              level: "$_id.level",
+            },
+            scores: { $push: "$best_score" },
+            min_score: { $min: "$best_score" },
+            max_score: { $max: "$best_score" },
+            avg_score: { $avg: "$best_score" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            game_name: "$_id.game_name",
+            level: "$_id.level",
+            scores: 1,
+            worst: "$min_score",
+            best: "$max_score",
+            mean: { $round: ["$avg_score", 0] },
+          },
+        },
+      ];
+
+      const rawStats = await collection.aggregate(pipeline).toArray();
+
+      // Now calculate median in JS
+      const result = {};
+      for (const row of rawStats) {
+        const { game_name, level, scores, ...rest } = row;
+        if (!result[game_name]) result[game_name] = {};
+
+        const sorted = scores.sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        const median =
+          sorted.length % 2 === 0
+            ? (sorted[mid - 1] + sorted[mid]) / 2
+            : sorted[mid];
+
+        result[game_name][level] = {
+          ...rest,
+          median: Number(median.toFixed(2)),
+        };
+      }
+
+      console.log(result);
+      return result;
+    } catch (e) {
+      console.error("Aggregation Error:", e);
+    } finally {
+      await client.close();
+    }
+  };
+
   myDB.getMistakeReductionDataForSingleUserUtil = async (
     userId,
     db,
@@ -1204,6 +1295,7 @@ async function testCompletionData() {
     // );
     // myDBInstance.resetGameSessions("6775c78ec0bdc69e7c4b8eea");
     // console.log(data);
+    const data = await myDBInstance.getScoreAnalysisData();
   } catch (error) {
     console.error("Failed to fetch or process data:", error);
   }

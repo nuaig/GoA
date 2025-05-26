@@ -56,7 +56,7 @@ usersLink.addEventListener("click", (e) => {
 // Global variables to store fetched data
 let completionData = {};
 let avgMistakesData = {};
-let scoreDistributionData = {};
+let scoreAnalysisData = {};
 let completionTimeData = {};
 let avgMistakeReduction = {};
 
@@ -73,11 +73,11 @@ async function fetchGameData() {
       ({
         completionData,
         avgMistakesData,
-        scoreDistributionData,
+        scoreAnalysisData,
         completionTimeData,
         avgMistakeReduction,
       } = gameData);
-
+      console.log("scoreDistributionData", scoreAnalysisData);
       console.log("Data Loaded Successfully!");
 
       // **Initialize all charts after data is fetched**
@@ -108,7 +108,7 @@ function renderCharts() {
 
   renderCompletionChart();
   renderAverageMistakesChart(selectedGame);
-  renderScoreDistributionChart(selectedGame, selectedLevel);
+  renderOverallScoreChart(selectedGame);
   renderCompletionTimeChart(selectedGame);
   renderMistakeReductionChart(selectedGame);
 }
@@ -176,36 +176,126 @@ function renderAverageMistakesChart(game) {
     averageMistakesChart.render();
   }
 }
+let example_score = {
+  all: {
+    1: [6, 9, 69, 0, 0],
+    2: [7, 3, 16, 39, 0],
+    3: [3, 3, 2, 25, 38],
+    allLevels: [16, 15, 87, 64, 38],
+  },
+  heapsort: {
+    1: [1, 2, 12, 0, 0],
+    2: [6, 0, 5, 4, 0],
+    3: [0, 0, 0, 4, 2],
+    allLevels: [7, 2, 17, 8, 2],
+  },
+  kruskal: {
+    1: [5, 6, 37, 0, 0],
+    2: [1, 1, 8, 22, 0],
+    3: [1, 3, 1, 17, 26],
+    allLevels: [7, 10, 46, 39, 26],
+  },
+  prim: {
+    1: [0, 1, 20, 0, 0],
+    2: [0, 2, 3, 13, 0],
+    3: [2, 0, 1, 4, 10],
+    allLevels: [2, 3, 24, 17, 10],
+  },
+};
+let scoreAnalysisChart = null;
+function renderOverallScoreChart(selectedGame) {
+  selectedGame = selectedGame.charAt(0).toUpperCase() + selectedGame.slice(1);
+  if (
+    !scoreAnalysisData[selectedGame] ||
+    Object.keys(scoreAnalysisData[selectedGame]).length === 0
+  ) {
+    console.warn(`⚠️ No Score Data Available for ${selectedGame}`);
+    scoreAnalysisData[selectedGame] = {
+      1: { worst: 0, best: 0, mean: 0, median: 0 },
+      2: { worst: 0, best: 0, mean: 0, median: 0 },
+      3: { worst: 0, best: 0, mean: 0, median: 0 },
+    };
+  }
 
-// **Score Distribution Chart**
-let scoreDistributionChart = null;
-function renderScoreDistributionChart(game, level) {
-  const scores = scoreDistributionData[game]?.[level] || [0, 0, 0, 0, 0];
+  const levels = ["1", "2", "3"];
+  const gameData = scoreAnalysisData[selectedGame];
+
+  const worst = levels.map((lvl) => gameData[lvl]?.worst ?? 0);
+  const best = levels.map((lvl) => gameData[lvl]?.best ?? 0);
+  const mean = levels.map((lvl) => gameData[lvl]?.mean ?? 0);
+  const median = levels.map((lvl) => gameData[lvl]?.median ?? 0);
 
   const chartOptions = {
-    series: [{ name: "Score Buckets", data: scores }],
-    chart: { type: "bar", height: 380 },
+    chart: { type: "bar", height: 400 },
+    series: [
+      { name: "Worst", data: worst },
+      { name: "Best", data: best },
+      { name: "Mean", data: mean },
+      { name: "Median", data: median },
+    ],
     xaxis: {
-      categories: ["0-20", "21-40", "41-60", "61-80", "81-100"],
+      categories: ["Level 1", "Level 2", "Level 3"],
+      title: { text: "Levels" },
+    },
+    yaxis: {
+      title: { text: "Scores" },
+      min: 0,
+      max: 100,
+    },
+    colors: ["#8e44ad", "#0c8599", "#d35400", "#868e96"],
+    dataLabels: {
+      enabled: true,
+      // style: {
+      //   colors: ["#000"], // This sets the label text color to black
+      // },
+    },
+    plotOptions: {
+      bar: { columnWidth: "50%", grouped: true },
     },
     title: {
-      text: `Score Distribution: ${capitalize(game)} - ${
-        level === "allLevels" ? "All Levels" : `Level ${level}`
-      }`,
+      text: `${selectedGame} Score Summary Across All Users`,
       align: "center",
     },
   };
-
-  if (scoreDistributionChart) {
-    scoreDistributionChart.updateOptions(chartOptions);
+  if (scoreAnalysisChart) {
+    scoreAnalysisChart.updateOptions(chartOptions);
   } else {
-    scoreDistributionChart = new ApexCharts(
+    scoreAnalysisChart = new ApexCharts(
       document.querySelector("#score-distribution-chart"),
       chartOptions
     );
-    scoreDistributionChart.render();
+    scoreAnalysisChart.render();
   }
 }
+// **Score Distribution Chart**
+// let scoreDistributionChart = null;
+// function renderS(game, level) {
+//   const scores = scoreAnalysisData[game]?.[level] || [0, 0, 0, 0, 0];
+
+//   const chartOptions = {
+//     series: [{ name: "Score Buckets", data: scores }],
+//     chart: { type: "bar", height: 380 },
+//     xaxis: {
+//       categories: ["0-20", "21-40", "41-60", "61-80", "81-100"],
+//     },
+//     title: {
+//       text: `Score Distribution: ${capitalize(game)} - ${
+//         level === "allLevels" ? "All Levels" : `Level ${level}`
+//       }`,
+//       align: "center",
+//     },
+//   };
+
+//   if (scoreDistributionChart) {
+//     scoreDistributionChart.updateOptions(chartOptions);
+//   } else {
+//     scoreDistributionChart = new ApexCharts(
+//       document.querySelector("#score-distribution-chart"),
+//       chartOptions
+//     );
+//     scoreDistributionChart.render();
+//   }
+// }
 
 // **Completion Time Chart**
 let completionTimeChart = null;
@@ -283,7 +373,7 @@ document.getElementById("chart-filter").addEventListener("change", (event) => {
   selectedLevel = "allLevels";
 
   renderCompletionChart();
-  renderScoreDistributionChart(selectedGame, selectedLevel);
+  renderOverallScoreChart(selectedGame);
   renderAverageMistakesChart(selectedGame);
   renderCompletionTimeChart(selectedGame);
   renderMistakeReductionChart(selectedGame);
@@ -558,7 +648,12 @@ function renderIndiUserScoreChart(scoreData) {
       min: 0,
     },
     colors: ["#FF5733", "#33FF57", "#337BFF", "#FFD700"],
-    dataLabels: { enabled: true },
+    dataLabels: {
+      enabled: true,
+      style: {
+        colors: ["#000"], // This sets the label text color to black
+      },
+    },
     plotOptions: {
       bar: { columnWidth: "50%", grouped: true }, // Ensure proper grouping
     },
