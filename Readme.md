@@ -16,8 +16,6 @@ An immersive **3D dungeon-themed exploration game** where players solve interact
 
 ## Overview
 
-![GoA Overview](https://firebasestorage.googleapis.com/v0/b/commit-genie.firebasestorage.app/o/GoA.png?alt=media&token=77ced0e8-4bee-4303-85db-f4c53e303dc0)
-
 GoA combines educational content and interactive gameplay into a fully immersive 3D world. Players explore a dungeon, solve challenges based on algorithms like Heapsort, Kruskal, and Prim, and receive real-time feedback on their learning journey. Perfect for students and classrooms aiming to enhance their understanding of algorithms in a visual, hands-on way.
 
 ## Core Features
