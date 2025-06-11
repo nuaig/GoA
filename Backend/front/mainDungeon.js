@@ -576,7 +576,7 @@ function onMouseDown(event) {
     if (player.selectedDoor.name.includes("heapsort"))
       window.location.href = "heapsort.html";
     if (player.selectedDoor.name.includes("prim"))
-      window.location.href = "Prim.html";
+      window.location.href = "Dijkstra.html";
   }
 }
 

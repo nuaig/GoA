@@ -102,6 +102,21 @@ export function createSpecificGraphKruskalTutorial() {
   return new Graph(nodes, edges);
 }
 
+export function createSpecificGraphDijkstraTutorial() {
+  const nodes = [0, 1, 2, 3, 4];
+  const edges = [
+    [0, 1, 2],
+    [0, 2, 1],
+    [1, 2, 3],
+    [1, 3, 4],
+    [2, 3, 2],
+    [2, 4, 6], // tempting but long
+    [3, 4, 1], // correct final step
+  ];
+
+  return new Graph(nodes, edges);
+}
+
 export function createSpecificGraphPrimTutorial() {
   const nodes = [0, 1, 2, 3, 4]; // Nodes
   const edges = [

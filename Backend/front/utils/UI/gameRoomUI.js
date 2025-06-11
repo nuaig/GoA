@@ -508,7 +508,7 @@ class GameRoomUI {
       this.tutorialInstructionModal.classList.remove("hidden");
       this.isTutorial = true;
       this.callbacks.startTutorial();
-      if (this.gameName == "Kruskal" || this.gameName == "Prim") {
+      if (this.gameName == "Kruskal" || this.gameName == "Prim" || this.gameName == "Dijkstra") {
         this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
       }
       if (this.gameName == "Heapsort") {
@@ -536,7 +536,9 @@ class GameRoomUI {
     } else if (this.gameName == "Kruskal") {
       message =
         "<br>Keep in mind to always select the edge with the minimum weight that won't form a cycle.";
-    } else if (this.gameName == "Heapsort") {
+    } else if(this.gameName == "Dijkstra"){
+      message = "<br>Under Construction"
+    }else if (this.gameName == "Heapsort") {
       message =
         "<br>Keep in mind to always maintain the Max-Heap property: The largest element must be at the root. Swap it with the last element, remove it, and reheapify until the array is sorted.";
     }
@@ -874,7 +876,7 @@ class GameRoomUI {
           );
 
           // If the game is Kruskal or Prim, trigger the initial camera animation
-          if (this.gameName == "Kruskal" || this.gameName == "Prim") {
+          if (this.gameName == "Kruskal" || this.gameName == "Prim" || this.gameName == "Dijkstra") {
             this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
           }
           if (this.gameName == "Heapsort") {
@@ -1044,11 +1046,11 @@ class GameRoomUI {
     }, 1000);
   }
 
-  // -------For Kruskal and Prim Only------------
+  // -------For Kruskal, Prim, and Dijkstra Only------------
   // enable Mouse event listeners
   enableMouseEventListeners_K_P() {
     console.log(this.gameName);
-    if (this.gameName == "Kruskal" || this.gameName == "Prim") {
+    if (this.gameName == "Kruskal" || this.gameName == "Prim" || this.gameName == "Dijkstra") {
       if (this.callbacks?.onMouseMove) {
         console.log("mousemove added back");
         window.addEventListener("mousemove", this.callbacks.onMouseMove, false);
@@ -1062,7 +1064,7 @@ class GameRoomUI {
 
   // Disable mouse event listeners
   disableMouseEventListeners_K_P() {
-    if (this.gameName == "Kruskal" || this.gameName == "Prim") {
+    if (this.gameName == "Kruskal" || this.gameName == "Prim" || this.gameName == "Dijkstra") {
       if (this.callbacks?.onMouseMove) {
         console.log("mousemove removed");
         window.removeEventListener(
@@ -1077,7 +1079,7 @@ class GameRoomUI {
       }
     }
   }
-  // -------Done For Kruskal and Prim Only------------
+  // -------Done For Kruskal, Prim, and Dijkstra Only------------
 }
 
 export default GameRoomUI;
