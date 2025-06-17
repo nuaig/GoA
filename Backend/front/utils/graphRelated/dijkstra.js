@@ -100,7 +100,27 @@ export class DijkstraAlgorithm {
     );
 
     if (match) {
-      this.currentStepIndex++;
+      // Track selected edges for this step
+      if (!step.selectedEdges) step.selectedEdges = [];
+
+      const alreadyChosen = step.selectedEdges.some(
+        ([x, y]) => (a === x && b === y) || (a === y && b === x)
+      );
+      if (alreadyChosen) return [0, 0]; // prevent duplicates
+
+      step.selectedEdges.push([a, b]);
+
+      // Check if all expectedEdges have been chosen
+      const allSelected = step.expectedEdges.every(({ edge: [x, y] }) =>
+        step.selectedEdges.some(
+          ([a, b]) => (a === x && b === y) || (a === y && b === x)
+        )
+      );
+
+      if (allSelected) {
+        this.currentStepIndex++;
+      }
+
       return [1, match.weight];
     }
 
