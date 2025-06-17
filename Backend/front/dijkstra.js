@@ -11,7 +11,6 @@ import { DijkstraAlgorithm } from "./utils/graphRelated/dijkstra.js";
 import { GameSession } from "./utils/gameRelated/gameSession.js";
 import { loadModel } from "./utils/threeModels.js";
 import { GameStatusService } from "./utils/gameStatus/gameStatusService.js";
-import gsap from "gsap";
 import {
   decrementHealth,
   resetHealth,
@@ -31,12 +30,11 @@ import {
   createRing,
 } from "./utils/graphRelated/drawLine.js";
 import GameRoomUI from "./utils/UI/gameRoomUI.js";
-// ===== Import Section =====
 
 // ===== Variable Decleration Section =====
 const reArrangeButton = document.querySelector(".Rearrange-Action");
 let curGameSession;
-let currentLevel = 1; // TO DO
+let currentLevel = 1;
 let curNodes;
 let curEdges;
 let graph;
@@ -60,8 +58,8 @@ graph = createRandomConnectedGraph(curNodes, curEdges);
 updateEdgeTable(graph.edges);
 let componentColors = {};
 let curAlgorithmForGraph = new DijkstraAlgorithm(graph);
-let onMouseMove; // TO DO put it in the object
-let onClick; // TO DO put it in the object
+let onMouseMove;
+let onClick;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -89,11 +87,8 @@ const cubeSize = 1;
 const minDistance = cubeSize * 10;
 const gridSize = 40;
 let labels = [];
-let dungeonRoomMixer;
 let dungeonRoomAction;
 const startPosition = { x: 0, y: 5, z: 35 };
-const midPosition = { x: 0, y: 5, z: 26 };
-const endPosition = { x: 0, y: 26, z: 26 };
 camera.position.set(startPosition.x, startPosition.y, startPosition.z);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 4);
@@ -103,7 +98,6 @@ correctActionScoreAddition = Math.floor(
 );
 const fontLoader = new FontLoader();
 let font;
-let chapterTitle;
 let levelTitle;
 const labelDepth = 0.1;
 let hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
@@ -111,7 +105,7 @@ scene.add(hoverRing);
 let raycaster;
 const clock = new THREE.Clock();
 
-// Hard coded steps for the Dijkstra tutorial
+// Steps for the Dijkstra tutorial
 const tutorialSteps = [
   {
     instruction: "Step 0: Click on node 0 to begin.",
@@ -219,89 +213,97 @@ const tutorialSteps = [
   },
 ];
 
-// ===== Variable Decleration Section =====
-
 // ===== Function Decleration Section =====
+/*
+ * Updates tutorial UI with the current step.
+ * 1. Gets the current step from `tutorialSteps` using `curRoomUI.currentTutorialStep`.
+ * 2. Updates DOM with step's instruction and explanation.
+ */
 function updateTutorialStep() {
-  document.querySelector(".tuto-instruction-text").innerHTML =
-    tutorialSteps[curRoomUI.currentTutorialStep].instruction;
-  document.querySelector(".tuto-explanation-text").innerHTML =
-    tutorialSteps[curRoomUI.currentTutorialStep].explanation;
+  const step = tutorialSteps[curRoomUI.currentTutorialStep];
+
+  console.log(
+    "[updateTutorialStep] Current Step Index:",
+    curRoomUI.currentTutorialStep
+  );
+  console.log("[updateTutorialStep] Step Content:", step);
+
+  document.querySelector(".tuto-instruction-text").innerHTML = step.instruction;
+  document.querySelector(".tuto-explanation-text").innerHTML = step.explanation;
 }
 
-// Call this function whenever the user makes a correct selection
+/*
+ * Moves to the next tutorial step.
+ * 1. Increments current step index.
+ * 2. If all steps are done: shows completion modal, resets tutorial state.
+ * 3. Otherwise: updates UI with the next step.
+ */
 function nextTutorialStep() {
-  curRoomUI.currentTutorialStep++;
+  const nextStepIndex = ++curRoomUI.currentTutorialStep;
 
-  const isDone = curRoomUI.currentTutorialStep >= tutorialSteps.length;
+  console.log("[nextTutorialStep] Next Step Index:", nextStepIndex);
+  console.log("[nextTutorialStep] Total Steps:", tutorialSteps.length);
 
-  if (isDone) {
+  const isComplete = nextStepIndex >= tutorialSteps.length;
+  if (isComplete) {
+    console.log(
+      "[nextTutorialStep] Tutorial complete. Showing modal and resetting state."
+    );
     curRoomUI.updateTutorialModalToBeTutorialCompleteModal?.();
     curRoomUI.openModal(
-      "🎉 Congratulations!",
+      "Congratulations!",
       "You've completed Dijkstra's algorithm tutorial!"
     );
     curRoomUI.currentLevel = null;
     curRoomUI.isTutorial = false;
   } else {
+    console.log("[nextTutorialStep] Proceeding to next tutorial step.");
     updateTutorialStep();
   }
 }
 
-function initailCameraAnimationGSAP() {
-  const timeline = gsap.timeline();
-
-  // First animation to move to the midPosition
-  timeline.to(camera.position, {
-    x: midPosition.x,
-    y: midPosition.y,
-    z: midPosition.z,
-    duration: 2, // Duration of the first animation
-    ease: "power2.inOut",
-    onUpdate: () => {
-      camera.lookAt(new THREE.Vector3(0, 0, 4)); // Keep looking at the target
-    },
-  });
-
-  // Second animation to move to the endPosition
-  timeline.to(camera.position, {
-    x: endPosition.x,
-    y: endPosition.y,
-    z: endPosition.z,
-    duration: 2, // Duration of the second animation
-    ease: "power2.inOut",
-    onUpdate: () => {
-      camera.lookAt(new THREE.Vector3(0, 0, 4)); // Keep looking at the target
-    },
-  });
-}
-
+/*
+ * Generates and places 3D chest models on the scene.
+ * 1. Positions each node—fixed or randomly spaced using triangle checks.
+ * 2. Loads & scales open/closed chest models.
+ * 3. Adds labels above each chest.
+ * 4. Appends all to global lists and draws connecting lines.
+ */
 async function createModels() {
   const margin = 0.1;
   const fixed = [];
 
   for (let i = 0; i < curNodes.length; i++) {
+    console.log(`[createModels] Creating model for node ${i}`);
     let position;
+
     if (i < fixed.length) {
-      // Use the fixed positions for the first three nodes
+      // Use fixed coordinates for predefined nodes (not currently used since fixed is empty)
       position = new THREE.Vector3(fixed[i][0], fixed[i][1], fixed[i][2]);
+      console.log(
+        `[createModels] Using fixed position for node ${i}:`,
+        position
+      );
     } else {
-      // Generate random positions for the remaining nodes
+      // Generate a valid random position that satisfies spatial constraints
       let validPosition = false;
       position = new THREE.Vector3();
 
       while (!validPosition) {
+        // Generate random XZ position within the grid
         const randomX = (Math.random() - 0.5) * gridSize;
         const randomZ = (Math.random() - 0.5) * gridSize;
         position.set(randomX, 0, randomZ);
         validPosition = true;
 
+        // Check distance constraint with all existing chests
         for (let x = 0; x < chestList.length; x++) {
           if (chestList[x].position.distanceTo(position) < minDistance) {
             validPosition = false;
             break;
           }
 
+          // Check triangle inequality with each pair of existing chests
           for (let y = x + 1; y < chestList.length; y++) {
             if (
               !isTriangleInequalitySatisfied(
@@ -319,35 +321,60 @@ async function createModels() {
           if (!validPosition) break;
         }
       }
+
+      console.log(`[createModels] Random position for node ${i}:`, position);
     }
 
+    // Load and place closed chest model
     const closedModel = await loadModel(closedChestURL.href, position, scene);
     closedModel.model.scale.set(2.5, 2.5, 2.5);
     chestList.push(closedModel.model);
 
+    // Load and place open chest model (initially hidden)
     const openModel = await loadModel(openChestURL.href, position, scene);
     openModel.model.scale.set(1.5, 1.5, 1.5);
     openModel.model.visible = false;
     openChestList.push(openModel.model);
 
+    // Create a floating label above the chest
     const labelPosition = position.clone();
     labelPosition.y += 2.5;
-
     const chestLabel = createNodeLabel(`${i}`, labelPosition, scene);
     chestLabelList.push(chestLabel);
   }
 
   console.log("All models loaded. Final chestList:", chestList);
+
+  // Draw lines between all chests to form the graph
   drawLines();
 }
 
+/*
+ * Updates label colors for all nodes in the same tree/component as the given edge.
+ *
+ * 1. Gets nodes with the same parent as edge.start and edge.end.
+ * 2. Applies the appropriate existing or new color to all related nodes.
+ * 3. Manages the `usedColors` set to avoid color reuse.
+ *
+ * @param {Object} edge - The selected edge with `start` and `end` node indices.
+ */
 function updateNodeColorsForSameTree(edge) {
   function getNodesWithSameParentsAndColor(edge, color) {
     const nodesWithSameParentStart =
       curAlgorithmForGraph.getAllNodesWithSameParent(edge.start);
     const nodesWithSameParentEnd =
       curAlgorithmForGraph.getAllNodesWithSameParent(edge.end);
-    nodesWithSameParentStart.concat(nodesWithSameParentEnd).forEach((node) => {
+
+    const allNodes = nodesWithSameParentStart.concat(nodesWithSameParentEnd);
+
+    console.log(
+      "[updateNodeColors] Coloring nodes:",
+      allNodes,
+      "with color:",
+      color
+    );
+
+    allNodes.forEach((node) => {
       updateNodeLabelColor(chestLabelList[node], color);
       componentColors[node] = color;
     });
@@ -355,40 +382,76 @@ function updateNodeColorsForSameTree(edge) {
 
   const nodeStartColor = componentColors[edge.start];
   const nodeEndColor = componentColors[edge.end];
+
+  console.log(
+    "[updateNodeColors] Start Color:",
+    nodeStartColor,
+    "End Color:",
+    nodeEndColor
+  );
+
   if (nodeStartColor && nodeEndColor) {
+    // Case: merging two components — use one color, free the other
     getNodesWithSameParentsAndColor(edge, nodeStartColor);
     usedColors.delete(nodeEndColor);
+    console.log(
+      "[updateNodeColors] Merged two components; freed color:",
+      nodeEndColor
+    );
   } else if (!nodeStartColor && nodeEndColor) {
+    // Case: start uncolored, end has color — apply end color to both
     getNodesWithSameParentsAndColor(edge, nodeEndColor);
   } else if (nodeStartColor && !nodeEndColor) {
+    // Case: end uncolored, start has color — apply start color to both
     getNodesWithSameParentsAndColor(edge, nodeStartColor);
   } else {
+    // Case: both nodes uncolored — assign a new unique color
     let newColor;
     do {
       newColor = getRandomColor();
     } while (usedColors.has(newColor));
 
     usedColors.add(newColor);
+    console.log("[updateNodeColors] Assigned new color:", newColor);
 
     getNodesWithSameParentsAndColor(edge, newColor);
   }
 }
 
+/*
+ * Handles visual and logical updates when an edge is selected.
+ *
+ * 1. Highlights the selected edge and marks it as selected.
+ * 2. Swaps chest models (closed → open) for both connected nodes.
+ * 3. Adds a permanent ring under the label.
+ * 4. Updates score and triggers UI refresh.
+ *
+ * @param {THREE.Line} intersectedObject - The edge object selected by the user, containing userData like startCube, endCube, and label.
+ */
 function handleSelectionEffect(intersectedObject) {
+  // Visually highlight the selected edge
   intersectedObject.material.color.set(0x00ff00); // Set line to green
   intersectedObject.userData.selected = true; // Mark as selected
 
+  console.log("[handleSelectionEffect] Edge selected:", intersectedObject);
+
   const { startCube, endCube } = intersectedObject.userData;
+
+  // Locate corresponding closed and open chest models for both nodes
   const closedStart = chestList[chestList.indexOf(startCube)];
   const openStart = openChestList[chestList.indexOf(startCube)];
   const closedEnd = chestList[chestList.indexOf(endCube)];
   const openEnd = openChestList[chestList.indexOf(endCube)];
 
+  // Swap visibility: show open chests, hide closed ones
   closedStart.visible = false;
   openStart.visible = true;
   closedEnd.visible = false;
   openEnd.visible = true;
 
+  console.log("[handleSelectionEffect] Swapped chest models for nodes");
+
+  // Create a black ring under the selected label as a permanent marker
   const permanentRing = createRing(0.8, 0.9, labelDepth, 0x000000);
   permanentRing.position.copy(intersectedObject.userData.label.position);
   permanentRing.position.y -= labelDepth / 2;
@@ -397,19 +460,26 @@ function handleSelectionEffect(intersectedObject) {
   ringList.push(permanentRing);
   intersectedObject.userData.ring = permanentRing;
 
+  // Update score and trigger UI update
   curRoomUI.currentScore += correctActionScoreAddition;
   curRoomUI.updateScore(curRoomUI.currentScore);
-  console.log(curRoomUI.currentScore);
-  console.log(curRoomUI.health);
-  // curRoomUI.scoreText.innerHTML = `${currentScore}`;
+
+  console.log("[handleSelectionEffect] Score updated:", curRoomUI.currentScore);
+  console.log("[handleSelectionEffect] Current health:", curRoomUI.health);
 }
 
-function handleEdgeSelection(
-  intersectedObject,
-  currentAlgorithm,
-  onClick,
-  onMouseMove
-) {
+/*
+ * Handles user edge selection and triggers all effects.
+ *
+ * 1. Validates the selected edge via the algorithm.
+ * 2. If valid: shows visual effects, updates labels and chests, checks for completion.
+ * 3. If complete: calculates score, saves session, and shows end modal.
+ * 4. If incorrect: provides visual feedback, shows hints, and checks for game over.
+ *
+ * @param {THREE.Line} intersectedObject - The selected edge containing node and label data in `userData`.
+ * @param {string} currentAlgorithm - The name of the algorithm in use ("Dijkstra").
+ */
+function handleEdgeSelection(intersectedObject, currentAlgorithm) {
   const edge = intersectedObject.userData.edge;
   const selectEdgeResult = curAlgorithmForGraph.selectEdge([
     edge.start,
@@ -420,35 +490,43 @@ function handleEdgeSelection(
   const currentWeight = curAlgorithmForGraph.currentWeight;
 
   if (selectEdgeResult.every((res) => res === 1)) {
+    // Successful edge selection
     document.querySelector(".Hint-Text").classList.add("hidden");
     curRoomUI.uiText.innerText = "✅ Correct!";
 
+    // Update component colors if using Dijkstra
     if (currentAlgorithm === "Dijkstra") {
-      // updateNodeColorsForSameTree({ ...edge, rootStart, rootEnd }, sameTree);
       updateNodeColorsForSameTree(edge);
     }
+
+    // Visual + logical effect
     handleSelectionEffect(intersectedObject);
 
     console.log("Selected edges:", curAlgorithmForGraph.selectedEdges);
     console.log("Current weight of the spanning tree:", currentWeight);
 
     if (isComplete) {
+      // Game is complete — handle success flow
       if (curRoomUI.isTutorial) {
         curRoomUI.updateTutorialModalToBeTutorialCompleteModal();
         curRoomUI.currentLevel = null;
         curRoomUI.isTutorial = false;
         return;
       }
+
       console.log(currentLevel, "current Level");
 
+      // Calculate final score based on health and max score
       curRoomUI.currentScore = Math.floor(
         levelMaxScores[curRoomUI.currentLevel] *
           ((curRoomUI.health + 1) * 0.1 + 1)
       );
       console.log(curRoomUI.currentScore);
-      curRoomUI.uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
-      curRoomUI.fillInfoSuccessCompletionModal();
 
+      curRoomUI.uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
+
+      // Modal, score storage, status updates
+      curRoomUI.fillInfoSuccessCompletionModal();
       console.log(curRoomUI.totalStars);
 
       curGameSession.setFinalScore(curRoomUI.currentScore);
@@ -458,6 +536,7 @@ function handleEdgeSelection(
       const sessionData = curGameSession.toObject();
       console.log("printing session Data");
       console.log(sessionData);
+
       fetch("/api/gamesessions", {
         method: "POST",
         headers: {
@@ -469,7 +548,7 @@ function handleEdgeSelection(
       curRoomUI.updateLevelStatus(curRoomUI.currentLevel, curRoomUI.totalStars);
       const status_update_string =
         curRoomUI.currentLevel != 3 ? "completed" : "completed_first_time";
-      // TO DO needs to check if it is already completed or not!
+
       curRoomUI.gameStatusService.updateGameStatus(
         "Dijkstra",
         curRoomUI.currentLevel,
@@ -478,33 +557,41 @@ function handleEdgeSelection(
         curRoomUI.totalStars + 1,
         status_update_string
       );
+
       curRoomUI.gameStatusService.unlockGameLevel(
         "Dijkstra",
         curRoomUI.currentLevel + 1,
         curRoomUI.currentMode
       );
+
       curRoomUI.openCompletionModal();
-      // openModal(currentLevel); // TO DO check this
       curRoomUI.disableMouseEventListeners_K_P();
-      // window.removeEventListener("mousemove", onMouseMove, false);
-      // window.removeEventListener("click", onClick, false);
     } else {
+      // Not complete yet — show updated weight
       curRoomUI.uiText.innerText = `Correct! Current weight is ${currentWeight}.`;
     }
   } else {
+    // Incorrect edge selection
     shakeScreen();
     curGameSession.incrementMistakes();
     console.log("Incorrect edge selection:", edge);
-    intersectedObject.material.color.set(0xff0000); // Set line to red
+
+    // Visual feedback for incorrect selection
+    intersectedObject.material.color.set(0xff0000);
     if (intersectedObject.userData.label) {
-      intersectedObject.userData.label.material.color.set(0xff0000); // Set label to red
+      intersectedObject.userData.label.material.color.set(0xff0000);
     }
+
     curRoomUI.health = decrementHealth(curRoomUI.health);
     shakeScreen();
+
+    // Show hint panel
     document.querySelector(".Hint-Text").classList.remove("hidden");
     const hintItems = document.querySelectorAll(".Hint-Text li");
     updateHintIcons(hintItems[0], selectEdgeResult[0]);
     updateHintIcons(hintItems[1], selectEdgeResult[1]);
+
+    // Display instructional text based on mode
     if (curRoomUI.isTutorial) {
       curRoomUI.uiText.innerText =
         "Learn from the hints below why this choice is incorrect. Continue following the instruction.";
@@ -513,12 +600,15 @@ function handleEdgeSelection(
         "Incorrect Selection. Make sure to meet the following conditions:";
     }
 
+    // Restore edge color after 3 seconds
     setTimeout(() => {
       intersectedObject.material.color.set(0x74c0fc);
       if (intersectedObject.userData.label) {
         intersectedObject.userData.label.material.color.set(0x000000);
       }
     }, 3000);
+
+    // Handle game failure if health drops below zero
     if (
       curRoomUI.health < 0 &&
       curRoomUI.currentMode == "regular" &&
@@ -532,6 +622,7 @@ function handleEdgeSelection(
       const sessionData = curGameSession.toObject();
       console.log("printing session Data");
       console.log(sessionData);
+
       fetch("/api/gamesessions", {
         method: "POST",
         headers: {
@@ -539,20 +630,29 @@ function handleEdgeSelection(
         },
         body: JSON.stringify(sessionData),
       }).then((res) => res.json());
+
       curRoomUI.openCompletionModal();
-      // openModal(currentLevel); // TO DO check this
       curRoomUI.disableMouseEventListeners_K_P();
     }
   }
 }
 
+/*
+ * Draws lines between chests (edges of the graph) and sets up interaction logic.
+ *
+ * 1. Draws all edges from the graph visually and links labels.
+ * 2. Sets up hover and click interaction using raycasting.
+ * 3. Handles tutorial and game logic when a chest or edge is clicked.
+ */
 function drawLines() {
   console.log("Drawing lines between chests.");
   console.log("Graph edges:", graph.edges);
+
   const lines = [];
   graph.edges.forEach(([start, end, weight]) => {
     console.log("Drawing line between:", start, end);
     const edge = { start, end, weight };
+
     const line = drawLine(
       chestList[start],
       chestList[end],
@@ -560,30 +660,35 @@ function drawLines() {
       edge,
       scene
     );
+
     lines.push(line);
     edgeList.push(line);
     edgeLabelList.push(line.userData.label);
   });
 
+  // Reset old listeners before assigning new ones
   curRoomUI.disableMouseEventListeners_K_P();
   curRoomUI.callbacks.onMouseMove = null;
   curRoomUI.callbacks.onClick = null;
 
+  // Setup raycaster for hover and click
   raycaster = new THREE.Raycaster();
   raycaster.params.Line.threshold = 0.5;
   const mouse = new THREE.Vector2();
   let selectedLine = null;
 
+  // Sphere used to highlight hovered intersection
   const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32);
   const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
   sphereInter = new THREE.Mesh(sphereGeometry, sphereMaterial);
   sphereInter.visible = false;
   scene.add(sphereInter);
 
-  // Assign the function to the global variable
+  // Mouse move handler: hover feedback for edges and chests
   onMouseMove = function (event) {
     event.preventDefault();
     if (curRoomUI.isModalOpen) return;
+
     if (curAlgorithmForGraph.isComplete()) {
       sphereInter.visible = false;
       hoverRing.visible = false;
@@ -592,12 +697,12 @@ function drawLines() {
 
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
     raycaster.setFromCamera(mouse, camera);
 
     const intersects = raycaster.intersectObjects([...lines, ...labels]);
     const chestIntersects = raycaster.intersectObjects([...chestList]);
 
+    // Highlight chest if hovered
     if (chestIntersects.length > 0) {
       let hoveredChest = chestIntersects[0].object;
       while (hoveredChest && !chestList.includes(hoveredChest)) {
@@ -609,6 +714,7 @@ function drawLines() {
         openChestList[index].visible = true;
       }
     } else {
+      // Reset all unopened chests
       chestList.forEach((chest, i) => {
         if (!openChestList[i].userData?.clicked) {
           chest.visible = true;
@@ -622,6 +728,7 @@ function drawLines() {
         hoverEffect.classList.add("highlight")
       );
       const intersectedObject = intersects[0].object;
+
       if (intersectedObject.userData.selected) {
         sphereInter.visible = false;
         hoverRing.visible = false;
@@ -631,6 +738,7 @@ function drawLines() {
       sphereInter.position.copy(intersects[0].point);
       sphereInter.visible = true;
 
+      // Highlight edge if different from previously selected
       if (selectedLine !== intersectedObject) {
         if (selectedLine && !selectedLine.userData.selected) {
           selectedLine.material.color.set(0x74c0fc);
@@ -658,47 +766,19 @@ function drawLines() {
     }
   };
 
-  // Assign the function to the global variable
+  // Click handler: chest or edge interaction depending on tutorial/game state
   onClick = function (event) {
     event.preventDefault();
     if (curRoomUI.isModalOpen) return;
 
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
     raycaster.setFromCamera(mouse, camera);
 
-    const intersects = raycaster.intersectObjects([...lines, ...labels]);
     const chestIntersects = raycaster.intersectObjects([...chestList]);
-
-    const intersectedObject = intersects[0]?.object;
+    const edgeIntersects = raycaster.intersectObjects([...lines, ...labels]);
+    const intersectedEdge = edgeIntersects[0]?.object;
     const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
-
-    // Prevent edge click if chest is expected
-    if (
-      curRoomUI.isTutorial &&
-      currentStep.expectedChest !== null &&
-      intersectedObject?.userData?.edge
-    ) {
-      document.querySelector(".Hint-Text").classList.add("hidden");
-      curRoomUI.uiText.innerText = currentStep.errorMessage;
-      curRoomUI.wrongSelectionFeedback?.();
-      shakeScreen();
-      return;
-    }
-
-    // Prevent chest click if edge is expected
-    if (
-      curRoomUI.isTutorial &&
-      currentStep.expectedEdges &&
-      chestIntersects.length > 0
-    ) {
-      document.querySelector(".Hint-Text").classList.add("hidden");
-      curRoomUI.uiText.innerText = currentStep.errorMessage;
-      curRoomUI.wrongSelectionFeedback?.();
-      shakeScreen();
-      return;
-    }
 
     // Chest click logic
     if (chestIntersects.length > 0) {
@@ -710,6 +790,15 @@ function drawLines() {
       const index = chestList.indexOf(clickedChest);
       if (index !== -1) {
         if (curRoomUI.isTutorial) {
+          // Tutorial chest logic
+          if (currentStep.expectedEdges) {
+            document.querySelector(".Hint-Text").classList.add("hidden");
+            curRoomUI.uiText.innerText = currentStep.errorMessage;
+            curRoomUI.wrongSelectionFeedback?.();
+            shakeScreen();
+            return;
+          }
+
           if (currentStep.expectedChest !== null) {
             if (index === currentStep.expectedChest) {
               chestList[index].visible = false;
@@ -730,7 +819,7 @@ function drawLines() {
           return;
         }
 
-        // Non-tutorial mode
+        // Game chest logic
         chestList[index].visible = false;
         openChestList[index].visible = true;
         openChestList[index].userData.clicked = true;
@@ -738,61 +827,34 @@ function drawLines() {
       }
     }
 
-    // Edge click logic
-    if (curRoomUI.isTutorial) {
+    // Tutorial: clicked edge when chest was expected
+    if (
+      curRoomUI.isTutorial &&
+      currentStep.expectedChest !== null &&
+      intersectedEdge?.userData?.edge
+    ) {
+      document.querySelector(".Hint-Text").classList.add("hidden");
+      curRoomUI.uiText.innerText = currentStep.errorMessage;
+      curRoomUI.wrongSelectionFeedback?.();
+      shakeScreen();
+      return;
+    }
+
+    // Tutorial: clicked edge — validate expected edges
+    if (
+      curRoomUI.isTutorial &&
+      currentStep.expectedEdges &&
+      intersectedEdge?.userData?.edge
+    ) {
       const expectedEdges = currentStep.expectedEdges;
+      const { start, end } = intersectedEdge.userData.edge;
 
-      if (expectedEdges && intersectedObject?.userData?.edge) {
-        const { start, end } = intersectedObject.userData.edge;
+      const isExpected = expectedEdges.some(
+        ([e0, e1]) =>
+          (start === e0 && end === e1) || (start === e1 && end === e0)
+      );
 
-        const isExpected = expectedEdges.some(
-          ([e0, e1]) =>
-            (start === e0 && end === e1) || (start === e1 && end === e0)
-        );
-
-        if (!isExpected) {
-          document.querySelector(".Hint-Text").classList.add("hidden");
-          curRoomUI.uiText.innerText = currentStep.errorMessage;
-          curRoomUI.wrongSelectionFeedback?.();
-          shakeScreen();
-
-          if (currentStep.advanceOnError) {
-            setTimeout(() => {
-              selectedEdgesThisStep = [];
-              nextTutorialStep();
-            }, 1000);
-          }
-
-          return;
-        }
-
-        const alreadySelected = selectedEdgesThisStep.some(
-          ([e0, e1]) =>
-            (start === e0 && end === e1) || (start === e1 && end === e0)
-        );
-
-        if (!alreadySelected) {
-          selectedEdgesThisStep.push([start, end]);
-        }
-
-        const allSelected = expectedEdges.every(([e0, e1]) =>
-          selectedEdgesThisStep.some(
-            ([s0, s1]) => (s0 === e0 && s1 === e1) || (s0 === e1 && s1 === e0)
-          )
-        );
-
-        if (allSelected) {
-          selectedEdgesThisStep = [];
-          document.querySelector(".Hint-Text").classList.add("hidden");
-          curRoomUI.uiText.innerText = "✅ Correct!";
-          showInputDialog();
-        }
-
-        return;
-      }
-
-      // Edge click on mistake-only step
-      if (expectedEdges && expectedEdges.length === 0) {
+      if (!isExpected) {
         document.querySelector(".Hint-Text").classList.add("hidden");
         curRoomUI.uiText.innerText = currentStep.errorMessage;
         curRoomUI.wrongSelectionFeedback?.();
@@ -800,18 +862,43 @@ function drawLines() {
 
         if (currentStep.advanceOnError) {
           setTimeout(() => {
+            selectedEdgesThisStep = [];
             nextTutorialStep();
           }, 1000);
         }
 
         return;
       }
+
+      const alreadySelected = selectedEdgesThisStep.some(
+        ([e0, e1]) =>
+          (start === e0 && end === e1) || (start === e1 && end === e0)
+      );
+
+      if (!alreadySelected) {
+        selectedEdgesThisStep.push([start, end]);
+      }
+
+      const allSelected = expectedEdges.every(([e0, e1]) =>
+        selectedEdgesThisStep.some(
+          ([s0, s1]) => (s0 === e0 && s1 === e1) || (s0 === e1 && s1 === e0)
+        )
+      );
+
+      if (allSelected) {
+        selectedEdgesThisStep = [];
+        document.querySelector(".Hint-Text").classList.add("hidden");
+        curRoomUI.uiText.innerText = "✅ Correct!";
+        showInputDialog();
+      }
+
+      return;
     }
 
-    // Non-tutorial edge selection
-    if (intersectedObject?.userData?.edge) {
+    // Non-tutorial: edge selection
+    if (intersectedEdge?.userData?.edge) {
       handleEdgeSelection(
-        intersectedObject,
+        intersectedEdge,
         curRoomUI.currentAlgorithm,
         onClick,
         onMouseMove
@@ -823,30 +910,49 @@ function drawLines() {
   curRoomUI.callbacks.onClick = onClick;
 
   console.log("printing callbacks", curRoomUI.callbacks);
+
   curRoomUI.enableMouseEventListeners_K_P();
 }
 
+/*
+ * Updates the camera and renderer dimensions when the window is resized.
+ * Ensures the 3D scene maintains correct aspect ratio and fills the screen.
+ */
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+/*
+ * The main animation loop.
+ * 1. Updates all animation mixers using delta time.
+ * 2. Updates camera controls and label orientation.
+ * 3. Renders the scene.
+ */
 function animate() {
   requestAnimationFrame(animate);
   const deltaSeconds = clock.getDelta();
+
   mixers.forEach((mixer) => {
     mixer.update(deltaSeconds);
   });
+
   controls.update();
 
   updateLabelRotation(); // Update label rotation on each frame
   renderer.render(scene, camera);
 }
 
+/*
+ * Populates the edge table in the UI with the provided edge list.
+ *
+ * @param {Array<[number, number, number]>} edges - List of edges as [from, to, weight] tuples.
+ */
 function updateEdgeTable(edges) {
   const tableBody = document.querySelector("#edgeTable tbody");
   if (!tableBody) return;
+
   tableBody.innerHTML = "";
   edges.forEach(([from, to, weight]) => {
     const row = document.createElement("tr");
@@ -855,6 +961,10 @@ function updateEdgeTable(edges) {
   });
 }
 
+/*
+ * Rotates all labels and rings to always face the camera.
+ * Keeps chest, edge, and ring labels readable during movement.
+ */
 function updateLabelRotation() {
   chestLabelList.forEach((label) => {
     label.lookAt(camera.position);
@@ -868,8 +978,17 @@ function updateLabelRotation() {
   hoverRing.lookAt(camera.position);
 }
 
+/*
+ * Loads and places the dungeon room model into the scene.
+ *
+ * 1. Loads the model asynchronously using the provided URL and position.
+ * 2. Initializes animation mixer and action if available.
+ * 3. Scales the model and attaches it to the scene.
+ * 4. Handles loading failures gracefully.
+ */
 async function createDungeonRoom() {
   const position = new THREE.Vector3(0, -0.1, 0);
+
   try {
     const { model, mixer, action } = await loadModel(
       dungeonRoomURL.href,
@@ -879,9 +998,12 @@ async function createDungeonRoom() {
     );
 
     if (mixer && action) {
+      // Save mixer and action for animation control
       dungeonRoomMixer = mixer;
       dungeonRoomAction = action;
+
       console.log("Mixer and action initialized:", mixer, action);
+
       dungeonRoomAction.timeScale = 0.25;
       dungeonRoomAction.setLoop(THREE.LoopOnce);
       dungeonRoomAction.clampWhenFinished = true;
@@ -889,46 +1011,65 @@ async function createDungeonRoom() {
     } else {
       console.log("Mixer or action is undefined.");
     }
+
+    // Scale the model to fit the scene
     model.scale.set(1.5, 1.5, 1.5);
   } catch (error) {
     console.error("Error loading dungeon room:", error);
   }
 }
 
+/*
+ * Resets the entire 3D scene and UI state.
+ *
+ * 1. Removes all chests, edges, labels, and rings from the scene and disposes of their resources.
+ * 2. Clears all global arrays and resets state variables.
+ * 3. Removes raycaster-related listeners and interaction objects.
+ * 4. Resets score, star UI, and visual highlights.
+ */
 function resetScene() {
-  // Remove objects from the scene and dispose of their resources
+  // Remove and dispose chest models
   chestList.forEach((chest) => {
     scene.remove(chest);
     if (chest.geometry) chest.geometry.dispose();
     if (chest.material) chest.material.dispose();
   });
+
   openChestList.forEach((chest) => {
     scene.remove(chest);
     if (chest.geometry) chest.geometry.dispose();
     if (chest.material) chest.material.dispose();
   });
+
+  // Remove and dispose node labels
   chestLabelList.forEach((label) => {
     scene.remove(label);
     if (label.geometry) label.geometry.dispose();
     if (label.material) label.material.dispose();
   });
+
+  // Remove and dispose edge lines
   edgeList.forEach((edge) => {
     scene.remove(edge);
     if (edge.geometry) edge.geometry.dispose();
     if (edge.material) edge.material.dispose();
   });
+
+  // Remove and dispose edge labels
   edgeLabelList.forEach((label) => {
     scene.remove(label);
     if (label.geometry) label.geometry.dispose();
     if (label.material) label.material.dispose();
   });
+
+  // Remove and dispose selection rings
   ringList.forEach((ring) => {
     scene.remove(ring);
     if (ring.geometry) ring.geometry.dispose();
     if (ring.material) ring.material.dispose();
   });
 
-  // Reset arrays and variables
+  // Clear arrays
   chestList.length = 0;
   openChestList.length = 0;
   chestLabelList.length = 0;
@@ -936,28 +1077,32 @@ function resetScene() {
   edgeLabelList.length = 0;
   ringList.length = 0;
 
-  // Clear raycaster references
+  // Disable interaction handlers
   curRoomUI.disableMouseEventListeners_K_P();
-
   curRoomUI.onMouseMove = null;
   curRoomUI.onClick = null;
 
-  // Reset any leftover resources
+  // Remove sphere indicator and free its resources
   if (sphereInter) {
     scene.remove(sphereInter);
     sphereInter.geometry.dispose();
     sphereInter.material.dispose();
   }
 
+  // Reset UI and color tracking
   hoverRing.visible = false;
   usedColors.clear();
   componentColors = {};
 
-  // Reset score and UI
+  // Reset score and visual star indicators
   curRoomUI.updateScore(0);
   resetStars();
 }
 
+/*
+ * Creates and adds hover visual elements to the scene.
+ * Includes a red sphere for edge intersections and a black ring for label highlights.
+ */
 function createHoverElements() {
   const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32);
   const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
@@ -970,6 +1115,16 @@ function createHoverElements() {
   scene.add(hoverRing);
 }
 
+/*
+ * Sets up the game state and visuals based on the selected level.
+ *
+ * 1. Validates the level against `levelConfig`.
+ * 2. Initializes graph nodes, edges, and scoring logic.
+ * 3. Generates a connected graph and updates UI tables.
+ * 4. Instantiates the correct algorithm and prepares 3D models.
+ *
+ * @param {number} currentLevel - The currently selected level number.
+ */
 function setUpGameModel(currentLevel) {
   if (!levelConfig[currentLevel]) {
     console.error(
@@ -977,29 +1132,45 @@ function setUpGameModel(currentLevel) {
     );
     return; // Exit the function if the level is invalid
   }
+
   const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
   curNodes = Array.from({ length: numNodes }, (_, i) => i);
   curEdges = numEdges;
+
+  // Score per correct action is based on max score divided by number of needed actions
   correctActionScoreAddition = Math.floor(
     levelMaxScores[currentLevel] / (numNodes - 1)
   );
+
   graph = createRandomConnectedGraph(curNodes, curEdges);
   updateEdgeTable(graph.edges);
   initializeDistanceTable(graph.nodes);
 
   console.log("Graph ==", graph);
+
+  // Assign algorithm for early levels
   if (curRoomUI.currentLevel <= 3) {
     curAlgorithmForGraph = new DijkstraAlgorithm(graph);
     curRoomUI.currentAlgorithm = "Dijkstra";
   }
+
   createModels();
   createHoverElements();
 }
 
+/*
+ * Initializes the distance table UI for the algorithm.
+ *
+ * 1. Clears any existing table rows.
+ * 2. Creates a new row for each node with default distance "∞".
+ * 3. Assigns an ID to each distance cell for future updates.
+ *
+ * @param {Array<number>} nodes - List of node indices to populate in the table.
+ */
 function initializeDistanceTable(nodes) {
   const tableBody = document.getElementById("distance-table-body");
   if (!tableBody) {
-    console.warn("⚠️ Table body element not found: #distance-table-body");
+    console.warn("Table body element not found: #distance-table-body");
     return;
   }
 
@@ -1021,6 +1192,12 @@ function initializeDistanceTable(nodes) {
   });
 }
 
+/*
+ * Sets up the specific graph and UI for the Dijkstra tutorial mode.
+ *
+ * 1. Loads a predefined tutorial graph.
+ * 2. Initializes algorithm, tables, and visuals for the tutorial.
+ */
 function setUpTutorialModel() {
   graph = createSpecificGraphDijkstraTutorial();
   curNodes = graph.nodes;
@@ -1034,14 +1211,25 @@ function setUpTutorialModel() {
   createHoverElements();
 }
 
+/*
+ * Displays the input dialog and backdrop.
+ * Sets modal state to prevent interactions with the underlying scene.
+ */
 function showInputDialog() {
   document.getElementById("input-dialog").style.display = "block";
   document.getElementById("input-backdrop").style.display = "block";
 
-  // Optional: prevent interactions underneath
+  // Prevent interactions underneath
   curRoomUI.isModalOpen = true;
 }
 
+/*
+ * Validates user input from the tutorial dialog.
+ *
+ * 1. If a distance update is expected, checks correctness and updates UI/state.
+ * 2. Marks the related edge as selected and visually updates it if valid.
+ * 3. Closes the dialog and advances the tutorial if appropriate.
+ */
 function closeInputDialog() {
   const inputValue = document.getElementById("dialog-input").value.trim();
   const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
@@ -1050,18 +1238,18 @@ function closeInputDialog() {
 
   let isCorrect = false;
 
-  // ✅ If distance input is expected, validate it
+  // If distance input is expected, validate it
   if (expected) {
     const [node, correctValue] = Object.entries(expected)[0];
 
     if (inputValue === correctValue.toString()) {
       isCorrect = true;
 
-      // ✅ Update distance table
+      // Update distance table
       const cell = document.getElementById(`distance-${node}`);
       if (cell) cell.textContent = correctValue;
 
-      // ✅ Mark edge as selected (no visual highlight)
+      // Mark edge as selected (no visual highlight)
       if (selectedEdge) {
         const selectedLine = edgeList.find((line) => {
           const edge = line.userData?.edge;
@@ -1074,7 +1262,7 @@ function closeInputDialog() {
 
         if (selectedLine) {
           selectedLine.userData.selected = true;
-          selectedLine.material.color.set(0x800080); // show red for correct tutorial step
+          selectedLine.material.color.set(0x800080); // mark with distinct color
           if (selectedLine.userData.label) {
             selectedLine.userData.label.material.color.set(0x000000);
           }
@@ -1083,7 +1271,6 @@ function closeInputDialog() {
     }
   }
 
-  // ✅ Close dialog either way
   document.getElementById("input-dialog").style.display = "none";
   document.getElementById("input-backdrop").style.display = "none";
   document.getElementById("dialog-input").value = "";
@@ -1092,26 +1279,23 @@ function closeInputDialog() {
   if (isCorrect) {
     nextTutorialStep();
   } else {
-    // ⛔ Handle intentionally wrong input step (like "try making a mistake")
+    // Handle intentionally incorrect input (used for learning steps)
     if (currentStep.advanceOnError) {
       setTimeout(() => {
         nextTutorialStep();
       }, 1000);
     } else {
-      curRoomUI.uiText.innerText = "❌ Incorrect input. Try again.";
+      curRoomUI.uiText.innerText = "Incorrect input. Try again.";
       shakeScreen?.();
     }
   }
 }
 
-// Attach handler once DOM is loaded
+/// ===== Document Object Model & User Session Initialization Section =====
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("dialog-ok-btn").onclick = closeInputDialog;
 });
 
-// ===== Function Decleration Section =====
-
-// ===== Document Object Model & User Session Initialization Section =====
 document.addEventListener("DOMContentLoaded", async function () {
   try {
     const response = await fetch("/api/users/getUser", {
@@ -1209,7 +1393,7 @@ fontLoader.load(
     font = loadedFont;
     setFont(font);
     createModels();
-    chapterTitle = createNodeLabel(
+    createNodeLabel(
       "Dijkstra's Algorithm",
       new THREE.Vector3(13, 7, -30),
       scene,
@@ -1227,7 +1411,6 @@ fontLoader.load(
     );
   }
 );
-// ===== Document Object Model & User Session Initialization Section =====
 
 // ===== Scene Initialization Section =====
 createThreePointLightingRoom(scene);
@@ -1235,7 +1418,6 @@ window.addEventListener("resize", onWindowResize, false);
 window.closeInputDialog = closeInputDialog;
 animate();
 createDungeonRoom();
-// ===== Scene Initialization Section =====
 
 // ===== UI Callbacks Section =====
 curRoomUI.callbacks.resetLevel = function (curlvl) {
@@ -1262,4 +1444,3 @@ curRoomUI.callbacks.startTutorial = function () {
   updateNodeLabel(levelTitle, `Tutorial`, 0.9, 0.3, 0x212529);
   setUpTutorialModel();
 };
-// ===== UI Callbacks Section =====
