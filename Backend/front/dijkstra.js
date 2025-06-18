@@ -219,8 +219,10 @@ const tutorialSteps = [
  * 1. Gets the current step from `tutorialSteps` using `curRoomUI.currentTutorialStep`.
  * 2. Updates DOM with step's instruction and explanation.
  */
-function updateTutorialStep() {
-  const step = tutorialSteps[curRoomUI.currentTutorialStep];
+function updateTutorialStep(isTutorial = true) {
+  const step = isTutorial
+    ? tutorialSteps[curRoomUI.currentTutorialStep]
+    : curAlgorithmForGraph.steps[curRoomUI.currentTutorialStep];
 
   console.log(
     "[updateTutorialStep] Current Step Index:",
@@ -250,15 +252,11 @@ function nextTutorialStep() {
       "[nextTutorialStep] Tutorial complete. Showing modal and resetting state."
     );
     curRoomUI.updateTutorialModalToBeTutorialCompleteModal?.();
-    curRoomUI.openModal(
-      "Congratulations!",
-      "You've completed Dijkstra's algorithm tutorial!"
-    );
     curRoomUI.currentLevel = null;
     curRoomUI.isTutorial = false;
   } else {
     console.log("[nextTutorialStep] Proceeding to next tutorial step.");
-    updateTutorialStep();
+    updateTutorialStep(curRoomUI.isTutorial);
   }
 }
 
@@ -778,9 +776,11 @@ function drawLines() {
     const chestIntersects = raycaster.intersectObjects([...chestList]);
     const edgeIntersects = raycaster.intersectObjects([...lines, ...labels]);
     const intersectedEdge = edgeIntersects[0]?.object;
-    const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
+    const currentStep = curRoomUI.isTutorial
+      ? tutorialSteps[curRoomUI.currentTutorialStep]
+      : curAlgorithmForGraph.steps[curRoomUI.currentTutorialStep];
 
-    // Chest click logic
+    // Chest click logic for Tutorial and Non-Tutorial
     if (chestIntersects.length > 0) {
       let clickedChest = chestIntersects[0].object;
       while (clickedChest && !chestList.includes(clickedChest)) {
@@ -789,50 +789,38 @@ function drawLines() {
 
       const index = chestList.indexOf(clickedChest);
       if (index !== -1) {
-        if (curRoomUI.isTutorial) {
-          // Tutorial chest logic
-          if (currentStep.expectedEdges) {
+        // Chest logic
+        if (currentStep.expectedEdges) {
+          document.querySelector(".Hint-Text").classList.add("hidden");
+          curRoomUI.uiText.innerText = currentStep.errorMessage;
+          curRoomUI.wrongSelectionFeedback?.();
+          shakeScreen();
+          return;
+        }
+
+        if (currentStep.expectedChest !== null) {
+          if (index === currentStep.expectedChest) {
+            chestList[index].visible = false;
+            openChestList[index].visible = true;
+            openChestList[index].userData.clicked = true;
+
+            document.querySelector(".Hint-Text").classList.add("hidden");
+            curRoomUI.uiText.innerText = "Correct!";
+            setTimeout(() => nextTutorialStep(), 500);
+          } else {
             document.querySelector(".Hint-Text").classList.add("hidden");
             curRoomUI.uiText.innerText = currentStep.errorMessage;
             curRoomUI.wrongSelectionFeedback?.();
             shakeScreen();
-            return;
-          }
-
-          if (currentStep.expectedChest !== null) {
-            if (index === currentStep.expectedChest) {
-              chestList[index].visible = false;
-              openChestList[index].visible = true;
-              openChestList[index].userData.clicked = true;
-
-              document.querySelector(".Hint-Text").classList.add("hidden");
-              curRoomUI.uiText.innerText = "✅ Correct!";
-              setTimeout(() => nextTutorialStep(), 500);
-            } else {
-              document.querySelector(".Hint-Text").classList.add("hidden");
-              curRoomUI.uiText.innerText = currentStep.errorMessage;
-              curRoomUI.wrongSelectionFeedback?.();
-              shakeScreen();
-            }
-            return;
           }
           return;
         }
-
-        // Game chest logic
-        chestList[index].visible = false;
-        openChestList[index].visible = true;
-        openChestList[index].userData.clicked = true;
         return;
       }
     }
 
-    // Tutorial: clicked edge when chest was expected
-    if (
-      curRoomUI.isTutorial &&
-      currentStep.expectedChest !== null &&
-      intersectedEdge?.userData?.edge
-    ) {
+    // Tutorial and Non-Tutorial: clicked edge when chest was expected
+    if (currentStep.expectedChest !== null && intersectedEdge?.userData?.edge) {
       document.querySelector(".Hint-Text").classList.add("hidden");
       curRoomUI.uiText.innerText = currentStep.errorMessage;
       curRoomUI.wrongSelectionFeedback?.();
@@ -895,14 +883,67 @@ function drawLines() {
       return;
     }
 
-    // Non-tutorial: edge selection
-    if (intersectedEdge?.userData?.edge) {
-      handleEdgeSelection(
-        intersectedEdge,
-        curRoomUI.currentAlgorithm,
-        onClick,
-        onMouseMove
+    // Non Tutorial: clicked edge - validate expected edges
+    if (
+      !curRoomUI.isTutorial &&
+      currentStep.expectedEdges &&
+      intersectedEdge?.userData?.edge
+    ) {
+      const { start, end } = intersectedEdge.userData.edge;
+      const expectedEdges = currentStep.expectedEdges;
+
+      console.log("[onClick] Validating selected edge:", [start, end]);
+
+      // Search for the edge in the list of expected edges
+      const found = expectedEdges.find(
+        ({ edge: [e0, e1] }) =>
+          (start === e0 && end === e1) || (start === e1 && end === e0)
       );
+
+      if (found) {
+        console.log("[onClick] Edge is in the expectedEdges array:", [
+          start,
+          end,
+        ]);
+
+        // Avoid re-selecting the same edge
+        const alreadyChosen = selectedEdgesThisStep.some(
+          ([x, y]) => (x === start && y === end) || (x === end && y === start)
+        );
+
+        if (!alreadyChosen) {
+          selectedEdgesThisStep.push([start, end]);
+          console.log(
+            "[onClick] Edge added to selectedEdgesThisStep:",
+            selectedEdgesThisStep
+          );
+
+          // Store the selected edge temporarily for use in input validation
+          curRoomUI.selectedEdgeForInput = { start, end, weight: found.weight };
+
+          // Open dialog for user to input weight
+          document.getElementById("input-dialog").style.display = "block";
+          document.getElementById("input-backdrop").style.display = "block";
+          curRoomUI.isModalOpen = true;
+        }
+
+        // Proceed to the next step if all required edges are selected
+        const allChosen =
+          selectedEdgesThisStep.length === currentStep.expectedEdges.length;
+
+        if (allChosen) {
+          console.log(
+            "[onClick] All expected edges selected. Proceeding to next step."
+          );
+          selectedEdgesThisStep = [];
+          nextTutorialStep(); // Advances step even in non-tutorial context
+        }
+      } else {
+        console.log("[onClick] Edge is NOT in the expectedEdges array:", [
+          start,
+          end,
+        ]);
+      }
     }
   };
 
@@ -1232,61 +1273,111 @@ function showInputDialog() {
  */
 function closeInputDialog() {
   const inputValue = document.getElementById("dialog-input").value.trim();
-  const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
-  const expected = currentStep.updatedDistance;
-  const selectedEdge = currentStep.expectedEdges?.[0]; // [start, end]
-
   let isCorrect = false;
 
-  // If distance input is expected, validate it
-  if (expected) {
-    const [node, correctValue] = Object.entries(expected)[0];
+  if (curRoomUI.isTutorial) {
+    const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
+    const expected = currentStep.updatedDistance;
+    const selectedEdge = currentStep.expectedEdges?.[0]; // [start, end]
 
-    if (inputValue === correctValue.toString()) {
-      isCorrect = true;
+    if (expected) {
+      const [node, correctValue] = Object.entries(expected)[0];
 
-      // Update distance table
-      const cell = document.getElementById(`distance-${node}`);
-      if (cell) cell.textContent = correctValue;
+      if (inputValue === correctValue.toString()) {
+        isCorrect = true;
 
-      // Mark edge as selected (no visual highlight)
-      if (selectedEdge) {
-        const selectedLine = edgeList.find((line) => {
-          const edge = line.userData?.edge;
-          return (
-            edge &&
-            ((edge.start === selectedEdge[0] && edge.end === selectedEdge[1]) ||
-              (edge.start === selectedEdge[1] && edge.end === selectedEdge[0]))
-          );
-        });
+        const cell = document.getElementById(`distance-${node}`);
+        if (cell) cell.textContent = correctValue;
 
-        if (selectedLine) {
-          selectedLine.userData.selected = true;
-          selectedLine.material.color.set(0x800080); // mark with distinct color
-          if (selectedLine.userData.label) {
-            selectedLine.userData.label.material.color.set(0x000000);
+        if (selectedEdge) {
+          const selectedLine = edgeList.find((line) => {
+            const edge = line.userData?.edge;
+            return (
+              edge &&
+              ((edge.start === selectedEdge[0] &&
+                edge.end === selectedEdge[1]) ||
+                (edge.start === selectedEdge[1] &&
+                  edge.end === selectedEdge[0]))
+            );
+          });
+
+          if (selectedLine) {
+            selectedLine.userData.selected = true;
+            selectedLine.material.color.set(0x800080);
+            if (selectedLine.userData.label) {
+              selectedLine.userData.label.material.color.set(0x000000);
+            }
           }
         }
       }
     }
-  }
 
-  document.getElementById("input-dialog").style.display = "none";
-  document.getElementById("input-backdrop").style.display = "none";
-  document.getElementById("dialog-input").value = "";
-  curRoomUI.isModalOpen = false;
-
-  if (isCorrect) {
-    nextTutorialStep();
-  } else {
-    // Handle intentionally incorrect input (used for learning steps)
-    if (currentStep.advanceOnError) {
-      setTimeout(() => {
-        nextTutorialStep();
-      }, 1000);
+    if (isCorrect) {
+      nextTutorialStep();
+      // ✅ Close dialog on success
+      document.getElementById("input-dialog").style.display = "none";
+      document.getElementById("input-backdrop").style.display = "none";
+      document.getElementById("dialog-input").value = "";
+      curRoomUI.isModalOpen = false;
     } else {
+      if (currentStep.advanceOnError) {
+        setTimeout(() => nextTutorialStep(), 1000);
+      } else {
+        curRoomUI.uiText.innerText = "Incorrect input. Try again.";
+        shakeScreen?.();
+      }
+    }
+  } else {
+    const selected = curRoomUI.selectedEdgeForInput;
+    if (!selected) {
+      console.warn("[closeInputDialog] No selected edge found.");
+      return;
+    }
+
+    const inputWeight = parseInt(inputValue, 10);
+    if (inputWeight === selected.weight) {
+      console.log("[closeInputDialog] Correct weight entered:", inputWeight);
+
+      // Update distance table
+      const targetNode = selected.end;
+      const cell = document.getElementById(`distance-${targetNode}`);
+      if (cell) {
+        cell.textContent = inputWeight;
+        console.log(
+          "[closeInputDialog] Distance table updated for node:",
+          targetNode
+        );
+      }
+
+      // Highlight selected edge
+      const selectedLine = edgeList.find((line) => {
+        const edge = line.userData?.edge;
+        return (
+          edge &&
+          ((edge.start === selected.start && edge.end === selected.end) ||
+            (edge.start === selected.end && edge.end === selected.start))
+        );
+      });
+
+      if (selectedLine) {
+        selectedLine.userData.selected = true;
+        selectedLine.material.color.set(0x800080);
+        if (selectedLine.userData.label) {
+          selectedLine.userData.label.material.color.set(0x000000);
+        }
+      }
+
+      // Reset selected and close modal
+      curRoomUI.selectedEdgeForInput = null;
+      document.getElementById("input-dialog").style.display = "none";
+      document.getElementById("input-backdrop").style.display = "none";
+      document.getElementById("dialog-input").value = "";
+      curRoomUI.isModalOpen = false;
+    } else {
+      console.log("[closeInputDialog] Incorrect weight.");
       curRoomUI.uiText.innerText = "Incorrect input. Try again.";
       shakeScreen?.();
+      return;
     }
   }
 }
@@ -1426,6 +1517,7 @@ curRoomUI.callbacks.resetLevel = function (curlvl) {
   document.querySelector(".Hint-Text").classList.add("hidden");
   curRoomUI.closeCompletionModal();
   curRoomUI.pseudoModalClose();
+  curRoomUI.currentTutorialStep = 0;
   resetScene();
   setUpGameModel(curlvl);
   updateNodeLabel(levelTitle, `Level ${curlvl}`, 0.9, 0.3, 0x212529);
