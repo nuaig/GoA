@@ -27,6 +27,7 @@ export default defineConfig({
         heapSort: resolve(__dirname, "./heapsort.html"),
         kruskal: resolve(__dirname, "./Kruskal.html"),
         mainDungeon: resolve(__dirname, "./mainDungeon.html"),
+        dashboard: resolve(__dirname, "./dashboard.html"),
         prim: resolve(__dirname, "./Prim.html"),
         // Add more HTML files as needed
       },
