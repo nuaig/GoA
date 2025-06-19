@@ -27,7 +27,7 @@ export default defineConfig({
         heapSort: resolve(__dirname, "./heapsort.html"),
         kruskal: resolve(__dirname, "./Kruskal.html"),
         mainDungeon: resolve(__dirname, "./mainDungeon.html"),
-        dashboard: resolve(__dirname, "./dashboard.html"),
+        dashboard: resolve(__dirname, "./dashboard.html"), // Added this line to show dashboard.html to admin users
         prim: resolve(__dirname, "./Prim.html"),
         // Add more HTML files as needed
       },
