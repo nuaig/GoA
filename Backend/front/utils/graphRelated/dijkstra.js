@@ -7,6 +7,7 @@ export class DijkstraAlgorithm {
     this.currentStepIndex = 0;
     this.distances = {};
     this.previous = {};
+    this.paths = {};
 
     this.dijkstra(this.startNode);
     console.log("Generated Dijkstra steps:", this.steps);
@@ -25,22 +26,23 @@ export class DijkstraAlgorithm {
 
   dijkstra(start) {
     const distances = {};
-    const priorityQueue = new MinPriorityQueue();
     const previous = {};
-    const paths = {};
     const visited = new Set();
     const alreadyPressed = new Set();
+    const priorityQueue = new MinPriorityQueue();
 
     for (let node in this.adjacencyList) {
       distances[node] = Infinity;
       previous[node] = null;
     }
+
     distances[start] = 0;
     priorityQueue.enqueue(start, 0);
 
     while (!priorityQueue.isEmpty()) {
-      let currentNode = priorityQueue.dequeue().element;
+      const currentNode = priorityQueue.dequeue().element;
 
+      // Visit the chest (node)
       if (!alreadyPressed.has(currentNode)) {
         this.steps.push({
           expectedChest: parseInt(currentNode),
@@ -51,18 +53,24 @@ export class DijkstraAlgorithm {
       }
 
       visited.add(currentNode);
+
       const neighbors = this.adjacencyList[currentNode] || [];
-      let validEdges = [];
+      const validEdges = [];
 
       for (const { node: neighbor, weight } of neighbors) {
-        if (visited.has(neighbor)) continue;
+        const newDistance = distances[currentNode] + weight;
 
-        const newDist = distances[currentNode] + weight;
-        if (newDist < distances[neighbor]) {
-          distances[neighbor] = newDist;
+        if (newDistance < distances[neighbor]) {
+          distances[neighbor] = newDistance;
           previous[neighbor] = parseInt(currentNode);
-          priorityQueue.enqueue(neighbor, newDist);
-          validEdges.push({ edge: [parseInt(currentNode), neighbor], weight });
+          priorityQueue.enqueue(neighbor, newDistance);
+        }
+
+        if (!visited.has(neighbor)) {
+          validEdges.push({
+            edge: [parseInt(currentNode), neighbor],
+            weight: distances[neighbor],
+          });
         }
       }
 
@@ -75,6 +83,8 @@ export class DijkstraAlgorithm {
       }
     }
 
+    // Build shortest paths
+    const paths = {};
     for (let node in distances) {
       const path = [];
       let temp = node;
@@ -100,23 +110,17 @@ export class DijkstraAlgorithm {
     );
 
     if (match) {
-      // Track selected edges for this step
       if (!step.selectedEdges) step.selectedEdges = [];
 
       const alreadyChosen = step.selectedEdges.some(
         ([x, y]) => (a === x && b === y) || (a === y && b === x)
       );
-      if (alreadyChosen) return [0, 0]; // prevent duplicates
+      if (alreadyChosen) return [0, 0];
 
       step.selectedEdges.push([a, b]);
 
-      // Check if all expectedEdges have been chosen
-      const allSelected = step.expectedEdges.every(({ edge: [x, y] }) =>
-        step.selectedEdges.some(
-          ([a, b]) => (a === x && b === y) || (a === y && b === x)
-        )
-      );
-
+      const allSelected =
+        step.expectedEdges.length === step.selectedEdges.length;
       if (allSelected) {
         this.currentStepIndex++;
       }

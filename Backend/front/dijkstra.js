@@ -242,11 +242,14 @@ function updateTutorialStep(isTutorial = true) {
  */
 function nextTutorialStep() {
   const nextStepIndex = ++curRoomUI.currentTutorialStep;
+  const stepLength = curRoomUI.isTutorial
+    ? tutorialSteps.length
+    : curAlgorithmForGraph.steps.length;
 
   console.log("[nextTutorialStep] Next Step Index:", nextStepIndex);
-  console.log("[nextTutorialStep] Total Steps:", tutorialSteps.length);
+  console.log("[nextTutorialStep] Total Steps:", stepLength);
 
-  const isComplete = nextStepIndex >= tutorialSteps.length;
+  const isComplete = nextStepIndex >= stepLength;
   if (isComplete) {
     console.log(
       "[nextTutorialStep] Tutorial complete. Showing modal and resetting state."
@@ -794,6 +797,7 @@ function drawLines() {
           document.querySelector(".Hint-Text").classList.add("hidden");
           curRoomUI.uiText.innerText = currentStep.errorMessage;
           curRoomUI.wrongSelectionFeedback?.();
+          curRoomUI.health = decrementHealth(curRoomUI.health);
           shakeScreen();
           return;
         }
@@ -811,6 +815,7 @@ function drawLines() {
             document.querySelector(".Hint-Text").classList.add("hidden");
             curRoomUI.uiText.innerText = currentStep.errorMessage;
             curRoomUI.wrongSelectionFeedback?.();
+            curRoomUI.health = decrementHealth(curRoomUI.health);
             shakeScreen();
           }
           return;
@@ -824,6 +829,7 @@ function drawLines() {
       document.querySelector(".Hint-Text").classList.add("hidden");
       curRoomUI.uiText.innerText = currentStep.errorMessage;
       curRoomUI.wrongSelectionFeedback?.();
+      curRoomUI.health = decrementHealth(curRoomUI.health);
       shakeScreen();
       return;
     }
@@ -919,9 +925,15 @@ function drawLines() {
           );
 
           // Store the selected edge temporarily for use in input validation
-          curRoomUI.selectedEdgeForInput = { start, end, weight: found.weight };
+          const [src, dst] = found.edge;
+          curRoomUI.selectedEdgeForInput = {
+            start: src,
+            end: dst, // the destination is always the node being updated
+            weight: found.weight,
+          };
 
           // Open dialog for user to input weight
+          curRoomUI.inputCompleted = false;
           document.getElementById("input-dialog").style.display = "block";
           document.getElementById("input-backdrop").style.display = "block";
           curRoomUI.isModalOpen = true;
@@ -935,14 +947,19 @@ function drawLines() {
           console.log(
             "[onClick] All expected edges selected. Proceeding to next step."
           );
-          selectedEdgesThisStep = [];
           nextTutorialStep(); // Advances step even in non-tutorial context
+          selectedEdgesThisStep = [];
         }
       } else {
         console.log("[onClick] Edge is NOT in the expectedEdges array:", [
           start,
           end,
         ]);
+        document.querySelector(".Hint-Text").classList.add("hidden");
+        curRoomUI.uiText.innerText = currentStep.errorMessage;
+        curRoomUI.wrongSelectionFeedback?.();
+        curRoomUI.health = decrementHealth(curRoomUI.health);
+        shakeScreen();
       }
     }
   };
@@ -1138,6 +1155,9 @@ function resetScene() {
   // Reset score and visual star indicators
   curRoomUI.updateScore(0);
   resetStars();
+
+  selectedEdgesThisStep = [];
+  curRoomUI.selectedEdgeForInput = null;
 }
 
 /*
@@ -1329,6 +1349,8 @@ function closeInputDialog() {
     }
   } else {
     const selected = curRoomUI.selectedEdgeForInput;
+    const currentStep =
+      curAlgorithmForGraph.steps[curRoomUI.currentTutorialStep];
     if (!selected) {
       console.warn("[closeInputDialog] No selected edge found.");
       return;
@@ -1369,14 +1391,17 @@ function closeInputDialog() {
 
       // Reset selected and close modal
       curRoomUI.selectedEdgeForInput = null;
+      curRoomUI.inputCompleted = true;
       document.getElementById("input-dialog").style.display = "none";
       document.getElementById("input-backdrop").style.display = "none";
       document.getElementById("dialog-input").value = "";
       curRoomUI.isModalOpen = false;
     } else {
-      console.log("[closeInputDialog] Incorrect weight.");
-      curRoomUI.uiText.innerText = "Incorrect input. Try again.";
-      shakeScreen?.();
+      document.querySelector(".Hint-Text").classList.add("hidden");
+      curRoomUI.uiText.innerText = currentStep.errorMessage;
+      curRoomUI.wrongSelectionFeedback?.();
+      curRoomUI.health = decrementHealth(curRoomUI.health);
+      shakeScreen();
       return;
     }
   }
