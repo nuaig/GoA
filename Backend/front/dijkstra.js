@@ -255,11 +255,14 @@ function nextTutorialStep() {
     console.log(
       "[nextTutorialStep] Tutorial complete. Showing modal and resetting state."
     );
-    if (curRoomUI.isTutorial || curRoomUI.currentLevel?.includes("tutorial")) {
+    if (curRoomUI.isTutorial) {
       curRoomUI.updateTutorialModalToBeTutorialCompleteModal?.();
     } else {
-      curRoomUI.fillInfoSuccessCompletionModal?.();
-      curRoomUI.openCompletionModal?.();
+      GameHelper.handleLevelCompletion(
+        curRoomUI,
+        curGameSession,
+        levelMaxScores[curRoomUI.currentLevel]
+      );
     }
   } else {
     console.log("[nextTutorialStep] Proceeding to next tutorial step.");
