@@ -537,7 +537,7 @@ class GameRoomUI {
       message =
         "<br>Keep in mind to always select the edge with the minimum weight that won't form a cycle.";
     } else if(this.gameName == "Dijkstra"){
-      message = "<br>Under Construction"
+      message = "<br>Keep in mind to always select the edge that leads to the closest unvisited node with the lowest known cost."
     }else if (this.gameName == "Heapsort") {
       message =
         "<br>Keep in mind to always maintain the Max-Heap property: The largest element must be at the root. Swap it with the last element, remove it, and reheapify until the array is sorted.";

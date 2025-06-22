@@ -30,6 +30,7 @@ import {
   createRing,
 } from "./utils/graphRelated/drawLine.js";
 import GameRoomUI from "./utils/UI/gameRoomUI.js";
+import { GameHelper } from "./utils/gameHelper.js";
 
 // ===== Variable Decleration Section =====
 const reArrangeButton = document.querySelector(".Rearrange-Action");
@@ -254,9 +255,12 @@ function nextTutorialStep() {
     console.log(
       "[nextTutorialStep] Tutorial complete. Showing modal and resetting state."
     );
-    curRoomUI.updateTutorialModalToBeTutorialCompleteModal?.();
-    curRoomUI.currentLevel = null;
-    curRoomUI.isTutorial = false;
+    if (curRoomUI.isTutorial || curRoomUI.currentLevel?.includes("tutorial")) {
+      curRoomUI.updateTutorialModalToBeTutorialCompleteModal?.();
+    } else {
+      curRoomUI.fillInfoSuccessCompletionModal?.();
+      curRoomUI.openCompletionModal?.();
+    }
   } else {
     console.log("[nextTutorialStep] Proceeding to next tutorial step.");
     updateTutorialStep(curRoomUI.isTutorial);
@@ -480,163 +484,175 @@ function handleSelectionEffect(intersectedObject) {
  * @param {THREE.Line} intersectedObject - The selected edge containing node and label data in `userData`.
  * @param {string} currentAlgorithm - The name of the algorithm in use ("Dijkstra").
  */
-function handleEdgeSelection(intersectedObject, currentAlgorithm) {
-  const edge = intersectedObject.userData.edge;
-  const selectEdgeResult = curAlgorithmForGraph.selectEdge([
-    edge.start,
-    edge.end,
-    edge.weight,
-  ]);
-  const isComplete = curAlgorithmForGraph.isComplete();
-  const currentWeight = curAlgorithmForGraph.currentWeight;
+// function handleEdgeSelection(intersectedObject, currentAlgorithm) {
+//   const edge = intersectedObject.userData.edge;
+//   const selectEdgeResult = curAlgorithmForGraph.selectEdge([
+//     edge.start,
+//     edge.end,
+//     edge.weight,
+//   ]);
+//   const isComplete = curAlgorithmForGraph.isComplete();
+//   const currentWeight = curAlgorithmForGraph.currentWeight;
 
-  if (selectEdgeResult.every((res) => res === 1)) {
-    // Successful edge selection
-    document.querySelector(".Hint-Text").classList.add("hidden");
-    curRoomUI.uiText.innerText = "✅ Correct!";
+//   if (selectEdgeResult.every((res) => res === 1)) {
+//     // Successful edge selection
+//     document.querySelector(".Hint-Text").classList.add("hidden");
+//     curRoomUI.uiText.innerText = "✅ Correct!";
 
-    // Update component colors if using Dijkstra
-    if (currentAlgorithm === "Dijkstra") {
-      updateNodeColorsForSameTree(edge);
-    }
+//     // Update component colors if using Dijkstra
+//     if (currentAlgorithm === "Dijkstra") {
+//       updateNodeColorsForSameTree(edge);
+//     }
 
-    // Visual + logical effect
-    handleSelectionEffect(intersectedObject);
+//     // Visual + logical effect
+//     handleSelectionEffect(intersectedObject);
 
-    console.log("Selected edges:", curAlgorithmForGraph.selectedEdges);
-    console.log("Current weight of the spanning tree:", currentWeight);
+//     console.log("Selected edges:", curAlgorithmForGraph.selectedEdges);
+//     console.log("Current weight of the spanning tree:", currentWeight);
 
-    if (isComplete) {
-      // Game is complete — handle success flow
-      if (curRoomUI.isTutorial) {
-        curRoomUI.updateTutorialModalToBeTutorialCompleteModal();
-        curRoomUI.currentLevel = null;
-        curRoomUI.isTutorial = false;
-        return;
-      }
+//     if (isComplete) {
+//       // Game is complete — handle success flow
+//       if (curRoomUI.isTutorial) {
+//         curRoomUI.updateTutorialModalToBeTutorialCompleteModal();
+//         curRoomUI.currentLevel = null;
+//         curRoomUI.isTutorial = false;
+//         return;
+//       }
 
-      console.log(currentLevel, "current Level");
+//       console.log(currentLevel, "current Level");
 
-      // Calculate final score based on health and max score
-      curRoomUI.currentScore = Math.floor(
-        levelMaxScores[curRoomUI.currentLevel] *
-          ((curRoomUI.health + 1) * 0.1 + 1)
-      );
-      console.log(curRoomUI.currentScore);
+//       // Calculate final score based on health and max score
+//       curRoomUI.currentScore = Math.floor(
+//         levelMaxScores[curRoomUI.currentLevel] *
+//           ((curRoomUI.health + 1) * 0.1 + 1)
+//       );
+//       console.log(curRoomUI.currentScore);
 
-      curRoomUI.uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
+//       curRoomUI.uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
 
-      // Modal, score storage, status updates
-      curRoomUI.fillInfoSuccessCompletionModal();
-      console.log(curRoomUI.totalStars);
+//       // Modal, score storage, status updates
+//       curRoomUI.fillInfoSuccessCompletionModal();
+//       console.log(curRoomUI.totalStars);
 
-      curGameSession.setFinalScore(curRoomUI.currentScore);
-      curGameSession.setSuccessStatus(true);
-      curGameSession.endSession();
+//       curGameSession.setFinalScore(curRoomUI.currentScore);
+//       curGameSession.setSuccessStatus(true);
+//       curGameSession.endSession();
 
-      const sessionData = curGameSession.toObject();
-      console.log("printing session Data");
-      console.log(sessionData);
+//       const sessionData = curGameSession.toObject();
+//       console.log("printing session Data");
+//       console.log(sessionData);
 
-      fetch("/api/gamesessions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(sessionData),
-      }).then((res) => res.json());
+//       fetch("/api/gamesessions", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify(sessionData),
+//       }).then((res) => res.json());
 
-      curRoomUI.updateLevelStatus(curRoomUI.currentLevel, curRoomUI.totalStars);
-      const status_update_string =
-        curRoomUI.currentLevel != 3 ? "completed" : "completed_first_time";
+//       curRoomUI.updateLevelStatus(curRoomUI.currentLevel, curRoomUI.totalStars);
+//       const status_update_string =
+//         curRoomUI.currentLevel != 3 ? "completed" : "completed_first_time";
 
-      curRoomUI.gameStatusService.updateGameStatus(
-        "Dijkstra",
-        curRoomUI.currentLevel,
-        curRoomUI.currentMode,
-        curRoomUI.currentScore,
-        curRoomUI.totalStars + 1,
-        status_update_string
-      );
+//       curRoomUI.gameStatusService.updateGameStatus(
+//         "Dijkstra",
+//         curRoomUI.currentLevel,
+//         curRoomUI.currentMode,
+//         curRoomUI.currentScore,
+//         curRoomUI.totalStars + 1,
+//         status_update_string
+//       );
 
-      curRoomUI.gameStatusService.unlockGameLevel(
-        "Dijkstra",
-        curRoomUI.currentLevel + 1,
-        curRoomUI.currentMode
-      );
+//       curRoomUI.gameStatusService.unlockGameLevel(
+//         "Dijkstra",
+//         curRoomUI.currentLevel + 1,
+//         curRoomUI.currentMode
+//       );
 
-      curRoomUI.openCompletionModal();
-      curRoomUI.disableMouseEventListeners_K_P();
-    } else {
-      // Not complete yet — show updated weight
-      curRoomUI.uiText.innerText = `Correct! Current weight is ${currentWeight}.`;
-    }
-  } else {
-    // Incorrect edge selection
-    shakeScreen();
-    curGameSession.incrementMistakes();
-    console.log("Incorrect edge selection:", edge);
+//       curRoomUI.openCompletionModal();
+//       curRoomUI.disableMouseEventListeners_K_P();
+//     } else {
+//       // Not complete yet — show updated weight
+//       curRoomUI.uiText.innerText = `Correct! Current weight is ${currentWeight}.`;
+//     }
+//   } else {
+//     // Incorrect edge selection
+//     shakeScreen();
+//     curGameSession.incrementMistakes();
+//     console.log("Incorrect edge selection:", edge);
 
-    // Visual feedback for incorrect selection
-    intersectedObject.material.color.set(0xff0000);
-    if (intersectedObject.userData.label) {
-      intersectedObject.userData.label.material.color.set(0xff0000);
-    }
+//     // Visual feedback for incorrect selection
+//     intersectedObject.material.color.set(0xff0000);
+//     if (intersectedObject.userData.label) {
+//       intersectedObject.userData.label.material.color.set(0xff0000);
+//     }
 
-    curRoomUI.health = decrementHealth(curRoomUI.health);
-    shakeScreen();
+// curRoomUI.health = decrementHealth(curRoomUI.health);
+// shakeScreen();
+//     if (
+//       curRoomUI.health < 0 &&
+//       curRoomUI.currentMode == "regular" &&
+//       !curRoomUI.isTutorial
+//     ) {
+//       curRoomUI.uiText.innerHTML =
+//         "You've run out of lives. Try again from the beginning.";
+//       curRoomUI.fillInfoFailureCompletionModal?.();
+//       curRoomUI.openCompletionModal?.();
+//       curRoomUI.currentLevel = null;
+//       curRoomUI.isTutorial = false;
+//     }
 
-    // Show hint panel
-    document.querySelector(".Hint-Text").classList.remove("hidden");
-    const hintItems = document.querySelectorAll(".Hint-Text li");
-    updateHintIcons(hintItems[0], selectEdgeResult[0]);
-    updateHintIcons(hintItems[1], selectEdgeResult[1]);
+//     // Show hint panel
+//     document.querySelector(".Hint-Text").classList.remove("hidden");
+//     const hintItems = document.querySelectorAll(".Hint-Text li");
+//     updateHintIcons(hintItems[0], selectEdgeResult[0]);
+//     updateHintIcons(hintItems[1], selectEdgeResult[1]);
 
-    // Display instructional text based on mode
-    if (curRoomUI.isTutorial) {
-      curRoomUI.uiText.innerText =
-        "Learn from the hints below why this choice is incorrect. Continue following the instruction.";
-    } else {
-      curRoomUI.uiText.innerText =
-        "Incorrect Selection. Make sure to meet the following conditions:";
-    }
+//     // Display instructional text based on mode
+//     if (curRoomUI.isTutorial) {
+//       curRoomUI.uiText.innerText =
+//         "Learn from the hints below why this choice is incorrect. Continue following the instruction.";
+//     } else {
+//       curRoomUI.uiText.innerText =
+//         "Incorrect Selection. Make sure to meet the following conditions:";
+//     }
 
-    // Restore edge color after 3 seconds
-    setTimeout(() => {
-      intersectedObject.material.color.set(0x74c0fc);
-      if (intersectedObject.userData.label) {
-        intersectedObject.userData.label.material.color.set(0x000000);
-      }
-    }, 3000);
+//     // Restore edge color after 3 seconds
+//     setTimeout(() => {
+//       intersectedObject.material.color.set(0x74c0fc);
+//       if (intersectedObject.userData.label) {
+//         intersectedObject.userData.label.material.color.set(0x000000);
+//       }
+//     }, 3000);
 
-    // Handle game failure if health drops below zero
-    if (
-      curRoomUI.health < 0 &&
-      curRoomUI.currentMode == "regular" &&
-      !curRoomUI.isTutorial
-    ) {
-      curRoomUI.fillInfoFailureSuccessCompletionModal();
-      curGameSession.setFinalScore(curRoomUI.currentScore);
-      curGameSession.setSuccessStatus(false);
-      curGameSession.endSession();
+//     // Handle game failure if health drops below zero
+//     if (
+//       curRoomUI.health < 0 &&
+//       curRoomUI.currentMode == "regular" &&
+//       !curRoomUI.isTutorial
+//     ) {
+//       curRoomUI.fillInfoFailureSuccessCompletionModal();
+//       curGameSession.setFinalScore(curRoomUI.currentScore);
+//       curGameSession.setSuccessStatus(false);
+//       curGameSession.endSession();
 
-      const sessionData = curGameSession.toObject();
-      console.log("printing session Data");
-      console.log(sessionData);
+//       const sessionData = curGameSession.toObject();
+//       console.log("printing session Data");
+//       console.log(sessionData);
 
-      fetch("/api/gamesessions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(sessionData),
-      }).then((res) => res.json());
+//       fetch("/api/gamesessions", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify(sessionData),
+//       }).then((res) => res.json());
 
-      curRoomUI.openCompletionModal();
-      curRoomUI.disableMouseEventListeners_K_P();
-    }
-  }
-}
+//       curRoomUI.openCompletionModal();
+//       curRoomUI.disableMouseEventListeners_K_P();
+//     }
+//   }
+// }
 
 /*
  * Draws lines between chests (edges of the graph) and sets up interaction logic.
@@ -794,11 +810,13 @@ function drawLines() {
       if (index !== -1) {
         // Chest logic
         if (currentStep.expectedEdges) {
-          document.querySelector(".Hint-Text").classList.add("hidden");
-          curRoomUI.uiText.innerText = currentStep.errorMessage;
-          curRoomUI.wrongSelectionFeedback?.();
-          curRoomUI.health = decrementHealth(curRoomUI.health);
-          shakeScreen();
+          GameHelper.handleWrongSelection(
+            curRoomUI,
+            currentStep.errorMessage,
+            curRoomUI.isTutorial,
+            curGameSession
+          );
+
           return;
         }
 
@@ -812,11 +830,12 @@ function drawLines() {
             curRoomUI.uiText.innerText = "Correct!";
             setTimeout(() => nextTutorialStep(), 500);
           } else {
-            document.querySelector(".Hint-Text").classList.add("hidden");
-            curRoomUI.uiText.innerText = currentStep.errorMessage;
-            curRoomUI.wrongSelectionFeedback?.();
-            curRoomUI.health = decrementHealth(curRoomUI.health);
-            shakeScreen();
+            GameHelper.handleWrongSelection(
+              curRoomUI,
+              currentStep.errorMessage,
+              curRoomUI.isTutorial,
+              curGameSession
+            );
           }
           return;
         }
@@ -826,11 +845,13 @@ function drawLines() {
 
     // Tutorial and Non-Tutorial: clicked edge when chest was expected
     if (currentStep.expectedChest !== null && intersectedEdge?.userData?.edge) {
-      document.querySelector(".Hint-Text").classList.add("hidden");
-      curRoomUI.uiText.innerText = currentStep.errorMessage;
-      curRoomUI.wrongSelectionFeedback?.();
-      curRoomUI.health = decrementHealth(curRoomUI.health);
-      shakeScreen();
+      GameHelper.handleWrongSelection(
+        curRoomUI,
+        currentStep.errorMessage,
+        curRoomUI.isTutorial,
+        curGameSession
+      );
+
       return;
     }
 
@@ -882,7 +903,7 @@ function drawLines() {
       if (allSelected) {
         selectedEdgesThisStep = [];
         document.querySelector(".Hint-Text").classList.add("hidden");
-        curRoomUI.uiText.innerText = "✅ Correct!";
+        curRoomUI.uiText.innerText = "Correct!";
         showInputDialog();
       }
 
@@ -928,15 +949,13 @@ function drawLines() {
           const [src, dst] = found.edge;
           curRoomUI.selectedEdgeForInput = {
             start: src,
-            end: dst, // the destination is always the node being updated
+            end: dst,
             weight: found.weight,
           };
 
           // Open dialog for user to input weight
           curRoomUI.inputCompleted = false;
-          document.getElementById("input-dialog").style.display = "block";
-          document.getElementById("input-backdrop").style.display = "block";
-          curRoomUI.isModalOpen = true;
+          showInputDialog();
         }
 
         // Proceed to the next step if all required edges are selected
@@ -955,11 +974,12 @@ function drawLines() {
           start,
           end,
         ]);
-        document.querySelector(".Hint-Text").classList.add("hidden");
-        curRoomUI.uiText.innerText = currentStep.errorMessage;
-        curRoomUI.wrongSelectionFeedback?.();
-        curRoomUI.health = decrementHealth(curRoomUI.health);
-        shakeScreen();
+        GameHelper.handleWrongSelection(
+          curRoomUI,
+          currentStep.errorMessage,
+          curRoomUI.isTutorial,
+          curGameSession
+        );
       }
     }
   };
@@ -1334,7 +1354,6 @@ function closeInputDialog() {
 
     if (isCorrect) {
       nextTutorialStep();
-      // ✅ Close dialog on success
       document.getElementById("input-dialog").style.display = "none";
       document.getElementById("input-backdrop").style.display = "none";
       document.getElementById("dialog-input").value = "";
@@ -1397,11 +1416,12 @@ function closeInputDialog() {
       document.getElementById("dialog-input").value = "";
       curRoomUI.isModalOpen = false;
     } else {
-      document.querySelector(".Hint-Text").classList.add("hidden");
-      curRoomUI.uiText.innerText = currentStep.errorMessage;
-      curRoomUI.wrongSelectionFeedback?.();
-      curRoomUI.health = decrementHealth(curRoomUI.health);
-      shakeScreen();
+      GameHelper.handleWrongSelection(
+        curRoomUI,
+        currentStep.errorMessage,
+        curRoomUI.isTutorial,
+        curGameSession
+      );
       return;
     }
   }
