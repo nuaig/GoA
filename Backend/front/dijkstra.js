@@ -39,6 +39,7 @@ let currentLevel = 1;
 let curNodes;
 let curEdges;
 let graph;
+let clickBlockedUntil = 0;
 let correctActionScoreAddition;
 // Define max score per level
 const levelMaxScores = {
@@ -501,7 +502,10 @@ function drawLines() {
   // Click handler: chest or edge interaction depending on tutorial/game state
   onClick = function (event) {
     event.preventDefault();
-    if (curRoomUI.isModalOpen) return;
+    if (curRoomUI.isModalOpen || Date.now() < clickBlockedUntil) {
+      console.log("[onClick] Ignored: modal is open.");
+      return;
+    }
 
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -1158,6 +1162,8 @@ function closeInputDialog() {
       return;
     }
   }
+
+  clickBlockedUntil = Date.now() + 400;
 }
 
 /// ===== Document Object Model & User Session Initialization Section =====
