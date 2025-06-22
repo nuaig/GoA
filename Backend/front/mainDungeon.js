@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       close: true, // Show close button
       gravity: "top", // Position: 'top' or 'bottom'
       position: "right", // Position: 'left', 'center' or 'right'
-      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)", // Custom background color
+      style: { background: "linear-gradient(to right, #00b09b, #96c93d)" }, // Custom background color
     }).showToast();
     sessionStorage.setItem("loginSuccess", "false");
   }

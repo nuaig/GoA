@@ -57,10 +57,10 @@ curNodes = Array.from({ length: numNodes }, (_, i) => i);
 curEdges = numEdges;
 graph = createRandomConnectedGraph(curNodes, curEdges);
 updateEdgeTable(graph.edges);
-let componentColors = {};
 let curAlgorithmForGraph = new DijkstraAlgorithm(graph);
 let onMouseMove;
 let onClick;
+let sceneLoadCount = 0;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -280,7 +280,6 @@ function nextTutorialStep() {
 async function createModels() {
   const margin = 0.1;
   const fixed = [];
-
   for (let i = 0; i < curNodes.length; i++) {
     console.log(`[createModels] Creating model for node ${i}`);
     let position;
@@ -355,307 +354,16 @@ async function createModels() {
 
   // Draw lines between all chests to form the graph
   drawLines();
+  // show the tables
 }
 
 /*
- * Updates label colors for all nodes in the same tree/component as the given edge.
- *
- * 1. Gets nodes with the same parent as edge.start and edge.end.
- * 2. Applies the appropriate existing or new color to all related nodes.
- * 3. Manages the `usedColors` set to avoid color reuse.
- *
- * @param {Object} edge - The selected edge with `start` and `end` node indices.
+ * Shows the tables in the beginning of the scene loading
  */
-function updateNodeColorsForSameTree(edge) {
-  function getNodesWithSameParentsAndColor(edge, color) {
-    const nodesWithSameParentStart =
-      curAlgorithmForGraph.getAllNodesWithSameParent(edge.start);
-    const nodesWithSameParentEnd =
-      curAlgorithmForGraph.getAllNodesWithSameParent(edge.end);
-
-    const allNodes = nodesWithSameParentStart.concat(nodesWithSameParentEnd);
-
-    console.log(
-      "[updateNodeColors] Coloring nodes:",
-      allNodes,
-      "with color:",
-      color
-    );
-
-    allNodes.forEach((node) => {
-      updateNodeLabelColor(chestLabelList[node], color);
-      componentColors[node] = color;
-    });
-  }
-
-  const nodeStartColor = componentColors[edge.start];
-  const nodeEndColor = componentColors[edge.end];
-
-  console.log(
-    "[updateNodeColors] Start Color:",
-    nodeStartColor,
-    "End Color:",
-    nodeEndColor
-  );
-
-  if (nodeStartColor && nodeEndColor) {
-    // Case: merging two components — use one color, free the other
-    getNodesWithSameParentsAndColor(edge, nodeStartColor);
-    usedColors.delete(nodeEndColor);
-    console.log(
-      "[updateNodeColors] Merged two components; freed color:",
-      nodeEndColor
-    );
-  } else if (!nodeStartColor && nodeEndColor) {
-    // Case: start uncolored, end has color — apply end color to both
-    getNodesWithSameParentsAndColor(edge, nodeEndColor);
-  } else if (nodeStartColor && !nodeEndColor) {
-    // Case: end uncolored, start has color — apply start color to both
-    getNodesWithSameParentsAndColor(edge, nodeStartColor);
-  } else {
-    // Case: both nodes uncolored — assign a new unique color
-    let newColor;
-    do {
-      newColor = getRandomColor();
-    } while (usedColors.has(newColor));
-
-    usedColors.add(newColor);
-    console.log("[updateNodeColors] Assigned new color:", newColor);
-
-    getNodesWithSameParentsAndColor(edge, newColor);
-  }
+function showTables() {
+  const container = document.getElementById("tables-container");
+  if (container) container.style.display = "block";
 }
-
-/*
- * Handles visual and logical updates when an edge is selected.
- *
- * 1. Highlights the selected edge and marks it as selected.
- * 2. Swaps chest models (closed → open) for both connected nodes.
- * 3. Adds a permanent ring under the label.
- * 4. Updates score and triggers UI refresh.
- *
- * @param {THREE.Line} intersectedObject - The edge object selected by the user, containing userData like startCube, endCube, and label.
- */
-function handleSelectionEffect(intersectedObject) {
-  // Visually highlight the selected edge
-  intersectedObject.material.color.set(0x00ff00); // Set line to green
-  intersectedObject.userData.selected = true; // Mark as selected
-
-  console.log("[handleSelectionEffect] Edge selected:", intersectedObject);
-
-  const { startCube, endCube } = intersectedObject.userData;
-
-  // Locate corresponding closed and open chest models for both nodes
-  const closedStart = chestList[chestList.indexOf(startCube)];
-  const openStart = openChestList[chestList.indexOf(startCube)];
-  const closedEnd = chestList[chestList.indexOf(endCube)];
-  const openEnd = openChestList[chestList.indexOf(endCube)];
-
-  // Swap visibility: show open chests, hide closed ones
-  closedStart.visible = false;
-  openStart.visible = true;
-  closedEnd.visible = false;
-  openEnd.visible = true;
-
-  console.log("[handleSelectionEffect] Swapped chest models for nodes");
-
-  // Create a black ring under the selected label as a permanent marker
-  const permanentRing = createRing(0.8, 0.9, labelDepth, 0x000000);
-  permanentRing.position.copy(intersectedObject.userData.label.position);
-  permanentRing.position.y -= labelDepth / 2;
-  scene.add(permanentRing);
-  permanentRing.visible = true;
-  ringList.push(permanentRing);
-  intersectedObject.userData.ring = permanentRing;
-
-  // Update score and trigger UI update
-  curRoomUI.currentScore += correctActionScoreAddition;
-  curRoomUI.updateScore(curRoomUI.currentScore);
-
-  console.log("[handleSelectionEffect] Score updated:", curRoomUI.currentScore);
-  console.log("[handleSelectionEffect] Current health:", curRoomUI.health);
-}
-
-/*
- * Handles user edge selection and triggers all effects.
- *
- * 1. Validates the selected edge via the algorithm.
- * 2. If valid: shows visual effects, updates labels and chests, checks for completion.
- * 3. If complete: calculates score, saves session, and shows end modal.
- * 4. If incorrect: provides visual feedback, shows hints, and checks for game over.
- *
- * @param {THREE.Line} intersectedObject - The selected edge containing node and label data in `userData`.
- * @param {string} currentAlgorithm - The name of the algorithm in use ("Dijkstra").
- */
-// function handleEdgeSelection(intersectedObject, currentAlgorithm) {
-//   const edge = intersectedObject.userData.edge;
-//   const selectEdgeResult = curAlgorithmForGraph.selectEdge([
-//     edge.start,
-//     edge.end,
-//     edge.weight,
-//   ]);
-//   const isComplete = curAlgorithmForGraph.isComplete();
-//   const currentWeight = curAlgorithmForGraph.currentWeight;
-
-//   if (selectEdgeResult.every((res) => res === 1)) {
-//     // Successful edge selection
-//     document.querySelector(".Hint-Text").classList.add("hidden");
-//     curRoomUI.uiText.innerText = "✅ Correct!";
-
-//     // Update component colors if using Dijkstra
-//     if (currentAlgorithm === "Dijkstra") {
-//       updateNodeColorsForSameTree(edge);
-//     }
-
-//     // Visual + logical effect
-//     handleSelectionEffect(intersectedObject);
-
-//     console.log("Selected edges:", curAlgorithmForGraph.selectedEdges);
-//     console.log("Current weight of the spanning tree:", currentWeight);
-
-//     if (isComplete) {
-//       // Game is complete — handle success flow
-//       if (curRoomUI.isTutorial) {
-//         curRoomUI.updateTutorialModalToBeTutorialCompleteModal();
-//         curRoomUI.currentLevel = null;
-//         curRoomUI.isTutorial = false;
-//         return;
-//       }
-
-//       console.log(currentLevel, "current Level");
-
-//       // Calculate final score based on health and max score
-//       curRoomUI.currentScore = Math.floor(
-//         levelMaxScores[curRoomUI.currentLevel] *
-//           ((curRoomUI.health + 1) * 0.1 + 1)
-//       );
-//       console.log(curRoomUI.currentScore);
-
-//       curRoomUI.uiText.innerHTML = `Congratulations! You've completed the game!<br>The total weight of the minimum spanning tree is ${currentWeight}.`;
-
-//       // Modal, score storage, status updates
-//       curRoomUI.fillInfoSuccessCompletionModal();
-//       console.log(curRoomUI.totalStars);
-
-//       curGameSession.setFinalScore(curRoomUI.currentScore);
-//       curGameSession.setSuccessStatus(true);
-//       curGameSession.endSession();
-
-//       const sessionData = curGameSession.toObject();
-//       console.log("printing session Data");
-//       console.log(sessionData);
-
-//       fetch("/api/gamesessions", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(sessionData),
-//       }).then((res) => res.json());
-
-//       curRoomUI.updateLevelStatus(curRoomUI.currentLevel, curRoomUI.totalStars);
-//       const status_update_string =
-//         curRoomUI.currentLevel != 3 ? "completed" : "completed_first_time";
-
-//       curRoomUI.gameStatusService.updateGameStatus(
-//         "Dijkstra",
-//         curRoomUI.currentLevel,
-//         curRoomUI.currentMode,
-//         curRoomUI.currentScore,
-//         curRoomUI.totalStars + 1,
-//         status_update_string
-//       );
-
-//       curRoomUI.gameStatusService.unlockGameLevel(
-//         "Dijkstra",
-//         curRoomUI.currentLevel + 1,
-//         curRoomUI.currentMode
-//       );
-
-//       curRoomUI.openCompletionModal();
-//       curRoomUI.disableMouseEventListeners_K_P();
-//     } else {
-//       // Not complete yet — show updated weight
-//       curRoomUI.uiText.innerText = `Correct! Current weight is ${currentWeight}.`;
-//     }
-//   } else {
-//     // Incorrect edge selection
-//     shakeScreen();
-//     curGameSession.incrementMistakes();
-//     console.log("Incorrect edge selection:", edge);
-
-//     // Visual feedback for incorrect selection
-//     intersectedObject.material.color.set(0xff0000);
-//     if (intersectedObject.userData.label) {
-//       intersectedObject.userData.label.material.color.set(0xff0000);
-//     }
-
-// curRoomUI.health = decrementHealth(curRoomUI.health);
-// shakeScreen();
-//     if (
-//       curRoomUI.health < 0 &&
-//       curRoomUI.currentMode == "regular" &&
-//       !curRoomUI.isTutorial
-//     ) {
-//       curRoomUI.uiText.innerHTML =
-//         "You've run out of lives. Try again from the beginning.";
-//       curRoomUI.fillInfoFailureCompletionModal?.();
-//       curRoomUI.openCompletionModal?.();
-//       curRoomUI.currentLevel = null;
-//       curRoomUI.isTutorial = false;
-//     }
-
-//     // Show hint panel
-//     document.querySelector(".Hint-Text").classList.remove("hidden");
-//     const hintItems = document.querySelectorAll(".Hint-Text li");
-//     updateHintIcons(hintItems[0], selectEdgeResult[0]);
-//     updateHintIcons(hintItems[1], selectEdgeResult[1]);
-
-//     // Display instructional text based on mode
-//     if (curRoomUI.isTutorial) {
-//       curRoomUI.uiText.innerText =
-//         "Learn from the hints below why this choice is incorrect. Continue following the instruction.";
-//     } else {
-//       curRoomUI.uiText.innerText =
-//         "Incorrect Selection. Make sure to meet the following conditions:";
-//     }
-
-//     // Restore edge color after 3 seconds
-//     setTimeout(() => {
-//       intersectedObject.material.color.set(0x74c0fc);
-//       if (intersectedObject.userData.label) {
-//         intersectedObject.userData.label.material.color.set(0x000000);
-//       }
-//     }, 3000);
-
-//     // Handle game failure if health drops below zero
-//     if (
-//       curRoomUI.health < 0 &&
-//       curRoomUI.currentMode == "regular" &&
-//       !curRoomUI.isTutorial
-//     ) {
-//       curRoomUI.fillInfoFailureSuccessCompletionModal();
-//       curGameSession.setFinalScore(curRoomUI.currentScore);
-//       curGameSession.setSuccessStatus(false);
-//       curGameSession.endSession();
-
-//       const sessionData = curGameSession.toObject();
-//       console.log("printing session Data");
-//       console.log(sessionData);
-
-//       fetch("/api/gamesessions", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(sessionData),
-//       }).then((res) => res.json());
-
-//       curRoomUI.openCompletionModal();
-//       curRoomUI.disableMouseEventListeners_K_P();
-//     }
-//   }
-// }
 
 /*
  * Draws lines between chests (edges of the graph) and sets up interaction logic.
@@ -665,6 +373,10 @@ function handleSelectionEffect(intersectedObject) {
  * 3. Handles tutorial and game logic when a chest or edge is clicked.
  */
 function drawLines() {
+  sceneLoadCount++;
+  if (sceneLoadCount > 1) {
+    showTables();
+  }
   console.log("Drawing lines between chests.");
   console.log("Graph edges:", graph.edges);
 
@@ -811,6 +523,10 @@ function drawLines() {
 
       const index = chestList.indexOf(clickedChest);
       if (index !== -1) {
+        if (openChestList[index]?.userData?.clicked) {
+          console.log(`Node ${index} already visited — ignoring click.`);
+          return;
+        }
         // Chest logic
         if (currentStep.expectedEdges) {
           GameHelper.handleWrongSelection(
@@ -1173,7 +889,6 @@ function resetScene() {
   // Reset UI and color tracking
   hoverRing.visible = false;
   usedColors.clear();
-  componentColors = {};
 
   // Reset score and visual star indicators
   curRoomUI.updateScore(0);
@@ -1425,6 +1140,21 @@ function closeInputDialog() {
         curRoomUI.isTutorial,
         curGameSession
       );
+
+      curRoomUI.selectedEdgeForInput = null;
+      curRoomUI.inputCompleted = false;
+      selectedEdgesThisStep = selectedEdgesThisStep.filter(
+        ([s0, s1]) =>
+          !(
+            (s0 === selected.start && s1 === selected.end) ||
+            (s0 === selected.end && s1 === selected.start)
+          )
+      );
+      document.getElementById("input-dialog").style.display = "none";
+      document.getElementById("input-backdrop").style.display = "none";
+      document.getElementById("dialog-input").value = "";
+      curRoomUI.isModalOpen = false;
+
       return;
     }
   }
@@ -1550,6 +1280,10 @@ fontLoader.load(
     );
   }
 );
+
+document.getElementById("dialog-input").addEventListener("keydown", (e) => {
+  e.stopPropagation(); // stop bubbling to global listeners
+});
 
 // ===== Scene Initialization Section =====
 createThreePointLightingRoom(scene);
