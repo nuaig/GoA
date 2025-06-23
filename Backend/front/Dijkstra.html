@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html>
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -14,71 +13,48 @@
       <div class="world" id="world"></div>
     </div>
 
-    <!-- TODO: Need to change the svg here -->
     <div class="topnav-centered">
       <p id="UI-Text" class="UI-Text">
-        Start by selecting node 0, then find the shortest path to every other node in the graph!
+        Start by selecting node 0, then find the shortest path to every other
+        node in the graph!
       </p>
       <ul class="UI-Text Hint-Text hidden">
         <li>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 48 48"
-            width="48px"
-            height="48px"
-          >
-            <path
-              fill="#F44336"
-              d="M21.5 4.5H26.501V43.5H21.5z"
-              transform="rotate(45.001 24 24)"
-            />
-            <path
-              fill="#F44336"
-              d="M21.5 4.5H26.5V43.501H21.5z"
-              transform="rotate(135.008 24 24)"
-            />
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 48 48"
-            width="48px"
-            height="48px"
-          >
-            <path
-              fill="#43A047"
-              d="M40.6 12.1L17 35.7 7.4 26.1 4.6 29 17 41.3 43.4 14.9z"
-            />
-          </svg>
+          <img
+            class="red-cross-icon"
+            src="./symbols/red-cross-icon.svg"
+            alt="Red Cross Icon"
+            width="48"
+            height="48"
+            style="cursor: pointer"
+          />
+          <img
+            class="green-check-icon"
+            src="./symbols/green-check-icon.svg"
+            alt="Green Check Icon"
+            width="48"
+            height="48"
+            style="cursor: pointer"
+          />
           Select the edge with the smallest total distance from the start
         </li>
         <li>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 48 48"
-            width="48px"
-            height="48px"
-          >
-            <path
-              fill="#F44336"
-              d="M21.5 4.5H26.501V43.5H21.5z"
-              transform="rotate(45.001 24 24)"
-            />
-            <path
-              fill="#F44336"
-              d="M21.5 4.5H26.5V43.501H21.5z"
-              transform="rotate(135.008 24 24)"
-            />
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 48 48"
-            width="48px"
-            height="48px"
-          >
-            <path
-              fill="#43A047"
-              d="M40.6 12.1L17 35.7 7.4 26.1 4.6 29 17 41.3 43.4 14.9z"
-            /></svg>
+          <img
+            class="red-cross-icon"
+            src="./symbols/red-cross-icon.svg"
+            alt="Red Cross Icon"
+            width="48"
+            height="48"
+            style="cursor: pointer"
+          />
+          <img
+            class="green-check-icon"
+            src="./symbols/green-check-icon.svg"
+            alt="Green Check Icon"
+            width="48"
+            height="48"
+            style="cursor: pointer"
+          />
           >Only connect to nodes that haven't been visited yet
         </li>
       </ul>
@@ -88,13 +64,41 @@
     <div class="Action-Icons-Holder">
       <div class="Action-Icons">
         <!-- Rearrange Icon -->
-        <img class="Rearrange-Action" src="./symbols/rearrange-icon.svg" alt="Rearrange Icon" width="76" height="76" style="cursor: pointer;" />
+        <img
+          class="Rearrange-Action"
+          src="./symbols/rearrange-icon.svg"
+          alt="Rearrange Icon"
+          width="76"
+          height="76"
+          style="cursor: pointer"
+        />
         <!-- Psudocode Icon -->
-        <img class="Pesudocode-Icon" src="./symbols/psudocode-icon.svg" alt="Psudocode Icon" width="76" height="76" style="cursor: pointer;" />
+        <img
+          class="Pesudocode-Icon"
+          src="./symbols/psudocode-icon.svg"
+          alt="Psudocode Icon"
+          width="76"
+          height="76"
+          style="cursor: pointer"
+        />
         <!-- Instruction Icon -->
-        <img class="Instruction-Icon" src="./symbols/instruction-icon.svg" alt="Instruction Icon" width="76" height="76" style="cursor: pointer;" />
+        <img
+          class="Instruction-Icon"
+          src="./symbols/instruction-icon.svg"
+          alt="Instruction Icon"
+          width="76"
+          height="76"
+          style="cursor: pointer"
+        />
         <!-- Settings Icon -->
-        <img class="settings__icon" src="./symbols/settings-icon.svg" alt="Settings Icon" width="76" height="76" style="cursor: pointer;" />
+        <img
+          class="settings__icon"
+          src="./symbols/settings-icon.svg"
+          alt="Settings Icon"
+          width="76"
+          height="76"
+          style="cursor: pointer"
+        />
       </div>
     </div>
 
@@ -144,11 +148,41 @@
         <div class="health">
           <div class="health-label">Lives</div>
           <div id="health-bar">
-            <img class="health-icon" src="./symbols/health-full-icon.svg" alt="Health Icon" width="20" height="20" />
-            <img class="health-icon" src="./symbols/health-full-icon.svg" alt="Health Icon" width="20" height="20" />
-            <img class="health-icon" src="./symbols/health-full-icon.svg" alt="Health Icon" width="20" height="20" />
-            <img class="health-icon" src="./symbols/health-full-icon.svg" alt="Health Icon" width="20" height="20" />
-            <img class="health-icon" src="./symbols/health-full-icon.svg" alt="Health Icon" width="20" height="20" />
+            <img
+              class="health-icon"
+              src="./symbols/health-full-icon.svg"
+              alt="Health Icon"
+              width="20"
+              height="20"
+            />
+            <img
+              class="health-icon"
+              src="./symbols/health-full-icon.svg"
+              alt="Health Icon"
+              width="20"
+              height="20"
+            />
+            <img
+              class="health-icon"
+              src="./symbols/health-full-icon.svg"
+              alt="Health Icon"
+              width="20"
+              height="20"
+            />
+            <img
+              class="health-icon"
+              src="./symbols/health-full-icon.svg"
+              alt="Health Icon"
+              width="20"
+              height="20"
+            />
+            <img
+              class="health-icon"
+              src="./symbols/health-full-icon.svg"
+              alt="Health Icon"
+              width="20"
+              height="20"
+            />
           </div>
         </div>
         <div class="score">
@@ -170,7 +204,9 @@
 
     <!-- Welcome Modal -->
     <div class="modal modal__tutorial hidden">
-      <h2 class="modal__header tutorial__header">Welcome to Dijkstra's Room!</h2>
+      <h2 class="modal__header tutorial__header">
+        Welcome to Dijkstra's Room!
+      </h2>
       <p class="label__tutorial_text">
         Would you like to learn Dijkstra's Algorithm through an interactive
         walk-through tutorial?
@@ -201,21 +237,17 @@
           Go back to main dungeon
         </button>
       </div>
-      <svg
+      <img
         class="btn__close"
-        xmlns="http://www.w3.org/2000/svg"
-        height="36px"
-        viewBox="0 -960 960 960"
-        width="36px"
-        fill="#a5d8ff"
-      >
-        <path
-          d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
-        />
-      </svg>
+        src="./symbols/close-icon.svg"
+        alt="Close Icon"
+        width="36"
+        height="36"
+        style="cursor: pointer"
+      />
     </div>
 
-    <!-- Level Choice Modal TODO: Figure out stars filled and empty-->
+    <!-- Level Choice Modal -->
     <div class="modal modal__level__selection hidden">
       <h2 class="modal__header level__selection__header">
         Dijkstra's Room Levels
@@ -234,309 +266,136 @@
       <button class="btn btn__level__1 level__btn__holder">
         <p class="btn__level">Level 1</p>
         <div class="level__stars__holder">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a5d8ff"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+          />
+          <img
             class="feather feather-star"
-          >
-            <polygon
-              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-            />
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a5d8ff"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+          />
+          <img
             class="feather feather-star"
-          >
-            <polygon
-              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-            />
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a5d8ff"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="feather feather-star"
-          >
-            <polygon
-              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-            />
-          </svg>
+          />
         </div>
         <div></div>
       </button>
       <button class="btn btn__level__2 level__btn__holder level__locked">
         <p class="btn__level">Level 2</p>
         <div class="level__stars__holder">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="SmallEmpty Star Icon"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a5d8ff"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+          />
+          <img
             class="feather feather-star"
-          >
-            <polygon
-              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-            />
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a5d8ff"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+          />
+          <img
             class="feather feather-star"
-          >
-            <polygon
-              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-            />
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a5d8ff"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="feather feather-star"
-          >
-            <polygon
-              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-            />
-          </svg>
+          />
         </div>
         <div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+          <img
+            class="feather feather-lock"
+            src="./symbols/lock-icon.svg"
+            alt="Lock Icon"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a5d8ff"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="feather feather-lock"
-          >
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
+          />
         </div>
       </button>
       <button class="btn btn__level__3 level__btn__holder level__locked">
         <p class="btn__level">Level 3</p>
         <div class="level__stars__holder">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a5d8ff"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+          />
+          <img
             class="feather feather-star"
-          >
-            <polygon
-              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-            />
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a5d8ff"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+          />
+          <img
             class="feather feather-star"
-          >
-            <polygon
-              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-            />
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a5d8ff"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="feather feather-star"
-          >
-            <polygon
-              points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-            />
-          </svg>
+          />
         </div>
         <div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+          <img
+            class="feather feather-lock"
+            src="./symbols/lock-icon.svg"
+            alt="Lock Icon"
             width="24"
             height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a5d8ff"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="feather feather-lock"
-          >
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
+          />
         </div>
       </button>
 
-      <svg
+      <img
         class="btn__close btn__level__close hidden"
-        xmlns="http://www.w3.org/2000/svg"
-        height="36px"
-        viewBox="0 -960 960 960"
-        width="36px"
-        fill="#a5d8ff"
-      >
-        <path
-          d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
-        />
-      </svg>
+        src="./symbols/close-icon.svg"
+        alt="Close Icon"
+        width="36"
+        height="36"
+        style="cursor: pointer"
+      />
     </div>
 
-    <!-- Completion Modal TODO: Remove svg and show empty star or full star TODO: make svg image-->
+    <!-- Completion Modal -->
     <div class="modal modal__completion hidden">
       <h2 class="modal__header modal__completion__header">Congratulations!</h2>
       <div class="stars__rating">
-        <svg
+        <img
           class="star"
-          version="1.0"
-          id="Layer_1"
-          xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink"
-          viewBox="0 0 64 64"
-          enable-background="new 0 0 64 64"
-          xml:space="preserve"
-          fill="#000000"
-          transform="matrix(1, 0, 0, 1, 0, 0)"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <g>
-              <path
-                fill="#F9EBB2394240"
-                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478 M31.998,0 c-0.775,0-1.48,0.448-1.811,1.15l-8.815,18.778L1.698,22.935c-0.741,0.113-1.356,0.632-1.595,1.343 c-0.238,0.71-0.059,1.494,0.465,2.031l14.294,14.657L11.484,61.67c-0.124,0.756,0.195,1.517,0.822,1.957 c0.344,0.243,0.747,0.366,1.151,0.366c0.332,0,0.666-0.084,0.968-0.25l17.572-9.719l17.572,9.719 c0.302,0.166,0.636,0.25,0.968,0.25c0.404,0,0.808-0.123,1.151-0.366c0.627-0.44,0.946-1.201,0.822-1.957l-3.378-20.704 l14.294-14.657c0.523-0.537,0.703-1.321,0.465-2.031c-0.238-0.711-0.854-1.229-1.595-1.343l-19.674-3.006L33.809,1.15 C33.479,0.448,32.773,0,31.998,0L31.998,0z"
-              ></path>
-              <path
-                fill="#F9EBB2"
-                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478"
-              ></path>
-            </g>
-          </g>
-        </svg>
-        <svg
+          src="./symbols/star-big-full-icon.svg"
+          alt="Full Star"
+          width="90"
+          height="90"
+        />
+        <img
           class="star"
-          version="1.0"
-          id="Layer_1"
-          xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink"
-          viewBox="0 0 64 64"
-          enable-background="new 0 0 64 64"
-          xml:space="preserve"
-          fill="#000000"
-          transform="matrix(1, 0, 0, 1, 0, 0)"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <g>
-              <path
-                fill="#F9EBB2394240"
-                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478 M31.998,0 c-0.775,0-1.48,0.448-1.811,1.15l-8.815,18.778L1.698,22.935c-0.741,0.113-1.356,0.632-1.595,1.343 c-0.238,0.71-0.059,1.494,0.465,2.031l14.294,14.657L11.484,61.67c-0.124,0.756,0.195,1.517,0.822,1.957 c0.344,0.243,0.747,0.366,1.151,0.366c0.332,0,0.666-0.084,0.968-0.25l17.572-9.719l17.572,9.719 c0.302,0.166,0.636,0.25,0.968,0.25c0.404,0,0.808-0.123,1.151-0.366c0.627-0.44,0.946-1.201,0.822-1.957l-3.378-20.704 l14.294-14.657c0.523-0.537,0.703-1.321,0.465-2.031c-0.238-0.711-0.854-1.229-1.595-1.343l-19.674-3.006L33.809,1.15 C33.479,0.448,32.773,0,31.998,0L31.998,0z"
-              ></path>
-              <path
-                fill="#F9EBB2"
-                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478"
-              ></path>
-            </g>
-          </g>
-        </svg>
-        <svg
+          src="./symbols/star-big-full-icon.svg"
+          alt="Full Star"
+          width="90"
+          height="90"
+        />
+        <img
           class="star"
-          version="1.0"
-          id="Layer_1"
-          xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink"
-          viewBox="0 0 64 64"
-          enable-background="new 0 0 64 64"
-          xml:space="preserve"
-          fill="#000000"
-          transform="matrix(1, 0, 0, 1, 0, 0)"
-        >
-          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-          <g
-            id="SVGRepo_tracerCarrier"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          ></g>
-          <g id="SVGRepo_iconCarrier">
-            <g>
-              <path
-                fill="#F9EBB2394240"
-                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478 M31.998,0 c-0.775,0-1.48,0.448-1.811,1.15l-8.815,18.778L1.698,22.935c-0.741,0.113-1.356,0.632-1.595,1.343 c-0.238,0.71-0.059,1.494,0.465,2.031l14.294,14.657L11.484,61.67c-0.124,0.756,0.195,1.517,0.822,1.957 c0.344,0.243,0.747,0.366,1.151,0.366c0.332,0,0.666-0.084,0.968-0.25l17.572-9.719l17.572,9.719 c0.302,0.166,0.636,0.25,0.968,0.25c0.404,0,0.808-0.123,1.151-0.366c0.627-0.44,0.946-1.201,0.822-1.957l-3.378-20.704 l14.294-14.657c0.523-0.537,0.703-1.321,0.465-2.031c-0.238-0.711-0.854-1.229-1.595-1.343l-19.674-3.006L33.809,1.15 C33.479,0.448,32.773,0,31.998,0L31.998,0z"
-              ></path>
-              <path
-                fill="#F9EBB2"
-                d="M31.998,2.478c0.279,0,0.463,0.509,0.463,0.509l8.806,18.759l20.729,3.167l-14.999,15.38l3.541,21.701 l-18.54-10.254l-18.54,10.254l3.541-21.701L2,24.912l20.729-3.167l8.798-18.743C31.527,3.002,31.719,2.478,31.998,2.478"
-              ></path>
-            </g>
-          </g>
-        </svg>
+          src="./symbols/star-big-full-icon.svg"
+          alt="Full Star"
+          width="90"
+          height="90"
+        />
       </div>
       <p class="label__final_score">Final Score : <span>00</span></p>
       <p class="label__completion_text">
@@ -552,7 +411,11 @@
       </div>
     </div>
     <div class="modal instruction hidden">
-      <img class="instruction__img" src="src/GameFeatures/Kruskal%20Game%20Features.svg" alt="Kruskal Game Features">
+      <img
+        class="instruction__img"
+        src="src/GameFeatures/Kruskal%20Game%20Features.svg"
+        alt="Dijkstra Game Features"
+      />
       <div class="button__holder">
         <button class="btn btn__instruction__start">
           Start the game &rarr;
@@ -561,22 +424,39 @@
     </div>
     <div class="modal algo-instruction-modal hidden">
       <div class="algo-instruction mySwiper">
-        <h2 class="modal__header">Step-by-Step Guide to Dijkstra's Algorithm</h2>
+        <h2 class="modal__header">
+          Step-by-Step Guide to Dijkstra's Algorithm
+        </h2>
         <div class="testi-content swiper-wrapper">
           <div class="slide swiper-slide">
-            <img src="src/AlgorithmsInstructions/kruskalAlgo/1.svg" alt="Kruskal Algorithm Step 1">
+            <img
+              src="src/AlgorithmsInstructions/kruskalAlgo/1.svg"
+              alt="Dijkstra Algorithm Step 1"
+            />
           </div>
           <div class="slide swiper-slide">
-            <img src="src/AlgorithmsInstructions/kruskalAlgo/2.svg" alt="Kruskal Algorithm Step 2">
+            <img
+              src="src/AlgorithmsInstructions/kruskalAlgo/2.svg"
+              alt="Dijkstra Algorithm Step 2"
+            />
           </div>
           <div class="slide swiper-slide">
-            <img src="src/AlgorithmsInstructions/kruskalAlgo/3.svg" alt="Kruskal Algorithm Step 3">
+            <img
+              src="src/AlgorithmsInstructions/kruskalAlgo/3.svg"
+              alt="Dijkstra Algorithm Step 3"
+            />
           </div>
           <div class="slide swiper-slide">
-            <img src="src/AlgorithmsInstructions/kruskalAlgo/4.svg" alt="Kruskal Algorithm Step 4">
+            <img
+              src="src/AlgorithmsInstructions/kruskalAlgo/4.svg"
+              alt="Dijkstra Algorithm Step 4"
+            />
           </div>
           <div class="slide swiper-slide">
-            <img src="src/AlgorithmsInstructions/kruskalAlgo/5.svg" alt="Kruskal Algorithm Step 5">
+            <img
+              src="src/AlgorithmsInstructions/kruskalAlgo/5.svg"
+              alt="Dijkstra Algorithm Step 5"
+            />
           </div>
         </div>
         <div class="swiper-button-next nav-btn"></div>
@@ -590,78 +470,155 @@
     </div>
     <div class="overlay hidden"></div>
     <!-- Edge Table UI -->
-    <div id="tables-container" class="edge-table-container" style="display: none; position: absolute; bottom: 10px; left: 10px; background: #343a40; color: white; padding: 10px; border-radius: 8px; z-index: 99;">
-        <div style="position: absolute; bottom: 10px; left: 10px; right: 10px; display: flex; gap: 20px; justify-content: space-between; z-index: 99; font-family: monospace;">
+    <div
+      id="tables-container"
+      class="edge-table-container"
+      style="
+        display: none;
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background: #343a40;
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        z-index: 99;
+      "
+    >
+      <div
+        style="
+          position: absolute;
+          bottom: 10px;
+          left: 10px;
+          right: 10px;
+          display: flex;
+          gap: 20px;
+          justify-content: space-between;
+          z-index: 99;
+          font-family: monospace;
+        "
+      >
         <!-- Edge Table -->
-          <div style="background: #343a40; color: white; padding: 10px; border-radius: 8px; flex: 1;">
-            <h3 style="margin: 0 0 10px 0;">Graph Edges</h3>
-            <table id="edgeTable" border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-              <thead>
-                <tr style="background-color: #1971c2;">
-                  <th>From</th>
-                  <th>To</th>
-                  <th>Weight</th>
-                </tr>
-              </thead>
-              <tbody>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Distance Table -->
-          <div style="background: #343a40; color: white; padding: 10px; border-radius: 8px; flex: 1;">
-            <h3 style="margin: 0 0 10px 0;">Distance from Source</h3>
-            <table id="distanceTable" border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-              <thead>
-                <tr style="background-color: #1971c2;">
-                  <th>Node</th>
-                  <th>Distance</th>
-                </tr>
-              </thead>
-              <tbody id="distance-table-body">
-                <!-- Rows will be inserted here -->
-              </tbody>
-            </table>
-          </div>
+        <div
+          style="
+            background: #343a40;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            flex: 1;
+          "
+        >
+          <h3 style="margin: 0 0 10px 0">Graph Edges</h3>
+          <table
+            id="edgeTable"
+            border="1"
+            cellpadding="5"
+            cellspacing="0"
+            style="border-collapse: collapse; width: 100%"
+          >
+            <thead>
+              <tr style="background-color: #1971c2">
+                <th>From</th>
+                <th>To</th>
+                <th>Weight</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
+
+        <!-- Distance Table -->
+        <div
+          style="
+            background: #343a40;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            flex: 1;
+          "
+        >
+          <h3 style="margin: 0 0 10px 0">Distance from Source</h3>
+          <table
+            id="distanceTable"
+            border="1"
+            cellpadding="5"
+            cellspacing="0"
+            style="border-collapse: collapse; width: 100%"
+          >
+            <thead>
+              <tr style="background-color: #1971c2">
+                <th>Node</th>
+                <th>Distance</th>
+              </tr>
+            </thead>
+            <tbody id="distance-table-body">
+              <!-- Rows will be inserted here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <!-- Backdrop -->
-    <div id="input-backdrop" style="
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background-color: rgba(0, 0, 0, 0.6);
-      z-index: 999;
-    "></div>
+    <div
+      id="input-backdrop"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 999;
+      "
+    ></div>
     <!-- Dialog -->
-    <div id="input-dialog" style="
-      display: none;
-      position: fixed;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -30%);
-      background: #343a40;
-      color: white;
-      border-radius: 8px;
-      border: 2px solid #1971c2;
-      padding: 20px;
-      z-index: 1000;
-      width: 300px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    ">
-      <h3 style="margin-top: 0; color: white;">Distance Update</h3>
-      <p style="margin-bottom: 10px;">Hello, this works:</p>
+    <div
+      id="input-dialog"
+      style="
+        display: none;
+        position: fixed;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -30%);
+        background: #343a40;
+        color: white;
+        border-radius: 8px;
+        border: 2px solid #1971c2;
+        padding: 20px;
+        z-index: 1000;
+        width: 300px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      "
+    >
+      <h3 style="margin-top: 0; color: white">Distance Update</h3>
+      <p style="margin-bottom: 10px">Hello, this works:</p>
       <input
         type="text"
         id="dialog-input"
         placeholder="Enter something..."
-        style="width: 100%; padding: 10px; border-radius: 5px; border: none; font-size: 14px; box-sizing: border-box; margin-bottom: 15px;"
+        style="
+          width: 100%;
+          padding: 10px;
+          border-radius: 5px;
+          border: none;
+          font-size: 14px;
+          box-sizing: border-box;
+          margin-bottom: 15px;
+        "
       />
-      <div style="text-align: center;">
+      <div style="text-align: center">
         <button
           id="dialog-ok-btn"
-          style="background-color: #1971c2; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;"
+          style="
+            background-color: #1971c2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+          "
         >
           OK
         </button>

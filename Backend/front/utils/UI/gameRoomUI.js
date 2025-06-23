@@ -310,6 +310,7 @@ class GameRoomUI {
           ".level__stars__holder"
         );
 
+        // TODO: Change and remove this when all code files have the img instead of svg
         const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
         for (let i = 0; i < stars.length; i++) {
           if (i < gameData.stars) {
@@ -318,6 +319,16 @@ class GameRoomUI {
           } else {
             stars[i].classList.remove("filled");
             stars[i].style.fill = "none";
+          }
+        }
+
+        const changingStars =
+          currentStarsHolder.querySelectorAll("img.feather-star");
+        for (let i = 0; i < changingStars.length; i++) {
+          if (i < gameData.stars) {
+            changingStars[i].src = "./../../symbols/star-small-full-icon.svg";
+          } else {
+            changingStars[i].src = "./../../symbols/star-small-empty-icon.svg";
           }
         }
 
@@ -405,6 +416,7 @@ class GameRoomUI {
     );
 
     // Update stars based on the starsCount
+    // TODO: CHange and remove this when all code files are using the img instead of svg
     const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
     for (let i = 0; i < stars.length; i++) {
       if (i <= starsCount) {
@@ -413,6 +425,16 @@ class GameRoomUI {
       } else {
         stars[i].classList.remove("filled");
         stars[i].style.fill = "none"; // Default color for unfilled stars
+      }
+    }
+
+    const changingStars =
+      currentStarsHolder.querySelectorAll("img.feather-star");
+    for (let i = 0; i < changingStars.length; i++) {
+      if (i <= starsCount) {
+        changingStars[i].src = "./../../symbols/star-small-full-icon.svg";
+      } else {
+        changingStars[i].src = "./../../symbols/star-small-empty-icon.svg";
       }
     }
     // Unlock the next level if the current one is completed
@@ -508,7 +530,11 @@ class GameRoomUI {
       this.tutorialInstructionModal.classList.remove("hidden");
       this.isTutorial = true;
       this.callbacks.startTutorial();
-      if (this.gameName == "Kruskal" || this.gameName == "Prim" || this.gameName == "Dijkstra") {
+      if (
+        this.gameName == "Kruskal" ||
+        this.gameName == "Prim" ||
+        this.gameName == "Dijkstra"
+      ) {
         this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
       }
       if (this.gameName == "Heapsort") {
@@ -536,9 +562,10 @@ class GameRoomUI {
     } else if (this.gameName == "Kruskal") {
       message =
         "<br>Keep in mind to always select the edge with the minimum weight that won't form a cycle.";
-    } else if(this.gameName == "Dijkstra"){
-      message = "<br>Keep in mind to always select the edge that leads to the closest unvisited node with the lowest known cost."
-    }else if (this.gameName == "Heapsort") {
+    } else if (this.gameName == "Dijkstra") {
+      message =
+        "<br>Keep in mind to always select the edge that leads to the closest unvisited node with the lowest known cost.";
+    } else if (this.gameName == "Heapsort") {
       message =
         "<br>Keep in mind to always maintain the Max-Heap property: The largest element must be at the root. Swap it with the last element, remove it, and reheapify until the array is sorted.";
     }
@@ -876,7 +903,11 @@ class GameRoomUI {
           );
 
           // If the game is Kruskal or Prim, trigger the initial camera animation
-          if (this.gameName == "Kruskal" || this.gameName == "Prim" || this.gameName == "Dijkstra") {
+          if (
+            this.gameName == "Kruskal" ||
+            this.gameName == "Prim" ||
+            this.gameName == "Dijkstra"
+          ) {
             this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
           }
           if (this.gameName == "Heapsort") {
@@ -1050,7 +1081,11 @@ class GameRoomUI {
   // enable Mouse event listeners
   enableMouseEventListeners_K_P() {
     console.log(this.gameName);
-    if (this.gameName == "Kruskal" || this.gameName == "Prim" || this.gameName == "Dijkstra") {
+    if (
+      this.gameName == "Kruskal" ||
+      this.gameName == "Prim" ||
+      this.gameName == "Dijkstra"
+    ) {
       if (this.callbacks?.onMouseMove) {
         console.log("mousemove added back");
         window.addEventListener("mousemove", this.callbacks.onMouseMove, false);
@@ -1064,7 +1099,11 @@ class GameRoomUI {
 
   // Disable mouse event listeners
   disableMouseEventListeners_K_P() {
-    if (this.gameName == "Kruskal" || this.gameName == "Prim" || this.gameName == "Dijkstra") {
+    if (
+      this.gameName == "Kruskal" ||
+      this.gameName == "Prim" ||
+      this.gameName == "Dijkstra"
+    ) {
       if (this.callbacks?.onMouseMove) {
         console.log("mousemove removed");
         window.removeEventListener(

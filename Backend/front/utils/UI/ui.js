@@ -30,7 +30,7 @@ export function decrementHealth(health) {
   if (health >= 0 && health <= 4) {
     // TODO: when all svgs are replaced, remove this line
     healthIcons[health].style.fill = "white";
-    healthIcons[health].src = "./../../symbols/health-empty-icon.svg"
+    healthIcons[health].src = "./../../symbols/health-empty-icon.svg";
     health--;
     console.log(health);
   }
@@ -42,39 +42,46 @@ export function resetHealth() {
   const healthIcons = document.querySelectorAll(".health-icon");
   for (let i = 0; i <= health; i++) {
     healthIcons[i].style.fill = "red";
-     // TODO: when all svgs are replaced, remove this line
-    healthIcons[i].src = "./../../symbols/health-full-icon.svg"
+    // TODO: when all svgs are replaced, remove this line
+    healthIcons[i].src = "./../../symbols/health-full-icon.svg";
   }
   return health;
 }
 
 export function setStars(health) {
+  // TODO: Remove this once all star elements are <img>
   const stars = document.querySelectorAll(".star path:last-child");
+  const imgStars = document.querySelectorAll("img.star");
+
   let numStars;
   if (health === 4) {
     numStars = 2;
   } else if (health >= 2 && health < 4) {
-    // Updated the condition to prevent overlap
     numStars = 1;
   } else if (health >= 0 && health < 2) {
     numStars = 0;
   } else {
     numStars = -1;
   }
-  console.log(numStars);
+
+  console.log("[setStars] Setting", numStars + 1, "stars");
 
   for (let i = 0; i <= numStars; i++) {
-    stars[i].src = "./../../symbols/small-star-full-icon.svg"
-    stars[i].style.fill = "#fab005"; // Ensure the color is a string
+    if (stars[i]) stars[i].style.fill = "#fab005"; // gold
+    if (imgStars[i]) imgStars[i].src = "./../../symbols/star-big-full-icon.svg";
   }
 
   return numStars;
 }
 
 export function resetStars() {
+  // TODO: Remove this once all star elements are <img>
   const stars = document.querySelectorAll(".star path:last-child");
+  const imgStars = document.querySelectorAll("img.star");
+
   for (let i = 0; i <= 2; i++) {
-    stars[i].style.fill = "#e9ecef"; // Ensure the color is a string
+    if (stars[i]) stars[i].style.fill = "#e9ecef"; // gray
+    if (imgStars[i]) imgStars[i].src = "./../../symbols/star-big-empty-icon.svg";
   }
 }
 
