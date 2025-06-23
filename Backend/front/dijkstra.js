@@ -1300,7 +1300,7 @@ createDungeonRoom();
 
 // ===== UI Callbacks Section =====
 curRoomUI.callbacks.resetLevel = function (curlvl) {
-  curRoomUI.uiText.innerHTML = `Please click on the edge to find the shortest path.`;
+  curRoomUI.uiText.innerHTML = `Start by selecting node 0, then find the shortest path to every other node in the graph.`;
   curRoomUI.health = resetHealth();
   document.querySelector(".Hint-Text").classList.add("hidden");
   curRoomUI.closeCompletionModal();

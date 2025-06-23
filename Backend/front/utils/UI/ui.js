@@ -28,7 +28,9 @@ export function decrementHealth(health) {
   const healthIcons = document.querySelectorAll(".health-icon");
   console.log(health);
   if (health >= 0 && health <= 4) {
+    // TODO: when all svgs are replaced, remove this line
     healthIcons[health].style.fill = "white";
+    healthIcons[health].src = "./../../symbols/health-empty-icon.svg"
     health--;
     console.log(health);
   }
@@ -40,6 +42,8 @@ export function resetHealth() {
   const healthIcons = document.querySelectorAll(".health-icon");
   for (let i = 0; i <= health; i++) {
     healthIcons[i].style.fill = "red";
+     // TODO: when all svgs are replaced, remove this line
+    healthIcons[i].src = "./../../symbols/health-full-icon.svg"
   }
   return health;
 }
@@ -60,6 +64,7 @@ export function setStars(health) {
   console.log(numStars);
 
   for (let i = 0; i <= numStars; i++) {
+    stars[i].src = "./../../symbols/small-star-full-icon.svg"
     stars[i].style.fill = "#fab005"; // Ensure the color is a string
   }
 
