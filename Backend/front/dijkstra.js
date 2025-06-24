@@ -520,6 +520,7 @@ function drawLines() {
 
     // Chest click logic for Tutorial and Non-Tutorial
     if (chestIntersects.length > 0) {
+      clickBlockedUntil = Date.now() + 400;
       let clickedChest = chestIntersects[0].object;
       while (clickedChest && !chestList.includes(clickedChest)) {
         clickedChest = clickedChest.parent;
@@ -568,6 +569,7 @@ function drawLines() {
 
     // Tutorial and Non-Tutorial: clicked edge when chest was expected
     if (currentStep.expectedChest !== null && intersectedEdge?.userData?.edge) {
+      clickBlockedUntil = Date.now() + 400;
       GameHelper.handleWrongSelection(
         curRoomUI,
         currentStep.errorMessage,
@@ -584,6 +586,7 @@ function drawLines() {
       currentStep.expectedEdges &&
       intersectedEdge?.userData?.edge
     ) {
+      clickBlockedUntil = Date.now() + 400;
       const expectedEdges = currentStep.expectedEdges;
       const { start, end } = intersectedEdge.userData.edge;
 
@@ -639,6 +642,7 @@ function drawLines() {
       currentStep.expectedEdges &&
       intersectedEdge?.userData?.edge
     ) {
+      clickBlockedUntil = Date.now() + 400;
       const { start, end } = intersectedEdge.userData.edge;
       const expectedEdges = currentStep.expectedEdges;
 
