@@ -424,7 +424,7 @@ function MyMongoDB() {
               Heapsort: { $ifNull: ["$games.Heapsort.regular", []] },
               Prim: { $ifNull: ["$games.Prim.regular", []] },
               Kruskal: { $ifNull: ["$games.Kruskal.regular", []] },
-              Dijjkstra: { $ifNull: ["$games.Dijkstra.regular", []] },
+              Dijkstra: { $ifNull: ["$games.Dijkstra.regular", []] },
             },
           },
         },

@@ -236,7 +236,7 @@ document.body.appendChild(renderer.domElement);
 
 const player = new Player(scene, world);
 const mainDungeonURL = new URL(
-  "./src/main_dungeon_v4_compressed.glb",
+  "./src/main_dungeon_v5.glb",
   import.meta.url
 );
 let gameCompleted = false;
@@ -576,7 +576,9 @@ function onMouseDown(event) {
     if (player.selectedDoor.name.includes("heapsort"))
       window.location.href = "heapsort.html";
     if (player.selectedDoor.name.includes("prim"))
-      window.location.href = "Dijkstra.html";
+      window.location.href = "Prim.html";
+    if (player.selectedDoor.name.includes("dijkstra"))
+      window.location.href = "Dijkstra.html"
   }
 }
 
