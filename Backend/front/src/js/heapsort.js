@@ -1,5 +1,5 @@
 import * as THREE from "three"; // the three js library
-import { loadStaticObject } from "./utils/modelLoader.js"; // the basic model loader used to import 3d models
+import { loadStaticObject } from "../../utils/modelLoader.js"; // the basic model loader used to import 3d models
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { DragControls } from "three/examples/jsm/controls/DragControls.js";
 import {
@@ -8,15 +8,15 @@ import {
   createTextMesh1,
   createCube,
   updateText,
-} from "./utils/HeapSort-Related/arrayHelper.js"; // import helper functions
+} from "../../utils/HeapSort-Related/arrayHelper.js"; // import helper functions
 import {
   createDebossedAreas,
   updateNextSwapIndices,
   arraySorted,
   checkMaxHeapProperties,
   findClosestDebossedIndex,
-} from "./utils/HeapSort-Related/HeapSort.js";
-import { createThreePointLightingRoom } from "./utils/threePointLighting.js";
+} from "../../utils/HeapSort-Related/HeapSort.js";
+import { createThreePointLightingRoom } from "../../utils/threePointLighting.js";
 import {
   decrementHealth,
   closePseudocode,
@@ -26,18 +26,18 @@ import {
   updateHintIcons,
   updateLabelRotations,
   removeFromScene,
-} from "./utils/UI/ui.js";
-import { GameStatusService } from "./utils/gameStatus/gameStatusService.js";
+} from "../../utils/UI/ui.js";
+import { GameStatusService } from "../../utils/gameStatus/gameStatusService.js";
 import {
   effectForHoverSelect,
   removingEffectForHoverSelect,
   effectForCorrectSelect,
   shakeForWrongSelect,
   shakeScreen,
-} from "./utils/UI/animations.js";
-import { GameSession } from "./utils/gameRelated/gameSession.js";
-import GameRoomUI from "./utils/UI/gameRoomUI.js";
-import { loadModel } from "./utils/threeModels.js";
+} from "../../utils/UI/animations.js";
+import { GameSession } from "../../utils/gameRelated/gameSession.js";
+import GameRoomUI from "../../utils/UI/gameRoomUI.js";
+import { loadModel } from "../../utils/threeModels.js";
 import gsap from "gsap";
 //create an export function with your scene name that takes a scene object and renderer as a constructor
 
@@ -52,7 +52,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 const dungeonRoomURL = new URL(
-  "./src/dungeonroom_heapsort.glb",
+  "../../public/models/dungeonroom_heapsort.glb",
   import.meta.url
 );
 

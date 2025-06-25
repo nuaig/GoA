@@ -1,4 +1,4 @@
-# GameRoomUI Documentation
+# GameRoomUI Documentation (sample.html, sample.css, sample.js only)
 
 ## Overview
 

@@ -28,6 +28,7 @@ export default defineConfig({
         kruskal: resolve(__dirname, "./Kruskal.html"),
         mainDungeon: resolve(__dirname, "./mainDungeon.html"),
         prim: resolve(__dirname, "./Prim.html"),
+        dashboard: resolve(__dirname, "./dashboard.html"),
         // Add more HTML files as needed
       },
     },
