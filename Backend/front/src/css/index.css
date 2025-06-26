@@ -27,7 +27,7 @@ header {
   height: 100vh;
   position: relative;
   background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-    url(/src/pexels-ahmedadly-1270163.jpg);
+    url(/pexels-ahmedadly-1270163.jpg);
   background-size: cover;
   background-position: center;
   color: #fff;
