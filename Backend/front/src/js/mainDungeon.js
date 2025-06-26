@@ -236,7 +236,7 @@ document.body.appendChild(renderer.domElement);
 
 const player = new Player(scene, world);
 const mainDungeonURL = new URL(
-  "./src/main_dungeon_v5.glb",
+  "../../public/models/main_dungeon_v5.glb",
   import.meta.url
 );
 let gameCompleted = false;
