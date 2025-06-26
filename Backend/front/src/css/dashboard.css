@@ -175,7 +175,7 @@ header {
   width: 38px;
   background-size: cover;
   background-repeat: no-repeat;
-  background-image: url(img/1.jpg);
+  /* background-image: url(img/1.jpg); */
   border-radius: 50%;
 }
 
@@ -364,7 +364,7 @@ tbody tr:nth-child(even) {
   background-repeat: no-repeat;
 }
 
-.img-1 {
+/* .img-1 {
   background-image: url(img/1.jpg);
 }
 
@@ -374,7 +374,7 @@ tbody tr:nth-child(even) {
 
 .img-3 {
   background-image: url(img/3.jpeg);
-}
+} */
 
 .summary-card {
   margin-bottom: 1.5rem;
@@ -422,7 +422,7 @@ tbody tr:nth-child(even) {
   border: 3px solid #efefef;
   background-size: cover;
   background-repeat: no-repeat;
-  background-image: url(img/3.jpeg);
+  /* background-image: url(img/3.jpeg); */
   margin-right: 0.7rem;
 }
 

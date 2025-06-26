@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { loadModel } from "./utils/threeModels.js";
+import { loadModel } from "../../utils/threeModels.js";
 import * as CANNON from "cannon-es";
-import { createThreePointLighting } from "./utils/threePointLighting.js";
-import { Player } from "./utils/lockedFirstPersonCam/player.js";
-import { GameStatusService } from "./utils/gameStatus/gameStatusService.js";
+import { createThreePointLighting } from "../../utils/threePointLighting.js";
+import { Player } from "../../utils/lockedFirstPersonCam/player.js";
+import { GameStatusService } from "../../utils/gameStatus/gameStatusService.js";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import { gsap } from "gsap";

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import GameRoomUI from "./utils/UI/gameRoomUI.js";
+import GameRoomUI from "../../utils/UI/gameRoomUI.js";
 
 const curRoomUI = new GameRoomUI("Kruskal");
 

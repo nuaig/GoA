@@ -4,25 +4,25 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import {
   createRandomConnectedGraph,
   createSpecificGraphKruskalTutorial,
-} from "./graph.js";
-import { createThreePointLightingRoom } from "./utils/threePointLighting.js";
-import { KruskalAlgorithm } from "./utils/graphRelated/kruskal.js";
-import { PrimAlgorithm } from "./utils/graphRelated/prims.js";
-import { GameSession } from "./utils/gameRelated/gameSession.js";
-import { loadModel } from "./utils/threeModels.js";
-import { GameStatusService } from "./utils/gameStatus/gameStatusService.js";
+} from "../../utils/graphRelated/graph.js";
+import { createThreePointLightingRoom } from "../../utils/threePointLighting.js";
+import { KruskalAlgorithm } from "../../utils/graphRelated/kruskal.js";
+import { PrimAlgorithm } from "../../utils/graphRelated/prims.js";
+import { GameSession } from "../../utils/gameRelated/gameSession.js";
+import { loadModel } from "../../utils/threeModels.js";
+import { GameStatusService } from "../../utils/gameStatus/gameStatusService.js";
 import gsap from "gsap";
 import {
   decrementHealth,
   resetHealth,
   resetStars,
   updateHintIcons,
-} from "./utils/UI/ui.js";
+} from "../../utils/UI/ui.js";
 import {
   effectForCorrectSelect,
   shakeForWrongSelect,
   shakeScreen,
-} from "./utils/UI/animations.js";
+} from "../../utils/UI/animations.js";
 import {
   drawLine,
   updateLinePosition,
@@ -34,8 +34,8 @@ import {
   getRandomColor,
   createRing,
   highlightChest,
-} from "./utils/graphRelated/drawLine.js";
-import GameRoomUI from "./utils/UI/gameRoomUI.js";
+} from "../../utils/graphRelated/drawLine.js";
+import GameRoomUI from "../../utils/UI/gameRoomUI.js";
 
 const reArrangeButton = document.querySelector(".Rearrange-Action");
 let curGameSession;
@@ -93,9 +93,18 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
 
-const closedChestURL = new URL("./src/Prop_Chest_Closed.gltf", import.meta.url);
-const openChestURL = new URL("./src/Prop_Chest_Gold.gltf", import.meta.url);
-const dungeonRoomURL = new URL("./src/DungeonRoom.glb", import.meta.url);
+const closedChestURL = new URL(
+  "../../public/models/Prop_Chest_Closed.gltf",
+  import.meta.url
+);
+const openChestURL = new URL(
+  "../../public/models/Prop_Chest_Gold.gltf",
+  import.meta.url
+);
+const dungeonRoomURL = new URL(
+  "../../public/models/DungeonRoom_Kruskal_and_Prim.glb",
+  import.meta.url
+);
 
 let chestList = [];
 let openChestList = [];

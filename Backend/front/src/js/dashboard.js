@@ -943,11 +943,6 @@ function renderIndiUserMistakeReductionChart(mistakeReductionUserData) {
   }
 }
 
-// **Helper Function to Capitalize First Letter**
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 // **Toggle Button Event Listener for Mistake Type Selection**
 document.querySelectorAll(".toggle-btn").forEach((button) => {
   button.addEventListener("click", () => {
