@@ -7,6 +7,7 @@ import {
   updateStatusToCompletedCon,
   getLeaderboardCon,
   getUsersDataCon,
+  updatePlayAgainCon,
 } from "../controllers/gameStatusController.js";
 
 const router = express.Router();
@@ -16,6 +17,8 @@ router.get("/leaderboard", getLeaderboardCon);
 router.get("/usersData", getUsersDataCon);
 // Route to get game status for a user
 router.get("/:userId", getGameStatusCon);
+
+router.post("/:userId/playAgain", updatePlayAgainCon);
 
 // Route to update game status for a specific game and mode
 router.post("/:userId/:gameName/:mode", updateGameStatusCon);

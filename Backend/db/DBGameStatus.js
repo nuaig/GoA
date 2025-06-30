@@ -24,6 +24,32 @@ function MyMongoDB() {
     }
   }
 
+  myDB.updatePlayAgain = async (userId, playAgain) => {
+    const { client, db } = await connect();
+    try {
+      const objectId = new ObjectId(userId);
+
+      const result = await db.collection("game_status").updateOne(
+        { user_id: objectId },
+        { $set: { playAgain: playAgain } }, // Add or update this field
+        { upsert: true }
+      );
+
+      if (result.modifiedCount === 0 && result.matchedCount === 0) {
+        console.log(`No document found to update for user ${userId}`);
+        return { ok: false, msg: "No document matched for playAgain update." };
+      }
+
+      console.log(`playAgain set to ${playAgain} for user ${userId}`);
+      return { ok: true };
+    } catch (err) {
+      console.error("Error updating playAgain:", err.message);
+      return { ok: false, msg: "Error updating playAgain" };
+    } finally {
+      await client.close();
+    }
+  };
+
   myDB.createGameStatus = async (userId) => {
     const { client, db } = await connect();
     try {
