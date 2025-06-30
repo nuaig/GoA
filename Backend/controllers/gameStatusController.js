@@ -19,6 +19,34 @@ export const getGameStatusCon = async (req, res) => {
   }
 };
 
+export const updatePlayAgainCon = async (req, res) => {
+  const { userId } = req.params;
+  const { playAgain } = req.body;
+
+  console.log("🟡 Incoming playAgain update:", userId, playAgain);
+
+  try {
+    const result = await myDB.updatePlayAgain(userId, playAgain);
+
+    if (!result.ok) {
+      return res.status(400).json({ ok: false, msg: result.msg });
+    }
+
+    return res
+      .status(200)
+      .json({ ok: true, msg: "playAgain updated successfully" });
+  } catch (err) {
+    console.error("❌ Error updating playAgain:", err.message);
+    res
+      .status(500)
+      .json({
+        ok: false,
+        msg: "Failed to update playAgain",
+        error: err.message,
+      });
+  }
+};
+
 export const updateGameStatusCon = async (req, res) => {
   const { userId, gameName, mode } = req.params;
   const { level, score, stars, status } = req.body;
