@@ -28,6 +28,29 @@ export class GameStatusService {
       console.error("Error in getGameStatus:", error);
     }
   }
+  
+  // Update the playAgain field to be true to not show fireworks
+  async updatePlayAgainStatus(value) {
+    try {
+      const response = await fetch(`/api/status/${this.userId}/playAgain`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playAgain: value }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update playAgain.");
+
+      const data = await response.json();
+
+      // Update local cache (optional but useful)
+      if (!this.gameStatus) this.gameStatus = {};
+      this.gameStatus.playAgain = value;
+
+      console.log("PlayAgain updated successfully:", data.msg);
+    } catch (error) {
+      console.error("Error in updatePlayAgainStatus:", error);
+    }
+  }
 
   // Update game status in the class and database
   async updateGameStatus(gameName, level, mode, score, stars, status) {

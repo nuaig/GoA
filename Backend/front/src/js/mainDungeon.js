@@ -214,10 +214,17 @@ dashboardHandler.addEventListener("click", () => {
   window.location.href = "dashboard.html";
 });
 
-gameCompletionContinueButton.addEventListener("click", () => {
+gameCompletionContinueButton.addEventListener("click", async () => {
   closeModal(gameCompletionModal);
   player.controls.lock();
   stopTriggerFireworks();
+
+  try {
+    await gameStatusService.updatePlayAgainStatus(true);
+    console.log("playAgain set to true successfully");
+  } catch (err) {
+    console.error("Failed to update playAgain:", err);
+  }
 });
 
 function displayMessage(message) {
@@ -240,7 +247,7 @@ const mainDungeonURL = new URL(
   import.meta.url
 );
 let gameCompleted = false;
-
+let playAgain = false;
 let treasure_wall_gate_left = [];
 let treasure_wall_gate_right = [];
 // Global variable to track completion of each glow effect
@@ -302,8 +309,12 @@ function applyGlowEffect(material, status, key) {
 
 function checkAllGlowEffects() {
   const allCompleted = Object.values(glowEffectsCompleted).every(Boolean);
-
-  if (allCompleted) {
+  playAgain = gameStatusService.getLocalGameStatus()?.playAgain;
+  // check if play again is true
+  if (
+    allCompleted &&
+    (playAgain === false || playAgain === null || playAgain === undefined)
+  ) {
     const message = `Well done, brave explorer! The treasure door is now unlocked. Continue to sharpen your skills by revisiting any of the rooms at your leisure.`;
     triggerFireworks();
     displayMessage(message);
