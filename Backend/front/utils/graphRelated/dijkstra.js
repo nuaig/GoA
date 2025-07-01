@@ -42,7 +42,6 @@ export class DijkstraAlgorithm {
     while (!priorityQueue.isEmpty()) {
       const currentNode = priorityQueue.dequeue().element;
 
-      // Visit the chest (node)
       if (!alreadyPressed.has(currentNode)) {
         this.steps.push({
           expectedChest: parseInt(currentNode),
@@ -66,7 +65,12 @@ export class DijkstraAlgorithm {
           priorityQueue.enqueue(neighbor, newDistance);
         }
 
-        if (!visited.has(neighbor)) {
+        // [FIX] Only include edge if neighbor not yet visited or already used
+        if (
+          !visited.has(neighbor) &&
+          !alreadyPressed.has(neighbor) &&
+          !this.edgeAlreadyExpected(currentNode, neighbor)
+        ) {
           validEdges.push({
             edge: [parseInt(currentNode), neighbor],
             weight: distances[neighbor],
@@ -83,7 +87,6 @@ export class DijkstraAlgorithm {
       }
     }
 
-    // Build shortest paths
     const paths = {};
     for (let node in distances) {
       const path = [];
@@ -98,6 +101,14 @@ export class DijkstraAlgorithm {
     this.distances = distances;
     this.previous = previous;
     this.paths = paths;
+  }
+
+  edgeAlreadyExpected(a, b) {
+    return this.steps.some((step) =>
+      step.expectedEdges?.some(
+        ({ edge: [x, y] }) => (x === a && y === b) || (x === b && y === a)
+      )
+    );
   }
 
   selectEdge(edge) {

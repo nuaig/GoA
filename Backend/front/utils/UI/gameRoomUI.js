@@ -407,6 +407,13 @@ class GameRoomUI {
         this.currentMode
       ]?.[level - 1];
 
+    if (!currentGameData) {
+      console.warn(
+        `No backend game data found for game "${this.gameName}" in mode "${this.currentMode}". Skipping level update.`
+      );
+      return;
+    }
+
     if (starsCount + 1 < currentGameData.stars) {
       return;
     }
