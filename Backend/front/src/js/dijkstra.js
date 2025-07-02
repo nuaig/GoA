@@ -607,7 +607,7 @@ function drawLines() {
       return;
     }
 
-    // [ADDED] Reset all hint booleans at the start of the click
+    // Reset all hint booleans at the start of the click
     Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
 
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -649,7 +649,6 @@ function drawLines() {
 
         // Chest logic
         if (currentStep.expectedEdges) {
-          // [ADDED]
           hintBooleans.nodePressedWhenEdgeExpected = true;
           updateHintsFromBooleans();
 
@@ -669,7 +668,6 @@ function drawLines() {
             openChestList[index].visible = true;
             openChestList[index].userData.clicked = true;
 
-            // [ADDED]
             Object.keys(hintBooleans).forEach(
               (key) => (hintBooleans[key] = false)
             );
@@ -677,7 +675,6 @@ function drawLines() {
             curRoomUI.uiText.innerText = "Relax the edges of this node!";
             setTimeout(() => nextTutorialStep(), 500);
           } else {
-            // [ADDED for node 0 check]
             if (currentStep.expectedChest === 0) {
               hintBooleans.needToPressStarterNode = true;
             } else {
@@ -702,7 +699,6 @@ function drawLines() {
     if (currentStep.expectedChest !== null && intersectedEdge?.userData?.edge) {
       clickBlockedUntil = Date.now() + 400;
 
-      // [ADDED for node 0 check]
       if (currentStep.expectedChest === 0) {
         hintBooleans.needToPressStarterNode = true;
       } else {
@@ -787,7 +783,6 @@ function drawLines() {
 
       if (allSelected) {
         selectedEdgesThisStep = [];
-        // [ADDED]
         Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
         document.querySelector(".Hint-Text").classList.add("hidden");
         curRoomUI.uiText.innerText = "Visit a new node!";
@@ -865,7 +860,6 @@ function drawLines() {
           console.log(
             "[onClick] All expected edges selected. Proceeding to next step."
           );
-          // [ADDED]
           Object.keys(hintBooleans).forEach(
             (key) => (hintBooleans[key] = false)
           );
@@ -875,7 +869,6 @@ function drawLines() {
           selectedEdgesThisStep = [];
         }
       } else {
-        // [ADDED]
         hintBooleans.wrongEdgeSelected = true;
         updateHintsFromBooleans();
 
@@ -1210,6 +1203,8 @@ function showInputDialog() {
 
   // Prevent interactions underneath
   curRoomUI.isModalOpen = true;
+  const input = document.getElementById("dialog-input");
+  input.focus();
 }
 
 /*
@@ -1219,8 +1214,8 @@ function showInputDialog() {
  * 2. Marks the related edge as selected and visually updates it if valid.
  * 3. Closes the dialog and advances the tutorial if appropriate.
  */
-function closeInputDialog(allchosen = false) {
-  // [ADDED] Reset hint booleans at the start of input check
+function closeInputDialog() {
+  // Reset hint booleans at the start of input check
   Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
 
   const inputValue = document.getElementById("dialog-input").value.trim();
@@ -1264,7 +1259,7 @@ function closeInputDialog(allchosen = false) {
     }
 
     if (isCorrect) {
-      // [ADDED] Clear booleans and hint message on success
+      // Clear booleans and hint message on success
       Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
       document.querySelector(".Hint-Text").classList.add("hidden");
 
@@ -1274,7 +1269,6 @@ function closeInputDialog(allchosen = false) {
       document.getElementById("dialog-input").value = "";
       curRoomUI.isModalOpen = false;
     } else {
-      // [ADDED]
       hintBooleans.wrongWeightEntered = true;
       updateHintsFromBooleans();
 
@@ -1287,8 +1281,7 @@ function closeInputDialog(allchosen = false) {
     }
   } else {
     const selected = curRoomUI.selectedEdgeForInput;
-    const currentStep =
-      curAlgorithmForGraph.steps[curRoomUI.currentTutorialStep];
+
     if (!selected) {
       console.warn("[closeInputDialog] No selected edge found.");
       return;
@@ -1329,7 +1322,7 @@ function closeInputDialog(allchosen = false) {
         }
       }
 
-      // [ADDED] Clear booleans and hint message on success
+      // Clear booleans and hint message on success
       Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
       document.querySelector(".Hint-Text").classList.add("hidden");
 
@@ -1340,7 +1333,6 @@ function closeInputDialog(allchosen = false) {
       document.getElementById("dialog-input").value = "";
       curRoomUI.isModalOpen = false;
     } else {
-      // [ADDED]
       hintBooleans.wrongWeightEntered = true;
       updateHintsFromBooleans();
 
@@ -1374,7 +1366,19 @@ function closeInputDialog(allchosen = false) {
 
 /// ===== Document Object Model & User Session Initialization Section =====
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("dialog-ok-btn").onclick = closeInputDialog;
+  const input = document.getElementById("dialog-input");
+  const okBtn = document.getElementById("dialog-ok-btn");
+
+  // Clicking OK button
+  okBtn.onclick = closeInputDialog;
+
+  // Pressing Enter in the input field
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault(); // Optional: prevent default form behavior
+      okBtn.click(); // Simulate click on OK button
+    }
+  });
 });
 
 document.addEventListener("DOMContentLoaded", async function () {
