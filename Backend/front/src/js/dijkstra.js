@@ -128,106 +128,128 @@ const clock = new THREE.Clock();
 
 // Steps for the Dijkstra tutorial
 const tutorialSteps = [
+  // Step 0
   {
     instruction: "Step 0: Click on node 0 to begin.",
-    explanation:
-      "Dijkstra's algorithm starts at a source node. Here, node 0 is the source — the starting point for finding the shortest paths to all other nodes.",
+    explanation: "Node 0 is the source node. we start here.",
     expectedChest: 0,
     expectedEdges: null,
     errorMessage: "Incorrect! Please press on node 0.",
   },
+  // Step 1
   {
-    instruction: "Step 1: Click on the edge between node 0 and node 2.",
+    instruction:
+      "Step 1: Click on edge (0, 2). Type 1 in the input dialog, and press OK.",
     explanation:
-      "We now explore neighbors of node 0. The edge (0, 2) has weight 1, meaning it costs 1 unit to reach node 2 from node 0. This is currently the shortest path to node 2.",
+      "Current distance from source to node 2 is ∞. Weight of edge (0, 2) = 1 < ∞, so new distance is 1.",
     expectedChest: null,
     expectedEdges: [[0, 2]],
     updatedDistance: { 2: 1 },
     errorMessage: "Click the edge (0, 2) to record the distance to node 2.",
   },
+  // Step 2
   {
-    instruction: "Step 2: Now click the edge between node 0 and node 1.",
+    instruction:
+      "Step 2: Click on edge (0, 1). Type 2 in the input dialog, and press OK.",
     explanation:
-      "We’re still exploring node 0’s neighbors. The edge (0, 1) has a weight of 2, which means it costs 2 units to reach node 1 from node 0. We now know shortest paths to nodes 1 and 2.",
+      "Current distance from source to node 1 is ∞. Weight of edge (0, 1) = 2 < ∞, so new distance is 2.",
     expectedChest: null,
     expectedEdges: [[0, 1]],
     updatedDistance: { 1: 2 },
     errorMessage: "Click the edge (0, 1) to update the distance to node 1.",
   },
+  // Step 3
   {
-    instruction: "Step 3: Visit the next closest unvisited node: node 2.",
+    instruction:
+      "Step 3: Click on the unvisited node that has the shortest distance from source: node 2.",
     explanation:
-      "Out of all unvisited nodes, node 2 has the smallest known distance (1). So we visit it next. Dijkstra always chooses the unvisited node with the lowest cost so far.",
+      "Out of all unvisited nodes, node 2 has the shortest distance from source. So we visit it next.",
     expectedChest: 2,
     expectedEdges: null,
     errorMessage:
       "Incorrect! Click on node 2 — it's the nearest unvisited node.",
   },
+  // Step 4
   {
-    instruction: "Step 4: Click the edge between node 2 and node 1.",
+    instruction:
+      "Step 4: Click on edge (2, 1). Type 2 in the input dialog, and press OK.",
     explanation:
-      "We check if there's a shorter path to node 1 via node 2. This edge (2, 1) has a weight of 1. But the current known distance to node 1 is 2, and 1 (to node 2) + 1 = 2, so it doesn't improve the path.",
+      "We check path to node 1 via node 2. Distance to 2 = 1, edge weight = 3, so total = 1 + 3 = 4. 4 > current distance 2, so we keep 2.",
     expectedChest: null,
     expectedEdges: [[2, 1]],
     updatedDistance: { 1: 2 },
     errorMessage: "Click (2, 1) to compare if it's a better path to node 1.",
   },
+  // Step 5
   {
-    instruction: "Step 5: Click the edge between node 2 and node 4.",
+    instruction:
+      "Step 5: Click on edge (2, 4). Type 7 in the input dialog, and press OK.",
     explanation:
-      "We check the cost to reach node 4 through node 2. The edge (2, 4) has a weight of 6. Since reaching node 2 costs 1, total cost to node 4 is 1 + 6 = 7. This becomes the current shortest known distance to node 4.",
+      "We check path to node 4 via node 2. Distance to 2 = 1, edge weight = 6, so total = 1 + 6 = 7. Current distance is ∞, so we update to 7.",
     expectedChest: null,
     expectedEdges: [[2, 4]],
     updatedDistance: { 4: 7 },
     errorMessage: "Click (2, 4) to record the current distance to node 4.",
   },
+  // Step 6
   {
-    instruction: "Step 6: Click the edge between node 2 and node 3.",
+    instruction:
+      "Step 6: Click on edge (2, 3). Type 3 in the input dialog, and press OK.",
     explanation:
-      "Now we check the cost to reach node 3 from node 2. The edge (2, 3) has a weight of 2. Since node 2’s distance is 1, total cost to node 3 becomes 3. That’s our best path so far.",
+      "We check path to node 3 via node 2. Distance to 2 = 1, edge weight = 2, so total = 1 + 2 = 3. Current distance is ∞, so we update to 3.",
     expectedChest: null,
     expectedEdges: [[2, 3]],
     updatedDistance: { 3: 3 },
     errorMessage: "Click (2, 3) to update the distance to node 3.",
   },
+  // Step 7
   {
-    instruction: "Step 7: Visit node 1 — it's the next closest.",
+    instruction:
+      "Step 7: Click on the unvisited node that has the shortest distance from source: node 1.",
     explanation:
-      "Among the remaining unvisited nodes, node 1 has the shortest distance (2). So we visit it next to check if it leads to better paths to other nodes.",
+      "Out of all unvisited nodes, node 1 has the shortest distance from source. So we visit it next.",
     expectedChest: 1,
     expectedEdges: null,
     errorMessage: "Incorrect! Click on node 1 — it’s the next closest node.",
   },
+  // Step 8
   {
-    instruction: "Step 8: Click the edge between node 1 and node 3.",
+    instruction:
+      "Step 8: Click on edge (1, 3). Type 3 in the input dialog, and press OK.",
     explanation:
-      "From node 1, we check if going to node 3 through (1, 3) improves the path. This edge has weight 3, and node 1’s cost is 2, so total = 5. But we already know a cheaper path to node 3 (which is 3), so we keep that.",
+      "We check path to node 3 via node 1. Distance to 1 = 2, edge weight = 3, so total = 2 + 3 = 5. 5 > current distance 3, so we keep 3.",
     expectedChest: null,
     expectedEdges: [[1, 3]],
     updatedDistance: { 3: 3 },
     errorMessage: "Click (1, 3) to evaluate its path to node 3.",
   },
+  // Step 9
   {
-    instruction: "Step 9: Visit node 3 next.",
+    instruction:
+      "Step 9: Click on the unvisited node that has the shortest distance from source: node 3.",
     explanation:
-      "Among unvisited nodes, node 3 has the lowest cost (3). We now explore paths through it.",
+      "Out of all unvisited nodes, node 3 has the shortest distance from source. So we visit it next.",
     expectedChest: 3,
     expectedEdges: null,
     errorMessage: "Incorrect! Click on node 3 to visit it next.",
   },
+  // Step 10
   {
-    instruction: "Step 10: Click the edge between node 3 and node 4.",
+    instruction:
+      "Step 10: Click on edge (3, 4). Type 4 in the input dialog, and press OK.",
     explanation:
-      "We evaluate the path to node 4 through node 3. Node 3’s cost is 3 and the edge (3, 4) has weight 1, so total = 4. This is shorter than the previous known distance to node 4 (which was 7), so we update it.",
+      "We check path to node 4 via node 3. Distance to 3 = 3, edge weight = 1, so total = 3 + 1 = 4. 4 < current distance 7, so we update to 4.",
     expectedChest: null,
     expectedEdges: [[3, 4]],
     updatedDistance: { 4: 4 },
     errorMessage: "Click (3, 4) to update the distance to node 4.",
   },
+  // Step 11
   {
-    instruction: "Step 11: Finally, visit node 4.",
+    instruction:
+      "Step 11: Click on the unvisited node that has the shortest distance from source: node 4.",
     explanation:
-      "Node 4 is the last unvisited node. Its shortest path has been found (distance 4), so we visit it to finish the algorithm.",
+      "Out of all unvisited nodes, node 4 has the shortest distance from source. So we visit it next.",
     expectedChest: 4,
     expectedEdges: null,
     errorMessage: "Click on node 4 to complete Dijkstra’s algorithm.",
@@ -237,6 +259,20 @@ const tutorialSteps = [
 // ===== Function Decleration Section =====
 function updateHintsFromBooleans() {
   const hintElement = document.querySelector(".Hint-Text");
+
+  // In tutorial mode: only show the step's errorMessage, always
+  if (curRoomUI.isTutorial) {
+    const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
+    if (currentStep?.errorMessage) {
+      hintElement.classList.remove("hidden");
+      hintElement.innerHTML = `<li>${currentStep.errorMessage}</li>`;
+    } else {
+      hintElement.classList.add("hidden");
+    }
+    return;
+  }
+
+  // Outside of tutorial — normal behavior using hintBooleans
   const messages = [];
 
   if (hintBooleans.edgePressedWhenNodeExpected) {
@@ -676,11 +712,10 @@ function drawLines() {
       );
 
       if (!isExpected) {
-        // [ADDED]
         hintBooleans.wrongEdgeSelected = true;
-        updateHintsFromBooleans();
+        updateHintsFromBooleans(); // This now works and remains visible
 
-        document.querySelector(".Hint-Text").classList.add("hidden");
+        // DO NOT hide hint manually
         curRoomUI.uiText.innerText = "";
         curRoomUI.wrongSelectionFeedback?.();
         shakeScreen();
@@ -1082,8 +1117,8 @@ function initializeDistanceTable(nodes) {
     nodeCell.textContent = index;
 
     const distCell = document.createElement("td");
-    distCell.textContent = "∞";
-    distCell.id = `distance-${index}`; // We'll use this ID to update it later
+    distCell.textContent = index === 0 ? "0" : "∞";
+    distCell.id = `distance-${index}`;
 
     row.appendChild(nodeCell);
     row.appendChild(distCell);
@@ -1433,7 +1468,7 @@ curRoomUI.callbacks.resetLevel = function (curlvl) {
 curRoomUI.callbacks.startTutorial = function () {
   curRoomUI.currentTutorialStep = 0;
   updateTutorialStep();
-  curRoomUI.uiText.innerHTML = `Please click on the edge to begin finding the shortest path.`;
+  curRoomUI.uiText.innerHTML = `Please follow the steps shown in the tutorial window.`;
   resetScene();
   updateNodeLabel(levelTitle, `Tutorial`, 0.9, 0.3, 0x212529);
   setUpTutorialModel();

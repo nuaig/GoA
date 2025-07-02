@@ -410,6 +410,8 @@
         <button class="btn btn__change__level">Change Level</button>
       </div>
     </div>
+
+    <!-- Start Game Modal -->
     <div class="modal instruction hidden">
       <img
         class="instruction__img"
@@ -422,6 +424,8 @@
         </button>
       </div>
     </div>
+
+    <!-- Algorithm Modal -->
     <div class="modal algo-instruction-modal hidden">
       <div class="algo-instruction mySwiper">
         <h2 class="modal__header">
@@ -464,11 +468,11 @@
         <div class="swiper-pagination"></div>
       </div>
       <div class="button__holder">
-        <!-- <button class="btn btn__again">Try again</button> -->
         <button class="btn btn-algo-instruction-close">Close</button>
       </div>
     </div>
     <div class="overlay hidden"></div>
+
     <!-- Edge Table UI -->
     <div
       id="tables-container"
@@ -558,6 +562,7 @@
         </div>
       </div>
     </div>
+
     <!-- Backdrop -->
     <div
       id="input-backdrop"
@@ -572,15 +577,15 @@
         z-index: 999;
       "
     ></div>
+
     <!-- Dialog -->
     <div
       id="input-dialog"
       style="
         display: none;
         position: fixed;
-        top: 30%;
-        left: 50%;
-        transform: translate(-50%, -30%);
+        bottom: 280px; 
+        left: 30px;
         background: #343a40;
         color: white;
         border-radius: 8px;
@@ -592,7 +597,7 @@
       "
     >
       <h3 style="margin-top: 0; color: white">Distance Update</h3>
-      <p style="margin-bottom: 10px">Hello, this works:</p>
+      <p style="margin-bottom: 10px">Update the distance from node 0 the destination node</p>
       <input
         type="text"
         id="dialog-input"
