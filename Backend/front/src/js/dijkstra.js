@@ -40,7 +40,7 @@ let hintBooleans = {
   wrongEdgeSelected: false,
   needToPressStarterNode: false,
   wrongWeightEntered: false,
-  // Add more if needed
+  alreadyVisited: false,
 };
 
 const reArrangeButton = document.querySelector(".Rearrange-Action");
@@ -260,21 +260,32 @@ const tutorialSteps = [
 function updateHintsFromBooleans() {
   const hintElement = document.querySelector(".Hint-Text");
 
-  // In tutorial mode: only show the step's errorMessage, always
+  // Handle tutorial mode
   if (curRoomUI.isTutorial) {
     const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
-    if (currentStep?.errorMessage) {
+
+    const showVisited = hintBooleans.alreadyVisited;
+    const message = showVisited
+      ? "This was already visited. Please choose the correct one!"
+      : currentStep?.errorMessage?.trim();
+
+    if (message) {
       hintElement.classList.remove("hidden");
-      hintElement.innerHTML = `<li>${currentStep.errorMessage}</li>`;
+      hintElement.innerHTML = `<li>${message}</li>`;
     } else {
       hintElement.classList.add("hidden");
+      hintElement.innerHTML = "";
     }
+
     return;
   }
 
-  // Outside of tutorial — normal behavior using hintBooleans
+  // Handle non-tutorial mode
   const messages = [];
 
+  if (hintBooleans.alreadyVisited) {
+    messages.push("This was already visited. Please choose the correct one!");
+  }
   if (hintBooleans.edgePressedWhenNodeExpected) {
     messages.push("Please select a node, not an edge.");
   }
@@ -282,7 +293,9 @@ function updateHintsFromBooleans() {
     messages.push("You need to select an edge, not a node.");
   }
   if (hintBooleans.wrongNodeSelected) {
-    messages.push("This is not the correct node to select.");
+    messages.push(
+      "Choose the unvisited node that has the shortest distance from source."
+    );
   }
   if (hintBooleans.wrongEdgeSelected) {
     messages.push("This is not the correct edge to select.");
@@ -299,6 +312,7 @@ function updateHintsFromBooleans() {
     hintElement.innerHTML = messages.map((msg) => `<li>${msg}</li>`).join("");
   } else {
     hintElement.classList.add("hidden");
+    hintElement.innerHTML = "";
   }
 }
 
@@ -618,7 +632,18 @@ function drawLines() {
       const index = chestList.indexOf(clickedChest);
       if (index !== -1) {
         if (openChestList[index]?.userData?.clicked) {
-          console.log(`Node ${index} already visited — ignoring click.`);
+          console.log(`Node ${index} already visited.`);
+
+          hintBooleans.alreadyVisited = true;
+          updateHintsFromBooleans();
+
+          GameHelper.handleWrongSelection(
+            curRoomUI,
+            "",
+            curRoomUI.isTutorial,
+            curGameSession
+          );
+          shakeScreen();
           return;
         }
 
@@ -634,7 +659,7 @@ function drawLines() {
             curRoomUI.isTutorial,
             curGameSession
           );
-          updateHintsFromBooleans();
+
           return;
         }
 
@@ -649,7 +674,7 @@ function drawLines() {
               (key) => (hintBooleans[key] = false)
             );
             document.querySelector(".Hint-Text").classList.add("hidden");
-            curRoomUI.uiText.innerText = "Correct!";
+            curRoomUI.uiText.innerText = "Relax the edges of this node!";
             setTimeout(() => nextTutorialStep(), 500);
           } else {
             // [ADDED for node 0 check]
@@ -666,7 +691,6 @@ function drawLines() {
               curRoomUI.isTutorial,
               curGameSession
             );
-            updateHintsFromBooleans();
           }
           return;
         }
@@ -692,7 +716,7 @@ function drawLines() {
         curRoomUI.isTutorial,
         curGameSession
       );
-      updateHintsFromBooleans();
+
       return;
     }
 
@@ -735,6 +759,22 @@ function drawLines() {
           (start === e0 && end === e1) || (start === e1 && end === e0)
       );
 
+      if (alreadySelected) {
+        console.log("[onClick] Edge already selected.");
+
+        hintBooleans.alreadyVisited = true;
+        updateHintsFromBooleans();
+
+        GameHelper.handleWrongSelection(
+          curRoomUI,
+          "",
+          curRoomUI.isTutorial,
+          curGameSession
+        );
+        shakeScreen();
+        return;
+      }
+
       if (!alreadySelected) {
         selectedEdgesThisStep.push([start, end]);
       }
@@ -750,7 +790,7 @@ function drawLines() {
         // [ADDED]
         Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
         document.querySelector(".Hint-Text").classList.add("hidden");
-        curRoomUI.uiText.innerText = "Correct!";
+        curRoomUI.uiText.innerText = "Visit a new node!";
         showInputDialog();
       }
 
@@ -784,6 +824,22 @@ function drawLines() {
           ([x, y]) => (x === start && y === end) || (x === end && y === start)
         );
 
+        if (alreadyChosen) {
+          console.log("[onClick] Edge already selected.");
+
+          hintBooleans.alreadyVisited = true;
+          updateHintsFromBooleans();
+
+          GameHelper.handleWrongSelection(
+            curRoomUI,
+            "",
+            curRoomUI.isTutorial,
+            curGameSession
+          );
+          shakeScreen();
+          return;
+        }
+
         if (!alreadyChosen) {
           selectedEdgesThisStep.push([start, end]);
           console.log(
@@ -814,8 +870,8 @@ function drawLines() {
             (key) => (hintBooleans[key] = false)
           );
           document.querySelector(".Hint-Text").classList.add("hidden");
-          curRoomUI.uiText.innerText = "Correct!";
           nextTutorialStep();
+          curRoomUI.uiText.innerText = "Visit a new node!";
           selectedEdgesThisStep = [];
         }
       } else {
@@ -833,7 +889,6 @@ function drawLines() {
           curRoomUI.isTutorial,
           curGameSession
         );
-        updateHintsFromBooleans();
       }
     }
   };
@@ -1164,7 +1219,7 @@ function showInputDialog() {
  * 2. Marks the related edge as selected and visually updates it if valid.
  * 3. Closes the dialog and advances the tutorial if appropriate.
  */
-function closeInputDialog() {
+function closeInputDialog(allchosen = false) {
   // [ADDED] Reset hint booleans at the start of input check
   Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
 
@@ -1242,7 +1297,9 @@ function closeInputDialog() {
     const inputWeight = parseInt(inputValue, 10);
     if (inputWeight === selected.weight) {
       console.log("[closeInputDialog] Correct weight entered:", inputWeight);
-
+      if (curRoomUI.uiText.innerText !== "Visit a new node!") {
+        curRoomUI.uiText.innerText = "Correct!";
+      }
       // Update distance table
       const targetNode = selected.end;
       const cell = document.getElementById(`distance-${targetNode}`);
@@ -1293,7 +1350,7 @@ function closeInputDialog() {
         curRoomUI.isTutorial,
         curGameSession
       );
-      updateHintsFromBooleans();
+
       curRoomUI.selectedEdgeForInput = null;
       curRoomUI.inputCompleted = false;
       selectedEdgesThisStep = selectedEdgesThisStep.filter(

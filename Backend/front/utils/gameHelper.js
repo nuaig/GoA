@@ -19,7 +19,7 @@ export class GameHelper {
     isTutorial = false,
     curGameSession
   ) {
-    document.querySelector(".Hint-Text").classList.add("hidden");
+    
     curRoomUI.uiText.innerText = errorMessage;
     curRoomUI.wrongSelectionFeedback?.();
 
