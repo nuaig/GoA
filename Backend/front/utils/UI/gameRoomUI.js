@@ -987,7 +987,7 @@ class GameRoomUI {
     this.modalCompletionHeader.innerHTML = "Game Over!";
     this.finalScoreText.innerHTML = `${this.currentScore}`;
     this.labelCompletionText.innerHTML = `
-        You have failed level ${this.currentLevel} of ${this.gameName}'s Algorithm in ${this.currentMode} mode!
+        You ran out of lives :( Please retry ${this.currentLevel} of ${this.gameName}'s Algorithm in ${this.currentMode} mode.
       `;
 
     this.totalStars = setStars(this.health);

@@ -298,7 +298,7 @@ function updateHintsFromBooleans() {
     );
   }
   if (hintBooleans.wrongEdgeSelected) {
-    messages.push("This is not the correct edge to select.");
+    messages.push("Select an unvisited edge connected to the current node!");
   }
   if (hintBooleans.needToPressStarterNode) {
     messages.push("Please press on node 0 to begin.");
@@ -1506,7 +1506,7 @@ createDungeonRoom();
 
 // ===== UI Callbacks Section =====
 curRoomUI.callbacks.resetLevel = function (curlvl) {
-  curRoomUI.uiText.innerHTML = `Start by selecting node 0, then find the shortest path to every other node in the graph.`;
+  curRoomUI.uiText.innerHTML = `Start by selecting the source node (Node 0), then relax all edges going out of this node!`;
   curRoomUI.health = resetHealth();
   document.querySelector(".Hint-Text").classList.add("hidden");
   curRoomUI.closeCompletionModal();
