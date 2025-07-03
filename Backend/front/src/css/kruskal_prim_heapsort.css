@@ -43,6 +43,12 @@ body {
   padding: 10px 0;
 }
 
+.visited-node-cell {
+  background-color: yellow;
+  color: black;
+  font-weight: bold;
+}
+
 .tutorial-instructions-modal strong {
   font-size: 18px;
   display: block;

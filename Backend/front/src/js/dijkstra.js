@@ -671,6 +671,10 @@ function drawLines() {
             chestList[index].visible = false;
             openChestList[index].visible = true;
             openChestList[index].userData.clicked = true;
+            const cell = document.getElementById(`distance-${index}`);
+            if (cell) {
+              cell.classList.add("visited-node-cell");
+            }
 
             Object.keys(hintBooleans).forEach(
               (key) => (hintBooleans[key] = false)
@@ -1070,6 +1074,13 @@ function resetScene() {
 
   selectedEdgesThisStep = [];
   curRoomUI.selectedEdgeForInput = null;
+
+  curNodes.forEach((node) => {
+    const cell = document.getElementById(`distance-${node}`);
+    if (cell) {
+      cell.classList.remove("visited-node-cell");
+    }
+  });
 }
 
 /*
