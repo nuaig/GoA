@@ -33,6 +33,7 @@ import GameRoomUI from "./../../utils/UI/gameRoomUI.js";
 import { GameHelper } from "./../../utils/gameHelper.js";
 
 // ===== Variable Decleration Section =====
+const DEBUG_MODE = false;
 let hintBooleans = {
   edgePressedWhenNodeExpected: false,
   nodePressedWhenEdgeExpected: false,
@@ -110,6 +111,7 @@ const minDistance = cubeSize * 10;
 const gridSize = 40;
 let labels = [];
 let dungeonRoomAction;
+let dungeonRoomMixer;
 const startPosition = { x: 0, y: 5, z: 35 };
 camera.position.set(startPosition.x, startPosition.y, startPosition.z);
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -258,24 +260,48 @@ const tutorialSteps = [
 ];
 
 // ===== Function Decleration Section =====
+/*
+ * This function prints only when in debug mode
+ */
+function debugPrint(...args) {
+  if (DEBUG_MODE) {
+    console.log(...args);
+  }
+}
+/*
+ * Updates hint messages in the UI based on current boolean flags.
+ * 1. If in tutorial mode, it checks the current step and displays either the visited message or a tutorial-specific error message.
+ * 2. If not in tutorial mode, it checks various boolean flags (e.g., wrong node, wrong edge) and compiles appropriate messages.
+ * 3. It then updates the DOM with the generated hints, showing or hiding the hint box accordingly.
+ */
 function updateHintsFromBooleans() {
   const hintElement = document.querySelector(".Hint-Text");
+  debugPrint("Updating hints. Tutorial mode:", curRoomUI.isTutorial);
 
   // Handle tutorial mode
   if (curRoomUI.isTutorial) {
     const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
+    debugPrint(
+      "Current tutorial step:",
+      curRoomUI.currentTutorialStep,
+      currentStep
+    );
 
     const showVisited = hintBooleans.alreadyVisited;
     const message = showVisited
       ? "This was already visited. Please choose the correct one!"
       : currentStep?.errorMessage?.trim();
 
+    debugPrint("Tutorial mode message:", message);
+
     if (message) {
       hintElement.classList.remove("hidden");
       hintElement.innerHTML = `<li>${message}</li>`;
+      debugPrint("Hint shown with message.");
     } else {
       hintElement.classList.add("hidden");
       hintElement.innerHTML = "";
+      debugPrint("Hint hidden (no message).");
     }
 
     return;
@@ -286,40 +312,49 @@ function updateHintsFromBooleans() {
 
   if (hintBooleans.alreadyVisited) {
     messages.push("This was already visited. Please choose the correct one!");
+    debugPrint("Hint: alreadyVisited");
   }
   if (hintBooleans.edgePressedWhenNodeExpected) {
     messages.push("Please select a node, not an edge.");
+    debugPrint("Hint: edgePressedWhenNodeExpected");
   }
   if (hintBooleans.nodePressedWhenEdgeExpected) {
     messages.push("You need to select an edge, not a node.");
+    debugPrint("Hint: nodePressedWhenEdgeExpected");
   }
   if (hintBooleans.wrongNodeSelected) {
     messages.push(
       "Choose the unvisited node that has the shortest distance from source."
     );
+    debugPrint("Hint: wrongNodeSelected");
   }
   if (hintBooleans.wrongEdgeSelected) {
     messages.push("Select an unvisited edge connected to the current node!");
+    debugPrint("Hint: wrongEdgeSelected");
   }
   if (hintBooleans.needToPressStarterNode) {
     messages.push("Please press on node 0 to begin.");
+    debugPrint("Hint: needToPressStarterNode");
   }
   if (hintBooleans.wrongWeightEntered) {
     messages.push("The weight you entered is incorrect.");
+    debugPrint("Hint: wrongWeightEntered");
   }
 
   if (messages.length > 0) {
     hintElement.classList.remove("hidden");
     hintElement.innerHTML = messages.map((msg) => `<li>${msg}</li>`).join("");
+    debugPrint("Hints displayed:", messages);
   } else {
     hintElement.classList.add("hidden");
     hintElement.innerHTML = "";
+    debugPrint("No hints to display. Hint element hidden.");
   }
 }
 
 /*
  * Updates tutorial UI with the current step.
- * 1. Gets the current step from `tutorialSteps` using `curRoomUI.currentTutorialStep`.
+ * 1. Gets the current step from `tutorialSteps` or `curAlgorithmForGraph.steps` depending on `isTutorial`.
  * 2. Updates DOM with step's instruction and explanation.
  */
 function updateTutorialStep(isTutorial = true) {
@@ -327,14 +362,19 @@ function updateTutorialStep(isTutorial = true) {
     ? tutorialSteps[curRoomUI.currentTutorialStep]
     : curAlgorithmForGraph.steps[curRoomUI.currentTutorialStep];
 
-  console.log(
+  debugPrint(
     "[updateTutorialStep] Current Step Index:",
     curRoomUI.currentTutorialStep
   );
-  console.log("[updateTutorialStep] Step Content:", step);
+  debugPrint("[updateTutorialStep] Step Content:", step);
 
+  // Update instruction text
   document.querySelector(".tuto-instruction-text").innerHTML = step.instruction;
+  debugPrint("[updateTutorialStep] Instruction updated:", step.instruction);
+
+  // Update explanation text
   document.querySelector(".tuto-explanation-text").innerHTML = step.explanation;
+  debugPrint("[updateTutorialStep] Explanation updated:", step.explanation);
 }
 
 /*
@@ -349,17 +389,22 @@ function nextTutorialStep() {
     ? tutorialSteps.length
     : curAlgorithmForGraph.steps.length;
 
-  console.log("[nextTutorialStep] Next Step Index:", nextStepIndex);
-  console.log("[nextTutorialStep] Total Steps:", stepLength);
+  debugPrint("[nextTutorialStep] Next Step Index:", nextStepIndex);
+  debugPrint("[nextTutorialStep] Total Steps:", stepLength);
 
   const isComplete = nextStepIndex >= stepLength;
   if (isComplete) {
-    console.log(
+    debugPrint(
       "[nextTutorialStep] Tutorial complete. Showing modal and resetting state."
     );
+
     if (curRoomUI.isTutorial) {
+      debugPrint("[nextTutorialStep] Triggering tutorial completion modal.");
       curRoomUI.updateTutorialModalToBeTutorialCompleteModal?.();
     } else {
+      debugPrint(
+        "[nextTutorialStep] Handling level completion via GameHelper."
+      );
       GameHelper.handleLevelCompletion(
         curRoomUI,
         curGameSession,
@@ -367,7 +412,7 @@ function nextTutorialStep() {
       );
     }
   } else {
-    console.log("[nextTutorialStep] Proceeding to next tutorial step.");
+    debugPrint("[nextTutorialStep] Proceeding to next tutorial step.");
     updateTutorialStep(curRoomUI.isTutorial);
   }
 }
@@ -382,14 +427,15 @@ function nextTutorialStep() {
 async function createModels() {
   const margin = 0.1;
   const fixed = [];
+
   for (let i = 0; i < curNodes.length; i++) {
-    console.log(`[createModels] Creating model for node ${i}`);
+    debugPrint(`[createModels] Creating model for node ${i}`);
     let position;
 
     if (i < fixed.length) {
-      // Use fixed coordinates for predefined nodes (not currently used since fixed is empty)
+      // Use fixed coordinates for predefined nodes (currently unused)
       position = new THREE.Vector3(fixed[i][0], fixed[i][1], fixed[i][2]);
-      console.log(
+      debugPrint(
         `[createModels] Using fixed position for node ${i}:`,
         position
       );
@@ -399,7 +445,6 @@ async function createModels() {
       position = new THREE.Vector3();
 
       while (!validPosition) {
-        // Generate random XZ position within the grid
         const randomX = (Math.random() - 0.5) * gridSize;
         const randomZ = (Math.random() - 0.5) * gridSize;
         position.set(randomX, 0, randomZ);
@@ -407,22 +452,28 @@ async function createModels() {
 
         // Check distance constraint with all existing chests
         for (let x = 0; x < chestList.length; x++) {
-          if (chestList[x].position.distanceTo(position) < minDistance) {
+          const dist = chestList[x].position.distanceTo(position);
+          if (dist < minDistance) {
             validPosition = false;
+            debugPrint(
+              `[createModels] Node ${i} too close to node ${x} (dist=${dist}). Retrying...`
+            );
             break;
           }
 
-          // Check triangle inequality with each pair of existing chests
+          // Check triangle inequality with pairs of existing chests
           for (let y = x + 1; y < chestList.length; y++) {
-            if (
-              !isTriangleInequalitySatisfied(
-                chestList[x].position,
-                chestList[y].position,
-                position,
-                margin
-              )
-            ) {
+            const satisfies = isTriangleInequalitySatisfied(
+              chestList[x].position,
+              chestList[y].position,
+              position,
+              margin
+            );
+            if (!satisfies) {
               validPosition = false;
+              debugPrint(
+                `[createModels] Triangle inequality failed for nodes ${x}, ${y}, and ${i}. Retrying...`
+              );
               break;
             }
           }
@@ -431,40 +482,50 @@ async function createModels() {
         }
       }
 
-      console.log(`[createModels] Random position for node ${i}:`, position);
+      debugPrint(`[createModels] Random position for node ${i}:`, position);
     }
 
     // Load and place closed chest model
     const closedModel = await loadModel(closedChestURL.href, position, scene);
     closedModel.model.scale.set(2.5, 2.5, 2.5);
     chestList.push(closedModel.model);
+    debugPrint(`[createModels] Closed chest added at node ${i}.`);
 
     // Load and place open chest model (initially hidden)
     const openModel = await loadModel(openChestURL.href, position, scene);
     openModel.model.scale.set(1.5, 1.5, 1.5);
     openModel.model.visible = false;
     openChestList.push(openModel.model);
+    debugPrint(`[createModels] Open chest (hidden) added at node ${i}.`);
 
     // Create a floating label above the chest
     const labelPosition = position.clone();
     labelPosition.y += 2.5;
     const chestLabel = createNodeLabel(`${i}`, labelPosition, scene);
     chestLabelList.push(chestLabel);
+    debugPrint(`[createModels] Label created for node ${i}.`);
   }
 
-  console.log("All models loaded. Final chestList:", chestList);
+  debugPrint("All models loaded. Final chestList:", chestList);
 
   // Draw lines between all chests to form the graph
   drawLines();
-  // show the tables
+  debugPrint("[createModels] Lines drawn between chests.");
 }
 
 /*
- * Shows the tables in the beginning of the scene loading
+ * Shows the tables in the beginning of the scene loading.
+ * 1. Retrieves the "tables-container" element.
+ * 2. Makes it visible by setting its display style to "block".
  */
 function showTables() {
   const container = document.getElementById("tables-container");
-  if (container) container.style.display = "block";
+  if (container) {
+    container.style.display = "block";
+    debugPrint("[showTables] Tables container is now visible.");
+  } else {
+    debugPrint("[showTables] Tables container not found.");
+  }
 }
 
 /*
@@ -479,12 +540,14 @@ function drawLines() {
   if (sceneLoadCount > 1) {
     showTables();
   }
-  console.log("Drawing lines between chests.");
-  console.log("Graph edges:", graph.edges);
+  debugPrint("[drawLines] Drawing lines between chests.");
+  debugPrint("[drawLines] Graph edges:", graph.edges);
 
   const lines = [];
   graph.edges.forEach(([start, end, weight]) => {
-    console.log("Drawing line between:", start, end);
+    debugPrint(
+      `[drawLines] Creating edge from node ${start} to ${end} with weight ${weight}`
+    );
     const edge = { start, end, weight };
 
     const line = drawLine(
@@ -500,25 +563,21 @@ function drawLines() {
     edgeLabelList.push(line.userData.label);
   });
 
-  // Reset old listeners before assigning new ones
   curRoomUI.disableMouseEventListeners_K_P();
   curRoomUI.callbacks.onMouseMove = null;
   curRoomUI.callbacks.onClick = null;
 
-  // Setup raycaster for hover and click
   raycaster = new THREE.Raycaster();
   raycaster.params.Line.threshold = 0.5;
   const mouse = new THREE.Vector2();
   let selectedLine = null;
 
-  // Sphere used to highlight hovered intersection
   const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32);
   const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
   sphereInter = new THREE.Mesh(sphereGeometry, sphereMaterial);
   sphereInter.visible = false;
   scene.add(sphereInter);
 
-  // Mouse move handler: hover feedback for edges and chests
   onMouseMove = function (event) {
     event.preventDefault();
     if (curRoomUI.isModalOpen) return;
@@ -536,7 +595,6 @@ function drawLines() {
     const intersects = raycaster.intersectObjects([...lines, ...labels]);
     const chestIntersects = raycaster.intersectObjects([...chestList]);
 
-    // Highlight chest if hovered
     if (chestIntersects.length > 0) {
       let hoveredChest = chestIntersects[0].object;
       while (hoveredChest && !chestList.includes(hoveredChest)) {
@@ -548,7 +606,6 @@ function drawLines() {
         openChestList[index].visible = true;
       }
     } else {
-      // Reset all unopened chests
       chestList.forEach((chest, i) => {
         if (!openChestList[i].userData?.clicked) {
           chest.visible = true;
@@ -572,7 +629,6 @@ function drawLines() {
       sphereInter.position.copy(intersects[0].point);
       sphereInter.visible = true;
 
-      // Highlight edge if different from previously selected
       if (selectedLine !== intersectedObject) {
         if (selectedLine && !selectedLine.userData.selected) {
           selectedLine.material.color.set(0x74c0fc);
@@ -600,11 +656,10 @@ function drawLines() {
     }
   };
 
-  // Click handler: chest or edge interaction depending on tutorial/game state
   onClick = function (event) {
     event.preventDefault();
     if (curRoomUI.isModalOpen || Date.now() < clickBlockedUntil) {
-      console.log("[onClick] Ignored: modal is open.");
+      debugPrint("[onClick] Ignored: modal is open or click is blocked.");
       return;
     }
 
@@ -630,8 +685,10 @@ function drawLines() {
 
       const index = chestList.indexOf(clickedChest);
       if (index !== -1) {
+        debugPrint(`[onClick] Chest ${index} clicked.`);
+
         if (openChestList[index]?.userData?.clicked) {
-          console.log(`Node ${index} already visited.`);
+          debugPrint(`[onClick] Node ${index} already visited.`);
           hintBooleans.alreadyVisited = true;
           updateHintsFromBooleans();
           GameHelper.handleWrongSelection(
@@ -645,6 +702,7 @@ function drawLines() {
         }
 
         if (currentStep.expectedEdges) {
+          debugPrint("[onClick] Expected an edge, not a node.");
           hintBooleans.nodePressedWhenEdgeExpected = true;
           updateHintsFromBooleans();
           GameHelper.handleWrongSelection(
@@ -657,17 +715,21 @@ function drawLines() {
         }
 
         if (Array.isArray(currentStep.expectedChests)) {
-          console.log("=======================+", currentStep.expectedChests);
+          debugPrint("[onClick] Expected chests:", currentStep.expectedChests);
           const isAmbiguityStep = currentStep.expectedChests.length > 1;
-          console.log("isambiguitystep:", isAmbiguityStep);
+          debugPrint("[onClick] Ambiguity step:", isAmbiguityStep);
 
           if (currentStep.expectedChests.includes(index)) {
-            // prevent visiting the already-visited node in ambiguity
             if (isAmbiguityStep && openChestList[index]?.userData?.clicked) {
-              console.warn("Ambiguity step: node already visited, ignoring.");
+              debugPrint(
+                "[onClick] Ambiguity step: node already visited, ignoring."
+              );
               return;
             }
 
+            debugPrint(
+              `[onClick] Correct node ${index} clicked. Opening chest.`
+            );
             chestList[index].visible = false;
             openChestList[index].visible = true;
             openChestList[index].userData.clicked = true;
@@ -681,13 +743,10 @@ function drawLines() {
             );
             document.querySelector(".Hint-Text").classList.add("hidden");
             curRoomUI.uiText.innerText = "Relax the edges of this node!";
-            console.log(
-              "=============================pressed on node: ",
-              index
-            );
             curAlgorithmForGraph.resumeFromNode(index);
             setTimeout(() => nextTutorialStep(), 500);
           } else {
+            debugPrint("[onClick] Wrong node clicked.");
             if (currentStep.expectedChests.includes(0)) {
               hintBooleans.needToPressStarterNode = true;
             } else {
@@ -712,6 +771,7 @@ function drawLines() {
       intersectedEdge?.userData?.edge
     ) {
       clickBlockedUntil = Date.now() + 400;
+      debugPrint("[onClick] Clicked edge when node was expected.");
       if (currentStep.expectedChests.includes(0)) {
         hintBooleans.needToPressStarterNode = true;
       } else {
@@ -733,8 +793,9 @@ function drawLines() {
       intersectedEdge?.userData?.edge
     ) {
       clickBlockedUntil = Date.now() + 400;
-      const expectedEdges = currentStep.expectedEdges;
       const { start, end } = intersectedEdge.userData.edge;
+      debugPrint(`[onClick] Edge clicked in tutorial: [${start}, ${end}]`);
+      const expectedEdges = currentStep.expectedEdges;
 
       const isExpected = expectedEdges.some(
         ([e0, e1]) =>
@@ -742,6 +803,7 @@ function drawLines() {
       );
 
       if (!isExpected) {
+        debugPrint("[onClick] Wrong edge clicked.");
         hintBooleans.wrongEdgeSelected = true;
         updateHintsFromBooleans();
         curRoomUI.uiText.innerText = "";
@@ -762,7 +824,7 @@ function drawLines() {
       );
 
       if (alreadySelected) {
-        console.log("[onClick] Edge already selected.");
+        debugPrint("[onClick] Edge already selected.");
         hintBooleans.alreadyVisited = true;
         updateHintsFromBooleans();
         GameHelper.handleWrongSelection(
@@ -775,6 +837,7 @@ function drawLines() {
         return;
       }
 
+      debugPrint("[onClick] Correct edge selected.");
       selectedEdgesThisStep.push([start, end]);
 
       const allSelected = expectedEdges.every(([e0, e1]) =>
@@ -784,6 +847,7 @@ function drawLines() {
       );
 
       if (allSelected) {
+        debugPrint("[onClick] All expected edges selected.");
         selectedEdgesThisStep = [];
         Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
         document.querySelector(".Hint-Text").classList.add("hidden");
@@ -802,7 +866,7 @@ function drawLines() {
       const { start, end } = intersectedEdge.userData.edge;
       const expectedEdges = currentStep.expectedEdges;
 
-      console.log("[onClick] Validating selected edge:", [start, end]);
+      debugPrint("[onClick] Validating edge selection:", [start, end]);
 
       const found = expectedEdges.find(
         ({ edge: [e0, e1] }) =>
@@ -810,17 +874,13 @@ function drawLines() {
       );
 
       if (found) {
-        console.log("[onClick] Edge is in the expectedEdges array:", [
-          start,
-          end,
-        ]);
-
+        debugPrint("[onClick] Edge is valid.");
         const alreadyChosen = selectedEdgesThisStep.some(
           ([x, y]) => (x === start && y === end) || (x === end && y === start)
         );
 
         if (alreadyChosen) {
-          console.log("[onClick] Edge already selected.");
+          debugPrint("[onClick] Edge already selected.");
           hintBooleans.alreadyVisited = true;
           updateHintsFromBooleans();
           GameHelper.handleWrongSelection(
@@ -834,7 +894,7 @@ function drawLines() {
         }
 
         selectedEdgesThisStep.push([start, end]);
-        console.log(
+        debugPrint(
           "[onClick] Edge added to selectedEdgesThisStep:",
           selectedEdgesThisStep
         );
@@ -853,24 +913,20 @@ function drawLines() {
           selectedEdgesThisStep.length === currentStep.expectedEdges.length;
 
         if (allChosen) {
-          console.log(
-            "[onClick] All expected edges selected. Waiting for correct input."
+          debugPrint(
+            "[onClick] All expected edges selected. Awaiting weight input."
           );
           Object.keys(hintBooleans).forEach(
             (key) => (hintBooleans[key] = false)
           );
           document.querySelector(".Hint-Text").classList.add("hidden");
           curRoomUI.uiText.innerText = "Visit a new node!";
-
-          curRoomUI.readyForNextStep = true; // Set flag instead of advancing
+          curRoomUI.readyForNextStep = true;
         }
       } else {
+        debugPrint("[onClick] Selected edge is not expected.");
         hintBooleans.wrongEdgeSelected = true;
         updateHintsFromBooleans();
-        console.log("[onClick] Edge is NOT in the expectedEdges array:", [
-          start,
-          end,
-        ]);
         GameHelper.handleWrongSelection(
           curRoomUI,
           "",
@@ -884,7 +940,7 @@ function drawLines() {
   curRoomUI.callbacks.onMouseMove = onMouseMove;
   curRoomUI.callbacks.onClick = onClick;
 
-  console.log("printing callbacks", curRoomUI.callbacks);
+  debugPrint("[drawLines] Mouse callbacks set:", curRoomUI.callbacks);
 
   curRoomUI.enableMouseEventListeners_K_P();
 }
@@ -894,9 +950,18 @@ function drawLines() {
  * Ensures the 3D scene maintains correct aspect ratio and fills the screen.
  */
 function onWindowResize() {
+  debugPrint(
+    "[onWindowResize] Window resized:",
+    window.innerWidth,
+    window.innerHeight
+  );
+
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+  debugPrint("[onWindowResize] Camera aspect ratio updated:", camera.aspect);
+
   renderer.setSize(window.innerWidth, window.innerHeight);
+  debugPrint("[onWindowResize] Renderer size set.");
 }
 
 /*
@@ -907,15 +972,17 @@ function onWindowResize() {
  */
 function animate() {
   requestAnimationFrame(animate);
+
   const deltaSeconds = clock.getDelta();
 
-  mixers.forEach((mixer) => {
+  mixers.forEach((mixer, index) => {
     mixer.update(deltaSeconds);
   });
 
   controls.update();
 
   updateLabelRotation(); // Update label rotation on each frame
+
   renderer.render(scene, camera);
 }
 
@@ -926,14 +993,24 @@ function animate() {
  */
 function updateEdgeTable(edges) {
   const tableBody = document.querySelector("#edgeTable tbody");
-  if (!tableBody) return;
+  if (!tableBody) {
+    console.warn("[updateEdgeTable] Table body not found.");
+    return;
+  }
 
-  tableBody.innerHTML = "";
-  edges.forEach(([from, to, weight]) => {
+  debugPrint("[updateEdgeTable] Populating table with edges:", edges);
+
+  tableBody.innerHTML = ""; // Clear existing rows
+  edges.forEach(([from, to, weight], index) => {
     const row = document.createElement("tr");
     row.innerHTML = `<td>${from}</td><td>${to}</td><td>${weight}</td>`;
     tableBody.appendChild(row);
+    debugPrint(
+      `[updateEdgeTable] Added row ${index}: [${from}, ${to}, ${weight}]`
+    );
   });
+
+  debugPrint("[updateEdgeTable] Edge table update complete.");
 }
 
 /*
@@ -941,15 +1018,18 @@ function updateEdgeTable(edges) {
  * Keeps chest, edge, and ring labels readable during movement.
  */
 function updateLabelRotation() {
-  chestLabelList.forEach((label) => {
+  chestLabelList.forEach((label, i) => {
     label.lookAt(camera.position);
   });
-  edgeLabelList.forEach((label) => {
+
+  edgeLabelList.forEach((label, i) => {
     label.lookAt(camera.position);
   });
-  ringList.forEach((label) => {
+
+  ringList.forEach((label, i) => {
     label.lookAt(camera.position);
   });
+
   hoverRing.lookAt(camera.position);
 }
 
@@ -963,6 +1043,10 @@ function updateLabelRotation() {
  */
 async function createDungeonRoom() {
   const position = new THREE.Vector3(0, -0.1, 0);
+  debugPrint(
+    "[createDungeonRoom] Loading dungeon model at position:",
+    position
+  );
 
   try {
     const { model, mixer, action } = await loadModel(
@@ -972,25 +1056,30 @@ async function createDungeonRoom() {
       mixers
     );
 
+    debugPrint("[createDungeonRoom] Dungeon model loaded.");
+
     if (mixer && action) {
-      // Save mixer and action for animation control
       dungeonRoomMixer = mixer;
       dungeonRoomAction = action;
 
-      console.log("Mixer and action initialized:", mixer, action);
+      debugPrint(
+        "[createDungeonRoom] Mixer and action initialized:",
+        dungeonRoomMixer,
+        dungeonRoomAction
+      );
 
       dungeonRoomAction.timeScale = 0.25;
       dungeonRoomAction.setLoop(THREE.LoopOnce);
       dungeonRoomAction.clampWhenFinished = true;
       dungeonRoomAction.paused = false;
     } else {
-      console.log("Mixer or action is undefined.");
+      debugPrint("[createDungeonRoom] Mixer or action is undefined.");
     }
 
-    // Scale the model to fit the scene
     model.scale.set(1.5, 1.5, 1.5);
+    debugPrint("[createDungeonRoom] Model scaled to (1.5, 1.5, 1.5).");
   } catch (error) {
-    console.error("Error loading dungeon room:", error);
+    console.error("[createDungeonRoom] Error loading dungeon room:", error);
   }
 }
 
@@ -1003,45 +1092,53 @@ async function createDungeonRoom() {
  * 4. Resets score, star UI, and visual highlights.
  */
 function resetScene() {
+  debugPrint("[resetScene] Starting scene reset.");
+
   // Remove and dispose chest models
-  chestList.forEach((chest) => {
+  chestList.forEach((chest, i) => {
     scene.remove(chest);
     if (chest.geometry) chest.geometry.dispose();
     if (chest.material) chest.material.dispose();
+    debugPrint(`[resetScene] Removed closed chest ${i}`);
   });
 
-  openChestList.forEach((chest) => {
+  openChestList.forEach((chest, i) => {
     scene.remove(chest);
     if (chest.geometry) chest.geometry.dispose();
     if (chest.material) chest.material.dispose();
+    debugPrint(`[resetScene] Removed open chest ${i}`);
   });
 
   // Remove and dispose node labels
-  chestLabelList.forEach((label) => {
+  chestLabelList.forEach((label, i) => {
     scene.remove(label);
     if (label.geometry) label.geometry.dispose();
     if (label.material) label.material.dispose();
+    debugPrint(`[resetScene] Removed chest label ${i}`);
   });
 
   // Remove and dispose edge lines
-  edgeList.forEach((edge) => {
+  edgeList.forEach((edge, i) => {
     scene.remove(edge);
     if (edge.geometry) edge.geometry.dispose();
     if (edge.material) edge.material.dispose();
+    debugPrint(`[resetScene] Removed edge line ${i}`);
   });
 
   // Remove and dispose edge labels
-  edgeLabelList.forEach((label) => {
+  edgeLabelList.forEach((label, i) => {
     scene.remove(label);
     if (label.geometry) label.geometry.dispose();
     if (label.material) label.material.dispose();
+    debugPrint(`[resetScene] Removed edge label ${i}`);
   });
 
   // Remove and dispose selection rings
-  ringList.forEach((ring) => {
+  ringList.forEach((ring, i) => {
     scene.remove(ring);
     if (ring.geometry) ring.geometry.dispose();
     if (ring.material) ring.material.dispose();
+    debugPrint(`[resetScene] Removed selection ring ${i}`);
   });
 
   // Clear arrays
@@ -1051,26 +1148,31 @@ function resetScene() {
   edgeList.length = 0;
   edgeLabelList.length = 0;
   ringList.length = 0;
+  debugPrint("[resetScene] Cleared all model and label lists.");
 
   // Disable interaction handlers
   curRoomUI.disableMouseEventListeners_K_P();
   curRoomUI.onMouseMove = null;
   curRoomUI.onClick = null;
+  debugPrint("[resetScene] Disabled mouse event listeners.");
 
   // Remove sphere indicator and free its resources
   if (sphereInter) {
     scene.remove(sphereInter);
     sphereInter.geometry.dispose();
     sphereInter.material.dispose();
+    debugPrint("[resetScene] Removed sphere indicator.");
   }
 
   // Reset UI and color tracking
   hoverRing.visible = false;
   usedColors.clear();
+  debugPrint("[resetScene] Reset color usage and hover ring visibility.");
 
   // Reset score and visual star indicators
   curRoomUI.updateScore(0);
   resetStars();
+  debugPrint("[resetScene] Score reset and stars cleared.");
 
   selectedEdgesThisStep = [];
   curRoomUI.selectedEdgeForInput = null;
@@ -1079,8 +1181,11 @@ function resetScene() {
     const cell = document.getElementById(`distance-${node}`);
     if (cell) {
       cell.classList.remove("visited-node-cell");
+      debugPrint(`[resetScene] Cleared visited class for node ${node}`);
     }
   });
+
+  debugPrint("[resetScene] Scene reset complete.");
 }
 
 /*
@@ -1088,15 +1193,23 @@ function resetScene() {
  * Includes a red sphere for edge intersections and a black ring for label highlights.
  */
 function createHoverElements() {
+  // Create red sphere for edge hover intersections
   const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32);
   const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
   sphereInter = new THREE.Mesh(sphereGeometry, sphereMaterial);
   sphereInter.visible = false;
   scene.add(sphereInter);
+  debugPrint(
+    "[createHoverElements] Red hover sphere created and added to scene."
+  );
 
+  // Create black ring for label highlights
   hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
   hoverRing.visible = false;
   scene.add(hoverRing);
+  debugPrint(
+    "[createHoverElements] Black hover ring created and added to scene."
+  );
 }
 
 /*
@@ -1117,29 +1230,45 @@ function setUpGameModel(currentLevel) {
     return; // Exit the function if the level is invalid
   }
 
+  debugPrint(`[setUpGameModel] Setting up level ${currentLevel}`);
+
   const { nodes: numNodes, edges: numEdges } = levelConfig[currentLevel];
   curNodes = Array.from({ length: numNodes }, (_, i) => i);
   curEdges = numEdges;
 
-  // Score per correct action is based on max score divided by number of needed actions
+  debugPrint(
+    `[setUpGameModel] Number of nodes: ${numNodes}, edges: ${numEdges}`
+  );
+  debugPrint(`[setUpGameModel] Nodes array:`, curNodes);
+
   correctActionScoreAddition = Math.floor(
     levelMaxScores[currentLevel] / (numNodes - 1)
   );
+  debugPrint(
+    `[setUpGameModel] Score per correct action: ${correctActionScoreAddition}`
+  );
 
   graph = createRandomConnectedGraph(curNodes, curEdges);
-  updateEdgeTable(graph.edges);
-  initializeDistanceTable(graph.nodes);
+  debugPrint("[setUpGameModel] Random connected graph generated:", graph);
 
-  console.log("Graph ==", graph);
+  updateEdgeTable(graph.edges);
+  debugPrint("[setUpGameModel] Edge table updated.");
+
+  initializeDistanceTable(graph.nodes);
+  debugPrint("[setUpGameModel] Distance table initialized.");
 
   // Assign algorithm for early levels
   if (curRoomUI.currentLevel <= 3) {
     curAlgorithmForGraph = new DijkstraAlgorithm(graph);
     curRoomUI.currentAlgorithm = "Dijkstra";
+    debugPrint("[setUpGameModel] Dijkstra algorithm assigned for this level.");
   }
 
   createModels();
+  debugPrint("[setUpGameModel] Models created.");
+
   createHoverElements();
+  debugPrint("[setUpGameModel] Hover elements created.");
 }
 
 /*
@@ -1154,9 +1283,13 @@ function setUpGameModel(currentLevel) {
 function initializeDistanceTable(nodes) {
   const tableBody = document.getElementById("distance-table-body");
   if (!tableBody) {
-    console.warn("Table body element not found: #distance-table-body");
+    console.warn(
+      "[initializeDistanceTable] Table body element not found: #distance-table-body"
+    );
     return;
   }
+
+  debugPrint("[initializeDistanceTable] Initializing table with nodes:", nodes);
 
   tableBody.innerHTML = ""; // Clear any old rows
 
@@ -1173,7 +1306,15 @@ function initializeDistanceTable(nodes) {
     row.appendChild(nodeCell);
     row.appendChild(distCell);
     tableBody.appendChild(row);
+
+    debugPrint(
+      `[initializeDistanceTable] Row added for node ${index} with initial distance: ${distCell.textContent}`
+    );
   });
+
+  debugPrint(
+    "[initializeDistanceTable] Distance table initialization complete."
+  );
 }
 
 /*
@@ -1183,16 +1324,27 @@ function initializeDistanceTable(nodes) {
  * 2. Initializes algorithm, tables, and visuals for the tutorial.
  */
 function setUpTutorialModel() {
+  debugPrint("[setUpTutorialModel] Setting up Dijkstra tutorial model...");
+
   graph = createSpecificGraphDijkstraTutorial();
+  debugPrint("[setUpTutorialModel] Tutorial graph created:", graph);
+
   curNodes = graph.nodes;
   curAlgorithmForGraph = new DijkstraAlgorithm(graph);
   curRoomUI.currentAlgorithm = "Dijkstra";
+  debugPrint("[setUpTutorialModel] Dijkstra algorithm initialized and set.");
 
   updateEdgeTable(graph.edges);
+  debugPrint("[setUpTutorialModel] Edge table updated.");
+
   initializeDistanceTable(graph.nodes);
+  debugPrint("[setUpTutorialModel] Distance table initialized.");
 
   createModels();
+  debugPrint("[setUpTutorialModel] Models created.");
+
   createHoverElements();
+  debugPrint("[setUpTutorialModel] Hover elements created.");
 }
 
 /*
@@ -1202,11 +1354,15 @@ function setUpTutorialModel() {
 function showInputDialog() {
   document.getElementById("input-dialog").style.display = "block";
   document.getElementById("input-backdrop").style.display = "block";
+  debugPrint("[showInputDialog] Input dialog and backdrop displayed.");
 
   // Prevent interactions underneath
   curRoomUI.isModalOpen = true;
+  debugPrint("[showInputDialog] Modal state set to true.");
+
   const input = document.getElementById("dialog-input");
   input.focus();
+  debugPrint("[showInputDialog] Input field focused.");
 }
 
 /*
@@ -1217,6 +1373,7 @@ function showInputDialog() {
  * 3. Closes the dialog and advances the tutorial if appropriate.
  */
 function closeInputDialog() {
+  debugPrint("[closeInputDialog] Closing input dialog...");
   Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
 
   const inputValue = document.getElementById("dialog-input").value.trim();
@@ -1227,14 +1384,22 @@ function closeInputDialog() {
     const expected = currentStep.updatedDistance;
     const selectedEdge = currentStep.expectedEdges?.[0];
 
+    debugPrint("[closeInputDialog] Tutorial mode. Current step:", currentStep);
+
     if (expected) {
       const [node, correctValue] = Object.entries(expected)[0];
 
       if (inputValue === correctValue.toString()) {
+        debugPrint(`[closeInputDialog] Correct input received: ${inputValue}`);
         isCorrect = true;
 
         const cell = document.getElementById(`distance-${node}`);
-        if (cell) cell.textContent = correctValue;
+        if (cell) {
+          cell.textContent = correctValue;
+          debugPrint(
+            `[closeInputDialog] Updated distance cell for node ${node}`
+          );
+        }
 
         if (selectedEdge) {
           const selectedLine = edgeList.find((line) => {
@@ -1254,8 +1419,13 @@ function closeInputDialog() {
             if (selectedLine.userData.label) {
               selectedLine.userData.label.material.color.set(0x000000);
             }
+            debugPrint("[closeInputDialog] Selected edge marked as visited.");
           }
         }
+      } else {
+        console.warn(
+          `[closeInputDialog] Incorrect input: ${inputValue}, expected: ${correctValue}`
+        );
       }
     }
 
@@ -1268,13 +1438,20 @@ function closeInputDialog() {
       document.getElementById("input-backdrop").style.display = "none";
       document.getElementById("dialog-input").value = "";
       curRoomUI.isModalOpen = false;
+      debugPrint(
+        "[closeInputDialog] Correct input — proceeding to next tutorial step."
+      );
     } else {
       hintBooleans.wrongWeightEntered = true;
       updateHintsFromBooleans();
 
       if (currentStep.advanceOnError === true) {
+        debugPrint(
+          "[closeInputDialog] Incorrect input, but advancing due to advanceOnError=true."
+        );
         setTimeout(() => nextTutorialStep(), 1000);
       } else {
+        debugPrint("[closeInputDialog] Incorrect input — prompting retry.");
         curRoomUI.uiText.innerText = "Incorrect input. Try again.";
         shakeScreen?.();
         return;
@@ -1282,7 +1459,6 @@ function closeInputDialog() {
     }
   } else {
     const selected = curRoomUI.selectedEdgeForInput;
-
     if (!selected) {
       console.warn("[closeInputDialog] No selected edge found.");
       return;
@@ -1290,7 +1466,8 @@ function closeInputDialog() {
 
     const inputWeight = parseInt(inputValue, 10);
     if (inputWeight === selected.weight) {
-      console.log("[closeInputDialog] Correct weight entered:", inputWeight);
+      debugPrint("[closeInputDialog] Correct weight entered:", inputWeight);
+
       if (curRoomUI.uiText.innerText !== "Visit a new node!") {
         curRoomUI.uiText.innerText = "Correct!";
       }
@@ -1299,9 +1476,8 @@ function closeInputDialog() {
       const cell = document.getElementById(`distance-${targetNode}`);
       if (cell) {
         cell.textContent = inputWeight;
-        console.log(
-          "[closeInputDialog] Distance table updated for node:",
-          targetNode
+        debugPrint(
+          `[closeInputDialog] Updated distance cell for node ${targetNode}`
         );
       }
 
@@ -1320,6 +1496,9 @@ function closeInputDialog() {
         if (selectedLine.userData.label) {
           selectedLine.userData.label.material.color.set(0x000000);
         }
+        debugPrint(
+          "[closeInputDialog] Selected edge visually marked as completed."
+        );
       }
 
       Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
@@ -1332,13 +1511,16 @@ function closeInputDialog() {
       document.getElementById("dialog-input").value = "";
       curRoomUI.isModalOpen = false;
 
-      // ✅ Only now do we advance to the next step, safely
       if (curRoomUI.readyForNextStep) {
+        debugPrint(
+          "[closeInputDialog] Advancing to next step after correct input."
+        );
         nextTutorialStep();
         curRoomUI.readyForNextStep = false;
         selectedEdgesThisStep = [];
       }
     } else {
+      console.warn("[closeInputDialog] Incorrect weight entered:", inputWeight);
       hintBooleans.wrongWeightEntered = true;
       updateHintsFromBooleans();
 
@@ -1369,6 +1551,7 @@ function closeInputDialog() {
   }
 
   clickBlockedUntil = Date.now() + 400;
+  debugPrint("[closeInputDialog] Input locked for 400ms to prevent spamming.");
 }
 
 /// ===== Document Object Model & User Session Initialization Section =====
@@ -1397,7 +1580,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     if (response.ok) {
       const userData = await response.json();
-      console.log("User is logged in:", userData);
+      debugPrint("User is logged in:", userData);
 
       // Initialize GameStatusService with the logged-in userId
       const gameStatusService = new GameStatusService(userData.id);
@@ -1426,7 +1609,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 reArrangeButton.addEventListener("click", () => {
-  console.log("Rearrange Button Clicked");
+  debugPrint("Rearrange Button Clicked");
   const margin = 0.1;
   // Recompute positions for chests
   for (let i = 0; i < curNodes.length; i++) {
@@ -1469,11 +1652,11 @@ reArrangeButton.addEventListener("click", () => {
     chestLabelList[i].position.copy(position.clone().setY(position.y + 2.5));
   }
 
-  console.log(edgeList[0].userData.startCube);
+  debugPrint(edgeList[0].userData.startCube);
 
   // Update the positions of the lines and their labels
   edgeList.forEach((line, index) => {
-    console.log(graph.edges[index]);
+    debugPrint(graph.edges[index]);
     const [start, end, weight] = graph.edges[index];
     updateLinePosition(line, chestList[start], chestList[end]);
   });
