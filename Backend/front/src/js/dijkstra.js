@@ -762,7 +762,7 @@ function drawLines() {
           );
           document.querySelector(".Hint-Text").classList.add("hidden");
 
-          curRoomUI.uiText.innerText = "Relax the edges of this node!";
+          curRoomUI.uiText.innerText = "Relax the edges of this node! If there are no unvisited edges, visit another node";
           curAlgorithmForGraph.resumeFromNode(index);
 
           setTimeout(() => nextTutorialStep(), 500);
