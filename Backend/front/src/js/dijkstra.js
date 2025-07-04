@@ -33,7 +33,7 @@ import GameRoomUI from "./../../utils/UI/gameRoomUI.js";
 import { GameHelper } from "./../../utils/gameHelper.js";
 
 // ===== Variable Decleration Section =====
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 let hintBooleans = {
   edgePressedWhenNodeExpected: false,
   nodePressedWhenEdgeExpected: false,
