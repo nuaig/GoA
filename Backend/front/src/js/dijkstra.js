@@ -52,6 +52,7 @@ let curEdges;
 let graph;
 let clickBlockedUntil = 0;
 let correctActionScoreAddition;
+let currentlyHighlightedNodeIndex;
 // Define max score per level
 const levelMaxScores = {
   1: 40,
@@ -480,6 +481,7 @@ async function createModels() {
     const closedModel = await loadModel(closedChestURL.href, position, scene);
     closedModel.model.scale.set(2.5, 2.5, 2.5);
     chestList.push(closedModel.model);
+
     debugPrint(`[createModels] Closed chest added at node ${i}.`);
 
     // Load and place open chest model (initially hidden)
@@ -487,6 +489,8 @@ async function createModels() {
     openModel.model.scale.set(1.5, 1.5, 1.5);
     openModel.model.visible = false;
     openChestList.push(openModel.model);
+    closedModel.model.userData.nodeIndex = i;
+    openModel.model.userData.nodeIndex = i;
     debugPrint(`[createModels] Open chest (hidden) added at node ${i}.`);
 
     // Create a floating label above the chest
@@ -661,26 +665,114 @@ function drawLines() {
     raycaster.setFromCamera(mouse, camera);
 
     const chestIntersects = raycaster.intersectObjects([...chestList]);
-    const edgeIntersects = raycaster.intersectObjects([...lines, ...labels]);
+    const edgeIntersects = raycaster.intersectObjects([...edgeList, ...labels]);
     const intersectedEdge = edgeIntersects[0]?.object;
+
     const currentStep = curRoomUI.isTutorial
       ? tutorialSteps[curRoomUI.currentTutorialStep]
       : curAlgorithmForGraph.steps[curRoomUI.currentTutorialStep];
 
+    // ========== NODE CLICK ==========
     if (chestIntersects.length > 0) {
       clickBlockedUntil = Date.now() + 400;
+
+      // Traverse to find the clicked chest with nodeIndex
       let clickedChest = chestIntersects[0].object;
-      while (clickedChest && !chestList.includes(clickedChest)) {
+      while (clickedChest && clickedChest.userData.nodeIndex === undefined) {
         clickedChest = clickedChest.parent;
       }
 
-      const index = chestList.indexOf(clickedChest);
-      if (index !== -1) {
-        debugPrint(`[onClick] Chest ${index} clicked.`);
+      const index = clickedChest?.userData?.nodeIndex;
+      if (typeof index !== "number") {
+        console.warn(
+          "[onClick] Could not resolve node index from clicked chest."
+        );
+        return;
+      }
 
-        if (openChestList[index]?.userData?.clicked) {
-          debugPrint(`[onClick] Node ${index} already visited.`);
-          hintBooleans.alreadyVisited = true;
+      debugPrint(`[onClick] Chest ${index} clicked.`);
+
+      if (openChestList[index]?.userData?.clicked) {
+        debugPrint(`[onClick] Node ${index} already visited.`);
+        hintBooleans.alreadyVisited = true;
+        updateHintsFromBooleans();
+        GameHelper.handleWrongSelection(
+          curRoomUI,
+          "",
+          curRoomUI.isTutorial,
+          curGameSession
+        );
+        shakeScreen();
+        return;
+      }
+
+      if (currentStep.expectedEdges) {
+        debugPrint("[onClick] Expected an edge, not a node.");
+        hintBooleans.nodePressedWhenEdgeExpected = true;
+        updateHintsFromBooleans();
+        GameHelper.handleWrongSelection(
+          curRoomUI,
+          "",
+          curRoomUI.isTutorial,
+          curGameSession
+        );
+        return;
+      }
+
+      if (Array.isArray(currentStep.expectedChests)) {
+        const isAmbiguityStep = currentStep.expectedChests.length > 1;
+
+        if (currentStep.expectedChests.includes(index)) {
+          if (isAmbiguityStep && openChestList[index]?.userData?.clicked) {
+            debugPrint("[onClick] Ambiguity step: node already visited.");
+            return;
+          }
+
+          debugPrint(`[onClick] Correct node ${index} clicked.`);
+          chestList[index].visible = false;
+          openChestList[index].visible = true;
+          openChestList[index].userData.clicked = true;
+
+          // ====== CONDITIONAL HIGHLIGHTING ======
+          const cell = document.getElementById(`distance-${index}`);
+          if (cell) {
+            if (
+              currentlyHighlightedNodeIndex !== null &&
+              currentlyHighlightedNodeIndex !== index
+            ) {
+              const prevCell = document.getElementById(
+                `distance-${currentlyHighlightedNodeIndex}`
+              );
+              if (prevCell) {
+                prevCell.classList.remove("current-node-cell");
+                prevCell.classList.add("visited-node-cell");
+              }
+            }
+
+            cell.classList.add("current-node-cell");
+            cell.classList.remove("visited-node-cell");
+            currentlyHighlightedNodeIndex = index;
+          } else {
+            console.warn(`[Highlight] Could not find cell for node ${index}`);
+          }
+          // ====== END HIGHLIGHTING ======
+
+          Object.keys(hintBooleans).forEach(
+            (key) => (hintBooleans[key] = false)
+          );
+          document.querySelector(".Hint-Text").classList.add("hidden");
+
+          curRoomUI.uiText.innerText = "Relax the edges of this node!";
+          curAlgorithmForGraph.resumeFromNode(index);
+
+          setTimeout(() => nextTutorialStep(), 500);
+        } else {
+          debugPrint("[onClick] Wrong node clicked.");
+          if (currentStep.expectedChests.includes(0)) {
+            hintBooleans.needToPressStarterNode = true;
+          } else {
+            hintBooleans.wrongNodeSelected = true;
+          }
           updateHintsFromBooleans();
           GameHelper.handleWrongSelection(
             curRoomUI,
@@ -689,80 +781,17 @@ function drawLines() {
             curGameSession
           );
           shakeScreen();
-          return;
         }
-
-        if (currentStep.expectedEdges) {
-          debugPrint("[onClick] Expected an edge, not a node.");
-          hintBooleans.nodePressedWhenEdgeExpected = true;
-          updateHintsFromBooleans();
-          GameHelper.handleWrongSelection(
-            curRoomUI,
-            "",
-            curRoomUI.isTutorial,
-            curGameSession
-          );
-          return;
-        }
-
-        if (Array.isArray(currentStep.expectedChests)) {
-          debugPrint("[onClick] Expected chests:", currentStep.expectedChests);
-          const isAmbiguityStep = currentStep.expectedChests.length > 1;
-          debugPrint("[onClick] Ambiguity step:", isAmbiguityStep);
-
-          if (currentStep.expectedChests.includes(index)) {
-            if (isAmbiguityStep && openChestList[index]?.userData?.clicked) {
-              debugPrint(
-                "[onClick] Ambiguity step: node already visited, ignoring."
-              );
-              return;
-            }
-
-            debugPrint(
-              `[onClick] Correct node ${index} clicked. Opening chest.`
-            );
-            chestList[index].visible = false;
-            openChestList[index].visible = true;
-            openChestList[index].userData.clicked = true;
-            const cell = document.getElementById(`distance-${index}`);
-            if (cell) {
-              cell.classList.add("visited-node-cell");
-            }
-
-            Object.keys(hintBooleans).forEach(
-              (key) => (hintBooleans[key] = false)
-            );
-            document.querySelector(".Hint-Text").classList.add("hidden");
-            curRoomUI.uiText.innerText = "Relax the edges of this node!";
-            curAlgorithmForGraph.resumeFromNode(index);
-            setTimeout(() => nextTutorialStep(), 500);
-          } else {
-            debugPrint("[onClick] Wrong node clicked.");
-            if (currentStep.expectedChests.includes(0)) {
-              hintBooleans.needToPressStarterNode = true;
-            } else {
-              hintBooleans.wrongNodeSelected = true;
-            }
-            updateHintsFromBooleans();
-            GameHelper.handleWrongSelection(
-              curRoomUI,
-              "",
-              curRoomUI.isTutorial,
-              curGameSession
-            );
-            shakeScreen();
-          }
-          return;
-        }
+        return;
       }
     }
 
+    // ========== EDGE CLICK WHEN NODE EXPECTED ==========
     if (
       Array.isArray(currentStep.expectedChests) &&
       intersectedEdge?.userData?.edge
     ) {
       clickBlockedUntil = Date.now() + 400;
-      debugPrint("[onClick] Clicked edge when node was expected.");
       if (currentStep.expectedChests.includes(0)) {
         hintBooleans.needToPressStarterNode = true;
       } else {
@@ -778,6 +807,7 @@ function drawLines() {
       return;
     }
 
+    // ========== TUTORIAL EDGE CLICK ==========
     if (
       curRoomUI.isTutorial &&
       currentStep.expectedEdges &&
@@ -785,7 +815,6 @@ function drawLines() {
     ) {
       clickBlockedUntil = Date.now() + 400;
       const { start, end } = intersectedEdge.userData.edge;
-      debugPrint(`[onClick] Edge clicked in tutorial: [${start}, ${end}]`);
       const expectedEdges = currentStep.expectedEdges;
 
       const isExpected = expectedEdges.some(
@@ -794,7 +823,6 @@ function drawLines() {
       );
 
       if (!isExpected) {
-        debugPrint("[onClick] Wrong edge clicked.");
         hintBooleans.wrongEdgeSelected = true;
         updateHintsFromBooleans();
         curRoomUI.uiText.innerText = "";
@@ -815,7 +843,6 @@ function drawLines() {
       );
 
       if (alreadySelected) {
-        debugPrint("[onClick] Edge already selected.");
         hintBooleans.alreadyVisited = true;
         updateHintsFromBooleans();
         GameHelper.handleWrongSelection(
@@ -828,7 +855,6 @@ function drawLines() {
         return;
       }
 
-      debugPrint("[onClick] Correct edge selected.");
       selectedEdgesThisStep.push([start, end]);
 
       const allSelected = expectedEdges.every(([e0, e1]) =>
@@ -838,7 +864,6 @@ function drawLines() {
       );
 
       if (allSelected) {
-        debugPrint("[onClick] All expected edges selected.");
         selectedEdgesThisStep = [];
         Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
         document.querySelector(".Hint-Text").classList.add("hidden");
@@ -848,6 +873,7 @@ function drawLines() {
       return;
     }
 
+    // ========== REGULAR EDGE CLICK ==========
     if (
       !curRoomUI.isTutorial &&
       currentStep.expectedEdges &&
@@ -857,21 +883,17 @@ function drawLines() {
       const { start, end } = intersectedEdge.userData.edge;
       const expectedEdges = currentStep.expectedEdges;
 
-      debugPrint("[onClick] Validating edge selection:", [start, end]);
-
       const found = expectedEdges.find(
         ({ edge: [e0, e1] }) =>
           (start === e0 && end === e1) || (start === e1 && end === e0)
       );
 
       if (found) {
-        debugPrint("[onClick] Edge is valid.");
         const alreadyChosen = selectedEdgesThisStep.some(
           ([x, y]) => (x === start && y === end) || (x === end && y === start)
         );
 
         if (alreadyChosen) {
-          debugPrint("[onClick] Edge already selected.");
           hintBooleans.alreadyVisited = true;
           updateHintsFromBooleans();
           GameHelper.handleWrongSelection(
@@ -885,10 +907,6 @@ function drawLines() {
         }
 
         selectedEdgesThisStep.push([start, end]);
-        debugPrint(
-          "[onClick] Edge added to selectedEdgesThisStep:",
-          selectedEdgesThisStep
-        );
 
         const [src, dst] = found.edge;
         curRoomUI.selectedEdgeForInput = {
@@ -904,9 +922,6 @@ function drawLines() {
           selectedEdgesThisStep.length === currentStep.expectedEdges.length;
 
         if (allChosen) {
-          debugPrint(
-            "[onClick] All expected edges selected. Awaiting weight input."
-          );
           Object.keys(hintBooleans).forEach(
             (key) => (hintBooleans[key] = false)
           );
@@ -915,7 +930,6 @@ function drawLines() {
           curRoomUI.readyForNextStep = true;
         }
       } else {
-        debugPrint("[onClick] Selected edge is not expected.");
         hintBooleans.wrongEdgeSelected = true;
         updateHintsFromBooleans();
         GameHelper.handleWrongSelection(
@@ -1345,6 +1359,8 @@ function setUpTutorialModel() {
 function showInputDialog() {
   document.getElementById("input-dialog").style.display = "block";
   document.getElementById("input-backdrop").style.display = "block";
+  const dialog = document.getElementById("input-dialog");
+  dialog.style.bottom = curRoomUI.isTutorial ? "280px" : "380px";
   debugPrint("[showInputDialog] Input dialog and backdrop displayed.");
 
   // Prevent interactions underneath
@@ -1700,6 +1716,7 @@ curRoomUI.callbacks.resetLevel = function (curlvl) {
   resetScene();
   setUpGameModel(curlvl);
   updateNodeLabel(levelTitle, `Level ${curlvl}`, 0.9, 0.3, 0x212529);
+  currentlyHighlightedNodeIndex = null;
   curGameSession.resetGameSession(
     curRoomUI.gameName,
     curRoomUI.currentLevel,
@@ -1708,6 +1725,7 @@ curRoomUI.callbacks.resetLevel = function (curlvl) {
 };
 
 curRoomUI.callbacks.startTutorial = function () {
+  currentlyHighlightedNodeIndex = null;
   curRoomUI.currentTutorialStep = 0;
   updateTutorialStep();
   curRoomUI.uiText.innerHTML = `Please follow the steps shown in the tutorial window.`;

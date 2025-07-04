@@ -49,6 +49,10 @@ body {
   font-weight: bold;
 }
 
+.current-node-cell {
+  background-color: green;
+}
+
 .tutorial-instructions-modal strong {
   font-size: 18px;
   display: block;
