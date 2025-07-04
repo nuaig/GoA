@@ -33,7 +33,7 @@ import GameRoomUI from "./../../utils/UI/gameRoomUI.js";
 import { GameHelper } from "./../../utils/gameHelper.js";
 
 // ===== Variable Decleration Section =====
-const DEBUG_MODE = false;
+const DEBUG_MODE = true;
 let hintBooleans = {
   edgePressedWhenNodeExpected: false,
   nodePressedWhenEdgeExpected: false,
@@ -131,129 +131,117 @@ const clock = new THREE.Clock();
 
 // Steps for the Dijkstra tutorial
 const tutorialSteps = [
-  // Step 0
   {
     instruction: "Step 0: Click on node 0 to begin.",
     explanation: "Node 0 is the source node. we start here.",
-    expectedChest: 0,
+    expectedChests: [0],
     expectedEdges: null,
     errorMessage: "Incorrect! Please press on node 0.",
   },
-  // Step 1
   {
     instruction:
       "Step 1: Click on edge (0, 2). Type 1 in the input dialog, and press OK.",
     explanation:
       "Current distance from source to node 2 is ∞. Weight of edge (0, 2) = 1 < ∞, so new distance is 1.",
-    expectedChest: null,
+    expectedChests: null,
     expectedEdges: [[0, 2]],
     updatedDistance: { 2: 1 },
     errorMessage: "Click the edge (0, 2) to record the distance to node 2.",
   },
-  // Step 2
   {
     instruction:
       "Step 2: Click on edge (0, 1). Type 2 in the input dialog, and press OK.",
     explanation:
       "Current distance from source to node 1 is ∞. Weight of edge (0, 1) = 2 < ∞, so new distance is 2.",
-    expectedChest: null,
+    expectedChests: null,
     expectedEdges: [[0, 1]],
     updatedDistance: { 1: 2 },
     errorMessage: "Click the edge (0, 1) to update the distance to node 1.",
   },
-  // Step 3
   {
     instruction:
       "Step 3: Click on the unvisited node that has the shortest distance from source: node 2.",
     explanation:
       "Out of all unvisited nodes, node 2 has the shortest distance from source. So we visit it next.",
-    expectedChest: 2,
+    expectedChests: [2],
     expectedEdges: null,
     errorMessage:
       "Incorrect! Click on node 2 — it's the nearest unvisited node.",
   },
-  // Step 4
   {
     instruction:
       "Step 4: Click on edge (2, 1). Type 2 in the input dialog, and press OK.",
     explanation:
       "We check path to node 1 via node 2. Distance to 2 = 1, edge weight = 3, so total = 1 + 3 = 4. 4 > current distance 2, so we keep 2.",
-    expectedChest: null,
+    expectedChests: null,
     expectedEdges: [[2, 1]],
     updatedDistance: { 1: 2 },
     errorMessage: "Click (2, 1) to compare if it's a better path to node 1.",
   },
-  // Step 5
   {
     instruction:
       "Step 5: Click on edge (2, 4). Type 7 in the input dialog, and press OK.",
     explanation:
       "We check path to node 4 via node 2. Distance to 2 = 1, edge weight = 6, so total = 1 + 6 = 7. Current distance is ∞, so we update to 7.",
-    expectedChest: null,
+    expectedChests: null,
     expectedEdges: [[2, 4]],
     updatedDistance: { 4: 7 },
     errorMessage: "Click (2, 4) to record the current distance to node 4.",
   },
-  // Step 6
   {
     instruction:
       "Step 6: Click on edge (2, 3). Type 3 in the input dialog, and press OK.",
     explanation:
       "We check path to node 3 via node 2. Distance to 2 = 1, edge weight = 2, so total = 1 + 2 = 3. Current distance is ∞, so we update to 3.",
-    expectedChest: null,
+    expectedChests: null,
     expectedEdges: [[2, 3]],
     updatedDistance: { 3: 3 },
     errorMessage: "Click (2, 3) to update the distance to node 3.",
   },
-  // Step 7
   {
     instruction:
       "Step 7: Click on the unvisited node that has the shortest distance from source: node 1.",
     explanation:
       "Out of all unvisited nodes, node 1 has the shortest distance from source. So we visit it next.",
-    expectedChest: 1,
+    expectedChests: [1],
     expectedEdges: null,
     errorMessage: "Incorrect! Click on node 1 — it’s the next closest node.",
   },
-  // Step 8
   {
     instruction:
       "Step 8: Click on edge (1, 3). Type 3 in the input dialog, and press OK.",
     explanation:
       "We check path to node 3 via node 1. Distance to 1 = 2, edge weight = 3, so total = 2 + 3 = 5. 5 > current distance 3, so we keep 3.",
-    expectedChest: null,
+    expectedChests: null,
     expectedEdges: [[1, 3]],
     updatedDistance: { 3: 3 },
     errorMessage: "Click (1, 3) to evaluate its path to node 3.",
   },
-  // Step 9
   {
     instruction:
       "Step 9: Click on the unvisited node that has the shortest distance from source: node 3.",
     explanation:
       "Out of all unvisited nodes, node 3 has the shortest distance from source. So we visit it next.",
-    expectedChest: 3,
+    expectedChests: [3],
     expectedEdges: null,
     errorMessage: "Incorrect! Click on node 3 to visit it next.",
   },
-  // Step 10
   {
     instruction:
       "Step 10: Click on edge (3, 4). Type 4 in the input dialog, and press OK.",
     explanation:
       "We check path to node 4 via node 3. Distance to 3 = 3, edge weight = 1, so total = 3 + 1 = 4. 4 < current distance 7, so we update to 4.",
-    expectedChest: null,
+    expectedChests: null,
     expectedEdges: [[3, 4]],
     updatedDistance: { 4: 4 },
     errorMessage: "Click (3, 4) to update the distance to node 4.",
   },
-  // Step 11
   {
     instruction:
       "Step 11: Click on the unvisited node that has the shortest distance from source: node 4.",
     explanation:
       "Out of all unvisited nodes, node 4 has the shortest distance from source. So we visit it next.",
-    expectedChest: 4,
+    expectedChests: [4],
     expectedEdges: null,
     errorMessage: "Click on node 4 to complete Dijkstra’s algorithm.",
   },
@@ -384,7 +372,10 @@ function updateTutorialStep(isTutorial = true) {
  * 3. Otherwise: updates UI with the next step.
  */
 function nextTutorialStep() {
+  console.log("BEFORE:", curRoomUI.currentTutorialStep);
   const nextStepIndex = ++curRoomUI.currentTutorialStep;
+  console.log("AFTER:", nextStepIndex);
+
   const stepLength = curRoomUI.isTutorial
     ? tutorialSteps.length
     : curAlgorithmForGraph.steps.length;
