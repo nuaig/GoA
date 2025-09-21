@@ -251,7 +251,12 @@ let playAgain = false;
 let treasure_wall_gate_left = [];
 let treasure_wall_gate_right = [];
 // Global variable to track completion of each glow effect
-let glowEffectsCompleted = { Kruskal: false, Prim: false, Heapsort: false };
+let glowEffectsCompleted = {
+  Kruskal: false,
+  Prim: false,
+  Heapsort: false,
+  Dijkstra: false,
+};
 
 function triggerFireworks() {
   const fireworks = document.querySelectorAll(".firework");
@@ -384,12 +389,20 @@ async function createMainDungeon() {
     const heapsortStatus =
       gameStatusService.getLocalGameStatus()?.games?.Heapsort?.regular?.[2]
         ?.status;
+    const dijkstraStatus =
+      gameStatusService.getLocalGameStatus()?.games?.Dijkstra?.regular?.[2]
+        ?.status;
 
     const kruskalCompleted = kruskalStatus.includes("completed");
     const primCompleted = primStatus.includes("completed");
     const heapsortCompleted = heapsortStatus.includes("completed");
+    const dijkstraCompleted = dijkstraStatus?.includes("completed");
 
-    gameCompleted = kruskalCompleted && primCompleted && heapsortCompleted;
+    gameCompleted =
+      kruskalCompleted &&
+      primCompleted &&
+      heapsortCompleted &&
+      dijkstraCompleted;
 
     model.traverse((child) => {
       if (child.isMesh) {
@@ -417,6 +430,14 @@ async function createMainDungeon() {
           if (child.material.name === "prim_symbol") {
             symbol_dict["prim"] = child.material;
             applyGlowEffect(symbol_dict["prim"], primStatus, "Prim");
+          }
+          if (child.material.name === "dijkstra_symbol") {
+            symbol_dict["dijkstra"] = child.material;
+            applyGlowEffect(
+              symbol_dict["dijkstra"],
+              dijkstraStatus,
+              "Dijkstra"
+            );
           }
           if (child.material.name === "heapsort_symbol") {
             symbol_dict["heapsort"] = child.material;
@@ -589,7 +610,7 @@ function onMouseDown(event) {
     if (player.selectedDoor.name.includes("prim"))
       window.location.href = "Prim.html";
     if (player.selectedDoor.name.includes("dijkstra"))
-      window.location.href = "Dijkstra.html"
+      window.location.href = "Dijkstra.html";
   }
 }
 
