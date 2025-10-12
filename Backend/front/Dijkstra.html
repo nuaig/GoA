@@ -118,15 +118,14 @@
     <!-- Psudocode Shown when Psudocode Is Pressed -->
     <div class="topnav-instructions pseudo dijkstra-pseudo hidden">
       <pre class="code-block">
-        DIJKSTRA(G, w, s):
-        1.  <span class="function">INITIALIZE-SINGLE-SOURCE</span>(G, s)
-        2.  S = ∅
-        3.  Q = G.V
-        4.  while Q ≠ ∅:
-        5.      u = <span class="function">EXTRACT-MIN</span>(Q)
-        6.      S = S ∪ {u}
-        7.      for each vertex v ∈ <span class="function">Adj</span>[u]:
-        8.          <span class="correct__select">RELAX(u, v, w)</span>
+DIJKSTRA:
+1. Goal: Find shortest path from <span class="function">source node “s”</span>, to all nodes  
+2. Initialize the <span class="function">Distance from “s”</span> to be 0 to “s”, and ∞ to all other nodes  
+3. Repeat until all nodes are <span class="function">visited</span>  
+  + select an <span class="function">unvisited</span> node “u” that has the shortest <span class="function">Distance</span> from “s”  
+  + for each neighbor <span class="function">v</span> of <span class="function">u</span> 
+    - d = <span class="function">Find Distance (s→u)+Weight of Edge [u,v]</span>  
+    - update <span class="function">d</span> if shorter than current <span class="function">Distance from “s”</span>   
       </pre>
     </div>
 
@@ -434,31 +433,31 @@
         <div class="testi-content swiper-wrapper">
           <div class="slide swiper-slide">
             <img
-              src="src/AlgorithmsInstructions/kruskalAlgo/1.svg"
+              src="AlgorithmsInstructions/dijkstraAlgo/1.png"
               alt="Dijkstra Algorithm Step 1"
             />
           </div>
           <div class="slide swiper-slide">
             <img
-              src="src/AlgorithmsInstructions/kruskalAlgo/2.svg"
+              src="AlgorithmsInstructions/dijkstraAlgo/2.png"
               alt="Dijkstra Algorithm Step 2"
             />
           </div>
           <div class="slide swiper-slide">
             <img
-              src="src/AlgorithmsInstructions/kruskalAlgo/3.svg"
+              src="AlgorithmsInstructions/dijkstraAlgo/3.png"
               alt="Dijkstra Algorithm Step 3"
             />
           </div>
           <div class="slide swiper-slide">
             <img
-              src="src/AlgorithmsInstructions/kruskalAlgo/4.svg"
+              src="AlgorithmsInstructions/dijkstraAlgo/4.png"
               alt="Dijkstra Algorithm Step 4"
             />
           </div>
           <div class="slide swiper-slide">
             <img
-              src="src/AlgorithmsInstructions/kruskalAlgo/5.svg"
+              src="AlgorithmsInstructions/dijkstraAlgo/5.png"
               alt="Dijkstra Algorithm Step 5"
             />
           </div>
