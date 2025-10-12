@@ -550,6 +550,33 @@ body {
   height: auto; /* Maintain aspect ratio */
 }
 
+.instruction__img_djkstra {
+  max-width: min(40%, 400px); /* smaller default size */
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 2rem auto;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  object-fit: contain;
+  background-color: #f9f9f9;
+  padding: 0.5rem;
+  transform-origin: center center;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  cursor: zoom-in;
+}
+
+.instruction__img_djkstra:hover {
+  transform: scale(2); /* zooms to about your old full size */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  cursor: zoom-out;
+}
+
+/* Optional: make the zoom follow the mouse a bit */
+.instruction__img_djkstra:hover {
+  transform-origin: var(--x, 50%) var(--y, 50%);
+}
+
 .btn--close-modal {
   font-family: inherit;
   color: inherit;

@@ -762,7 +762,8 @@ function drawLines() {
           );
           document.querySelector(".Hint-Text").classList.add("hidden");
 
-          curRoomUI.uiText.innerText = "Relax the edges of this node! If there are no unvisited edges, visit another node";
+          curRoomUI.uiText.innerText =
+            "Relax the edges of this node! If there are no unvisited edges, visit another node";
           curAlgorithmForGraph.resumeFromNode(index);
 
           setTimeout(() => nextTutorialStep(), 500);
@@ -1696,6 +1697,16 @@ fontLoader.load(
 
 document.getElementById("dialog-input").addEventListener("keydown", (e) => {
   e.stopPropagation(); // stop bubbling to global listeners
+});
+
+document.querySelectorAll(".instruction__img_djkstra").forEach((img) => {
+  img.addEventListener("mousemove", (e) => {
+    const rect = img.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    img.style.setProperty("--x", `${x}%`);
+    img.style.setProperty("--y", `${y}%`);
+  });
 });
 
 // ===== Scene Initialization Section =====
