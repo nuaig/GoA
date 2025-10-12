@@ -100,6 +100,18 @@ function MyMongoDB() {
               { level: 3, score: 0, stars: 0, status: "locked" },
             ],
           },
+          Dijkstra: {
+            regular: [
+              { level: 1, score: 0, stars: 0, status: "unlocked" },
+              { level: 2, score: 0, stars: 0, status: "locked" },
+              { level: 3, score: 0, stars: 0, status: "locked" },
+            ],
+            training: [
+              { level: 1, score: 0, stars: 0, status: "unlocked" },
+              { level: 2, score: 0, stars: 0, status: "locked" },
+              { level: 3, score: 0, stars: 0, status: "locked" },
+            ],
+          },
         },
       };
 
@@ -312,6 +324,18 @@ function MyMongoDB() {
             { level: 3, score: 0, stars: 0, status: "locked" },
           ],
         },
+        "games.Dijkstra": {
+          regular: [
+            { level: 1, score: 0, stars: 0, status: "unlocked" },
+            { level: 2, score: 0, stars: 0, status: "locked" },
+            { level: 3, score: 0, stars: 0, status: "locked" },
+          ],
+          training: [
+            { level: 1, score: 0, stars: 0, status: "unlocked" },
+            { level: 2, score: 0, stars: 0, status: "locked" },
+            { level: 3, score: 0, stars: 0, status: "locked" },
+          ],
+        },
       };
 
       // Update the game status in the database to the reset status
@@ -360,6 +384,7 @@ function MyMongoDB() {
                 "$games.Heapsort.regular",
                 "$games.Prim.regular",
                 "$games.Kruskal.regular",
+                "$games.Dijkstra.regular",
               ],
             },
           },
@@ -425,6 +450,7 @@ function MyMongoDB() {
               Heapsort: { $ifNull: ["$games.Heapsort.regular", []] },
               Prim: { $ifNull: ["$games.Prim.regular", []] },
               Kruskal: { $ifNull: ["$games.Kruskal.regular", []] },
+              Dijkstra: { $ifNull: ["$games.Dijkstra.regular", []] },
             },
           },
         },
@@ -437,6 +463,7 @@ function MyMongoDB() {
                 { $sum: "$gameProgress.Heapsort.score" },
                 { $sum: "$gameProgress.Prim.score" },
                 { $sum: "$gameProgress.Kruskal.score" },
+                { $sum: "$gameProgress.Dijkstra.score" },
               ],
             },
             completed_games: {
@@ -509,6 +536,36 @@ function MyMongoDB() {
                           $size: {
                             $filter: {
                               input: "$gameProgress.Kruskal",
+                              as: "level",
+                              cond: {
+                                $and: [
+                                  { $eq: ["$$level.level", 3] },
+                                  {
+                                    $in: [
+                                      "$$level.status",
+                                      ["completed", "completed_first_time"],
+                                    ],
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                        },
+                        0,
+                      ],
+                    },
+                    then: 1,
+                    else: 0,
+                  },
+                },
+                {
+                  $cond: {
+                    if: {
+                      $gt: [
+                        {
+                          $size: {
+                            $filter: {
+                              input: "$gameProgress.Dijkstra",
                               as: "level",
                               cond: {
                                 $and: [

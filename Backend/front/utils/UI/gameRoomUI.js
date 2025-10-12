@@ -310,6 +310,7 @@ class GameRoomUI {
           ".level__stars__holder"
         );
 
+        // TODO: Change and remove this when all code files have the img instead of svg
         const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
         for (let i = 0; i < stars.length; i++) {
           if (i < gameData.stars) {
@@ -318,6 +319,16 @@ class GameRoomUI {
           } else {
             stars[i].classList.remove("filled");
             stars[i].style.fill = "none";
+          }
+        }
+
+        const changingStars =
+          currentStarsHolder.querySelectorAll("img.feather-star");
+        for (let i = 0; i < changingStars.length; i++) {
+          if (i < gameData.stars) {
+            changingStars[i].src = "./../../symbols/star-small-full-icon.svg";
+          } else {
+            changingStars[i].src = "./../../symbols/star-small-empty-icon.svg";
           }
         }
 
@@ -396,6 +407,13 @@ class GameRoomUI {
         this.currentMode
       ]?.[level - 1];
 
+    if (!currentGameData) {
+      console.warn(
+        `No backend game data found for game "${this.gameName}" in mode "${this.currentMode}". Skipping level update.`
+      );
+      return;
+    }
+
     if (starsCount + 1 < currentGameData.stars) {
       return;
     }
@@ -405,6 +423,7 @@ class GameRoomUI {
     );
 
     // Update stars based on the starsCount
+    // TODO: CHange and remove this when all code files are using the img instead of svg
     const stars = currentStarsHolder.querySelectorAll("svg.feather-star");
     for (let i = 0; i < stars.length; i++) {
       if (i <= starsCount) {
@@ -413,6 +432,16 @@ class GameRoomUI {
       } else {
         stars[i].classList.remove("filled");
         stars[i].style.fill = "none"; // Default color for unfilled stars
+      }
+    }
+
+    const changingStars =
+      currentStarsHolder.querySelectorAll("img.feather-star");
+    for (let i = 0; i < changingStars.length; i++) {
+      if (i <= starsCount) {
+        changingStars[i].src = "./../../symbols/star-small-full-icon.svg";
+      } else {
+        changingStars[i].src = "./../../symbols/star-small-empty-icon.svg";
       }
     }
     // Unlock the next level if the current one is completed
@@ -508,7 +537,11 @@ class GameRoomUI {
       this.tutorialInstructionModal.classList.remove("hidden");
       this.isTutorial = true;
       this.callbacks.startTutorial();
-      if (this.gameName == "Kruskal" || this.gameName == "Prim") {
+      if (
+        this.gameName == "Kruskal" ||
+        this.gameName == "Prim" ||
+        this.gameName == "Dijkstra"
+      ) {
         this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
       }
       if (this.gameName == "Heapsort") {
@@ -536,6 +569,9 @@ class GameRoomUI {
     } else if (this.gameName == "Kruskal") {
       message =
         "<br>Keep in mind to always select the edge with the minimum weight that won't form a cycle.";
+    } else if (this.gameName == "Dijkstra") {
+      message =
+        "";
     } else if (this.gameName == "Heapsort") {
       message =
         "<br>Keep in mind to always maintain the Max-Heap property: The largest element must be at the root. Swap it with the last element, remove it, and reheapify until the array is sorted.";
@@ -874,7 +910,11 @@ class GameRoomUI {
           );
 
           // If the game is Kruskal or Prim, trigger the initial camera animation
-          if (this.gameName == "Kruskal" || this.gameName == "Prim") {
+          if (
+            this.gameName == "Kruskal" ||
+            this.gameName == "Prim" ||
+            this.gameName == "Dijkstra"
+          ) {
             this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
           }
           if (this.gameName == "Heapsort") {
@@ -947,7 +987,7 @@ class GameRoomUI {
     this.modalCompletionHeader.innerHTML = "Game Over!";
     this.finalScoreText.innerHTML = `${this.currentScore}`;
     this.labelCompletionText.innerHTML = `
-        You have failed level ${this.currentLevel} of ${this.gameName}'s Algorithm in ${this.currentMode} mode!
+        You ran out of lives :( Please retry ${this.currentLevel} of ${this.gameName}'s Algorithm in ${this.currentMode} mode.
       `;
 
     this.totalStars = setStars(this.health);
@@ -1044,11 +1084,15 @@ class GameRoomUI {
     }, 1000);
   }
 
-  // -------For Kruskal and Prim Only------------
+  // -------For Kruskal, Prim, and Dijkstra Only------------
   // enable Mouse event listeners
   enableMouseEventListeners_K_P() {
     console.log(this.gameName);
-    if (this.gameName == "Kruskal" || this.gameName == "Prim") {
+    if (
+      this.gameName == "Kruskal" ||
+      this.gameName == "Prim" ||
+      this.gameName == "Dijkstra"
+    ) {
       if (this.callbacks?.onMouseMove) {
         console.log("mousemove added back");
         window.addEventListener("mousemove", this.callbacks.onMouseMove, false);
@@ -1062,7 +1106,11 @@ class GameRoomUI {
 
   // Disable mouse event listeners
   disableMouseEventListeners_K_P() {
-    if (this.gameName == "Kruskal" || this.gameName == "Prim") {
+    if (
+      this.gameName == "Kruskal" ||
+      this.gameName == "Prim" ||
+      this.gameName == "Dijkstra"
+    ) {
       if (this.callbacks?.onMouseMove) {
         console.log("mousemove removed");
         window.removeEventListener(
@@ -1077,7 +1125,7 @@ class GameRoomUI {
       }
     }
   }
-  // -------Done For Kruskal and Prim Only------------
+  // -------Done For Kruskal, Prim, and Dijkstra Only------------
 }
 
 export default GameRoomUI;

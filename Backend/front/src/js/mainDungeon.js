@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       close: true, // Show close button
       gravity: "top", // Position: 'top' or 'bottom'
       position: "right", // Position: 'left', 'center' or 'right'
-      backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)", // Custom background color
+      style: { background: "linear-gradient(to right, #00b09b, #96c93d)" }, // Custom background color
     }).showToast();
     sessionStorage.setItem("loginSuccess", "false");
   }
@@ -243,7 +243,7 @@ document.body.appendChild(renderer.domElement);
 
 const player = new Player(scene, world);
 const mainDungeonURL = new URL(
-  "../../public/models/main_dungeon_v4_compressed.glb",
+  "../../public/models/main_dungeon_v6_compressed.glb",
   import.meta.url
 );
 let gameCompleted = false;
@@ -251,7 +251,12 @@ let playAgain = false;
 let treasure_wall_gate_left = [];
 let treasure_wall_gate_right = [];
 // Global variable to track completion of each glow effect
-let glowEffectsCompleted = { Kruskal: false, Prim: false, Heapsort: false };
+let glowEffectsCompleted = {
+  Kruskal: false,
+  Prim: false,
+  Heapsort: false,
+  Dijkstra: false,
+};
 
 function triggerFireworks() {
   const fireworks = document.querySelectorAll(".firework");
@@ -272,6 +277,8 @@ function stopTriggerFireworks() {
 }
 
 function applyGlowEffect(material, status, key) {
+  console.log(`🔍 Applying glow for ${key}, status:`, status); // 🧠 Debug log
+
   if (status === "completed_first_time") {
     player.position.set(-0.8, 2, -20);
     player.camera.lookAt(-0.8, 2, -20);
@@ -303,11 +310,15 @@ function applyGlowEffect(material, status, key) {
     material.emissive.set("#fff");
     material.emissiveIntensity = 5;
     glowEffectsCompleted[key] = true; // Mark this glow effect as completed
+    console.log(`✅ ${key} glow applied (completed).`);
+
     checkAllGlowEffects(); // Check if all glow effects are completed
   }
 }
 
 function checkAllGlowEffects() {
+  console.log("🌟 Glow status:", glowEffectsCompleted); // 🧠 See which game failed
+
   const allCompleted = Object.values(glowEffectsCompleted).every(Boolean);
   playAgain = gameStatusService.getLocalGameStatus()?.playAgain;
   // check if play again is true
@@ -359,6 +370,40 @@ function checkAllGlowEffects() {
         console.warn(`Right gate at index ${index} is undefined or invalid`);
       }
     });
+  } else if(allCompleted && playAgain === true){
+    // Open Left Door (Rotates Counterclockwise)
+    treasure_wall_gate_left.forEach((gate, index) => {
+      if (gate && gate.rotation) {
+        console.log(`Opening left gate: ${gate.name}`);
+
+        gsap.to(gate.rotation, {
+          y: -Math.PI / 2, // Rotate 90 degrees CCW
+          duration: 6,
+          ease: "power2.inOut",
+          onComplete: () => {
+            console.log(`Left gate animation complete: ${gate.name}`);
+          },
+        });
+      } else {
+        console.warn(`Left gate at index ${index} is undefined or invalid`);
+      }
+    });
+    treasure_wall_gate_right.forEach((gate, index) => {
+      if (gate && gate.rotation) {
+        console.log(`Opening right gate: ${gate.name}`);
+
+        gsap.to(gate.rotation, {
+          y: -Math.PI / 2, // Rotate 90 degrees CW
+          duration: 6,
+          ease: "power2.inOut",
+          onComplete: () => {
+            console.log(`Right gate animation complete: ${gate.name}`);
+          },
+        });
+      } else {
+        console.warn(`Right gate at index ${index} is undefined or invalid`);
+      }
+    });
   }
 }
 
@@ -384,12 +429,20 @@ async function createMainDungeon() {
     const heapsortStatus =
       gameStatusService.getLocalGameStatus()?.games?.Heapsort?.regular?.[2]
         ?.status;
+    const dijkstraStatus =
+      gameStatusService.getLocalGameStatus()?.games?.Dijkstra?.regular?.[2]
+        ?.status;
 
-    const kruskalCompleted = kruskalStatus.includes("completed");
-    const primCompleted = primStatus.includes("completed");
-    const heapsortCompleted = heapsortStatus.includes("completed");
+    const kruskalCompleted = kruskalStatus?.includes("completed");
+    const primCompleted = primStatus?.includes("completed");
+    const heapsortCompleted = heapsortStatus?.includes("completed");
+    const dijkstraCompleted = dijkstraStatus?.includes("completed");
 
-    gameCompleted = kruskalCompleted && primCompleted && heapsortCompleted;
+    gameCompleted =
+      kruskalCompleted &&
+      primCompleted &&
+      heapsortCompleted &&
+      dijkstraCompleted;
 
     model.traverse((child) => {
       if (child.isMesh) {
@@ -410,20 +463,32 @@ async function createMainDungeon() {
         }
 
         if (child.name.includes("status_symbol") && child.material) {
-          if (child.material.name === "kruskal_symbol") {
+          console.log("Found symbol:", child.material.name); // 🧠 Debug log
+
+          const matName = child.material.name.toLowerCase();
+
+          if (matName.includes("kruskal_symbol")) {
             symbol_dict["kruskal"] = child.material;
             applyGlowEffect(symbol_dict["kruskal"], kruskalStatus, "Kruskal");
           }
-          if (child.material.name === "prim_symbol") {
+          if (matName.includes("prim_symbol")) {
             symbol_dict["prim"] = child.material;
             applyGlowEffect(symbol_dict["prim"], primStatus, "Prim");
           }
-          if (child.material.name === "heapsort_symbol") {
+          if (matName.includes("heapsort_symbol")) {
             symbol_dict["heapsort"] = child.material;
             applyGlowEffect(
               symbol_dict["heapsort"],
               heapsortStatus,
               "Heapsort"
+            );
+          }
+          if (matName.includes("dijkstra_symbol")) {
+            symbol_dict["dijkstra"] = child.material;
+            applyGlowEffect(
+              symbol_dict["dijkstra"],
+              dijkstraStatus,
+              "Dijkstra"
             );
           }
         }
@@ -588,6 +653,8 @@ function onMouseDown(event) {
       window.location.href = "heapsort.html";
     if (player.selectedDoor.name.includes("prim"))
       window.location.href = "Prim.html";
+    if (player.selectedDoor.name.includes("dijkstra"))
+      window.location.href = "Dijkstra.html";
   }
 }
 

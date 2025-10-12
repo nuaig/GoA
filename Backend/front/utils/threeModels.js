@@ -47,7 +47,7 @@ export function loadModel(url, position, scene, mixers = []) {
 
             mixers.push(mixer);
           } else {
-            console.warn("⚠️ No animations found in the GLTF file.");
+            console.log("No animations found in the gltf animations folder. Static");
           }
 
           resolve({ model, mixer, action });
