@@ -29,6 +29,8 @@ export default defineConfig({
         mainDungeon: resolve(__dirname, "./mainDungeon.html"),
         prim: resolve(__dirname, "./Prim.html"),
         dashboard: resolve(__dirname, "./dashboard.html"),
+        dashboard: resolve(__dirname, "./dashboard.html"),
+        dijkstra: resolve(__dirname, "./Dijkstra.html"),
         // Add more HTML files as needed
       },
     },
