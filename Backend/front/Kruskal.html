@@ -15,6 +15,7 @@
     <div id="Renderer">
       <div class="world" id="world"></div>
     </div>
+    
     <div class="topnav-centered">
       <p id="UI-Text" class="UI-Text">
         Click on the Edge to Create Minimum Spanning Tree!
@@ -115,6 +116,7 @@
       </ul>
     </div>
 
+    <!--Buttons are svgs drawn in this file-->
     <div class="Action-Icons-Holder">
       <div class="Action-Icons">
         <svg
@@ -753,6 +755,9 @@
         <div class="sub-menu-btn sub-menu-algo-instructions">
           <p>Algorithm</p>
         </div>
+        <div class="sub-menu-btn sub-menu-testing-menu">
+          <p>Testing</p>
+        </div>
       </div>
     </div>
 
@@ -785,8 +790,10 @@ MST-KRUSKAL(G, w):
       </pre>
     </div>
 
+    <!--Container to display player health and game score-->
     <div id="header-with-health" class="header">
       <div class="header-content">
+        <!--Displays the player's health-->
         <div class="health">
           <div class="health-label">Lives</div>
           <div id="health-bar">
@@ -842,12 +849,15 @@ MST-KRUSKAL(G, w):
             </svg>
           </div>
         </div>
+        <!--Element that displays the game score-->
         <div class="score">
           <div class="score-label">Score</div>
           <div class="score-label-2">00</div>
         </div>
       </div>
     </div>
+
+    <!--Container to display ONLY game score (used for practice levels)-->
     <div id="header-without-health" class="header hidden">
       <div class="header-content">
         <div class="score">
@@ -856,6 +866,25 @@ MST-KRUSKAL(G, w):
         </div>
       </div>
     </div>
+
+    <!--Main chat container-->
+    <div class="chat-container">
+      <!--Message header-->
+      <div class="chat-header">
+        <h2>Chat Header: What can I help you with?</h2>
+      </div>
+      <div class="chat-box">
+        <div class="container-msgs">
+          <!--contains the buttons for text options-->
+          <button class="button-msg" id="msg-opt1">Option 1</button>
+          <button class="button-msg" id="msg-opt2">Option 2</button>
+          <button class="button-msg" id="msg-opt3">Option 3</button>
+        </div>
+      </div>
+        
+          
+    </div>
+
     <div class="modal modal__tutorial hidden">
       <h2 class="modal__header tutorial__header">Welcome to Kruskal's Room!</h2>
       <p class="label__tutorial_text">

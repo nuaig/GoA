@@ -3,12 +3,13 @@ body {
   font-family: "Inter", sans-serif;
 }
 
+/* Pseudo-code Instructions, located at top right navigation menu */
 .topnav-instructions {
   position: absolute;
   top: calc(2vh + 75px);
   left: 83%;
   transform: translate(-50%, 0%);
-  background-color: rgb(72, 121, 212);
+  background-color: rgb(72, 121, 212); 
   width: 28%;
   height: 27%;
   border: solid #eaebf1 2px;
@@ -268,10 +269,48 @@ body {
   padding: 15px;
   text-align: center;
   pointer-events: none;
-  background-color: #343a40;
+  /* background-color: #343a40; */
+  background-color: white;
   border: solid #eaebf1 2px;
   font-weight: 600;
   border-radius: 10px;
+}
+
+/* Expanded chat box */
+.chat-container {
+  width: 20%;
+  height: 500px;
+  position: absolute;
+  right: 2%;
+  bottom: 5%;
+  padding: 15px;
+  text-align: center;
+  pointer-events: none;
+  /* background-color: #343a40; */
+  background-color: red;
+  border: solid #eaebf1 2px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+/* Container to hold chat buttons vertically */
+.container-msgs {
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  align-items: center; /* Center items vertically */
+  margin-bottom: 20px; /* Add some spacing between buttons */
+}
+
+/* Individual chat button styling */
+.button-msg {
+  width: 90%; /* Make buttons take full width */
+  font-size: 18px; /* Increase font size */
+  padding: 10px; /* Add some padding for better appearance */
+  background-color: #1971c2; /* Button background color */
+  color: white; /* Button text color */
+  border: none; /* Remove default border */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Change cursor on hover */
 }
 
 /*Modal*/
@@ -800,4 +839,14 @@ button:active {
     min-height: 30%;
     max-height: 44%;
   }
+
+  /* .chat-container {
+    width: 500px;
+    height: 1000px;
+    color: white;
+    margin: auto;
+    margin-top: 2rem;
+    letter-spacing: 0.5px;
+    height: 80%;
+  } */
 }
