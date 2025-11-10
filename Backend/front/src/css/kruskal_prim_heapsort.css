@@ -1,3 +1,21 @@
+:root {
+      --chat-bkgd-color: #242A3B; /* Global variable */
+      --chat-heading-text: white;
+      --chat-button-color: #2354DE;
+      --chat-button-text:blue;
+      --chat-border:white;
+      /* Chat styles - change these variables to edit font */
+      --font-chat-heading: 'Inter', sans-serif;
+      --fontsize-chat-heading: 18px;
+      --fontweight-chat-heading: semi-bold;
+      --fontcolor-chat-heading: white;
+      /* Chat Button styles - change these variables to edit font */
+      --font-button: 'Inter', sans-serif;
+      --fontsize-button: 18px;
+      --fontweight-button: regular;
+      --fontcolor-button: white;
+    }
+
 body {
   margin: 0;
   font-family: "Inter", sans-serif;
@@ -276,21 +294,42 @@ body {
   border-radius: 10px;
 }
 
+/* Parrot character next to chat box */
+.chat-character {
+  z-index: 50;
+  position: absolute;
+  right: -12%;
+  bottom: -1%;
+  pointer-events: none;
+}
+
+#character-img {
+  width: 75%;
+  height: auto;
+}
+
 /* Expanded chat box */
 .chat-container {
   width: 20%;
-  height: 500px;
+  height: 75%;
   position: absolute;
   right: 2%;
   bottom: 5%;
   padding: 15px;
   text-align: center;
   pointer-events: none;
-  /* background-color: #343a40; */
-  background-color: red;
+  background-color: var(--chat-bkgd-color);
   border: solid #eaebf1 2px;
-  font-weight: 600;
-  border-radius: 10px;
+  border-radius: 20px;
+}
+
+.chat-header {
+  font-family: var(--font-chat-heading);
+  font-size: var(--fontsize-chat-heading);
+  font-weight: var(--fontweight-chat-heading);
+  color: var(--fontcolor-chat-heading);
+  text-align: left;
+  padding-left: 5%;
 }
 
 /* Container to hold chat buttons vertically */
@@ -298,18 +337,22 @@ body {
   display: flex;
   flex-direction: column; /* Stack buttons vertically */
   align-items: center; /* Center items vertically */
-  margin-bottom: 20px; /* Add some spacing between buttons */
+  gap: 15px; /* Space between buttons */
+  margin-top: 20px; /* Space from header */
 }
 
 /* Individual chat button styling */
 .button-msg {
   width: 90%; /* Make buttons take full width */
-  font-size: 18px; /* Increase font size */
-  padding: 10px; /* Add some padding for better appearance */
-  background-color: #1971c2; /* Button background color */
+  font-family: var(--font-button);
+  font-weight: var(--fontweight-button);
+  font-size: var(--fontsize-button); 
+  color: var(--fontcolor-button);
+  padding: 20px;
+  background-color: var(--chat-button-color); /* Button background color */
   color: white; /* Button text color */
   border: none; /* Remove default border */
-  border-radius: 5px; /* Rounded corners */
+  border-radius: 10px; /* Rounded corners */
   cursor: pointer; /* Change cursor on hover */
 }
 
