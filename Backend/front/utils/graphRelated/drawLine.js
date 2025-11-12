@@ -5,6 +5,10 @@ import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 let font;
 const labels = [];
 
+//colors used in this page
+const textColor = 0xffd700; // Gold color for text
+
+
 export function setFont(loadedFont) {
   font = loadedFont;
 }
@@ -69,7 +73,7 @@ export function createNodeLabel(
   scene,
   size = 1.2,
   depth = 0.3,
-  color = 0xffd700
+  color = textColor
 ) {
   const textGeometry = new TextGeometry(text, {
     font: font,
@@ -98,7 +102,7 @@ export function updateNodeLabel(
   newText,
   size = 0.35,
   depth = 0.15,
-  color = 0xffd700
+  color = textColor
 ) {
   textMesh.geometry.dispose();
   textMesh.material.dispose();
@@ -138,6 +142,7 @@ export function getRandomColor() {
   return colors[randomIndex];
 }
 
+//never used
 export function updateComponentColors(uf, nodes, componentColors) {
   const newColors = {};
   nodes.forEach((node) => {
@@ -151,8 +156,8 @@ export function updateComponentColors(uf, nodes, componentColors) {
 
 export function drawLine(startCube, endCube, weight, edge, scene) {
   const lineMaterial = new MeshLineMaterial({
-    color: 0x74c0fc,
-    lineWidth: 0.2, // Set the desired line width
+    color: 0x74e2fc,
+    lineWidth: 0.4, // Set the desired line width
   });
 
   const points = [];
@@ -239,7 +244,7 @@ export function isTriangleInequalitySatisfied(a, b, c, margin) {
 // Function to highlight a chest
 export function highlightChest(chest, scene) {
   const circleGeometry = new THREE.CircleGeometry(1, 32);
-  const circleMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+  const circleMaterial = new THREE.MeshBasicMaterial({ color: textColor });
   const circle = new THREE.Mesh(circleGeometry, circleMaterial);
   circle.position.set(
     chest.position.x,

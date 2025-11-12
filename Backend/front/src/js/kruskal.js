@@ -752,9 +752,10 @@ function drawLines() {
       sphereInter.position.copy(intersects[0].point);
       sphereInter.visible = true;
 
+      //changes the color of the edge after hovering
       if (selectedLine !== intersectedObject) {
         if (selectedLine && !selectedLine.userData.selected) {
-          selectedLine.material.color.set(0x74c0fc);
+          selectedLine.material.color.set(0x74e2fc);
           hoverRing.visible = false;
         }
         selectedLine = intersectedObject;
@@ -772,7 +773,7 @@ function drawLines() {
       hoverRing.visible = false;
 
       if (selectedLine && !selectedLine.userData.selected) {
-        selectedLine.material.color.set(0x74c0fc);
+        selectedLine.material.color.set(0x74e2fc);
         hoverRing.visible = false;
       }
       selectedLine = null;
