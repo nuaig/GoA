@@ -7,6 +7,8 @@ const labels = [];
 
 //colors used in this page
 const textColor = 0xffd700; // Gold color for text
+const labelEdgeColor = 0xffffff; //Color for edge label background circle
+const labelEdgeSize = 1; //Size for edge label background circle
 
 
 export function setFont(loadedFont) {
@@ -34,6 +36,20 @@ export function createRing(innerRadius, outerRadius, depth, color) {
   ring.rotation.x = -Math.PI / 2;
   ring.visible = false;
   return ring;
+}
+
+// Creates a solid 2D circle to be used as a label background for graph weights
+export function createLabelSolidCircle(position, radius=0.8, color=0xffffff, scene) {
+  const circleGeo = new THREE.CircleGeometry(radius, 32);
+  const circleMaterial = new THREE.MeshBasicMaterial({ color: color });
+  const circle = new THREE.Mesh(circleGeo, circleMaterial);
+  //place slightly behind the number label 
+  circle.position.copy(position);
+  circle.position.y -= 0.1;
+  circle.rotation.x = -Math.PI / 2;
+  
+  scene.add(circle);
+  return circle;
 }
 
 // Function to create text labels
@@ -154,6 +170,7 @@ export function updateComponentColors(uf, nodes, componentColors) {
   });
 }
 
+// Draws a line between start and end with a number weight label and background circle
 export function drawLine(startCube, endCube, weight, edge, scene) {
   const lineMaterial = new MeshLineMaterial({
     color: 0x74e2fc,
@@ -188,8 +205,11 @@ export function drawLine(startCube, endCube, weight, edge, scene) {
     (startCube.position.y + endCube.position.y) / 2 + 0.5,
     (startCube.position.z + endCube.position.z) / 2
   );
+
+  // Create a background circle for the label
   const label = createLabel(weight.toString(), midPoint, 0x000000, scene);
-  mesh.userData = { startCube, endCube, label, edge, selected: false }; // Store edge data and selected state
+  const labelBackground = createLabelSolidCircle(midPoint, labelEdgeSize, labelEdgeColor, scene);
+  mesh.userData = { startCube, endCube, label, labelBackground, edge, selected: false }; // Store edge data and selected state
 
   return mesh;
 }
