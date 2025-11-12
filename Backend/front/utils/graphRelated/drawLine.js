@@ -202,7 +202,7 @@ export function drawLine(startCube, endCube, weight, edge, scene) {
   // Create label in the middle of the line
   const midPoint = new THREE.Vector3(
     (startCube.position.x + endCube.position.x) / 2,
-    (startCube.position.y + endCube.position.y) / 2 + 0.5,
+    (startCube.position.y + endCube.position.y) / 2 + 0.7,
     (startCube.position.z + endCube.position.z) / 2
   );
 
@@ -239,13 +239,15 @@ export function updateLinePosition(mesh, startCube, endCube) {
   // Update the label position
   const midPoint = new THREE.Vector3(
     (startCube.position.x + endCube.position.x) / 2,
-    (startCube.position.y + endCube.position.y) / 2 + 0.5,
+    (startCube.position.y + endCube.position.y) / 2 + 0.7,
     (startCube.position.z + endCube.position.z) / 2
   );
   mesh.userData.label.position.copy(midPoint);
   if (mesh.userData.ring) {
     mesh.userData.ring.position.copy(mesh.userData.label.position);
   }
+  mesh.userData.labelBackground.position.copy(midPoint);
+  mesh.userData.labelBackground.position.y -= 0.1; // Slightly behind the label
 }
 
 // Usage:
