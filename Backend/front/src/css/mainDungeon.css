@@ -409,7 +409,7 @@ button:active {
 #miniMapCanvas {
   width: 200px; /* Adjust size as needed */
   height: 200px; /* Adjust size as needed */
-  border-radius: 50%; /* This creates the circular shape */
+  border-radius: 20%; /* This creates the circular shape */
   overflow: hidden; /* Ensures nothing leaks outside the border */
   position: absolute;
   bottom: 10px;
