@@ -369,6 +369,22 @@ body {
   border-radius: 20px;
 }
 
+.page-home {
+  position: absolute;
+}
+
+.page-context {
+  position: absolute;
+  visibility: hidden;
+  color: white;
+}
+
+/*Home page button styling */
+#button-home-context {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
 .chat-header {
   font-family: var(--font-chat-heading);
   font-size: var(--fontsize-chat-heading);
@@ -376,7 +392,7 @@ body {
   color: var(--fontcolor-chat-heading);
   text-align: left;
   padding-left: 5%;
-  padding-top: 2%;
+  padding-top: 5%;
 }
 
 /* Close chatroom button styling */
@@ -391,7 +407,24 @@ body {
   color: var(--fontcolor-chat-heading);
   cursor: pointer;
   pointer-events: auto;
+}
 
+.chat-close-button:active {
+  box-shadow: none;
+  transform: none;
+}
+
+.chat-home-button{
+  position: absolute;
+  top: 0%;
+  left: 0%; 
+  font-size: 24px;
+  font-weight: semi-bold;
+  background: none;
+  border: none;
+  color: var(--fontcolor-chat-heading);
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 /* Container to hold chat buttons vertically */

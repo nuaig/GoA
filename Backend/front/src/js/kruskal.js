@@ -41,6 +41,13 @@ import GameRoomUI from "../../utils/UI/gameRoomUI.js";
 const reArrangeButton = document.querySelector(".Rearrange-Action");
 const chatOpenButton = document.querySelector(".chat-open-button");
 const chatCloseButton = document.querySelector(".chat-close-button");
+// const chatContextButton = document.querySelector("#button-home-context");
+const chatContextButton = document.getElementById("button-home-context");
+const chatHomeButton = document.getElementById("chat-home-button");
+
+let currChatPage = document.querySelector(".chat-homepage-container"); //default to home page
+let prevChatPage = document.querySelector(".chat-homepage-container"); //default to home page
+
 let curGameSession;
 let currentLevel = 1; // TO DO
 
@@ -355,19 +362,42 @@ chatOpenButton.addEventListener("click", () => {
   console.log("Open Chat Button Clicked");
   var chatContainer = document.querySelector(".chat-container");
   chatContainer.style.visibility = 'visible';
+  currChatPage.style.visibility = 'visible';
   var openButton = document.querySelector(".chat-open-button-container");
   openButton.style.visibility = 'hidden';
 });
 
 // Close chat box when close button is clicked
 chatCloseButton.addEventListener("click", () => {
-
   console.log("Close Chat Button Clicked");
+
   var chatContainer = document.querySelector(".chat-container");
   chatContainer.style.visibility = 'hidden';
+  currChatPage.style.visibility = 'hidden';
+
   var openButton = document.querySelector(".chat-open-button-container");
   openButton.style.visibility = 'visible';
 });
+
+chatHomeButton.addEventListener("click", () => {
+  console.log("Chat Home Button Clicked");
+  currChatPage.style.visibility = 'hidden';
+  document.querySelector(".page-home").style.visibility = 'visible';
+
+});
+
+chatContextButton.addEventListener("click", () => {
+  console.log("Chat Context Button Clicked");
+
+  
+  prevChatPage = document.querySelector(".page-home"); //store previous page
+  currChatPage = document.querySelector(".page-context"); //switch to context page
+  
+  prevChatPage.style.visibility = 'hidden';
+  currChatPage.style.visibility = 'visible';
+
+});
+
 
 
 function primSetup() {

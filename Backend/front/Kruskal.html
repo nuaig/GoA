@@ -755,9 +755,6 @@
         <div class="sub-menu-btn sub-menu-algo-instructions">
           <p>Algorithm</p>
         </div>
-        <div class="sub-menu-btn sub-menu-testing-menu">
-          <p>Testing</p>
-        </div>
       </div>
     </div>
 
@@ -877,6 +874,7 @@ MST-KRUSKAL(G, w):
 
     </div>
 
+    <!-- I forgot what this container was, might need to remove it-->
     <div class="chat-open-close-container">
       <div class="chat-character"> 
         <img src="parrot_mock.PNG" alt="parrot character" id="character-img" width="419" height="298">
@@ -885,20 +883,62 @@ MST-KRUSKAL(G, w):
 
     <!--Main chat container-->
     <div class="chat-container">
-      <!--Message header-->
-      <div class="chat-header">
-        <h2>What can I help you with?</h2>
-        <button class="chat-close-button"  id="chat-close-button">X</button>
-      </div>
-      <div class="chat-box">
-        <div class="container-msgs">
-          <!--contains the buttons for text options-->
-          <button class="button-msg" id="msg-opt1">Option 1: text more text and more text</button>
-          <button class="button-msg" id="msg-opt2">Option 2: lots of texts</button>
-          <button class="button-msg" id="msg-opt3">Option 3: this option will be longer than the rest</button>
+      <button class="chat-close-button"  id="chat-close-button">X</button>
+      <button class="chat-home-button" id="chat-home-button">Home</button>
+      <div class="page-home" id="chat-homepage-container">
+        
+        <!--Message header-->
+        <div class="chat-header">
+          <h2>What can I help you with?</h2>
+          
+        </div>
+        <div class="chat-body">
+          <div class="container-msgs">
+            <!--contains the buttons for text options-->
+            <button class="button-msg" id="button-home-context">What is a graph? What is a minimum spanning tree?</button>
+            <button class="button-msg" id="button-home-algo">How does Kruskal's algorithm work?</button>
+            <button class="button-msg" id="button-home-pseudo">Show me the pseudo-code for this algorithm.</button>
+            <button class="button-msg" id="button-home-tutorial">Replay the tutorial.</button>
+          </div>
         </div>
       </div>
-        
+
+      <!--Context Page-->
+      <div class="page-context" id="chat-contextpage-container">
+        <!--Message header-->
+        <div class="chat-header">
+          <h2>Context Page Header Text</h2>
+        </div>
+        <div class="chat-body">
+          <p>body text ... blahbalh ablha</p>
+          <li>list item</li>
+          <li>list item 2</li>
+        </div>
+
+        <!--Algo Page-->
+        <div class="page-algo" id="chat-algopage-container">
+        <!--Message header-->
+        <div class="chat-header">
+          <h2>Algorithm Page Header Text</h2>
+        </div>
+        <div class="chat-body">
+          <p>body text ... blahbalh ablha</p>
+          <li>list item</li>
+          <li>list item 2</li>
+        </div>
+
+         <!--Pseudo-code Page-->
+        <div class="page-pseudo" id="chat-pseduopage-container">
+        <!--Message header-->
+        <div class="chat-header">
+          <h2>Pseudo-code Page Header Text</h2>
+        </div>
+        <div class="chat-body">
+          <p>body text ... blahbalh ablha</p>
+          <li>list item</li>
+          <li>list item 2</li>
+        </div>
+      </div>  
           
     </div>
 
