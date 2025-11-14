@@ -373,7 +373,7 @@ body {
   position: absolute;
 }
 
-.page-context {
+.page-context.page-algo.page-pseudo{
   position: absolute;
   visibility: hidden;
   color: white;
