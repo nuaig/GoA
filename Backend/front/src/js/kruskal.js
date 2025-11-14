@@ -40,6 +40,7 @@ import GameRoomUI from "../../utils/UI/gameRoomUI.js";
 
 const reArrangeButton = document.querySelector(".Rearrange-Action");
 const chatOpenButton = document.querySelector(".chat-open-button");
+const chatCloseButton = document.querySelector(".chat-close-button");
 let curGameSession;
 let currentLevel = 1; // TO DO
 
@@ -357,6 +358,17 @@ chatOpenButton.addEventListener("click", () => {
   var openButton = document.querySelector(".chat-open-button-container");
   openButton.style.visibility = 'hidden';
 });
+
+// Close chat box when close button is clicked
+chatCloseButton.addEventListener("click", () => {
+
+  console.log("Close Chat Button Clicked");
+  var chatContainer = document.querySelector(".chat-container");
+  chatContainer.style.visibility = 'hidden';
+  var openButton = document.querySelector(".chat-open-button-container");
+  openButton.style.visibility = 'visible';
+});
+
 
 function primSetup() {
   // const randomIndex = Math.floor(Math.random() * chestList.length);
