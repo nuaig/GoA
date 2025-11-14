@@ -14,6 +14,10 @@
       --fontsize-button: 18px;
       --fontweight-button: regular;
       --fontcolor-button: white;
+      /* UI styles */
+      --score-box-color: #242A3B;
+      --score-font: 'Inter', sans-serif;
+      --score-font-size: 25px;
     }
 
 body {
@@ -251,12 +255,16 @@ body {
 .health-label,
 .score-label {
   text-transform: uppercase;
-  font-size: 18px;
+  font-size: var(--score-font-size);
+  font-family: var(--score-font);
+  letter-spacing: 2px;
+  font-weight: regular;
   padding-bottom: 6px;
 }
 .health {
   float: none;
   flex: 1;
+  font-size: var(--score-font-size);
   padding: 0 1em;
 
   border-right: 1px solid #d0ebff;
@@ -278,6 +286,7 @@ body {
 .score {
   float: none;
   flex: 1;
+  font-size: var(--score-font-size);
   padding: 0 1em;
 }
 
@@ -287,10 +296,8 @@ body {
   padding: 15px;
   text-align: center;
   pointer-events: none;
-  /* background-color: #343a40; */
-  background-color: #343a40;
+  background-color: var(--score-box-color);
   border: solid #eaebf1 2px;
-  font-weight: 600;
   border-radius: 10px;
 }
 
@@ -308,8 +315,47 @@ body {
   height: auto;
 }
 
+/* Container for chat open button */
+.chat-open-button-container {
+  z-index: 60;
+  position: absolute;
+  right: 5%;
+  bottom: 22%;
+  pointer-events: none;
+}
+
+/* Styling for question mark button*/
+.button-question-mark {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-button);
+  font-size: 50px;
+
+  color: black;
+  width: 100px;
+  height: 80px;
+  border-radius: 15px;
+  background-color: white;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* Hover effect to expand button*/
+.button-question-mark:hover {
+  width: 150px;
+}
+.button-question-mark:hover:after {
+  content: "Click for help"; /* Text displayed on hover */
+  color: black;
+  position: absolute;
+  font-size: 20px;
+}
+
 /* Expanded chat box */
 .chat-container {
+  visibility: hidden;
   width: 20%;
   height: 75%;
   position: absolute;
@@ -387,7 +433,8 @@ body {
   transform: translate(-50%, -50%);
   max-width: 80rem;
   min-width: 40vw;
-  background-color: #343a40;
+  /* background-color: #343a40; */
+  background-color: var(--score-box-color);
   padding: 2.5rem 3rem;
   box-shadow: 0 4rem 6rem rgba(0, 0, 0, 0.3);
   z-index: 99;
@@ -728,8 +775,9 @@ button:active {
   color: #a5d8ff;
   font-size: larger;
   font-family: "Inter", sans-serif;
-  font-size: 20;
+  font-size: 24px;
   font-weight: 300;
+  letter-spacing: 0.5px;
 
   margin: 0;
   line-height: 1.5;
@@ -882,14 +930,4 @@ button:active {
     min-height: 30%;
     max-height: 44%;
   }
-
-  /* .chat-container {
-    width: 500px;
-    height: 1000px;
-    color: white;
-    margin: auto;
-    margin-top: 2rem;
-    letter-spacing: 0.5px;
-    height: 80%;
-  } */
 }
