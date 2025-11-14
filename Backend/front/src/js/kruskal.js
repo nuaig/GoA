@@ -39,6 +39,7 @@ import {
 import GameRoomUI from "../../utils/UI/gameRoomUI.js";
 
 const reArrangeButton = document.querySelector(".Rearrange-Action");
+const chatOpenButton = document.querySelector(".chat-open-button");
 let curGameSession;
 let currentLevel = 1; // TO DO
 
@@ -346,6 +347,15 @@ reArrangeButton.addEventListener("click", () => {
     const [start, end, weight] = graph.edges[index];
     updateLinePosition(line, chestList[start], chestList[end]);
   });
+});
+
+// Open chat box when question mark button is clicked
+chatOpenButton.addEventListener("click", () => {
+  console.log("Open Chat Button Clicked");
+  var chatContainer = document.querySelector(".chat-container");
+  chatContainer.style.visibility = 'visible';
+  var openButton = document.querySelector(".chat-open-button-container");
+  openButton.style.visibility = 'hidden';
 });
 
 function primSetup() {
@@ -1091,6 +1101,11 @@ function setUpTutorialModel() {
   curRoomUI.currentAlgorithm = "Kruskal";
   createModels();
   createHoverElements();
+}
+
+function openChatbox() {
+  const chatbox = document.getElementById("chat-question-mark");
+
 }
 
 curRoomUI.callbacks.resetLevel = function (curlvl) {
