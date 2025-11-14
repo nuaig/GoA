@@ -126,6 +126,8 @@ let dungeonRoomAction;
 
 const labelChestColor = 0x242a3b; //Color for chest label background circle
 const labelChesteSize = 1; //Size for chest label background circle
+const ringInner = 0.9;
+const ringOuter = 1.1;
 
 const startPosition = { x: 0, y: 5, z: 35 };
 const midPosition = { x: 0, y: 5, z: 26 };
@@ -477,7 +479,7 @@ fontLoader.load(
 );
 
 const labelDepth = 0.1;
-let hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
+let hoverRing = createRing(ringInner, ringOuter, labelDepth, 0x000000);
 scene.add(hoverRing);
 
 function updateNodeColorsForSameTree(edge) {
@@ -504,7 +506,8 @@ function updateNodeColorsForSameTree(edge) {
   } else {
     let newColor;
     do {
-      newColor = getRandomColor();
+      // newColor = getRandomColor();
+      newColor = 0x00ff00;  // green color for node
     } while (usedColors.has(newColor));
 
     usedColors.add(newColor);
@@ -528,7 +531,7 @@ function handleSelectionEffect(intersectedObject) {
   closedEnd.visible = false;
   openEnd.visible = true;
 
-  const permanentRing = createRing(0.8, 0.9, labelDepth, 0x000000);
+  const permanentRing = createRing(ringInner, ringOuter, labelDepth, 0x000000);
   permanentRing.position.copy(intersectedObject.userData.label.position);
   permanentRing.position.y -= labelDepth / 2;
   scene.add(permanentRing);
@@ -663,7 +666,7 @@ function handleEdgeSelection(
     }
 
     setTimeout(() => {
-      intersectedObject.material.color.set(0x74c0fc);
+      intersectedObject.material.color.set(0x74c0fc); //line color
       if (intersectedObject.userData.label) {
         intersectedObject.userData.label.material.color.set(0x000000);
       }
@@ -773,7 +776,7 @@ function drawLines() {
         }
         selectedLine = intersectedObject;
         if (!selectedLine.userData.selected) {
-          selectedLine.material.color.set(0x00ff00);
+          selectedLine.material.color.set(0x00ff00); //green line
           hoverRing.position.copy(selectedLine.userData.label.position);
           hoverRing.visible = true;
         }
@@ -1045,7 +1048,7 @@ function createHoverElements() {
   sphereInter.visible = false;
   scene.add(sphereInter);
 
-  hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
+  hoverRing = createRing(ringInner, ringOuter, labelDepth, 0x000000);
   hoverRing.visible = false;
   scene.add(hoverRing);
 }
