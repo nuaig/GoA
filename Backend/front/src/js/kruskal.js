@@ -44,9 +44,12 @@ const chatCloseButton = document.querySelector(".chat-close-button");
 // const chatContextButton = document.querySelector("#button-home-context");
 const chatContextButton = document.getElementById("button-home-context");
 const chatHomeButton = document.getElementById("chat-home-button");
+const chatAlgoButton = document.getElementById("button-home-algo");
+const chatPseudoButton = document.getElementById("button-home-pseudo");
 
-let currChatPage = document.querySelector(".chat-homepage-container"); //default to home page
-let prevChatPage = document.querySelector(".chat-homepage-container"); //default to home page
+let currChatPage = document.querySelector(".page-home"); //default to home page
+let prevChatPage = document.querySelector(".page-home"); //default to home page
+
 
 let curGameSession;
 let currentLevel = 1; // TO DO
@@ -363,6 +366,7 @@ chatOpenButton.addEventListener("click", () => {
   var chatContainer = document.querySelector(".chat-container");
   chatContainer.style.visibility = 'visible';
   currChatPage.style.visibility = 'visible';
+  
   var openButton = document.querySelector(".chat-open-button-container");
   openButton.style.visibility = 'hidden';
 });
@@ -374,6 +378,7 @@ chatCloseButton.addEventListener("click", () => {
   var chatContainer = document.querySelector(".chat-container");
   chatContainer.style.visibility = 'hidden';
   currChatPage.style.visibility = 'hidden';
+  prevChatPage.style.visibility = 'hidden';
 
   var openButton = document.querySelector(".chat-open-button-container");
   openButton.style.visibility = 'visible';
@@ -381,8 +386,10 @@ chatCloseButton.addEventListener("click", () => {
 
 chatHomeButton.addEventListener("click", () => {
   console.log("Chat Home Button Clicked");
-  currChatPage.style.visibility = 'hidden';
-  document.querySelector(".page-home").style.visibility = 'visible';
+  prevChatPage = currChatPage; //store previous page
+  prevChatPage.style.visibility = 'hidden';
+  currChatPage = document.querySelector(".page-home");
+  currChatPage.style.visibility = 'visible';
 
 });
 
@@ -391,7 +398,33 @@ chatContextButton.addEventListener("click", () => {
 
   
   prevChatPage = document.querySelector(".page-home"); //store previous page
-  currChatPage = document.querySelector(".page-context"); //switch to context page
+  currChatPage = document.querySelector(".page-context");
+  
+  prevChatPage.style.visibility = 'hidden';
+  currChatPage.style.visibility = 'visible';
+
+});
+
+
+
+chatAlgoButton.addEventListener("click", () => {
+  console.log("Chat Algorithm Button Clicked");
+
+  
+  prevChatPage = document.querySelector(".page-home"); //store previous page
+  currChatPage = document.querySelector(".page-algo"); //switch to context page
+  
+  prevChatPage.style.visibility = 'hidden';
+  currChatPage.style.visibility = 'visible';
+
+});
+
+chatPseudoButton.addEventListener("click", () => {
+  console.log("Chat Pseudo Button Clicked");
+
+  
+  prevChatPage = document.querySelector(".page-home"); //store previous page
+  currChatPage = document.querySelector(".page-pseudo"); 
   
   prevChatPage.style.visibility = 'hidden';
   currChatPage.style.visibility = 'visible';

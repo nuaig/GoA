@@ -322,6 +322,7 @@ body {
   right: 5%;
   bottom: 22%;
   pointer-events: none;
+  visibility: visible;
 }
 
 /* Styling for question mark button*/
@@ -371,13 +372,26 @@ body {
 
 .page-home {
   position: absolute;
+  visibility: hidden;
 }
 
-.page-context.page-algo.page-pseudo{
+.page-context{
   position: absolute;
   visibility: hidden;
   color: white;
 }
+
+.page-algo{
+  position: absolute;
+  visibility: hidden;
+  color: white;
+}
+
+.page-pseudo{
+  position: absolute;
+  visibility: hidden;
+  color: white;
+} 
 
 /*Home page button styling */
 #button-home-context {
@@ -449,6 +463,7 @@ body {
   border: none; /* Remove default border */
   border-radius: 10px; /* Rounded corners */
   cursor: pointer; /* Change cursor on hover */
+  pointer-events: auto;
 }
 
 /*Modal*/
