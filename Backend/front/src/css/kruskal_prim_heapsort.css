@@ -19,7 +19,11 @@
       --score-box-color: #242A3B;
       --score-font: 'Inter', sans-serif;
       --score-font-size: 25px;
-    }
+      --color-psuedo-background: #1344ce;
+      --color-psuedo-highlight: ##ffe25b;
+      --color-hover-orange: #ffcb5b;
+      --color-hover-blue: #1766e4;
+}
 
 body {
   margin: 0;
@@ -29,15 +33,17 @@ body {
 /* Pseudo-code Instructions, located at top right navigation menu */
 .topnav-instructions {
   position: absolute;
-  top: calc(2vh + 75px);
-  left: 83%;
+  /* top: calc(2vh + 75px); */
+  top: calc(10vh + 55px);
+  left: 16%;
   transform: translate(-50%, 0%);
-  background-color: rgb(72, 121, 212); 
+  background-color: var(--color-psuedo-background); 
   width: 28%;
   height: 27%;
   border: solid #eaebf1 2px;
+  border-radius: 10px;
   padding: 15px;
-  box-shadow: 0.5rem 0.5rem 0;
+  /* box-shadow: 0.5rem 0.5rem 0; */
   overflow: hidden;
   /* display: none; */
 }
@@ -57,6 +63,18 @@ body {
   overflow: hidden;
   z-index: 3;
   /* display: none; */
+}
+
+/* Syle for X close button on pseudo-code */
+.button-close-pseudo {
+  color: white;
+  font-weight: semi-bold;
+  position: absolute;
+  right: calc(2vh);
+  top:0%;
+  font-size: 20px;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .tutorial-instructions-modal h3 {
@@ -115,7 +133,7 @@ body {
 }
 
 .code-block .function {
-  color: #4ec9b0;
+  color: #ffc745;
 }
 
 .code-block .variable {
@@ -126,7 +144,7 @@ body {
   color: #f1c40f;
 } */
 .highlight {
-  background-color: #1864ab;
+  background-color: #16177a;
   display: inline-block;
 }
 
@@ -347,6 +365,7 @@ body {
 /* Hover effect to expand button*/
 .button-question-mark:hover {
   width: 150px;
+  
 }
 .button-question-mark:hover:after {
   content: "Click for help"; /* Text displayed on hover */
@@ -373,6 +392,7 @@ body {
   background-color: var(--chat-bkgd-color);
   border: solid #eaebf1 2px;
   border-radius: 20px;
+  
 }
 
 .page-home {
@@ -413,19 +433,16 @@ body {
   font-size: var(--fontsize-chat-heading);
   font-weight: var(--fontweight-chat-heading);
   color: var(--fontcolor-chat-heading);
+  /* background-color: red; */
   padding-left: 5%;
   padding-right: 5%;
   padding-top: 8%;
 }
 
 .chat-body {
-  /* display: flex;
-  flex-direction: column;
-  align-items: center;
-  align-content: center; */
-  /* font-size: clamp(0.5rem, 2vw, 2.5rem);  */
   padding-left: 5%;
   padding-right: 5%;
+  /* background-color: green; */
   
 }
 
@@ -443,6 +460,12 @@ body {
   pointer-events: auto;
 }
 
+.chat-close-button:hover {
+  color: var(--color-hover-orange);
+  /* font-weight: bold; */
+  transform: scale(1.05);
+}
+
 .chat-close-button:active {
   box-shadow: none;
   transform: none;
@@ -453,12 +476,23 @@ body {
   top: 0.5%;
   left: 0%; 
   font-size: 24px;
-  font-weight: bold;
+  font-weight: semi-bold;
   background: none;
   border: none;
   color: var(--fontcolor-chat-heading);
   cursor: pointer;
   pointer-events: auto;
+}
+
+.chat-home-button:hover {
+  color: var(--color-hover-orange);
+  /* font-weight: bold;  */
+  transform: scale(1.05);
+}
+
+.chat-home-button:active {
+  box-shadow: none;
+  transform: none;
 }
 
 /* Container to hold chat buttons vertically */
@@ -487,6 +521,17 @@ body {
   pointer-events: auto;
 }
 
+.button-msg:hover {
+  background-color: var(--color-hover-blue);
+  transform: scale(1.01);
+
+}
+
+.button-msg:active {
+  box-shadow: none;
+  transform: none;
+}
+
 .bot-button {
   width: 70%;
   font-family: var(--font-button);
@@ -498,6 +543,17 @@ body {
   border: none;
   cursor: pointer; /* Change cursor on hover */
   pointer-events: auto;
+}
+
+.bot-button:hover {
+  background-color: var(--color-hover-orange);
+  color: black;
+  transform: scale(1.01);
+}
+
+.bot-button:active {
+  box-shadow: none;
+  transform: none;
 }
 
 /* For text inside chatbox */

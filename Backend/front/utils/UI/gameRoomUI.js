@@ -673,7 +673,7 @@ class GameRoomUI {
   listenEventChatButtons() {
     const contextDiagramBtn = document.querySelector("#context-diagram-button");
     const algoDiagramBtn = document.querySelector("#algo-diagram-button");
-    const pseudoBtn = document.querySelector("#pseudo-diagram-button");
+    const pseudoBtn = document.querySelector("#button-home-pseudo");
 
     // Listens to click of context diagram button
     contextDiagramBtn.addEventListener("click", () => {
@@ -698,7 +698,9 @@ class GameRoomUI {
 
     //Listens to click of pseudo-code button
     pseudoBtn.addEventListener("click", () => {
-      this.pseudoModalToggle();
+      console.log("Clicked psuedocode button in chatbox");
+      const pseudoModal = document.querySelector(".pseudo");
+      pseudoModal.classList.toggle("hidden");
     });
 
 

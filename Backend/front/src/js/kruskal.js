@@ -45,8 +45,9 @@ const chatCloseButton = document.querySelector(".chat-close-button");
 const chatContextButton = document.getElementById("button-home-context");
 const chatHomeButton = document.getElementById("chat-home-button");
 const chatAlgoButton = document.getElementById("button-home-algo");
-const chatPseudoButton = document.getElementById("button-home-pseudo");
+// const chatPseudoButton = document.getElementById("button-home-pseudo");
 const contextDiagramButton = document.getElementById("context-diagram-button");
+const psudeoCloseButton = document.querySelector(".button-close-pseudo");
 
 let currChatPage = document.querySelector(".page-home"); //default to home page
 let prevChatPage = document.querySelector(".page-home"); //default to home page
@@ -420,28 +421,23 @@ chatAlgoButton.addEventListener("click", () => {
 
 });
 
-chatPseudoButton.addEventListener("click", () => {
-  console.log("Chat Pseudo Button Clicked");
+// chatPseudoButton.addEventListener("click", () => {
+//   console.log("Chat Pseudo Button Clicked");
 
   
-  prevChatPage = document.querySelector(".page-home"); //store previous page
-  currChatPage = document.querySelector(".page-pseudo"); 
+//   prevChatPage = document.querySelector(".page-home"); //store previous page
+//   currChatPage = document.querySelector(".page-pseudo"); 
   
-  prevChatPage.style.visibility = 'hidden';
-  currChatPage.style.visibility = 'visible';
+//   prevChatPage.style.visibility = 'hidden';
+//   currChatPage.style.visibility = 'visible';
 
-});
+// });
 
-contextDiagramButton.addEventListener("click", () => {
-  console.log("Context Diagram Button Clicked");
-  // this.openModal(this.instructionModal);
-  //     this.levelModalOpen = false;
-  //     document.querySelector(".btn__instruction__start").textContent =
-  //       "Close Instruction";
-  //     let subMenu = document.getElementById("subMenu");
-
-  //     subMenu.classList.toggle("open-menu");
-
+// Click the X button to close the pseudo code modal
+psudeoCloseButton.addEventListener("click", () => {
+  console.log("Pseudocode close button Clicked");
+  const pseudoModal = document.querySelector(".pseudo");
+  pseudoModal.classList.toggle("hidden");
 });
 
 
