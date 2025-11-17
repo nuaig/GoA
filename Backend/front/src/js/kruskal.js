@@ -46,6 +46,7 @@ const chatContextButton = document.getElementById("button-home-context");
 const chatHomeButton = document.getElementById("chat-home-button");
 const chatAlgoButton = document.getElementById("button-home-algo");
 const chatPseudoButton = document.getElementById("button-home-pseudo");
+const contextDiagramButton = document.getElementById("context-diagram-button");
 
 let currChatPage = document.querySelector(".page-home"); //default to home page
 let prevChatPage = document.querySelector(".page-home"); //default to home page
@@ -431,6 +432,17 @@ chatPseudoButton.addEventListener("click", () => {
 
 });
 
+contextDiagramButton.addEventListener("click", () => {
+  console.log("Context Diagram Button Clicked");
+  // this.openModal(this.instructionModal);
+  //     this.levelModalOpen = false;
+  //     document.querySelector(".btn__instruction__start").textContent =
+  //       "Close Instruction";
+  //     let subMenu = document.getElementById("subMenu");
+
+  //     subMenu.classList.toggle("open-menu");
+
+});
 
 
 function primSetup() {

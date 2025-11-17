@@ -359,7 +359,8 @@ body {
 .chat-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center;  
+  justify-content: space-between;
   visibility: hidden;
   width: 20%;
   height: 75%;
@@ -422,9 +423,9 @@ body {
   flex-direction: column;
   align-items: center;
   align-content: center; */
+  /* font-size: clamp(0.5rem, 2vw, 2.5rem);  */
   padding-left: 5%;
   padding-right: 5%;
-  
   
 }
 

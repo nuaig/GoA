@@ -597,6 +597,7 @@ class GameRoomUI {
     this.listenEventHelpButtonInstructionModalOpen();
     this.listenEventGameFeatureInstrModal();
     this.listenEventAlgorithmInstrModal();
+    this.listenEventChatButtons();
   }
 
   showGameFeatureInstructionModalIfNeeded() {
@@ -665,6 +666,42 @@ class GameRoomUI {
 
       subMenu.classList.toggle("open-menu");
     });
+   
+  }
+  
+  //Listens to buttons being clicked in the chatbox
+  listenEventChatButtons() {
+    const contextDiagramBtn = document.querySelector("#context-diagram-button");
+    const algoDiagramBtn = document.querySelector("#algo-diagram-button");
+    const pseudoBtn = document.querySelector("#pseudo-diagram-button");
+
+    // Listens to click of context diagram button
+    contextDiagramBtn.addEventListener("click", () => {
+      console.log("Diagram button observed in gameRoomUI.js");
+      this.openModal(this.instructionModal);
+      this.levelModalOpen = false;
+      document.querySelector(".btn__instruction__start").textContent =
+        "Close Instruction";
+      let subMenu = document.getElementById("subMenu");
+
+      subMenu.classList.toggle("open-menu");
+    });
+
+    //Listens to click of algorithm digram button
+    algoDiagramBtn.addEventListener("click", () => {
+      console.log(this.algoInstructionModal);
+      this.openModal(this.algoInstructionModal);
+      let subMenu = document.getElementById("subMenu");
+
+      subMenu.classList.toggle("open-menu");
+    });
+
+    //Listens to click of pseudo-code button
+    pseudoBtn.addEventListener("click", () => {
+      this.pseudoModalToggle();
+    });
+
+
   }
 
   /**
