@@ -14,6 +14,7 @@
       --fontsize-button: 18px;
       --fontweight-button: regular;
       --fontcolor-button: white;
+      --fontsize-bot-button: 20px;
       /* UI styles */
       --score-box-color: #242A3B;
       --score-font: 'Inter', sans-serif;
@@ -356,6 +357,9 @@ body {
 
 /* Styling for opened chat container */
 .chat-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   visibility: hidden;
   width: 20%;
   height: 75%;
@@ -400,13 +404,28 @@ body {
 }
 
 .chat-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   font-family: var(--font-chat-heading);
   font-size: var(--fontsize-chat-heading);
   font-weight: var(--fontweight-chat-heading);
   color: var(--fontcolor-chat-heading);
-  text-align: left;
   padding-left: 5%;
-  padding-top: 5%;
+  padding-right: 5%;
+  padding-top: 8%;
+}
+
+.chat-body {
+  /* display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center; */
+  padding-left: 5%;
+  padding-right: 5%;
+  
+  
 }
 
 /* Close chatroom button styling */
@@ -430,10 +449,10 @@ body {
 
 .chat-home-button{
   position: absolute;
-  top: 0%;
+  top: 0.5%;
   left: 0%; 
   font-size: 24px;
-  font-weight: semi-bold;
+  font-weight: bold;
   background: none;
   border: none;
   color: var(--fontcolor-chat-heading);
@@ -446,9 +465,10 @@ body {
   display: flex;
   flex-direction: column; /* Stack buttons vertically */
   align-items: center; /* Center items vertically */
-  gap: 15px; /* Space between buttons */
-  margin-top: 20px; /* Space from header */
+  gap: 15px; /*Space between buttons*/
+  margin-top: 5%; /* Space from header */
 }
+
 
 /* Individual chat button styling */
 .button-msg {
@@ -464,6 +484,32 @@ body {
   border-radius: 10px; /* Rounded corners */
   cursor: pointer; /* Change cursor on hover */
   pointer-events: auto;
+}
+
+.bot-button {
+  width: 70%;
+  font-family: var(--font-button);
+  font-weight: var(--fontweight-button);
+  font-size: var(--fontsize-bot-button); 
+  background-color: var(--chat-button-color);
+  color: var(--fontcolor-button);
+  border-radius: 10px;
+  border: none;
+  cursor: pointer; /* Change cursor on hover */
+  pointer-events: auto;
+}
+
+/* For text inside chatbox */
+.chat-text {
+  position: relative;
+  align-items: center;
+  align-content: center;
+  
+  padding-left: 5%;
+  padding-right: 10%;
+  padding-top: 5%;
+  font-size: 22px;
+  text-align: left;
 }
 
 /*Modal*/
