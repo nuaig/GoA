@@ -176,6 +176,15 @@ class GameRoomUI {
       ".btn-algo-instruction-close"
     );
 
+    //Algorithm Single Slide Instruction Modal
+    this.algoInstructionSingleModal = document.querySelector(
+      ".algo-instruction-modal-single"
+    );
+    this.btnAlgoInsrtSingleClose = document.querySelector(
+      ".btn-algo-instruction-single-close"
+    );
+
+
     this.openModal(this.tutorialModal);
   }
 
@@ -198,6 +207,8 @@ class GameRoomUI {
     this.addAllEventListenersLevelSelectionModal();
     // -------Algorithm Instruction Modal-----
     this.addAllEventListenersAlgoInstructionModal();
+    // -------Algorithm Instruction Single Modal----
+    this.addAllEventListenersAlgoInstructionSingleModal();
   }
 
   resetAllComponents() {}
@@ -689,11 +700,10 @@ class GameRoomUI {
 
     //Listens to click of algorithm digram button
     algoDiagramBtn.addEventListener("click", () => {
-      console.log(this.algoInstructionModal);
-      this.openModal(this.algoInstructionModal);
-      let subMenu = document.getElementById("subMenu");
-
-      subMenu.classList.toggle("open-menu");
+      console.log(this.algoInstructionSingleModal);
+      this.openModal(this.algoInstructionSingleModal);
+      // let subMenu = document.getElementById("subMenu");
+      // subMenu.classList.toggle("open-menu");
     });
 
     //Listens to click of pseudo-code button
@@ -704,6 +714,18 @@ class GameRoomUI {
     });
 
 
+  }
+
+  /* All event listeners for algorithm instruction single modal */
+  addAllEventListenersAlgoInstructionSingleModal() {
+    this.listenEventCloseButtonAlgoInstructionSingleModal();
+  }
+
+  /* Algorithm Single Modal Close Button */
+  listenEventCloseButtonAlgoInstructionSingleModal() {
+    this.btnAlgoInsrtSingleClose.addEventListener("click", () => {
+      this.closeModal(this.algoInstructionSingleModal);
+    });
   }
 
   /**
