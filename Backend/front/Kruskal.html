@@ -900,16 +900,27 @@ MST-KRUSKAL(G, w):
         <div class="chat-body">
           <div class="container-msgs">
             <!--contains the buttons for text options-->
-            <button class="button-msg" id="button-home-context">What is a graph? What is a minimum spanning tree?</button>
-            <button class="button-msg" id="button-home-algo">How does Kruskal's algorithm work?</button>
+            <button class="button-msg" id="button-home-main-ago">Learn more about the algorithm.</button>
             <button class="button-msg" id="button-home-pseudo">View the pseudo-code for the algorithm.</button>
             <button class="button-msg" id="button-home-tutorial">Replay the tutorial.</button>
           </div>
         </div>
       </div>
 
+      <!--Algorithm Main Page-->
+      <div class="chat-page page-main-algo" id="chat-main-algo-container">
+        <!--Message header-->
+        <div class="chat-header">
+          <h2>What do you want to know about Kruskal's algorithm?</h2>
+        </div>
+        <div class="chat-body">
+          <button class="button-msg" id="button-algo-context">What is a graph? What is a minimum spanning tree?</button>
+          <button class="button-msg" id="button-algo-step">What are the steps?</button>
+        </div>
+      </div>
+
       <!--Context Page-->
-      <div class="page-context" id="chat-contextpage-container">
+      <div class="chat-page page-context" id="chat-contextpage-container">
         <!--Message header-->
         <div class="chat-header">
           <h2>Graphs</h2>
@@ -926,7 +937,7 @@ MST-KRUSKAL(G, w):
       </div>
 
         <!--Algo Page-->
-        <div class="page-algo" id="chat-algopage-container">
+        <div class="chat-page page-algo" id="chat-algopage-container">
           <!--Message header-->
           <div class="chat-header">
             <h2>Krusakl's Algorithm</h2>
@@ -942,7 +953,7 @@ MST-KRUSKAL(G, w):
         </div>
 
          <!--Pseudo-code Page-->
-        <div class="page-pseudo" id="chat-pseduopage-container">
+        <div class="chat-page page-pseudo" id="chat-pseduopage-container">
           <!--Message header-->
           <div class="chat-header">
             <h2>Pseudo-code for Kruskal's Algorithm</h2>

@@ -48,6 +48,7 @@ const chatAlgoButton = document.getElementById("button-home-algo");
 // const chatPseudoButton = document.getElementById("button-home-pseudo");
 const contextDiagramButton = document.getElementById("context-diagram-button");
 const psudeoCloseButton = document.querySelector(".button-close-pseudo");
+const chatMainAlgoButton = document.querySelector(".button-home-main-algo")
 
 let currChatPage = document.querySelector(".page-home"); //default to home page
 let prevChatPage = document.querySelector(".page-home"); //default to home page
@@ -405,6 +406,16 @@ chatContextButton.addEventListener("click", () => {
   prevChatPage.style.visibility = 'hidden';
   currChatPage.style.visibility = 'visible';
 
+});
+
+chatMainAlgoButton.addEventListener("click", () => {
+  console.log("Chat Main Algo Page Button clicked");
+
+  prevChatPage = document.querySelector(".page-home");
+  currChatPage = document.querySelector(".page-main-algo");
+
+  prevChatPage.style.visibility = 'hidden';
+  currChatPage.style.visibility = 'visible';
 });
 
 
