@@ -1063,11 +1063,11 @@ button:active {
 
 /* styling to control the visibility of each slide's image */
 .step1 img {
-  visibility: hidden;
+  visibility: visible;
 }
 
 .step2 img {
-  visibility: visible;
+  visibility: hidden;
 }
 
 .step3 img {

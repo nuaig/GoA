@@ -683,7 +683,8 @@ class GameRoomUI {
   //Listens to buttons being clicked in the chatbox
   listenEventChatButtons() {
     const contextDiagramBtn = document.querySelector("#context-diagram-button");
-    const algoDiagramBtn = document.querySelector("#algo-diagram-button");
+    const algoContextBtn = document.querySelector("#button-algo-context");
+    const algoStepBtn = document.querySelector("#button-algo-step");
     const pseudoBtn = document.querySelector("#button-home-pseudo");
 
     // Listens to click of context diagram button
@@ -698,12 +699,18 @@ class GameRoomUI {
       subMenu.classList.toggle("open-menu");
     });
 
-    //Listens to click of algorithm digram button
-    algoDiagramBtn.addEventListener("click", () => {
-      console.log(this.algoInstructionSingleModal);
+    //Listens to click of algorithm context button in chatbox
+    algoContextBtn.addEventListener("click", () => {
+      console.log("Opened Algo Context Instruction Single Modal");
       this.openModal(this.algoInstructionSingleModal);
       // let subMenu = document.getElementById("subMenu");
       // subMenu.classList.toggle("open-menu");
+    });
+
+    //Listens to click of algorithm step button in chatbox
+    algoStepBtn.addEventListener("click" , () => {
+       console.log("Opened Algo Steps Instruction Single Modal");
+      this.openModal(this.algoInstructionSingleModal);
     });
 
     //Listens to click of pseudo-code button

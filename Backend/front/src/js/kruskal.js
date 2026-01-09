@@ -42,17 +42,23 @@ const reArrangeButton = document.querySelector(".Rearrange-Action");
 const chatOpenButton = document.querySelector(".chat-open-button");
 const chatCloseButton = document.querySelector(".chat-close-button");
 // const chatContextButton = document.querySelector("#button-home-context");
-const chatContextButton = document.getElementById("button-home-context");
+// const chatContextButton = document.getElementById("button-home-context");
 const chatHomeButton = document.getElementById("chat-home-button");
-const chatAlgoButton = document.getElementById("button-home-algo");
+// const chatAlgoButton = document.getElementById("button-home-main-algo");
 // const chatPseudoButton = document.getElementById("button-home-pseudo");
 const contextDiagramButton = document.getElementById("context-diagram-button");
 const psudeoCloseButton = document.querySelector(".button-close-pseudo");
-const chatMainAlgoButton = document.querySelector(".button-home-main-algo")
+const chatMainAlgoButton = document.getElementById("button-home-main-algo")
+const chatAlgoContextButton = document.getElementById("button-algo-context");
+const chatAlgoStepsButton = document.getElementById("button-algo-step");
 
 let currChatPage = document.querySelector(".page-home"); //default to home page
 let prevChatPage = document.querySelector(".page-home"); //default to home page
 
+const contextImg = document.querySelector(".step1 img");
+const stepImg = document.querySelector(".step4 img");
+const step2Img = document.querySelector(".step2 img");
+const step3Img = document.querySelector(".step3 img");
 
 let curGameSession;
 let currentLevel = 1; // TO DO
@@ -396,17 +402,17 @@ chatHomeButton.addEventListener("click", () => {
 
 });
 
-chatContextButton.addEventListener("click", () => {
-  console.log("Chat Context Button Clicked");
+// chatContextButton.addEventListener("click", () => {
+//   console.log("Chat Context Button Clicked");
 
   
-  prevChatPage = document.querySelector(".page-home"); //store previous page
-  currChatPage = document.querySelector(".page-context");
+//   prevChatPage = document.querySelector(".page-home"); //store previous page
+//   currChatPage = document.querySelector(".page-context");
   
-  prevChatPage.style.visibility = 'hidden';
-  currChatPage.style.visibility = 'visible';
+//   prevChatPage.style.visibility = 'hidden';
+//   currChatPage.style.visibility = 'visible';
 
-});
+// });
 
 chatMainAlgoButton.addEventListener("click", () => {
   console.log("Chat Main Algo Page Button clicked");
@@ -418,19 +424,32 @@ chatMainAlgoButton.addEventListener("click", () => {
   currChatPage.style.visibility = 'visible';
 });
 
-
-
-chatAlgoButton.addEventListener("click", () => {
-  console.log("Chat Algorithm Button Clicked");
-
-  
-  prevChatPage = document.querySelector(".page-home"); //store previous page
-  currChatPage = document.querySelector(".page-algo"); //switch to context page
-  
-  prevChatPage.style.visibility = 'hidden';
-  currChatPage.style.visibility = 'visible';
-
+chatAlgoContextButton.addEventListener("click", () => {
+  console.log("Set Single Modal to Context Image");
+  step2Img.style.visibility = 'hidden';
+  stepImg.style.visibility = 'hidden';
+  contextImg.style.visibility = 'visible';
 });
+
+chatAlgoStepsButton.addEventListener("click", () => {
+  console.log("Set Single Modal to Steps Image");
+  step2Img.style.visibility = 'hidden';
+  contextImg.style.visibility = 'hidden';
+  stepImg.style.visibility = 'visible';
+});
+
+
+// chatAlgoButton.addEventListener("click", () => {
+//   console.log("Chat Algorithm Button Clicked");
+
+  
+//   prevChatPage = document.querySelector(".page-home"); //store previous page
+//   currChatPage = document.querySelector(".page-algo"); //switch to context page
+  
+//   prevChatPage.style.visibility = 'hidden';
+//   currChatPage.style.visibility = 'visible';
+
+// });
 
 // chatPseudoButton.addEventListener("click", () => {
 //   console.log("Chat Pseudo Button Clicked");
