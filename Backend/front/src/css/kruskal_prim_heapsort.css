@@ -45,7 +45,7 @@ body {
   padding: 15px;
   /* box-shadow: 0.5rem 0.5rem 0; */
   overflow: hidden;
-  /* display: none; */
+  /* display: hidden; */
 }
 
 .tutorial-instructions-modal {
@@ -75,6 +75,7 @@ body {
   font-size: 20px;
   cursor: pointer;
   pointer-events: auto;
+  /* display: hidden; */
 }
 
 .tutorial-instructions-modal h3 {
@@ -1063,7 +1064,7 @@ button:active {
 
 /* styling to control the visibility of each slide's image */
 .step1 img {
-  visibility: visible;
+  visibility: hidden;
 }
 
 .step2 img {

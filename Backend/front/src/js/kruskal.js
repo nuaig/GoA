@@ -50,7 +50,9 @@ const contextDiagramButton = document.getElementById("context-diagram-button");
 const psudeoCloseButton = document.querySelector(".button-close-pseudo");
 const chatMainAlgoButton = document.getElementById("button-home-main-algo")
 const chatAlgoContextButton = document.getElementById("button-algo-context");
+const chatAlgoCycleButton = document.getElementById("button-algo-cycle");
 const chatAlgoStepsButton = document.getElementById("button-algo-step");
+const chatAlgoKruskalButton = document.getElementById("button-algo-kruskal");
 
 let currChatPage = document.querySelector(".page-home"); //default to home page
 let prevChatPage = document.querySelector(".page-home"); //default to home page
@@ -59,6 +61,7 @@ const contextImg = document.querySelector(".step1 img");
 const stepImg = document.querySelector(".step4 img");
 const step2Img = document.querySelector(".step2 img");
 const step3Img = document.querySelector(".step3 img");
+const closeModalButton = document.querySelector(".btn-algo-instruction-single-close");
 
 let curGameSession;
 let currentLevel = 1; // TO DO
@@ -426,17 +429,31 @@ chatMainAlgoButton.addEventListener("click", () => {
 
 chatAlgoContextButton.addEventListener("click", () => {
   console.log("Set Single Modal to Context Image");
-  step2Img.style.visibility = 'hidden';
-  stepImg.style.visibility = 'hidden';
   contextImg.style.visibility = 'visible';
+});
+
+chatAlgoCycleButton.addEventListener("click", () => {
+  console.log("Set Single Modal to Cycle Image");
+  step3Img.style.visibility = 'visible';
 });
 
 chatAlgoStepsButton.addEventListener("click", () => {
   console.log("Set Single Modal to Steps Image");
-  step2Img.style.visibility = 'hidden';
-  contextImg.style.visibility = 'hidden';
   stepImg.style.visibility = 'visible';
 });
+
+chatAlgoKruskalButton.addEventListener("click", () => {
+  console.log("Set Single Modal to Kruskal Image");
+  stepImg.style.visibility = 'visible';
+});
+
+closeModalButton.addEventListener("click", () => {
+  step2Img.style.visibility = 'hidden';
+  stepImg.style.visibility = 'hidden';
+  contextImg.style.visibility = 'hidden';
+  step3Img.style.visibility = 'hidden'; 
+});
+
 
 
 // chatAlgoButton.addEventListener("click", () => {

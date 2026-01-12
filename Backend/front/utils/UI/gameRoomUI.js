@@ -184,6 +184,8 @@ class GameRoomUI {
       ".btn-algo-instruction-single-close"
     );
 
+    //Chat Replay Tutorial Button
+    this.btnChatTutorial = document.getElementById("button-home-tutorial");
 
     this.openModal(this.tutorialModal);
   }
@@ -685,31 +687,46 @@ class GameRoomUI {
     const contextDiagramBtn = document.querySelector("#context-diagram-button");
     const algoContextBtn = document.querySelector("#button-algo-context");
     const algoStepBtn = document.querySelector("#button-algo-step");
+    const algoCycleBtn = document.querySelector("#button-algo-cycle");
+    const algoKruskalBtn = document.querySelector("#button-algo-kruskal");
     const pseudoBtn = document.querySelector("#button-home-pseudo");
 
-    // Listens to click of context diagram button
-    contextDiagramBtn.addEventListener("click", () => {
-      console.log("Diagram button observed in gameRoomUI.js");
-      this.openModal(this.instructionModal);
-      this.levelModalOpen = false;
-      document.querySelector(".btn__instruction__start").textContent =
-        "Close Instruction";
-      let subMenu = document.getElementById("subMenu");
+    // const tutorialBtn = document.getElementById("#button-home-tutorial");
 
-      subMenu.classList.toggle("open-menu");
-    });
+
+    // // Listens to click of context diagram button
+    // contextDiagramBtn.addEventListener("click", () => {
+    //   console.log("Diagram button observed in gameRoomUI.js");
+    //   this.openModal(this.instructionModal);
+    //   this.levelModalOpen = false;
+    //   document.querySelector(".btn__instruction__start").textContent =
+    //     "Close Instruction";
+    //   let subMenu = document.getElementById("subMenu");
+
+    //   subMenu.classList.toggle("open-menu");
+    // });
 
     //Listens to click of algorithm context button in chatbox
     algoContextBtn.addEventListener("click", () => {
       console.log("Opened Algo Context Instruction Single Modal");
       this.openModal(this.algoInstructionSingleModal);
-      // let subMenu = document.getElementById("subMenu");
-      // subMenu.classList.toggle("open-menu");
+    });
+
+    //Listens to click of algorithm context button in chatbox
+    algoCycleBtn.addEventListener("click", () => {
+      console.log("Opened Algo Cycle Instruction Single Modal");
+      this.openModal(this.algoInstructionSingleModal);
     });
 
     //Listens to click of algorithm step button in chatbox
-    algoStepBtn.addEventListener("click" , () => {
-       console.log("Opened Algo Steps Instruction Single Modal");
+    algoStepBtn.addEventListener("click", () => {
+      console.log("Opened Algo Steps Instruction Single Modal");
+      this.openModal(this.algoInstructionSingleModal);
+    });
+
+    //Listens to click of algorithm Kruskal button in chatbox
+    algoKruskalBtn.addEventListener("click", () => {
+      console.log("Opened Algo Steps Instruction Single Modal");
       this.openModal(this.algoInstructionSingleModal);
     });
 
@@ -720,6 +737,15 @@ class GameRoomUI {
       pseudoModal.classList.toggle("hidden");
     });
 
+    // tutorialBtn.addEventListener("click", () => {
+    //   this.revertTutorialCompleteModalToBeTutorialModal();
+    //   this.openModal(this.tutorialModal);
+    // });
+    this.btnChatTutorial.addEventListener("click", () => {
+      // this.closeModal(this.settingsModal);
+      this.revertTutorialCompleteModalToBeTutorialModal();
+      this.openModal(this.tutorialModal);
+    });
 
   }
 
@@ -849,11 +875,13 @@ class GameRoomUI {
   }
 
   listenEventSettingsModalTutorial() {
+
     this.btnSettingsTutorial.addEventListener("click", () => {
       this.closeModal(this.settingsModal);
       this.revertTutorialCompleteModalToBeTutorialModal();
       this.openModal(this.tutorialModal);
     });
+
   }
 
   // Button to go back to main Dungeon in setting modal
