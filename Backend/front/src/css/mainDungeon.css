@@ -3,6 +3,16 @@ body {
   font-family: "Inter", sans-serif;
 }
 
+.control-instruction {
+  position: absolute;
+  top: 40vh;
+  left: 1vw;
+  background-color: red;
+  display: visible;
+  width: 200px;
+  height: 100 px;
+}
+
 .Action-Icons-Holder {
   position: absolute;
   top: 2vh;
