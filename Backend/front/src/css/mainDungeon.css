@@ -5,12 +5,17 @@ body {
 
 .control-instruction {
   position: absolute;
-  top: 40vh;
+  top: 43vh;
   left: 1vw;
-  background-color: red;
-  display: visible;
-  width: 200px;
-  height: 100 px;
+  display: hidden;
+  width: 300px;
+  height: 150px;
+}
+
+.panel {
+  background-color: #bdcfe8;
+  border-radius: 18px;
+  display: hidden;
 }
 
 .Action-Icons-Holder {
