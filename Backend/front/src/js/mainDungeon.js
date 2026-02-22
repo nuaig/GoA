@@ -654,7 +654,7 @@ function onMouseDown(event) {
     if (player.selectedDoor.name.includes("prim"))
       window.location.href = "Prim.html";
     if (player.selectedDoor.name.includes("dijkstra"))
-      window.location.href = "Dijkstra.html";
+      window.location.href = "Astar.html";
   }
 }
 

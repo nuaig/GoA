@@ -540,7 +540,8 @@ class GameRoomUI {
       if (
         this.gameName == "Kruskal" ||
         this.gameName == "Prim" ||
-        this.gameName == "Dijkstra"
+        this.gameName == "Dijkstra" ||
+        this.gameName == "Astar"
       ) {
         this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
       }
@@ -572,7 +573,10 @@ class GameRoomUI {
     } else if (this.gameName == "Dijkstra") {
       message =
         "";
-    } else if (this.gameName == "Heapsort") {
+    } else if (this.gameName == "Astar") {
+      message =
+        "";
+    }else if (this.gameName == "Heapsort") {
       message =
         "<br>Keep in mind to always maintain the Max-Heap property: The largest element must be at the root. Swap it with the last element, remove it, and reheapify until the array is sorted.";
     }
@@ -913,7 +917,8 @@ class GameRoomUI {
           if (
             this.gameName == "Kruskal" ||
             this.gameName == "Prim" ||
-            this.gameName == "Dijkstra"
+            this.gameName == "Dijkstra" ||
+            this.gameName == "Astar"
           ) {
             this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
           }
@@ -1091,7 +1096,8 @@ class GameRoomUI {
     if (
       this.gameName == "Kruskal" ||
       this.gameName == "Prim" ||
-      this.gameName == "Dijkstra"
+      this.gameName == "Dijkstra" || 
+      this.gameName == "Astar"
     ) {
       if (this.callbacks?.onMouseMove) {
         console.log("mousemove added back");
@@ -1109,7 +1115,8 @@ class GameRoomUI {
     if (
       this.gameName == "Kruskal" ||
       this.gameName == "Prim" ||
-      this.gameName == "Dijkstra"
+      this.gameName == "Dijkstra" || 
+      this.gameName == "Astar"
     ) {
       if (this.callbacks?.onMouseMove) {
         console.log("mousemove removed");
@@ -1125,7 +1132,7 @@ class GameRoomUI {
       }
     }
   }
-  // -------Done For Kruskal, Prim, and Dijkstra Only------------
+  // -------Done For Kruskal, Prim, Astar and Dijkstra Only------------
 }
 
 export default GameRoomUI;

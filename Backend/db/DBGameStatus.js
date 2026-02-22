@@ -112,6 +112,18 @@ function MyMongoDB() {
               { level: 3, score: 0, stars: 0, status: "locked" },
             ],
           },
+          Astar: {
+            regular: [
+              { level: 1, score: 0, stars: 0, status: "unlocked" },
+              { level: 2, score: 0, stars: 0, status: "locked" },
+              { level: 3, score: 0, stars: 0, status: "locked" },
+            ],
+            training: [
+              { level: 1, score: 0, stars: 0, status: "unlocked" },
+              { level: 2, score: 0, stars: 0, status: "locked" },
+              { level: 3, score: 0, stars: 0, status: "locked" },
+            ],
+          },
         },
       };
 
@@ -566,6 +578,36 @@ function MyMongoDB() {
                           $size: {
                             $filter: {
                               input: "$gameProgress.Dijkstra",
+                              as: "level",
+                              cond: {
+                                $and: [
+                                  { $eq: ["$$level.level", 3] },
+                                  {
+                                    $in: [
+                                      "$$level.status",
+                                      ["completed", "completed_first_time"],
+                                    ],
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                        },
+                        0,
+                      ],
+                    },
+                    then: 1,
+                    else: 0,
+                  },
+                },
+                {
+                  $cond: {
+                    if: {
+                      $gt: [
+                        {
+                          $size: {
+                            $filter: {
+                              input: "$gameProgress.Astar",
                               as: "level",
                               cond: {
                                 $and: [

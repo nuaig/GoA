@@ -117,6 +117,28 @@ export function createSpecificGraphDijkstraTutorial() {
   return new Graph(nodes, edges);
 }
 
+export function createSpecificGraphAstarTutorial() {
+  const nodes = [0, 1, 2, 3, 4, 5];
+
+  const edges = [
+  [0, 1, 2],
+  [0, 2, 1],
+  [1, 2, 3],
+  [1, 3, 4],
+  [2, 3, 2],
+  [2, 4, 3],
+  [4, 5, 4],
+  [2, 5, 6],
+  [3, 5, 1],
+];
+
+  const graph = new Graph(nodes, edges);
+  graph.startNode = 0;
+  graph.goalNode = 5;
+
+  return graph;
+}
+
 export function createSpecificGraphPrimTutorial() {
   const nodes = [0, 1, 2, 3, 4]; // Nodes
   const edges = [
