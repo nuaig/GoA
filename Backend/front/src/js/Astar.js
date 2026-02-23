@@ -458,6 +458,13 @@ async function createModels() {
     openModel.model.userData.nodeIndex = i;
     debugPrint(`[createModels] Open chest (hidden) added at node ${i}.`);
 
+    graph.nodePositions ??= {};
+    graph.nodePositions[i] = {
+      x: position.x,
+      y: position.y,
+      z: position.z,
+    };
+
     // Create a floating label above the chest
     const labelPosition = position.clone();
     labelPosition.y += 2.5;
@@ -709,26 +716,25 @@ function drawLines() {
           openChestList[index].userData.clicked = true;
 
           // ====== CONDITIONAL HIGHLIGHTING ======
-          const cell = document.getElementById(`distance-${index}`);
-          if (cell) {
+          const row = document.getElementById(`row-${index}`);
+
+          if (row) {
             if (
               currentlyHighlightedNodeIndex !== null &&
               currentlyHighlightedNodeIndex !== index
             ) {
-              const prevCell = document.getElementById(
-                `distance-${currentlyHighlightedNodeIndex}`,
+              const prevRow = document.getElementById(
+                `row-${currentlyHighlightedNodeIndex}`,
               );
-              if (prevCell) {
-                prevCell.classList.remove("current-node-cell");
-                prevCell.classList.add("visited-node-cell");
+              if (prevRow) {
+                prevRow.classList.remove("current-node-row");
+                prevRow.classList.add("visited-node-row");
               }
             }
 
-            cell.classList.add("current-node-cell");
-            cell.classList.remove("visited-node-cell");
+            row.classList.add("current-node-row");
+            row.classList.remove("visited-node-row");
             currentlyHighlightedNodeIndex = index;
-          } else {
-            console.warn(`[Highlight] Could not find cell for node ${index}`);
           }
           // ====== END HIGHLIGHTING ======
 
@@ -752,7 +758,7 @@ function drawLines() {
                 levelMaxScores[curRoomUI.currentLevel],
               );
             }
-            return; 
+            return;
           }
           curAlgorithmForGraph.resumeFromNode(index);
 
@@ -905,6 +911,8 @@ function drawLines() {
           start: src,
           end: dst,
           weight: found.weight,
+          newG: found.newG,
+          newF: found.newF,
         };
 
         curRoomUI.inputCompleted = false;
@@ -1175,10 +1183,10 @@ function resetScene() {
   curRoomUI.selectedEdgeForInput = null;
 
   curNodes.forEach((node) => {
-    const cell = document.getElementById(`distance-${node}`);
-    if (cell) {
-      cell.classList.remove("visited-node-cell");
-      debugPrint(`[resetScene] Cleared visited class for node ${node}`);
+    const row = document.getElementById(`row-${node}`);
+    if (row) {
+      row.classList.remove("visited-node-row");
+      row.classList.remove("current-node-row");
     }
   });
 
@@ -1207,6 +1215,32 @@ function createHoverElements() {
   debugPrint(
     "[createHoverElements] Black hover ring created and added to scene.",
   );
+}
+
+function refreshHeuristicTable() {
+  if (!graph) return;
+
+  for (const node of graph.nodes) {
+    const h = computeHeuristicUI(node);
+
+    const hCell = document.getElementById(`h-${node}`);
+    if (hCell) hCell.textContent = h.toFixed(2);
+
+    const gCell = document.getElementById(`g-${node}`);
+    const fCell = document.getElementById(`f-${node}`);
+
+    if (!fCell) continue;
+
+    // if g is ∞, keep f as ∞
+    const gText = gCell?.textContent ?? "∞";
+    const gVal = gText === "∞" ? Infinity : Number(gText);
+
+    if (!Number.isFinite(gVal)) {
+      fCell.textContent = "∞";
+    } else {
+      fCell.textContent = (gVal + h).toFixed(2);
+    }
+  }
 }
 
 /*
@@ -1242,6 +1276,7 @@ function setUpGameModel(currentLevel) {
 
   while (goalNode === null && attempts < 30) {
     graph = createRandomConnectedGraph(curNodes, curEdges);
+    graph.nodePositions = {};
     graph.startNode = 0;
 
     const tempDijkstra = new DijkstraAlgorithm(graph, graph.startNode);
@@ -1294,18 +1329,24 @@ function setUpGameModel(currentLevel) {
   );
 
   updateEdgeTable(graph.edges);
-  initializeDistanceTable(graph.nodes);
+  createModels().then(() => {
+    // SET HEURISTIC FIRST
+    graph.heuristicType =
+      document.getElementById("heuristicSelect")?.value ?? "zero";
 
-  if (curRoomUI.currentLevel <= 3) {
+    // THEN build table (so h(n) is correct)
+    initializeDistanceTable(graph.nodes);
+
+    // THEN build algorithm
     curAlgorithmForGraph = new AstarAlgorithm(
       graph,
       graph.startNode,
       graph.goalNode,
     );
-    curRoomUI.currentAlgorithm = "Astar";
-  }
 
-  createModels();
+    curRoomUI.currentAlgorithm = "Astar";
+  });
+
   createHoverElements();
 }
 
@@ -1333,6 +1374,7 @@ function initializeDistanceTable(nodes) {
 
   nodes.forEach((node) => {
     const row = document.createElement("tr");
+    row.id = `row-${node}`;
 
     const nodeCell = document.createElement("td");
 
@@ -1344,22 +1386,53 @@ function initializeDistanceTable(nodes) {
       nodeCell.textContent = node;
     }
 
-    const distCell = document.createElement("td");
-    distCell.textContent = node === graph.startNode ? "0" : "∞";
-    distCell.id = `distance-${node}`;
+    // g(n)
+    const gCell = document.createElement("td");
+    gCell.textContent = node === graph.startNode ? "0" : "∞";
+    gCell.id = `g-${node}`;
+
+    // h(n)
+    const hCell = document.createElement("td");
+    hCell.textContent = computeHeuristicUI(node).toFixed(2);
+    hCell.id = `h-${node}`;
+
+    // f(n)
+    const fCell = document.createElement("td");
+    if (node === graph.startNode) {
+      const h = computeHeuristicUI(node);
+      fCell.textContent = (0 + h).toFixed(2);
+    } else {
+      fCell.textContent = "∞";
+    }
+    fCell.id = `f-${node}`;
 
     row.appendChild(nodeCell);
-    row.appendChild(distCell);
+    row.appendChild(gCell);
+    row.appendChild(hCell);
+    row.appendChild(fCell);
     tableBody.appendChild(row);
-
-    debugPrint(
-      `[initializeDistanceTable] Row added for node ${node} with initial distance: ${distCell.textContent}`,
-    );
   });
 
   debugPrint(
     "[initializeDistanceTable] Distance table initialization complete.",
   );
+}
+
+function computeHeuristicUI(node) {
+  if (graph.heuristicType === "zero") return 0;
+
+  const p = graph.nodePositions?.[node];
+  const g = graph.nodePositions?.[graph.goalNode];
+  if (!p || !g) return 0;
+
+  const dx = p.x - g.x;
+  const dz = p.z - g.z;
+  const euclid = Math.sqrt(dx * dx + dz * dz);
+
+  if (graph.heuristicType === "euclid") return euclid;
+  if (graph.heuristicType === "w_euclid") return 1.5 * euclid;
+
+  return 0;
 }
 
 /*
@@ -1375,6 +1448,7 @@ function setUpTutorialModel() {
   debugPrint("[setUpTutorialModel] Tutorial graph created:", graph);
 
   curNodes = graph.nodes;
+  graph.heuristicType = "zero";
   curAlgorithmForGraph = new AstarAlgorithm(
     graph,
     graph.startNode,
@@ -1386,10 +1460,11 @@ function setUpTutorialModel() {
   updateEdgeTable(graph.edges);
   debugPrint("[setUpTutorialModel] Edge table updated.");
 
-  initializeDistanceTable(graph.nodes);
+  createModels().then(() => {
+    initializeDistanceTable(graph.nodes);
+  });
   debugPrint("[setUpTutorialModel] Distance table initialized.");
 
-  createModels();
   debugPrint("[setUpTutorialModel] Models created.");
 
   createHoverElements();
@@ -1515,8 +1590,11 @@ function closeInputDialog() {
       return;
     }
 
-    const inputWeight = parseInt(inputValue, 10);
-    if (inputWeight === selected.weight) {
+    const inputF = Number(inputValue);
+    if (
+      Number.isFinite(inputF) &&
+      Math.abs(inputF - Number(selected.newF)) < 0.001
+    ) {
       debugPrint("[closeInputDialog] Correct weight entered:", inputWeight);
 
       if (curRoomUI.uiText.innerText !== "Visit a new node!") {
@@ -1524,12 +1602,23 @@ function closeInputDialog() {
       }
 
       const targetNode = selected.end;
-      const cell = document.getElementById(`distance-${targetNode}`);
-      if (cell) {
-        cell.textContent = inputWeight;
-        debugPrint(
-          `[closeInputDialog] Updated distance cell for node ${targetNode}`,
-        );
+      // Update g(n)
+      const gCell = document.getElementById(`g-${targetNode}`);
+      if (gCell) {
+        gCell.textContent = selected.newG.toString();
+      }
+
+      // Update h(n)
+      const h = computeHeuristicUI(targetNode);
+      const hCell = document.getElementById(`h-${targetNode}`);
+      if (hCell) {
+        hCell.textContent = h.toFixed(2);
+      }
+
+      // Update f(n)
+      const fCell = document.getElementById(`f-${targetNode}`);
+      if (fCell) {
+        fCell.textContent = selected.newF.toFixed(2);
       }
 
       const selectedLine = edgeList.find((line) => {
@@ -1619,6 +1708,26 @@ document.addEventListener("DOMContentLoaded", () => {
       event.preventDefault(); // Optional: prevent default form behavior
       okBtn.click(); // Simulate click on OK button
     }
+  });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const sel = document.getElementById("heuristicSelect");
+  if (!sel) return;
+
+  sel.addEventListener("change", () => {
+    if (!graph) return;
+
+    // update heuristic mode
+    graph.heuristicType = sel.value;
+
+    // FULL RESET
+    resetScene();
+    curRoomUI.currentTutorialStep = 0;
+    currentlyHighlightedNodeIndex = null;
+
+    // 3️rebuild game model properly
+    setUpGameModel(curRoomUI.currentLevel);
   });
 });
 
@@ -1761,6 +1870,12 @@ setUpGameModel(currentLevel);
 
 // ===== UI Callbacks Section =====
 curRoomUI.callbacks.resetLevel = function (curlvl) {
+  // Restore heuristic dropdown
+  const heuristicSelect = document.getElementById("heuristicSelect");
+  if (heuristicSelect) {
+    heuristicSelect.disabled = false;
+    heuristicSelect.style.display = "inline-block";
+  }
   curRoomUI.uiText.innerHTML = `Start by selecting the source node (Node 0), then find the shortest path to the goal node using f(n) = g(n) + h(n)!`;
   curRoomUI.health = resetHealth();
   document.querySelector(".Hint-Text").classList.add("hidden");
@@ -1779,6 +1894,12 @@ curRoomUI.callbacks.resetLevel = function (curlvl) {
 };
 
 curRoomUI.callbacks.startTutorial = function () {
+  // ===== Lock heuristic to zero for tutorial =====
+  const heuristicSelect = document.getElementById("heuristicSelect");
+  if (heuristicSelect) {
+    heuristicSelect.value = "zero";
+    heuristicSelect.disabled = true;
+  }
   currentlyHighlightedNodeIndex = null;
   curRoomUI.currentTutorialStep = 0;
   updateTutorialStep();

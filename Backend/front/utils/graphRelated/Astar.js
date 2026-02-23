@@ -8,6 +8,8 @@ export class AstarAlgorithm {
       graph.goalNode ??
       Math.max(...Object.keys(graph.nodes || this.buildNodeSet(graph.edges)));
 
+    this.heuristicType = graph.heuristicType ?? "zero"; // "zero" | "euclid" | "w_euclid"
+
     this.adjacencyList = this.buildAdjacencyList(graph.edges);
 
     this.steps = [];
@@ -50,6 +52,18 @@ export class AstarAlgorithm {
 
   // ===== HEURISTIC (currently zero — behaves like Dijkstra) =====
   heuristic(node) {
+    if (this.heuristicType === "zero") return 0;
+
+    const p = this.graph.nodePositions?.[Number(node)];
+    const g = this.graph.nodePositions?.[Number(this.goalNode)];
+    if (!p || !g) return 0;
+
+    const dx = p.x - g.x;
+    const dz = p.z - g.z;
+    const euclid = Math.sqrt(dx * dx + dz * dz);
+
+    if (this.heuristicType === "euclid") return euclid;
+    if (this.heuristicType === "w_euclid") return 1.5 * euclid; // faster, may lose optimality
     return 0;
   }
 
@@ -148,8 +162,10 @@ export class AstarAlgorithm {
         }
 
         validEdges.push({
-          edge: [Number(currentNode), neighbor],
-          weight: this.fValues[neighbor],
+          edge: [Number(currentNode), Number(neighbor)],
+          weight: weight, // actual edge weight
+          newG: tentativeG, // correct cumulative g
+          newF: tentativeG + this.heuristic(neighbor),
         });
       }
 
@@ -175,7 +191,7 @@ export class AstarAlgorithm {
   }
 
   isComplete() {
-    return this.currentStepIndex >= this.steps.length - 1 && !this.paused;
+    return this.currentStepIndex >= this.steps.length && !this.paused;
   }
 
   edgeAlreadyExpected(a, b) {

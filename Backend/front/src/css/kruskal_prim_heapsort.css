@@ -195,6 +195,60 @@ body {
   z-index: 1;
 }
 
+/* CURRENT NODE (soft yellow) */
+.current-node-row td {
+  background-color: yellow !important; /* soft warm yellow */
+  color: #212529 !important; /* dark readable text */
+  font-weight: 600;
+}
+
+/* VISITED NODE (soft green) */
+.visited-node-row td {
+  background-color: green !important; /* soft mint green */
+  color: #212529 !important; /* dark readable text */
+  font-weight: 600;
+}
+
+/* Centered Top Heuristic Dropdown */
+#heuristic-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  background: rgba(0, 0, 0, 0.75);
+  padding: 10px 16px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#heuristic-label {
+  color: #a5d8ff;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+/* Style the select itself */
+#heuristicSelect {
+  background-color: #212529;
+  color: white;
+  border: 1px solid #495057;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Hover effect */
+#heuristicSelect:hover {
+  border-color: #74c0fc;
+}
+
 .button-nav {
   float: none;
   position: absolute;
@@ -562,7 +616,9 @@ body {
   background-color: #f9f9f9;
   padding: 0.5rem;
   transform-origin: center center;
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
   cursor: zoom-in;
 }
 

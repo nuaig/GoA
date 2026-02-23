@@ -545,6 +545,15 @@ At every step, A* selects the unvisited node with the smallest f(n) value, guidi
           </table>
         </div>
 
+        <div id="heuristic-container">
+          <label for="heuristicSelect" id="heuristic-label">Heuristic:</label>
+          <select id="heuristicSelect">
+            <option value="zero">Zero Heuristic (h=0)</option>
+            <option value="euclid">Euclidean</option>
+            <option value="w_euclid">Weighted Euclidean</option>
+          </select>
+        </div>
+
         <!-- Distance Table -->
         <div
           style="
@@ -555,7 +564,7 @@ At every step, A* selects the unvisited node with the smallest f(n) value, guidi
             flex: 1;
           "
         >
-          <h3 style="margin: 0 0 10px 0">g(n) – Distance from Source</h3>
+          <h3 style="margin: 0 0 10px 0">A* Values</h3>
           <table
             id="distanceTable"
             border="1"
@@ -566,7 +575,9 @@ At every step, A* selects the unvisited node with the smallest f(n) value, guidi
             <thead>
               <tr style="background-color: #1971c2">
                 <th>Node</th>
-                <th>Distance</th>
+                <th>g(n)</th>
+                <th>h(n)</th>
+                <th>f(n)</th>
               </tr>
             </thead>
             <tbody id="distance-table-body">
