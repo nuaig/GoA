@@ -150,22 +150,26 @@ export class AstarAlgorithm {
       for (const { node: neighbor, weight } of neighbors) {
         if (this.visited.has(neighbor)) continue;
 
-        const tentativeG = this.gValues[currentNode] + weight;
+        let tentativeG = this.gValues[currentNode] + weight;
+        let tentativeF = tentativeG + this.heuristic(neighbor);
+
+        tentativeG = Number(tentativeG.toFixed(2));
+        tentativeF = Number(tentativeF.toFixed(2));
 
         if (tentativeG < this.gValues[neighbor]) {
           this.gValues[neighbor] = tentativeG;
-          this.fValues[neighbor] = tentativeG + this.heuristic(neighbor);
+          this.fValues[neighbor] = tentativeF;
 
           this.previous[neighbor] = Number(currentNode);
 
-          this.priorityQueue.enqueue(neighbor, this.fValues[neighbor]);
+          this.priorityQueue.enqueue(neighbor, tentativeF);
         }
 
         validEdges.push({
           edge: [Number(currentNode), Number(neighbor)],
-          weight: weight, // actual edge weight
-          newG: tentativeG, // correct cumulative g
-          newF: tentativeG + this.heuristic(neighbor),
+          weight: weight,
+          newG: tentativeG,
+          newF: tentativeF,
         });
       }
 

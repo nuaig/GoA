@@ -1595,7 +1595,9 @@ function closeInputDialog() {
       Number.isFinite(inputF) &&
       Math.abs(inputF - Number(selected.newF)) < 0.001
     ) {
-      debugPrint("[closeInputDialog] Correct weight entered:", inputWeight);
+      debugPrint("[closeInputDialog] Correct weight entered:", inputF);
+
+      
 
       if (curRoomUI.uiText.innerText !== "Visit a new node!") {
         curRoomUI.uiText.innerText = "Correct!";
@@ -1660,7 +1662,7 @@ function closeInputDialog() {
         selectedEdgesThisStep = [];
       }
     } else {
-      console.warn("[closeInputDialog] Incorrect weight entered:", inputWeight);
+      console.warn("[closeInputDialog] Incorrect weight entered:", inputF);
       hintBooleans.wrongWeightEntered = true;
       updateHintsFromBooleans();
 
