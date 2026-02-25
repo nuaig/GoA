@@ -8,6 +8,10 @@ import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import { gsap } from "gsap";
 
+//colors
+const mapBackgroundColor = "#95bcf6"
+const cameraSize = 150
+
 function hideLoadingScreen() {
   const loadingScreen = document.getElementById("loading-screen");
   loadingScreen.style.opacity = 1;
@@ -758,10 +762,10 @@ signOutHandler.addEventListener("click", async (event) => {
 
 // Mini-map
 const miniMapCamera = new THREE.OrthographicCamera(
-  150 / -2, // left
-  150 / 2, // right
-  150 / 2, // top
-  150 / -2, // bottom
+  cameraSize / -2, // left
+  cameraSize / 2, // right
+  cameraSize / 2, // top
+  cameraSize / -2, // bottom
   1, // near clipping plane
   1000 // far clipping plane
 );
@@ -774,7 +778,8 @@ miniMapCamera.updateProjectionMatrix();
 miniMapCamera.position.set(0, 250, -10); // Position it above the dungeon
 miniMapCamera.lookAt(new THREE.Vector3(0, 0, -10)); // Look directly down
 const miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
-miniMapRenderer.setSize(350, 350); // Size of the mini-map
+const mapSize = window.innerWidth * 0.2;
+miniMapRenderer.setSize(mapSize, mapSize); // Size of the mini-map
 miniMapRenderer.domElement.id = "miniMapCanvas";
 
 document.body.appendChild(miniMapRenderer.domElement); // Append it to the body or a specific element
@@ -789,9 +794,10 @@ miniMapRenderer.domElement.style.left = "15px";
 //   miniMapCamera.updateProjectionMatrix();
 // }
 
+// map background that covers the actual top-down view
 const mapBackground = new THREE.Mesh(
   new THREE.CircleGeometry(100, 32),
-  new THREE.MeshBasicMaterial({ color: "#868e96" })
+  new THREE.MeshBasicMaterial({ color: mapBackgroundColor })
 );
 mapBackground.rotation.x = -Math.PI / 2;
 scene.add(mapBackground);

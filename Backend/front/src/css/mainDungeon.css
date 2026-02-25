@@ -11,16 +11,20 @@ body {
   font-family: "Inter", sans-serif;
 }
 
+/* Outer container for panel describing movement controls */
 .control-instruction {
   position: absolute;
   top: 43vh;
   left: 1vw;
   display: hidden;
-  width: 300px;
-  height: 150px;
+  width: 15vw;
+  /* width: 15%; */
+  height: 15vh;
+  background-color: red;
 
 }
 
+/* Panel to describe the current mode */
 .mode-panel {
   height: 60px;
   display: flex;
@@ -29,6 +33,7 @@ body {
   gap: 12px;
 }
 
+/* Panel to describe the navigation/movement controls */
 .control-panel {
   display: flex;
   align-items: center;
@@ -37,6 +42,7 @@ body {
   gap: 20px;
 }
 
+/* ESC key icon */
 .esc-key {
   background-color: var(--color-panel-dark);
   border-radius: 25px;
@@ -57,6 +63,7 @@ body {
   font-weight: bold;
 }
 
+/* visual for a panel in the control panel layout */
 .panel {
   background-color: var(--color-move-panel);  border-radius: 18px;
   display: hidden;
@@ -104,25 +111,26 @@ body {
   .cursor-icon {
     font-size: 2.8rem;
     line-height: 1;
+
   }
 
+/* outer container for top right icons */
 .Action-Icons-Holder {
   position: absolute;
   top: 2vh;
   right: 0.5vw;
-
-  /* background-color: #343a40;
-  border: solid #eaebf1 2px; */
   border-radius: 10px;
   padding: 0 15px;
 }
 
+/*contianer for icons on top right */
 .Action-Icons {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+/*individual container for icons on top right */
 .Action-Icons-Holder svg {
   width: 75px;
   height: 75px;
@@ -350,6 +358,7 @@ body {
   top: 10%;
   left: 5%;
 }
+/*bottom text box*/
 .topnav-centered {
   float: none;
   position: absolute;
@@ -510,14 +519,11 @@ button:active {
 }
 
 #miniMapCanvas {
-  width: 200px; /* Adjust size as needed */
-  height: 200px; /* Adjust size as needed */
-  border-radius: 20%; /* This creates the circular shape */
+  border-radius: 50%; /* This creates the circular shape */
   overflow: hidden; /* Ensures nothing leaks outside the border */
   position: absolute;
   bottom: 10px;
   right: 10px;
-  background-color: #343a40;
   border: 3px solid #ffffff;
 }
 
