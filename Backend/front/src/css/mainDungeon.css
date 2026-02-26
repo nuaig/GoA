@@ -535,29 +535,30 @@ button:active {
   z-index: 2;
 }
 
+/* Each symbol is manually positioned onto the screen over the map*/
 .heapsort-symbol {
-  top: 164px;
-  left: 280px;
+  top: 129px;
+  left: 233px;
 }
 
 .kruskal-symbol {
-  top: 164px;
-  left: 93px;
+  top: 129px;
+  left: 77px;
 }
 
 .Dijkstra-symbol {
-  top: 233px;
-  left: 93px;
+  top: 185px;
+  left: 77px;
 }
 
 .prim-symbol {
-  top: 196px;
-  left: 45px;
+  top: 157px;
+  left: 35px;
 }
 
 .treasure-symbol {
-  top: 82px;
-  left: 181px;
+  top: 65px;
+  left: 150px;
 }
 
 .firework.active {
