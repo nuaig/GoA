@@ -13,13 +13,16 @@ body {
 
 /* Outer container for panel describing movement controls */
 .control-instruction {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   position: absolute;
-  top: 43vh;
+  top: 40vh;
   left: 1vw;
   display: hidden;
-  width: 15vw;
+  width: 17vw;
   /* width: 15%; */
-  height: 15vh;
+  height: 30vh;
   background-color: red;
 
 }
@@ -29,8 +32,9 @@ body {
   height: 60px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
+  /* justify-content: center; */
+  gap: 10px;
+  padding-left: 7px;
 }
 
 /* Panel to describe the navigation/movement controls */
@@ -55,17 +59,21 @@ body {
 
 .mode-text {
   display: flex;
+  /* background-color: red; */
+  max-width: 63%;
   align-items: center;
   flex-direction: row;
   justify-content: center;
-  gap: 8px;
+  gap: 20px;
   font-size: 1.1rem;
   font-weight: bold;
+  color: var(--color-panel-dark);
 }
 
 /* visual for a panel in the control panel layout */
 .panel {
-  background-color: var(--color-move-panel);  border-radius: 18px;
+  background-color: var(--color-move-panel);  
+  border-radius: 18px;
   display: hidden;
 }
 
@@ -106,12 +114,13 @@ body {
   .move-section label, .camera-section label {
     font-size: 1rem;
     font-weight: bold;
+    text-align: center;
+    color: var(--color-panel-dark);
   }
 
   .cursor-icon {
     font-size: 2.8rem;
     line-height: 1;
-
   }
 
 /* outer container for top right icons */
