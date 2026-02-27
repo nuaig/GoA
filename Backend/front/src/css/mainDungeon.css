@@ -427,23 +427,28 @@ button:active {
 }
 
 .heapsort-symbol {
-  top: 164px;
+  top: 184px;
   left: 280px;
 }
 
 .kruskal-symbol {
-  top: 164px;
+  top: 184px;
   left: 93px;
 }
 
 .Dijkstra-symbol {
-  top: 233px;
+  top: 214px;
+  left: 93px;
+}
+
+.Astar-symbol {
+  top: 114px;
   left: 93px;
 }
 
 .prim-symbol {
   top: 196px;
-  left: 45px;
+  left: 64px;
 }
 
 .treasure-symbol {

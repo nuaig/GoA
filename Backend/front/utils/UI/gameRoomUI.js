@@ -1089,7 +1089,7 @@ class GameRoomUI {
     }, 1000);
   }
 
-  // -------For Kruskal, Prim, and Dijkstra Only------------
+  // -------For Kruskal, Prim, Astar and Dijkstra Only------------
   // enable Mouse event listeners
   enableMouseEventListeners_K_P() {
     console.log(this.gameName);

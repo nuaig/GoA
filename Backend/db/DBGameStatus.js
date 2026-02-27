@@ -348,6 +348,18 @@ function MyMongoDB() {
             { level: 3, score: 0, stars: 0, status: "locked" },
           ],
         },
+        "games.Astar": {
+          regular: [
+            { level: 1, score: 0, stars: 0, status: "unlocked" },
+            { level: 2, score: 0, stars: 0, status: "locked" },
+            { level: 3, score: 0, stars: 0, status: "locked" },
+          ],
+          training: [
+            { level: 1, score: 0, stars: 0, status: "unlocked" },
+            { level: 2, score: 0, stars: 0, status: "locked" },
+            { level: 3, score: 0, stars: 0, status: "locked" },
+          ],
+        },
       };
 
       // Update the game status in the database to the reset status
@@ -397,6 +409,7 @@ function MyMongoDB() {
                 "$games.Prim.regular",
                 "$games.Kruskal.regular",
                 "$games.Dijkstra.regular",
+                "$games.Astar.regular",
               ],
             },
           },
@@ -463,6 +476,7 @@ function MyMongoDB() {
               Prim: { $ifNull: ["$games.Prim.regular", []] },
               Kruskal: { $ifNull: ["$games.Kruskal.regular", []] },
               Dijkstra: { $ifNull: ["$games.Dijkstra.regular", []] },
+              Astar: { $ifNull: ["$games.Astar.regular", []] },
             },
           },
         },
@@ -476,6 +490,7 @@ function MyMongoDB() {
                 { $sum: "$gameProgress.Prim.score" },
                 { $sum: "$gameProgress.Kruskal.score" },
                 { $sum: "$gameProgress.Dijkstra.score" },
+                { $sum: "$gameProgress.Astar.score" },
               ],
             },
             completed_games: {

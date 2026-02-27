@@ -243,7 +243,7 @@ document.body.appendChild(renderer.domElement);
 
 const player = new Player(scene, world);
 const mainDungeonURL = new URL(
-  "../../public/models/main_dungeon_v6_compressed.glb",
+  "../../public/models/main_dungeon_v7_compressed.glb",
   import.meta.url
 );
 let gameCompleted = false;
@@ -256,6 +256,7 @@ let glowEffectsCompleted = {
   Prim: false,
   Heapsort: false,
   Dijkstra: false,
+  Astar: false,
 };
 
 function triggerFireworks() {
@@ -432,17 +433,22 @@ async function createMainDungeon() {
     const dijkstraStatus =
       gameStatusService.getLocalGameStatus()?.games?.Dijkstra?.regular?.[2]
         ?.status;
+    const astarStatus =
+      gameStatusService.getLocalGameStatus()?.games?.Astar?.regular?.[2]?.status;
+    
 
     const kruskalCompleted = kruskalStatus?.includes("completed");
     const primCompleted = primStatus?.includes("completed");
     const heapsortCompleted = heapsortStatus?.includes("completed");
     const dijkstraCompleted = dijkstraStatus?.includes("completed");
+    const astarCompleted = astarStatus?.includes("completed");
 
     gameCompleted =
       kruskalCompleted &&
       primCompleted &&
       heapsortCompleted &&
-      dijkstraCompleted;
+      dijkstraCompleted && 
+      astarCompleted;
 
     model.traverse((child) => {
       if (child.isMesh) {
@@ -489,6 +495,14 @@ async function createMainDungeon() {
               symbol_dict["dijkstra"],
               dijkstraStatus,
               "Dijkstra"
+            );
+          }
+          if (matName.includes("astar_symbol")) {
+            symbol_dict["astar"] = child.material;
+            applyGlowEffect(
+              symbol_dict["astar"],
+              astarStatus,
+              "Astar"
             );
           }
         }
@@ -654,6 +668,8 @@ function onMouseDown(event) {
     if (player.selectedDoor.name.includes("prim"))
       window.location.href = "Prim.html";
     if (player.selectedDoor.name.includes("dijkstra"))
+      window.location.href = "Dijkstra.html";
+    if (player.selectedDoor.name.includes("astar"))
       window.location.href = "Astar.html";
   }
 }
