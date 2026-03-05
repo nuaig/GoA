@@ -10,7 +10,9 @@ import { gsap } from "gsap";
 
 //colors
 const mapBackgroundColor = "#95bcf6"
+//Size for minimap
 const cameraSize = 150
+const mapSize = window.innerWidth * 0.16; //size of the overall minimap on the screen
 
 function hideLoadingScreen() {
   const loadingScreen = document.getElementById("loading-screen");
@@ -778,7 +780,6 @@ miniMapCamera.updateProjectionMatrix();
 miniMapCamera.position.set(0, 250, -10); // Position it above the dungeon
 miniMapCamera.lookAt(new THREE.Vector3(0, 0, -10)); // Look directly down
 const miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
-const mapSize = window.innerWidth * 0.2;
 miniMapRenderer.setSize(mapSize, mapSize); // Size of the mini-map
 miniMapRenderer.domElement.id = "miniMapCanvas";
 

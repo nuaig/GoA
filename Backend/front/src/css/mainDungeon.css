@@ -23,7 +23,7 @@ body {
   width: 17vw;
   /* width: 15%; */
   height: 30vh;
-  background-color: red;
+  /* background-color: red; */
 
 }
 
@@ -546,28 +546,28 @@ button:active {
 
 /* Each symbol is manually positioned onto the screen over the map*/
 .heapsort-symbol {
-  top: 129px;
-  left: 233px;
+  top: 116px;
+  left: 210px;
 }
 
 .kruskal-symbol {
-  top: 129px;
-  left: 77px;
+  top: 116px;
+  left: 70px;
 }
 
 .Dijkstra-symbol {
-  top: 185px;
-  left: 77px;
+  top: 170px;
+  left: 70px;
 }
 
 .prim-symbol {
-  top: 157px;
-  left: 35px;
+  top: 140px;
+  left: 33px;
 }
 
 .treasure-symbol {
-  top: 65px;
-  left: 150px;
+  top: 56px;
+  left: 135px;
 }
 
 .firework.active {
