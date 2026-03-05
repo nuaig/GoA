@@ -762,6 +762,15 @@ function drawLines() {
           );
           document.querySelector(".Hint-Text").classList.add("hidden");
 
+          // Award score for correct node (chest) click in regular mode
+          if (!curRoomUI.isTutorial) {
+            curRoomUI.currentScore = Math.min(
+              curRoomUI.currentScore + correctActionScoreAddition,
+              levelMaxScores[curRoomUI.currentLevel]
+            );
+            curRoomUI.updateScore(curRoomUI.currentScore);
+          }
+
           curRoomUI.uiText.innerText =
             "Relax the edges of this node! If there are no unvisited edges, visit another node";
           curAlgorithmForGraph.resumeFromNode(index);
@@ -1475,6 +1484,13 @@ function closeInputDialog() {
     const inputWeight = parseInt(inputValue, 10);
     if (inputWeight === selected.weight) {
       debugPrint("[closeInputDialog] Correct weight entered:", inputWeight);
+
+      // Award score only after correct weight is entered in regular mode (cap at level max)
+      curRoomUI.currentScore = Math.min(
+        curRoomUI.currentScore + correctActionScoreAddition,
+        levelMaxScores[curRoomUI.currentLevel]
+      );
+      curRoomUI.updateScore(curRoomUI.currentScore);
 
       if (curRoomUI.uiText.innerText !== "Visit a new node!") {
         curRoomUI.uiText.innerText = "Correct!";

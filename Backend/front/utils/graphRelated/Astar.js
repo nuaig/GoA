@@ -127,22 +127,28 @@ export class AstarAlgorithm {
         const unvisitedSamePriority = samePriorityNodes.filter(
           (n) => !this.visited.has(n),
         );
-        if (unvisitedSamePriority.includes(Number(this.goalNode))) {
+        // Only auto-select goal when it is the only node with smallest f(n).
+        // Otherwise (goal tied with 3, 4, etc.) treat as ambiguity: user may pick any.
+        if (
+          unvisitedSamePriority.length === 1 &&
+          unvisitedSamePriority[0] === Number(this.goalNode)
+        ) {
           currentNode = Number(this.goalNode);
           this.priorityQueue.remove(currentNode);
+        } else if (
+          !this.resumedFromAmbiguity &&
+          unvisitedSamePriority.length > 1
+        ) {
+          this.waitingNodes = [...unvisitedSamePriority];
+          this.steps.push({
+            expectedChests: [...unvisitedSamePriority],
+            expectedEdges: null,
+            errorMessage:
+              "Multiple nodes have the same smallest f(n). Pick any one to continue.",
+          });
+          this.paused = true;
+          return;
         } else {
-          if (!this.resumedFromAmbiguity && unvisitedSamePriority.length > 1) {
-            this.waitingNodes = [...unvisitedSamePriority];
-            this.steps.push({
-              expectedChests: [...unvisitedSamePriority],
-              expectedEdges: null,
-              errorMessage:
-                "Multiple nodes have the same smallest f(n). Pick any one to continue.",
-            });
-            this.paused = true;
-            return;
-          }
-
           const next = this.priorityQueue.dequeue();
           if (!next) break;
           currentNode = next.element;
@@ -177,13 +183,21 @@ export class AstarAlgorithm {
       for (const { node: neighbor, weight } of neighbors) {
         if (this.visited.has(neighbor)) continue;
 
+        const oldG = this.gValues[neighbor];
+        const hVal = this.heuristic(neighbor);
+        const oldF = Number.isFinite(oldG)
+          ? Number((oldG + hVal).toFixed(2))
+          : Infinity;
+
         let tentativeG = this.gValues[currentNode] + weight;
-        let tentativeF = tentativeG + this.heuristic(neighbor);
+        let tentativeF = tentativeG + hVal;
 
         tentativeG = Number(tentativeG.toFixed(2));
         tentativeF = Number(tentativeF.toFixed(2));
 
-        if (tentativeG < this.gValues[neighbor]) {
+        const improves = tentativeG < oldG;
+
+        if (improves) {
           this.gValues[neighbor] = tentativeG;
           this.fValues[neighbor] = tentativeF;
 
@@ -194,9 +208,11 @@ export class AstarAlgorithm {
 
         validEdges.push({
           edge: [Number(currentNode), Number(neighbor)],
-          weight: weight,
+          weight,
           newG: tentativeG,
           newF: tentativeF,
+          oldG,
+          oldF,
         });
       }
 

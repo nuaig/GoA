@@ -94,7 +94,9 @@ export const updateStatusToCompletedCon = async (req, res) => {
     );
 
     if (!updateResponse.ok) {
-      return res.status(400).json({ ok: false, msg: updateResponse.msg });
+      return res
+        .status(400)
+        .json({ ok: false, msg: updateResponse.msg || "Update failed" });
     }
 
     return res.status(200).json({ ok: true, msg: updateResponse.msg });

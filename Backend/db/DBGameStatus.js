@@ -142,9 +142,19 @@ function MyMongoDB() {
 
   // Function to update status from "completed_first_time" to "completed"
   myDB.updateStatusToCompleted = async (userId, gameName, mode, level) => {
-    const { client, db } = await connect();
+    let client;
     try {
+      if (!userId || typeof userId !== "string") {
+        return { ok: false, msg: "Invalid userId" };
+      }
       const objectId = new ObjectId(userId);
+      const levelNum = parseInt(level, 10);
+      if (Number.isNaN(levelNum) || levelNum < 1 || levelNum > 3) {
+        return { ok: false, msg: "Invalid level" };
+      }
+
+      const { client: c, db } = await connect();
+      client = c;
 
       // Use arrayFilters to target the correct element in the array
       const response = await db.collection("game_status").updateOne(
@@ -159,30 +169,36 @@ function MyMongoDB() {
         },
         {
           arrayFilters: [
-            { "elem.level": level, "elem.status": "completed_first_time" },
+            {
+              "elem.level": levelNum,
+              "elem.status": "completed_first_time",
+            },
           ],
         }
       );
 
       if (response.modifiedCount === 0) {
         console.log(
-          `No status update needed for user ${userId}, game ${gameName}, mode ${mode}, level ${level}`
+          `No status update needed for user ${userId}, game ${gameName}, mode ${mode}, level ${levelNum}`
         );
         return {
-          ok: false,
+          ok: true,
           msg: "No update needed, status was not 'completed_first_time'",
         };
       }
 
       console.log(
-        `Status updated to 'completed' for user ${userId} in game ${gameName}, mode ${mode}, level ${level}`
+        `Status updated to 'completed' for user ${userId} in game ${gameName}, mode ${mode}, level ${levelNum}`
       );
       return { ok: true, msg: "Status updated to completed" };
     } catch (err) {
       console.error("Error updating status to completed", err.message);
-      return { ok: false, msg: "Error updating status to completed" };
+      return {
+        ok: false,
+        msg: err.message || "Error updating status to completed",
+      };
     } finally {
-      await client.close();
+      if (client) await client.close();
     }
   };
   // Fetch game status for a user

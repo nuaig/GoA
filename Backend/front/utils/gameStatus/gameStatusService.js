@@ -4,6 +4,7 @@ export class GameStatusService {
   constructor(userId) {
     this.userId = userId;
     this.gameStatus = null; // Initially null
+    this._updateToCompletedInFlight = new Set(); // avoid duplicate API calls
   }
 
   // Initialize the game status
@@ -58,7 +59,7 @@ export class GameStatusService {
       const currentGameData =
         this.gameStatus?.games[gameName]?.[mode]?.[level - 1];
 
-      // Validate if update is necessary
+      // Validate if update is necessary (skip only when score is not better)
       if (currentGameData?.score >= score) {
         console.log(
           `No update: Current score (${currentGameData.score}) is higher or equal to new score (${score}).`
@@ -66,9 +67,8 @@ export class GameStatusService {
         return;
       }
 
-      if (level === 3 && currentGameData?.status === "completed") {
-        status = "completed";
-      }
+      // Do not override status: caller (GameHelper) sets "completed_first_time"
+      // when level 3 is completed with 3 stars, even if it was previously "completed" (e.g. 2 stars).
 
       const updateData = { level, score, stars, status };
       console.log("Update data:", updateData);
@@ -94,28 +94,44 @@ export class GameStatusService {
 
   // Update status from "completed_first_time" to "completed"
   async updateStatusToCompleted(gameName, level, mode) {
+    const key = `${gameName}/${mode}/${level}`;
     try {
       const currentStatus =
         this.gameStatus?.games[gameName]?.[mode]?.[level - 1]?.status;
-      console.log(gameName, level, mode, currentStatus, "THing to note!!!!!");
       if (currentStatus === "completed") {
-        console.log(`Level ${level} in mode ${mode} is already completed.`);
         return;
       }
+      if (this._updateToCompletedInFlight.has(key)) {
+        return; // already updating this game/level/mode (e.g. duplicate onComplete)
+      }
+      this._updateToCompletedInFlight.add(key);
 
       const response = await fetch(
         `/api/status/updateToCompleted/${this.userId}/${gameName}/${mode}/${level}`,
         { method: "POST", headers: { "Content-Type": "application/json" } }
       );
 
-      if (!response.ok)
-        throw new Error("Failed to update status to completed.");
-
-      const data = await response.json();
-      this.gameStatus.games[gameName][mode][level - 1].status = "completed";
-      console.log("Status updated to 'completed':", data.msg);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        console.warn(
+          "updateStatusToCompleted:",
+          response.status,
+          data?.msg || "Failed to update status to completed."
+        );
+        // Still update local state so UI stays consistent (fireworks already shown)
+        if (this.gameStatus?.games?.[gameName]?.[mode]?.[level - 1]) {
+          this.gameStatus.games[gameName][mode][level - 1].status = "completed";
+        }
+        return;
+      }
+      if (this.gameStatus?.games?.[gameName]?.[mode]?.[level - 1]) {
+        this.gameStatus.games[gameName][mode][level - 1].status = "completed";
+      }
+      console.log("Status updated to 'completed':", data?.msg);
     } catch (error) {
       console.error("Error in updateStatusToCompleted:", error);
+    } finally {
+      this._updateToCompletedInFlight.delete(key);
     }
   }
 

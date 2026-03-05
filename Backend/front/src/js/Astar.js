@@ -109,7 +109,7 @@ camera.position.set(startPosition.x, startPosition.y, startPosition.z);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 4);
 const curRoomUI = new GameRoomUI("Astar", 1, camera);
-correctActionScoreAddition = Math.floor(
+let correctActionScoreAddition = Math.floor(
   levelMaxScores[curRoomUI.currentLevel] /
     (levelConfig[curRoomUI.currentLevel].nodes - 1),
 );
@@ -170,33 +170,46 @@ const tutorialSteps = [
     updatedDistance: { 4: 4 },
     errorMessage: "Click edge (2,4).",
   },
-
   {
-    instruction: "Step 6: Click edge (1,2). Type 2 (no change) and press OK.",
-    explanation:
-      "From node 2, the candidate for node 1 would be 4, but current g(1)=2 is better, so we keep g(1)=2.",
+    instruction: "Step 6: Click edge (2,1). Enter 2.",
+    explanation: "Candidate g(1)=g(2)+3=4 from edge (2,1) but g(1)=2 from edge (0,1).",
     expectedChests: null,
-    expectedEdges: [[1, 2]],
-    updatedDistance: { 1: 2 }, // keep same value so your engine doesn't error
-    errorMessage: "Click edge (1,2) and keep g(1)=2.",
+    expectedEdges: [[2, 1]],
+    updatedDistance: { 1: 2 },
+    errorMessage: "Click edge (2,1).",
   },
-
   {
     instruction: "Step 7: Click node 1.",
-    explanation: "Smallest in open set now is node 1 with g(1)=2.",
+    explanation: "Smallest in open set is node 1 with g(1)=2.",
     expectedChests: [1],
     expectedEdges: null,
     errorMessage: "Click node 1.",
   },
   {
-    instruction: "Step 8: Click node 3.",
-    explanation: "Next smallest is node 3 with g(3)=3.",
+    instruction: "Step 8: Click edge (1,3). Enter 4.",
+    explanation: "Candidate g(1)=g(3)+4=7 from edge (3,1) and g(1)=4 from edge (0,1).",
+    expectedChests: null,
+    expectedEdges: [[1, 3]],
+    updatedDistance: { 3: 4 },
+    errorMessage: "Click edge (1,3).",
+  },
+  {
+    instruction: "Step 10: Click node 3.",
+    explanation: "Here we have to choose between Node 3 and Node 4. g(3)=4 and g(4)=4. We can choose either one which is why h=0 is not the best since it makes us explore more nodes than we need. We will choose Node 3 to show how h=0 operates",
     expectedChests: [3],
     expectedEdges: null,
     errorMessage: "Click node 3.",
   },
   {
-    instruction: "Step 9: Click node 4 (goal).",
+    instruction: "Step 11: Click on edge (3,4). Enter 4.",
+    explanation: "Candidate g(4) = g(3) + 1=5. But we know g(4)=4 from edge (2,4).",
+    expectedChests: null,
+    expectedEdges: [[3, 4]],
+    updatedDistance: { 4: 4 },
+    errorMessage: "Click edge (3,4).",
+  },
+  {
+    instruction: "Step 12: Click node 4 (goal).",
     explanation: "Next is node 4 with g(4)=4, and it’s the goal. Stop.",
     expectedChests: [4],
     expectedEdges: null,
@@ -730,6 +743,15 @@ function drawLines() {
           );
           document.querySelector(".Hint-Text").classList.add("hidden");
 
+          // Award score for correct node (chest) click in regular mode
+          if (!curRoomUI.isTutorial) {
+            curRoomUI.currentScore = Math.min(
+              curRoomUI.currentScore + correctActionScoreAddition,
+              levelMaxScores[curRoomUI.currentLevel],
+            );
+            curRoomUI.updateScore(curRoomUI.currentScore);
+          }
+
           curRoomUI.uiText.innerText =
             "Evaluate neighbors of this node and update f(n) values if needed.";
           if (index === graph.goalNode) {
@@ -900,6 +922,8 @@ function drawLines() {
           weight: found.weight,
           newG: found.newG,
           newF: found.newF,
+          oldG: found.oldG,
+          oldF: found.oldF,
         };
 
         curRoomUI.inputCompleted = false;
@@ -1587,34 +1611,47 @@ function closeInputDialog() {
     }
 
     const inputF = Number(inputValue);
+    const improves = selected.newG < selected.oldG;
+    const expectedF = improves ? selected.newF : selected.oldF;
+
     if (
       Number.isFinite(inputF) &&
-      Math.abs(inputF - Number(selected.newF)) < 0.001
+      Math.abs(inputF - Number(expectedF)) < 0.001
     ) {
       debugPrint("[closeInputDialog] Correct weight entered:", inputF);
+
+      // Award score only after correct f(n) is entered in regular mode (cap at level max)
+      curRoomUI.currentScore = Math.min(
+        curRoomUI.currentScore + correctActionScoreAddition,
+        levelMaxScores[curRoomUI.currentLevel],
+      );
+      curRoomUI.updateScore(curRoomUI.currentScore);
 
       if (curRoomUI.uiText.innerText !== "Visit a new node!") {
         curRoomUI.uiText.innerText = "Correct!";
       }
 
       const targetNode = selected.end;
-      // Update g(n)
-      const gCell = document.getElementById(`g-${targetNode}`);
-      if (gCell) {
-        gCell.textContent = selected.newG.toString();
-      }
 
-      // Update h(n)
-      const h = computeHeuristicUI(targetNode);
-      const hCell = document.getElementById(`h-${targetNode}`);
-      if (hCell) {
-        hCell.textContent = h.toFixed(2);
-      }
+      if (improves) {
+        // Update g(n)
+        const gCell = document.getElementById(`g-${targetNode}`);
+        if (gCell) {
+          gCell.textContent = selected.newG.toString();
+        }
 
-      // Update f(n)
-      const fCell = document.getElementById(`f-${targetNode}`);
-      if (fCell) {
-        fCell.textContent = selected.newF.toFixed(2);
+        // Update h(n)
+        const h = computeHeuristicUI(targetNode);
+        const hCell = document.getElementById(`h-${targetNode}`);
+        if (hCell) {
+          hCell.textContent = h.toFixed(2);
+        }
+
+        // Update f(n)
+        const fCell = document.getElementById(`f-${targetNode}`);
+        if (fCell) {
+          fCell.textContent = selected.newF.toFixed(2);
+        }
       }
 
       const selectedLine = edgeList.find((line) => {
