@@ -17,14 +17,11 @@ body {
   flex-direction: column;
   gap: 5px;
   position: absolute;
-  top: 40vh;
-  left: 1vw;
+  top: 12vh;
+  right: 1vw;
   display: hidden;
-  width: 17vw;
-  /* width: 15%; */
-  height: 30vh;
-  /* background-color: red; */
-
+  width: 20vw;
+  height: 20vh;
 }
 
 /* Panel to describe the current mode */
@@ -50,21 +47,20 @@ body {
 .esc-key {
   background-color: var(--color-panel-dark);
   border-radius: 25px;
-  padding: 6px 18px;
+  padding: 8px 12px;
   color: var(--color-panel-text-highlight);
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1.0rem;
   white-space: nowrap;
 }
 
 .panel-text {
   display: flex;
-  max-width: 63%;
+  max-width: 80%;
   align-items: center;
   flex-direction: row;
   justify-content: center;
-  gap: 20px;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: bold;
   color: var(--color-panel-dark);
 }
