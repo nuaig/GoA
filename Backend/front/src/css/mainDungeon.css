@@ -57,9 +57,8 @@ body {
   white-space: nowrap;
 }
 
-.mode-text {
+.panel-text {
   display: flex;
-  /* background-color: red; */
   max-width: 63%;
   align-items: center;
   flex-direction: row;
@@ -70,8 +69,22 @@ body {
   color: var(--color-panel-dark);
 }
 
+/* Click Mode / Move Mode text */
+.mode-text {
+  display: flex;
+  max-width: 90%;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--color-panel-dark);
+}
+
 /* visual for a panel in the control panel layout */
 .panel {
+  display: grid;
+  place-items: center;
   background-color: var(--color-move-panel);  
   border-radius: 18px;
   display: hidden;

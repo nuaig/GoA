@@ -20,14 +20,23 @@
       <div id="World">
         <div class ="control-instruction"> 
           <div class = "panel mode-panel"> 
-            <div class = "esc-key">ESC</div>
-            <div class = "mode-text">
-              <span>Move Mode</span>
-              <span>||</span>
-              <span>Click Mode</span>
+            <div class = "mode-panel"> 
+              <div class = "panel-text">
+                <p>Click</p>
+              </div>
+              <div class = "esc-key">ESC</div>
+              <div class = "panel-text">
+                <p>key to change mode</p>
+              </div>
             </div>
           </div>
-          <div class = "panel control-panel">
+          <div class = "panel">
+            <div class = "mode-text">
+              <p id = "click-mode">Click Mode</p>
+              <p>/</p>
+              <p id = "move-mode">Move Mode</p>
+            </div>
+            <div class = "control-panel">
             <div class = "move-section">
               <div class="wasd-grid">
                 <div class="key key-w">W</div>
@@ -42,6 +51,8 @@
               <div class="cursor-icon">🖱️</div>
               <label>Turn Camera</label>
             </div>
+          </div>
+          
             
           </div>
         </div>
