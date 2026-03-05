@@ -559,23 +559,31 @@ button:active {
 
 /* Each symbol is manually positioned onto the screen over the map*/
 .heapsort-symbol {
-  top: 116px;
-  left: 210px;
+  /* top: 116px; */
+  /* left: 210px; */
+  top: 6.5em;
+  left: 11.7em;
 }
 
 .kruskal-symbol {
-  top: 116px;
-  left: 70px;
+  /* top: 116px; */
+  top: 6.5em;
+  /* left: 70px; */
+  left: 4em;
 }
 
 .Dijkstra-symbol {
-  top: 170px;
-  left: 70px;
+  /* top: 170px; */
+  top: 9.5em;
+  /* left: 70px; */
+  left: 4em;
 }
 
 .prim-symbol {
-  top: 140px;
-  left: 33px;
+  /* top: 140px; */
+  top: 8em;
+  /* left: 33px; */
+  left: 1.7em;
 }
 
 .treasure-symbol {
