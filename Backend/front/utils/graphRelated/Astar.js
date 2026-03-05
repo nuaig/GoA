@@ -1,9 +1,14 @@
+/**
+ * A* pathfinding algorithm for the game graph.
+ * Produces a sequence of steps (expected nodes/edges) for the player to follow.
+ * Uses a min-priority queue keyed by f(n) = g(n) + h(n).
+ */
+
 export class AstarAlgorithm {
   constructor(graph, startNode = 0) {
     this.graph = graph;
     this.startNode = startNode;
 
-    // If graph provides goalNode use it, otherwise default to highest index
     this.goalNode =
       graph.goalNode ??
       Math.max(...Object.keys(graph.nodes || this.buildNodeSet(graph.edges)));
@@ -30,6 +35,11 @@ export class AstarAlgorithm {
     this.astar(this.startNode);
   }
 
+  /**
+   * Builds a list of node ids from an edge list (all endpoints).
+   * @param {Array<[number, number, number]>} edges - [from, to, weight] tuples
+   * @returns {number[]}
+   */
   buildNodeSet(edges) {
     const nodes = new Set();
     for (const [a, b] of edges) {
@@ -39,6 +49,11 @@ export class AstarAlgorithm {
     return Array.from(nodes);
   }
 
+  /**
+   * Builds an adjacency list from edges: node -> [{ node, weight }, ...].
+   * @param {Array<[number, number, number]>} edges - [from, to, weight] tuples
+   * @returns {Object.<number, Array<{node: number, weight: number}>>}
+   */
   buildAdjacencyList(edges) {
     const adjList = {};
     for (const [from, to, weight] of edges) {
@@ -50,7 +65,12 @@ export class AstarAlgorithm {
     return adjList;
   }
 
-  // ===== HEURISTIC (currently zero — behaves like Dijkstra) =====
+  /**
+   * Heuristic h(n): estimated cost from node to goal.
+   * "zero" => 0 (Dijkstra-like). "euclid" / "w_euclid" use graph node positions.
+   * @param {number} node
+   * @returns {number}
+   */
   heuristic(node) {
     if (this.heuristicType === "zero") return 0;
 
@@ -63,10 +83,14 @@ export class AstarAlgorithm {
     const euclid = Math.sqrt(dx * dx + dz * dz);
 
     if (this.heuristicType === "euclid") return euclid;
-    if (this.heuristicType === "w_euclid") return 1.5 * euclid; // faster, may lose optimality
+    if (this.heuristicType === "w_euclid") return 1.5 * euclid;
     return 0;
   }
 
+  /**
+   * Initializes g/f/previous for all nodes and starts A* from the given node.
+   * @param {number} start
+   */
   astar(start) {
     for (let node in this.adjacencyList) {
       this.gValues[node] = Infinity;
@@ -82,6 +106,11 @@ export class AstarAlgorithm {
     this.continueAstar();
   }
 
+  /**
+   * Runs the main A* loop: dequeue smallest f(n), expand neighbors, record steps.
+   * Pauses when multiple nodes tie for smallest f(n) (player must pick one).
+   * Stops when the goal is reached or expanded.
+   */
   continueAstar() {
     while (!this.priorityQueue.isEmpty() || this.resumedNode !== null) {
       let currentNode;
@@ -98,7 +127,6 @@ export class AstarAlgorithm {
         const unvisitedSamePriority = samePriorityNodes.filter(
           (n) => !this.visited.has(n),
         );
-        // If goal is among the best f(n), select it immediately (true A*)
         if (unvisitedSamePriority.includes(Number(this.goalNode))) {
           currentNode = Number(this.goalNode);
           this.priorityQueue.remove(currentNode);
@@ -123,7 +151,6 @@ export class AstarAlgorithm {
 
       if (this.visited.has(currentNode)) continue;
 
-      // Stop early if goal reached
       if (Number(currentNode) === Number(this.goalNode)) {
         this.steps.push({
           expectedChests: [Number(currentNode)],
@@ -183,6 +210,10 @@ export class AstarAlgorithm {
     }
   }
 
+  /**
+   * Resumes A* after the player chose one of the tied nodes.
+   * @param {number} nodeId - The node chosen to expand next.
+   */
   resumeFromNode(nodeId) {
     if (this.visited.has(nodeId)) return;
 
@@ -194,10 +225,20 @@ export class AstarAlgorithm {
     this.continueAstar();
   }
 
+  /**
+   * Returns true when all steps are done and the algorithm is not paused.
+   * @returns {boolean}
+   */
   isComplete() {
     return this.currentStepIndex >= this.steps.length && !this.paused;
   }
 
+  /**
+   * Returns true if (a,b) or (b,a) appears in any step's expectedEdges.
+   * @param {number} a - Node id
+   * @param {number} b - Node id
+   * @returns {boolean}
+   */
   edgeAlreadyExpected(a, b) {
     return this.steps.some((step) =>
       step.expectedEdges?.some(
@@ -206,6 +247,11 @@ export class AstarAlgorithm {
     );
   }
 
+  /**
+   * If the given edge matches the current step's expected edges, records it and optionally advances.
+   * @param {[number, number]} edge - [from, to]
+   * @returns {[number, number]} [1, weight] if valid selection, [0, 0] otherwise
+   */
   selectEdge(edge) {
     const step = this.steps[this.currentStepIndex];
     if (!step || !step.expectedEdges) return [0, 0];
@@ -240,30 +286,38 @@ export class AstarAlgorithm {
   }
 }
 
+/**
+ * Min-heap by priority. Used for open set in A*.
+ */
 class MinPriorityQueue {
   constructor() {
     this.values = [];
   }
 
+  /** Adds element with given priority and re-sorts. */
   enqueue(element, priority) {
     this.values.push({ element, priority });
     this.sort();
   }
 
+  /** Removes and returns the element with smallest priority. */
   dequeue() {
     return this.values.shift();
   }
 
+  /** Returns the smallest priority, or Infinity if empty. */
   peekPriority() {
     return this.values.length > 0 ? this.values[0].priority : Infinity;
   }
 
+  /** Returns all elements that have the given priority. */
   getAllWithPriority(priority) {
     return this.values
       .filter((entry) => entry.priority === priority)
       .map((entry) => Number(entry.element));
   }
 
+  /** Removes the first occurrence of the given element. */
   remove(element) {
     this.values = this.values.filter((e) => e.element !== element);
   }

@@ -1,3 +1,7 @@
+/**
+ * A* Algorithm game room: 3D scene, tutorial, and regular play.
+ * Handles graph setup, chest/edge interaction, input dialog for f(n), and UI tables (g/h/f).
+ */
 // ===== Import Section =====
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -26,14 +30,12 @@ import {
   setFont,
   createNodeLabel,
   updateNodeLabel,
-  updateNodeLabelColor,
-  getRandomColor,
   createRing,
 } from "../../utils/graphRelated/drawLine.js";
 import GameRoomUI from "../../utils/UI/gameRoomUI.js";
 import { GameHelper } from "../../utils/gameHelper.js";
 
-// ===== Variable Decleration Section =====
+// ===== Variable Declaration Section =====
 const DEBUG_MODE = false;
 let hintBooleans = {
   edgePressedWhenNodeExpected: false,
@@ -131,87 +133,81 @@ const tutorialSteps = [
   {
     instruction: "Step 0: Click on node 0 to begin.",
     explanation:
-      "Node 0 is the start node. In A*, we compute f(n) = g(n) + h(n). For the start node, g(0) = 0.",
+      "Start node. g(0)=0. With h(n)=0, A* behaves like Dijkstra.",
     expectedChests: [0],
     expectedEdges: null,
-    errorMessage: "Incorrect! Please press on node 0.",
+    errorMessage: "Click node 0.",
   },
   {
-    instruction:
-      "Step 1: Click on edge (0, 2). Type 1 in the input dialog, and press OK.",
-    explanation:
-      "g(2) = g(0) + 1 = 1. We now compute f(2) = g(2) + h(2). Node 2 becomes a candidate in the priority queue.",
+    instruction: "Step 1: Click edge (0,2). Enter 1.",
+    explanation: "g(2)=1. Node 2 enters the open set.",
     expectedChests: null,
     expectedEdges: [[0, 2]],
     updatedDistance: { 2: 1 },
-    errorMessage: "Click the edge (0, 2) to update g(2).",
+    errorMessage: "Click edge (0,2).",
   },
   {
-    instruction:
-      "Step 2: Click on edge (0, 1). Type 2 in the input dialog, and press OK.",
-    explanation:
-      "g(1) = g(0) + 2 = 2. We compute f(1) = g(1) + h(1). Now nodes 1 and 2 are both in the open set.",
+    instruction: "Step 2: Click edge (0,1). Enter 2.",
+    explanation: "g(1)=2. Node 1 enters the open set.",
     expectedChests: null,
     expectedEdges: [[0, 1]],
     updatedDistance: { 1: 2 },
-    errorMessage: "Click the edge (0, 1) to update g(1).",
+    errorMessage: "Click edge (0,1).",
   },
   {
-    instruction:
-      "Step 3: Click on the unvisited node with the smallest f(n): node 2.",
-    explanation:
-      "Between nodes 1 and 2, node 2 has the smallest f(n). A* always expands the node with smallest f value.",
+    instruction: "Step 3: Click node 2 (smallest f).",
+    explanation: "Node 2 has the smallest f (same as g since h=0).",
     expectedChests: [2],
     expectedEdges: null,
-    errorMessage: "Incorrect! Click node 2 — it has the smallest f(n).",
+    errorMessage: "Click node 2.",
   },
   {
-    instruction:
-      "Step 4: Click on edge (2, 3). Type 3 in the input dialog, and press OK.",
-    explanation:
-      "g(3) = g(2) + 2 = 3. We compute f(3) = g(3) + h(3). Node 3 is added to the open set.",
+    instruction: "Step 4: Click edge (2,3). Enter 3.",
+    explanation: "g(3)=g(2)+2=3. Add node 3.",
     expectedChests: null,
     expectedEdges: [[2, 3]],
     updatedDistance: { 3: 3 },
-    errorMessage: "Click (2, 3) to update g(3).",
+    errorMessage: "Click edge (2,3).",
   },
   {
-    instruction:
-      "Step 5: Click on edge (2, 4). Type 7 in the input dialog, and press OK.",
-    explanation:
-      "g(4) = g(2) + 6 = 7. We compute f(4) = g(4) + h(4). Since node 4 is the goal, we track it carefully.",
+    instruction: "Step 5: Click edge (2,4). Enter 4.",
+    explanation: "g(4)=g(2)+3=4. Add goal node 4.",
     expectedChests: null,
     expectedEdges: [[2, 4]],
-    updatedDistance: { 4: 7 },
-    errorMessage: "Click (2, 4) to update g(4).",
+    updatedDistance: { 4: 4 },
+    errorMessage: "Click edge (2,4).",
+  },
+
+  {
+    instruction: "Step 6: Click edge (1,2). Type 2 (no change) and press OK.",
+    explanation:
+      "From node 2, the candidate for node 1 would be 4, but current g(1)=2 is better, so we keep g(1)=2.",
+    expectedChests: null,
+    expectedEdges: [[1, 2]],
+    updatedDistance: { 1: 2 }, // keep same value so your engine doesn't error
+    errorMessage: "Click edge (1,2) and keep g(1)=2."
+  },
+
+  {
+    instruction: "Step 7: Click node 1.",
+    explanation: "Smallest in open set now is node 1 with g(1)=2.",
+    expectedChests: [1],
+    expectedEdges: null,
+    errorMessage: "Click node 1.",
   },
   {
-    instruction:
-      "Step 6: Click on the unvisited node with the smallest f(n): node 3.",
-    explanation:
-      "Among nodes 1, 3, and 4, node 3 has the smallest f(n). So A* expands node 3 next.",
+    instruction: "Step 8: Click node 3.",
+    explanation: "Next smallest is node 3 with g(3)=3.",
     expectedChests: [3],
     expectedEdges: null,
-    errorMessage: "Incorrect! Click node 3 — it has the smallest f(n).",
+    errorMessage: "Click node 3.",
   },
   {
-    instruction:
-      "Step 7: Click on edge (3, 4). Type 4 in the input dialog, and press OK.",
-    explanation:
-      "g(4) = g(3) + 1 = 4. This improves the previous g(4) = 7. We update node 4 with the better path.",
-    expectedChests: null,
-    expectedEdges: [[3, 4]],
-    updatedDistance: { 4: 4 },
-    errorMessage: "Click (3, 4) to update g(4) with the shorter path.",
-  },
-  {
-    instruction:
-      "Step 8: Click on the node with the smallest f(n): node 4 (goal).",
-    explanation:
-      "Node 4 is the goal. Since it has the smallest f(n), A* stops. We have found the optimal path.",
+    instruction: "Step 9: Click node 4 (goal).",
+    explanation: "Next is node 4 with g(4)=4, and it’s the goal. Stop.",
     expectedChests: [4],
     expectedEdges: null,
-    errorMessage: "Click node 4 to complete A* search.",
+    errorMessage: "Click node 4.",
   },
 ];
 
@@ -338,9 +334,7 @@ function updateTutorialStep(isTutorial = true) {
  * 3. Otherwise: updates UI with the next step.
  */
 function nextTutorialStep() {
-  console.log("BEFORE:", curRoomUI.currentTutorialStep);
   const nextStepIndex = ++curRoomUI.currentTutorialStep;
-  console.log("AFTER:", nextStepIndex);
 
   const stepLength = curRoomUI.isTutorial
     ? tutorialSteps.length
@@ -1217,6 +1211,9 @@ function createHoverElements() {
   );
 }
 
+/**
+ * Refreshes the A* table: recomputes h(n) for all nodes and updates f(n) = g(n) + h(n) in the DOM.
+ */
 function refreshHeuristicTable() {
   if (!graph) return;
 
@@ -1338,11 +1335,7 @@ function setUpGameModel(currentLevel) {
     initializeDistanceTable(graph.nodes);
 
     // THEN build algorithm
-    curAlgorithmForGraph = new AstarAlgorithm(
-      graph,
-      graph.startNode,
-      graph.goalNode,
-    );
+    curAlgorithmForGraph = new AstarAlgorithm(graph, graph.startNode);
 
     curRoomUI.currentAlgorithm = "Astar";
   });
@@ -1418,6 +1411,11 @@ function initializeDistanceTable(nodes) {
   );
 }
 
+/**
+ * Computes heuristic h(n) for a node for UI display (uses graph positions and heuristicType).
+ * @param {number} node - Node id
+ * @returns {number}
+ */
 function computeHeuristicUI(node) {
   if (graph.heuristicType === "zero") return 0;
 
@@ -1449,11 +1447,7 @@ function setUpTutorialModel() {
 
   curNodes = graph.nodes;
   graph.heuristicType = "zero";
-  curAlgorithmForGraph = new AstarAlgorithm(
-    graph,
-    graph.startNode,
-    graph.goalNode,
-  );
+  curAlgorithmForGraph = new AstarAlgorithm(graph, graph.startNode);
   curRoomUI.currentAlgorithm = "Astar";
   debugPrint("[setUpTutorialModel] Astar algorithm initialized and set.");
 
@@ -1739,7 +1733,7 @@ document.addEventListener("DOMContentLoaded", () => {
     curRoomUI.currentTutorialStep = 0;
     currentlyHighlightedNodeIndex = null;
 
-    // 3️rebuild game model properly
+    // Rebuild game model with new heuristic
     setUpGameModel(curRoomUI.currentLevel);
   });
 });
