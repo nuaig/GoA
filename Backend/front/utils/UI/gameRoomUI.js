@@ -165,7 +165,7 @@ class GameRoomUI {
     this.regularBtn = document.getElementById("regular-mode-btn");
     // stars for each level
     this.svgStars = document.querySelectorAll(
-      ".level__stars__holder svg.feather-star"
+      ".level__stars__holder .feather-star"
     );
 
     // Algorithm Instruction Modal

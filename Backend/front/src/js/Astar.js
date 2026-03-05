@@ -16,12 +16,7 @@ import { AstarAlgorithm } from "./../../utils/graphRelated/Astar.js";
 import { GameSession } from "../../utils/gameRelated/gameSession.js";
 import { loadModel } from "../../utils/threeModels.js";
 import { GameStatusService } from "../../utils/gameStatus/gameStatusService.js";
-import {
-  decrementHealth,
-  resetHealth,
-  resetStars,
-  updateHintIcons,
-} from "../../utils/UI/ui.js";
+import { resetHealth, resetStars } from "../../utils/UI/ui.js";
 import { shakeScreen } from "../../utils/UI/animations.js";
 import {
   drawLine,
@@ -54,7 +49,6 @@ let curNodes;
 let curEdges;
 let graph;
 let clickBlockedUntil = 0;
-let correctActionScoreAddition;
 let currentlyHighlightedNodeIndex;
 // Define max score per level
 const levelMaxScores = {
@@ -132,8 +126,7 @@ const clock = new THREE.Clock();
 const tutorialSteps = [
   {
     instruction: "Step 0: Click on node 0 to begin.",
-    explanation:
-      "Start node. g(0)=0. With h(n)=0, A* behaves like Dijkstra.",
+    explanation: "Start node. g(0)=0. With h(n)=0, A* behaves like Dijkstra.",
     expectedChests: [0],
     expectedEdges: null,
     errorMessage: "Click node 0.",
@@ -185,7 +178,7 @@ const tutorialSteps = [
     expectedChests: null,
     expectedEdges: [[1, 2]],
     updatedDistance: { 1: 2 }, // keep same value so your engine doesn't error
-    errorMessage: "Click edge (1,2) and keep g(1)=2."
+    errorMessage: "Click edge (1,2) and keep g(1)=2.",
   },
 
   {
@@ -1518,9 +1511,7 @@ function closeInputDialog() {
         const gCell = document.getElementById(`g-${node}`);
         if (gCell) {
           gCell.textContent = correctValue;
-          debugPrint(
-            `[closeInputDialog] Updated g(n) cell for node ${node}`,
-          );
+          debugPrint(`[closeInputDialog] Updated g(n) cell for node ${node}`);
         }
         const hVal = computeHeuristicUI(Number(node));
         const hCell = document.getElementById(`h-${node}`);
@@ -1601,8 +1592,6 @@ function closeInputDialog() {
       Math.abs(inputF - Number(selected.newF)) < 0.001
     ) {
       debugPrint("[closeInputDialog] Correct weight entered:", inputF);
-
-      
 
       if (curRoomUI.uiText.innerText !== "Visit a new node!") {
         curRoomUI.uiText.innerText = "Correct!";
