@@ -123,7 +123,7 @@ export class AstarAlgorithm {
 
       if (this.visited.has(currentNode)) continue;
 
-      // 🎯 Stop early if goal reached
+      // Stop early if goal reached
       if (Number(currentNode) === Number(this.goalNode)) {
         this.steps.push({
           expectedChests: [Number(currentNode)],

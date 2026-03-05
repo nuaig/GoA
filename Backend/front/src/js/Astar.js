@@ -1519,12 +1519,23 @@ function closeInputDialog() {
         debugPrint(`[closeInputDialog] Correct input received: ${inputValue}`);
         isCorrect = true;
 
-        const cell = document.getElementById(`distance-${node}`);
-        if (cell) {
-          cell.textContent = correctValue;
+        // A* table has g(n), h(n), f(n) columns with ids g-{node}, h-{node}, f-{node}
+        const gVal = Number(correctValue);
+        const gCell = document.getElementById(`g-${node}`);
+        if (gCell) {
+          gCell.textContent = correctValue;
           debugPrint(
-            `[closeInputDialog] Updated distance cell for node ${node}`,
+            `[closeInputDialog] Updated g(n) cell for node ${node}`,
           );
+        }
+        const hVal = computeHeuristicUI(Number(node));
+        const hCell = document.getElementById(`h-${node}`);
+        if (hCell) {
+          hCell.textContent = hVal.toFixed(2);
+        }
+        const fCell = document.getElementById(`f-${node}`);
+        if (fCell) {
+          fCell.textContent = (gVal + hVal).toFixed(2);
         }
 
         if (selectedEdge) {
