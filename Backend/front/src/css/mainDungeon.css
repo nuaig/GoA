@@ -29,9 +29,10 @@ body {
   height: 60px;
   display: flex;
   align-items: center;
-  /* justify-content: center; */
-  gap: 10px;
+  gap: 0.3vw;
   padding-left: 7px;
+  max-width: 90%;
+  /* background-color: purple; */
 }
 
 /* Panel to describe the navigation/movement controls */
@@ -39,9 +40,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 16px;
-  gap: 20px;
+  padding: 0.5vw;
+  gap: 0.5vw;
+  max-width: 90%;
 }
+
 
 /* ESC key icon */
 .esc-key {
@@ -50,17 +53,17 @@ body {
   padding: 8px 12px;
   color: var(--color-panel-text-highlight);
   font-weight: bold;
-  font-size: 1.0rem;
+  font-size: 1vw;
   white-space: nowrap;
 }
 
 .panel-text {
   display: flex;
-  max-width: 80%;
+  max-width: 100%;
   align-items: center;
   flex-direction: row;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 1vw;
   font-weight: bold;
   color: var(--color-panel-dark);
 }
@@ -72,9 +75,13 @@ body {
   justify-content: center;
   text-align: center;
   gap: 10px;
-  font-size: 1.3rem;
+  font-size: 1.2vw;
   font-weight: bold;
   color: var(--color-panel-dark);
+}
+
+#click-mode {
+  color: red;
 }
 
 /* visual for a panel in the control panel layout */
@@ -84,20 +91,22 @@ body {
   background-color: var(--color-move-panel);  
   border-radius: 18px;
   display: hidden;
+  max-width: 90%;
 }
 
 .wasd-section, .camera-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    max-width: 90%;
+    gap: 1vw;
   }
 
 .wasd-grid {
     display: grid;
-    grid-template-columns: repeat(3, 48px);
-    grid-template-rows: repeat(2, 48px);
-    gap: 6px;
+    grid-template-columns: repeat(3, 3vw);
+    grid-template-rows: repeat(2, 3vw);
+    gap: 0.3vw;
   }
 
 .key {
@@ -107,10 +116,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.2vw;
     font-weight: bold;
-    width: 48px;
-    height: 48px;
+    width: 3vw;
+    height: 3vw;
   }
 
 
@@ -555,28 +564,36 @@ button:active {
 
 /* Each symbol is manually positioned onto the screen over the map*/
 .heapsort-symbol {
-  top: 5.7em;
-  left: 10.5em;
+  top: 112px;
+  left: 203px;
+  /* top: 5.7em;
+  left: 10.5em; */
 }
 
 .kruskal-symbol {
-  top: 5.7em;
-  left: 3.6em;
+  top: 112px;
+  left: 70px;
+  /* top: 8.5vh;
+  left: 5vw; */
 }
 
 .Dijkstra-symbol {
-  top: 8.5em;
-  left: 3.6em;
+  top: 165px;
+  left: 70px;
+  /* top: 13.5vh;
+  left: 5vw; */
 }
 
 .prim-symbol {
-  top: 7.1em;
-  left: 1.6em;
+  top: 138px;
+  left: 30px;
+  /* top: 7.1em;
+  left: 1.6em; */
 }
 
 .treasure-symbol {
   top: 56px;
-  left: 135px;
+  left: 132px;
 }
 
 .firework.active {
