@@ -172,14 +172,13 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.5vw;
+  /* padding: 0.5vw; */
   max-width: 95%;
-  padding: 1.5vw;
+  /* padding: 1.5vw; */
 }
 
-.click-icon {
-  font-size: 2.5vw;
-  line-height: 1;
+.click-icon img {
+  width: 4vw;
 }
 
 /* outer container for top right icons */
