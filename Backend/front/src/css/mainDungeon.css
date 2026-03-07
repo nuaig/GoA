@@ -130,10 +130,14 @@ body {
   .key-d { grid-column: 3; grid-row: 2; }
 
   .move-section label, .camera-section label {
-    font-size: 1rem;
+    font-size: 1.1vw;
     font-weight: bold;
     text-align: center;
     color: var(--color-panel-dark);
+  }
+
+  .move-section {
+    text-align: center;
   }
 
   .cursor-icon {
