@@ -73,6 +73,34 @@ export class Player {
 
     document.addEventListener("keyup", this.onKeyUp.bind(this));
     document.addEventListener("keydown", this.onKeyDown.bind(this));
+
+    //camera locks and player enters click mode
+    this.controls.addEventListener('unlock', () => {
+      document.querySelectorAll(".panel").forEach(panel => {
+        console.log('lock');
+        panel.classList.add('yellow-panel')
+        panel.classList.remove('green-panel');
+      });
+      let textClick = document.getElementById("click-mode");
+      textClick.classList.add('highlight-text');
+      let textMove = document.getElementById("move-mode");
+      textMove.classList.remove('highlight-text');
+
+    });
+
+    //camera unlock and player enters move mode
+    this.controls.addEventListener('lock', () => {
+      document.querySelectorAll(".panel").forEach(panel => {
+        console.log('unlock');
+        panel.classList.add('green-panel')
+        panel.classList.remove('yellow-panel');
+      });
+      let textClick = document.getElementById("click-mode");
+      textClick.classList.remove('highlight-text');
+      let textMove = document.getElementById("move-mode");
+      textMove.classList.add('highlight-text');
+    });
+
   }
 
   update(dt) {
@@ -182,17 +210,21 @@ export class Player {
     return this.camera.position;
   }
 
+
   onKeyUp(event) {
     switch (event.code) {
       case "Escape":
         if (event.repeat) break;
-        if (this.controls.isLocked) {
-          console.log("unlocking controls");
-          this.controls.unlock();
-        } else {
-          console.log("locking controls");
+        if(!this.controls.isLocked){
           this.controls.lock();
         }
+        // if (this.controls.isLocked) {
+        //   console.log("unlocking controls");
+        //   this.controls.unlock();
+        // } else {
+        //   console.log("locking controls");
+        //   this.controls.lock();
+        // }
         break;
       case "KeyW":
         this.input.z = 0;
