@@ -12,7 +12,10 @@ import { gsap } from "gsap";
 const mapBackgroundColor = "#95bcf6"
 //Size for minimap
 const cameraSize = 150
-const mapSize = window.innerWidth * 0.16; //size of the overall minimap on the screen
+//const mapSize = window.innerWidth * 0.16; //size of the overall minimap on the screen
+const viewportWidthPx = document.documentElement.clientWidth;
+//const mapSize = (viewportWidthPx * 0.2); //in px for javascript
+const mapSize = 250;
 
 function hideLoadingScreen() {
   const loadingScreen = document.getElementById("loading-screen");
