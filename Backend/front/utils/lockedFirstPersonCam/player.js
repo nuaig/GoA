@@ -86,6 +86,10 @@ export class Player {
       let textMove = document.getElementById("move-mode");
       textMove.classList.remove('highlight-text');
 
+      let panelMove = document.querySelector(".control-panel-move");
+      panelMove.style.display = "none";
+      let panelClick = document.querySelector(".control-panel-click");
+      panelClick.style.display = "flex";
     });
 
     //camera unlock and player enters move mode
@@ -99,6 +103,12 @@ export class Player {
       textClick.classList.remove('highlight-text');
       let textMove = document.getElementById("move-mode");
       textMove.classList.add('highlight-text');
+
+      let panelClick = document.querySelector(".control-panel-click");
+      panelClick.style.display = "none";
+      let panelMove = document.querySelector(".control-panel-move");
+      panelMove.style.display = "flex";
+
     });
 
   }
