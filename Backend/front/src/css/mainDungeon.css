@@ -219,9 +219,9 @@ body {
   cursor: pointer;
   border-radius: 20px;
   font-weight: normal;
-  font-size: 0.9vw;
+  font-size: 1vw;
   padding: 0.5vw 1.1vw;
-  border: 2px solid var(--color-text-light);
+  border: 1.7px solid var(--color-text-light);
 }
 
 .main-dungeon-btn:hover {
