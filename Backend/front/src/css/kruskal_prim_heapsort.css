@@ -23,7 +23,12 @@
       --color-psuedo-highlight: ##ffe25b;
       --color-hover-orange: #ffcb5b;
       --color-hover-blue: #1766e4;
-}
+      /* Colors for buttons */
+      --color-btn: #393eda;
+      --color-text-dark: #373737;
+      --color-text-light: #e3f4ff;
+      --color-btn-highlight: #637bdb;
+    }
 
 body {
   margin: 0;
@@ -47,6 +52,18 @@ body {
   overflow: hidden;
   /* display: hidden; */
 }
+
+.room-btn {
+  background-color: var(--color-btn);
+  color: var(--color-text-light);
+  cursor: pointer;
+  border-radius: 20px;
+  font-weight: normal;
+  font-size: 1vw;
+  padding: 0.5vw 1.1vw;
+  border: 1.7px solid var(--color-text-light);
+}
+
 
 .tutorial-instructions-modal {
   font-style: monospace;
