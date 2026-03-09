@@ -64,6 +64,10 @@ body {
   border: 1.7px solid var(--color-text-light);
 }
 
+.room-btn:hover {
+  background-color: var(--color-btn-highlight);
+}
+
 
 .tutorial-instructions-modal {
   font-style: monospace;
