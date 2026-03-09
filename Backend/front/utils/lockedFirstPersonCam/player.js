@@ -6,7 +6,7 @@ const CENTER_SCREEN = new THREE.Vector2();
 const uiTextHolder = document.querySelector(".UI-Text");
 const roomEnterText = "Click to enter this room!";
 let generalText =
-  "Brave adventurer! Solve the Algorithmic riddles in each room to gather clues and unlock the gate to the treasure!";
+  "Welcome, adventurer! Complete the puzzle in each room to unlock the treasure!";
 const lockedDoorText = "This door is locked. Please try another door.";
 const treasureDoorLockedText =
   "Conquer and master all rooms to ignite every symbol above the door, for only then will the door to the treasure finally unlock.";
