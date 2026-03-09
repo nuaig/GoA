@@ -58,7 +58,7 @@ body {
   color: var(--color-text-light);
   cursor: pointer;
   border-radius: 20px;
-  font-weight: normal;
+  font-weight: 300;
   font-size: 1vw;
   padding: 0.5vw 1.1vw;
   border: 1.7px solid var(--color-text-light);
@@ -361,44 +361,47 @@ body {
 
 /* Container for chat open button */
 .chat-open-button-container {
+  position:absolute;
   display:flex;
   z-index: 60;
-  position: absolute;
-  right: 9%;
-  bottom: 11%;
+  bottom: 3.5vh;
+  right: 1vw;
+  max-width: 20vw;
+
   pointer-events: none;
   visibility: visible;
 }
 
-/* Styling for question mark button*/
+/* Help menu button styling*/
 .button-question-mark {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  padding: 0.7vw 2.1vw;
+  text-align: center;
   font-family: var(--font-button);
-  font-size: 50px;
-
-  color: black;
-  width: 100px;
-  height: 80px;
-  border-radius: 15px;
-  background-color: white;
+  font-size: 20px;
+  border-radius: 30px;
+  background-color: var(--color-btn);
+  font-weight: 400;
+  color: var(--color-text-light);
+  border: 2px solid var(--color-text-light);
   cursor: pointer;
   pointer-events: auto;
 }
 
+
 /* Hover effect to expand button*/
 .button-question-mark:hover {
-  width: 150px;
+  background-color: var(--color-btn-highlight);
   
 }
+
+/* Text displayed on hover --- remove later
 .button-question-mark:hover:after {
-  content: "Click for help"; /* Text displayed on hover */
+  content: "Click for help"; 
   color: black;
   position: absolute;
   font-size: 22px;
 }
+*/
 
 /* Styling for opened chat container */
 .chat-container {
