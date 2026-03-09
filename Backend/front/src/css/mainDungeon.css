@@ -1,10 +1,18 @@
 :root{
+  /* Colors for navigation/control instruction panel */
   --color-move-panel: #92EA6E;
   --color-click-panel: #95BCF6;
   --color-panel-text-highlight: #FFF5C6;
   --color-panel-dark: #373737;
   --color-highlight: #EAD16F;
 
+  /* Colors for buttons */
+  /* --color-btn: #95BCF6; */
+  --color-btn: #393eda;
+  --color-text-dark: #373737;
+  --color-text-light: #e3f4ff;
+  --color-text-highlight: orange;
+  --color-btn-highlight: #637bdb;
 }
 
 body {
@@ -202,6 +210,22 @@ body {
   width: 75px;
   height: 75px;
   cursor: pointer;
+}
+
+/* Styling for buttons in main dungeon */
+.main-dungeon-btn {
+  background-color: var(--color-btn);
+  color: var(--color-text-light);
+  cursor: pointer;
+  border-radius: 20px;
+  font-weight: normal;
+  font-size: 0.9vw;
+  padding: 0.5vw 1.1vw;
+  border: 2px solid var(--color-text-light);
+}
+
+.main-dungeon-btn:hover {
+  background-color: var(--color-btn-highlight);
 }
 
 /* MODAL WINDOW */
