@@ -32,6 +32,7 @@ import {
   isTriangleInequalitySatisfied,
   setFont,
   createNodeLabel,
+  createLabelSolidCircle,
   updateNodeLabel,
   updateNodeLabelColor,
   getRandomColor,
@@ -114,6 +115,8 @@ const dungeonRoomURL = new URL(
 let chestList = [];
 let openChestList = [];
 let chestLabelList = [];
+let chestLabelBackgroundList = []; //chest label background circles
+let edgeLabelBackgroundList = []; // edge label background circles
 let edgeList = [];
 let edgeLabelList = [];
 let ringList = [];
@@ -125,6 +128,9 @@ const gridSize = 40;
 let labels = [];
 let dungeonRoomMixer;
 let dungeonRoomAction;
+
+const labelChestColor = 0x242a3b; //Color for chest label background circle
+const labelChesteSize = 1; //Size for chest label background circle
 
 const startPosition = { x: 0, y: 5, z: 35 };
 const midPosition = { x: 0, y: 5, z: 26 };
@@ -336,6 +342,7 @@ reArrangeButton.addEventListener("click", () => {
     chestList[i].position.copy(position);
     openChestList[i].position.copy(position);
     chestLabelList[i].position.copy(position.clone().setY(position.y + 2.5));
+    chestLabelBackgroundList[i].position.copy(position.clone().setY(position.y + 2.4));
   }
 
   console.log(edgeList[0].userData.startCube);
@@ -442,6 +449,9 @@ async function createModels() {
 
     const chestLabel = createNodeLabel(`${i}`, labelPosition, scene);
     chestLabelList.push(chestLabel);
+
+    const chestLabelBackground = createLabelSolidCircle(labelPosition, labelChesteSize, labelChestColor, scene);
+    chestLabelBackgroundList.push(chestLabelBackground);
   }
 
   if (curRoomUI.currentAlgorithm === "Prim") {
@@ -696,6 +706,7 @@ function handleEdgeSelection(
 }
 
 let raycaster;
+// Draws lines between chests with number labels and background circles
 function drawLines() {
   console.log("Drawing lines between chests.");
   console.log("Graph edges:", graph.edges);
@@ -713,6 +724,8 @@ function drawLines() {
     lines.push(line);
     edgeList.push(line);
     edgeLabelList.push(line.userData.label);
+     edgeLabelBackgroundList.push(line.userData.labelBackground);
+
   });
 
   curRoomUI.disableMouseEventListeners_K_P();
@@ -873,11 +886,18 @@ function animate() {
 }
 animate();
 
+// Update number label rotation to always face the camera
 function updateLabelRotation() {
   chestLabelList.forEach((label) => {
     label.lookAt(camera.position);
   });
+  chestLabelBackgroundList.forEach((label) => {
+    label.lookAt(camera.position);
+  });
   edgeLabelList.forEach((label) => {
+    label.lookAt(camera.position);
+  });
+  edgeLabelBackgroundList.forEach((label) => {
     label.lookAt(camera.position);
   });
   ringList.forEach((label) => {
@@ -964,10 +984,20 @@ function resetScene() {
     if (label.geometry) label.geometry.dispose();
     if (label.material) label.material.dispose();
   });
+  edgeLabelBackgroundList.forEach((label) => {
+    scene.remove(label);
+    if (label.geometry) label.geometry.dispose();
+    if (label.material) label.material.dispose();
+  });
   ringList.forEach((ring) => {
     scene.remove(ring);
     if (ring.geometry) ring.geometry.dispose();
     if (ring.material) ring.material.dispose();
+  });
+  chestLabelBackgroundList.forEach((label) => {
+    scene.remove(label);
+    if (label.geometry) label.geometry.dispose();
+    if (label.material) label.material.dispose();
   });
 
   // Reset arrays and variables
@@ -976,7 +1006,9 @@ function resetScene() {
   chestLabelList.length = 0;
   edgeList.length = 0;
   edgeLabelList.length = 0;
+  edgeLabelBackgroundList.length = 0;
   ringList.length = 0;
+  chestLabelBackgroundList.length = 0;
 
   // Clear raycaster references
   curRoomUI.disableMouseEventListeners_K_P();
