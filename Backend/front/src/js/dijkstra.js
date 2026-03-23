@@ -119,6 +119,8 @@ let dungeonRoomMixer;
 
 const labelChestColor = 0x242a3b; //Color for chest label background circle
 const labelChesteSize = 1; //Size for chest label background circle
+const ringInner = 0.9;
+const ringOuter = 1.1;
 
 const startPosition = { x: 0, y: 5, z: 35 };
 camera.position.set(startPosition.x, startPosition.y, startPosition.z);
@@ -132,7 +134,7 @@ const fontLoader = new FontLoader();
 let font;
 let levelTitle;
 const labelDepth = 0.1;
-let hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
+let hoverRing = createRing(ringInner, ringOuter, labelDepth, 0x000000);
 scene.add(hoverRing);
 let raycaster;
 const clock = new THREE.Clock();
@@ -1239,7 +1241,7 @@ function createHoverElements() {
   );
 
   // Create black ring for label highlights
-  hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
+  hoverRing = createRing(ringInner, ringOuter, labelDepth, 0x000000);
   hoverRing.visible = false;
   scene.add(hoverRing);
   debugPrint(
