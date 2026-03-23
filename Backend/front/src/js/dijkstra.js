@@ -24,6 +24,7 @@ import {
   isTriangleInequalitySatisfied,
   setFont,
   createNodeLabel,
+  createLabelSolidCircle,
   updateNodeLabel,
   updateNodeLabelColor,
   getRandomColor,
@@ -102,6 +103,8 @@ let chestList = [];
 let openChestList = [];
 let selectedEdgesThisStep = [];
 let chestLabelList = [];
+let chestLabelBackgroundList = []; //chest label background circles
+let edgeLabelBackgroundList = []; // edge label background circles
 let edgeList = [];
 let edgeLabelList = [];
 let ringList = [];
@@ -113,6 +116,10 @@ const gridSize = 40;
 let labels = [];
 let dungeonRoomAction;
 let dungeonRoomMixer;
+
+const labelChestColor = 0x242a3b; //Color for chest label background circle
+const labelChesteSize = 1; //Size for chest label background circle
+
 const startPosition = { x: 0, y: 5, z: 35 };
 camera.position.set(startPosition.x, startPosition.y, startPosition.z);
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -499,6 +506,9 @@ async function createModels() {
     const chestLabel = createNodeLabel(`${i}`, labelPosition, scene);
     chestLabelList.push(chestLabel);
     debugPrint(`[createModels] Label created for node ${i}.`);
+    
+    const chestLabelBackground = createLabelSolidCircle(labelPosition, labelChesteSize, labelChestColor, scene);
+    chestLabelBackgroundList.push(chestLabelBackground);
   }
 
   debugPrint("All models loaded. Final chestList:", chestList);
@@ -556,6 +566,7 @@ function drawLines() {
     lines.push(line);
     edgeList.push(line);
     edgeLabelList.push(line.userData.label);
+    edgeLabelBackgroundList.push(line.userData.labelBackground);
   });
 
   curRoomUI.disableMouseEventListeners_K_P();
@@ -626,7 +637,7 @@ function drawLines() {
 
       if (selectedLine !== intersectedObject) {
         if (selectedLine && !selectedLine.userData.selected) {
-          selectedLine.material.color.set(0x74c0fc);
+          selectedLine.material.color.set(0x74e2fc);
           hoverRing.visible = false;
         }
         selectedLine = intersectedObject;
@@ -644,7 +655,7 @@ function drawLines() {
       hoverRing.visible = false;
 
       if (selectedLine && !selectedLine.userData.selected) {
-        selectedLine.material.color.set(0x74c0fc);
+        selectedLine.material.color.set(0x74e2fc);
         hoverRing.visible = false;
       }
       selectedLine = null;
@@ -1027,11 +1038,15 @@ function updateLabelRotation() {
   chestLabelList.forEach((label, i) => {
     label.lookAt(camera.position);
   });
-
+  chestLabelBackgroundList.forEach((label) => {
+    label.lookAt(camera.position);
+  });
   edgeLabelList.forEach((label, i) => {
     label.lookAt(camera.position);
   });
-
+  edgeLabelBackgroundList.forEach((label) => {
+    label.lookAt(camera.position);
+  });
   ringList.forEach((label, i) => {
     label.lookAt(camera.position);
   });
@@ -1139,12 +1154,24 @@ function resetScene() {
     debugPrint(`[resetScene] Removed edge label ${i}`);
   });
 
+  edgeLabelBackgroundList.forEach((label) => {
+    scene.remove(label);
+    if (label.geometry) label.geometry.dispose();
+    if (label.material) label.material.dispose();
+  });
+
   // Remove and dispose selection rings
   ringList.forEach((ring, i) => {
     scene.remove(ring);
     if (ring.geometry) ring.geometry.dispose();
     if (ring.material) ring.material.dispose();
     debugPrint(`[resetScene] Removed selection ring ${i}`);
+  });
+
+  chestLabelBackgroundList.forEach((label) => {
+    scene.remove(label);
+    if (label.geometry) label.geometry.dispose();
+    if (label.material) label.material.dispose();
   });
 
   // Clear arrays
@@ -1154,6 +1181,8 @@ function resetScene() {
   edgeList.length = 0;
   edgeLabelList.length = 0;
   ringList.length = 0;
+  edgeLabelBackgroundList.length = 0;
+  chestLabelBackgroundList.length = 0;
   debugPrint("[resetScene] Cleared all model and label lists.");
 
   // Disable interaction handlers
@@ -1658,6 +1687,7 @@ reArrangeButton.addEventListener("click", () => {
     chestList[i].position.copy(position);
     openChestList[i].position.copy(position);
     chestLabelList[i].position.copy(position.clone().setY(position.y + 2.5));
+    chestLabelBackgroundList[i].position.copy(position.clone().setY(position.y + 2.4));
   }
 
   debugPrint(edgeList[0].userData.startCube);
