@@ -186,6 +186,26 @@ class GameRoomUI {
 
     //Chat Replay Tutorial Button
     this.btnChatTutorial = document.getElementById("button-home-tutorial");
+    //Helper chat UI elements
+    this.chatOpenButton = document.querySelector(".chat-open-button");
+    this.chatCloseButton = document.querySelector(".chat-close-button");
+    this.chatHomeButton = document.getElementById("chat-home-button");
+    this.contextDiagramButton = document.getElementById("context-diagram-button");
+    this.psudeoCloseButton = document.querySelector(".button-close-pseudo");
+    this.chatMainAlgoButton = document.getElementById("button-home-main-algo")
+    this.chatAlgoContextButton = document.getElementById("button-algo-context");
+    this.chatAlgoCycleButton = document.getElementById("button-algo-cycle");
+    this.chatAlgoStepsButton = document.getElementById("button-algo-step");
+    this.chatAlgoKruskalButton = document.getElementById("button-algo-kruskal");
+
+    this.currChatPage = document.querySelector(".page-home"); //default to home page
+    this.prevChatPage = document.querySelector(".page-home"); //default to home page
+
+    this.contextImg = document.querySelector(".step1 img");
+    this.stepImg = document.querySelector(".step4 img");
+    this.step2Img = document.querySelector(".step2 img");
+    this.step3Img = document.querySelector(".step3 img");
+    this.closeModalButton = document.querySelector(".btn-algo-instruction-single-close");
 
     this.openModal(this.tutorialModal);
   }
@@ -211,6 +231,9 @@ class GameRoomUI {
     this.addAllEventListenersAlgoInstructionModal();
     // -------Algorithm Instruction Single Modal----
     this.addAllEventListenersAlgoInstructionSingleModal();
+
+    // -------Helper Chat----------
+    this.addAllEventListenersHelperChat();
   }
 
   resetAllComponents() {}
@@ -610,7 +633,7 @@ class GameRoomUI {
     this.listenEventHelpButtonInstructionModalOpen();
     this.listenEventGameFeatureInstrModal();
     this.listenEventAlgorithmInstrModal();
-    this.listenEventChatButtons();
+    // this.listenEventChatButtons();
   }
 
   showGameFeatureInstructionModalIfNeeded() {
@@ -681,7 +704,43 @@ class GameRoomUI {
     });
    
   }
+
+  addAllEventListenersHelperChat() {
+    this.listenEventChatOpen();
+    this.listenEventChatClose();
+    this.listenEventChatButtons();
+  }
   
+  //Listens to helper chat button being clicked
+  listenEventChatOpen() {
+    // Open chat box when question mark button is clicked
+    this.chatOpenButton.addEventListener("click", () => {
+      console.log("Open Chat Button Clicked");
+      var chatContainer = document.querySelector(".chat-container");
+      chatContainer.style.visibility = 'visible';
+      this.currChatPage.style.visibility = 'visible';
+      
+      var openButton = document.querySelector(".chat-open-button-container");
+      openButton.style.visibility = 'hidden';
+    });
+  }
+
+  //Listens or close button in helper chat being clicked
+  listenEventChatClose() {
+    // Close chat box when close button is clicked
+    this.chatCloseButton.addEventListener("click", () => {
+      console.log("Close Chat Button Clicked");
+
+      var chatContainer = document.querySelector(".chat-container");
+      chatContainer.style.visibility = 'hidden';
+      this.currChatPage.style.visibility = 'hidden';
+      this.prevChatPage.style.visibility = 'hidden';
+
+      var openButton = document.querySelector(".chat-open-button-container");
+      openButton.style.visibility = 'visible';
+    });
+  }
+
   //Listens to buttons being clicked in the chatbox
   listenEventChatButtons() {
     const contextDiagramBtn = document.querySelector("#context-diagram-button");
@@ -690,21 +749,7 @@ class GameRoomUI {
     const algoCycleBtn = document.querySelector("#button-algo-cycle");
     const algoKruskalBtn = document.querySelector("#button-algo-kruskal");
     const pseudoBtn = document.querySelector("#button-home-pseudo");
-
-    // const tutorialBtn = document.getElementById("#button-home-tutorial");
-
-
-    // // Listens to click of context diagram button
-    // contextDiagramBtn.addEventListener("click", () => {
-    //   console.log("Diagram button observed in gameRoomUI.js");
-    //   this.openModal(this.instructionModal);
-    //   this.levelModalOpen = false;
-    //   document.querySelector(".btn__instruction__start").textContent =
-    //     "Close Instruction";
-    //   let subMenu = document.getElementById("subMenu");
-
-    //   subMenu.classList.toggle("open-menu");
-    // });
+    
 
     //Listens to click of algorithm context button in chatbox
     algoContextBtn.addEventListener("click", () => {
@@ -737,14 +782,64 @@ class GameRoomUI {
       pseudoModal.classList.toggle("hidden");
     });
 
-    // tutorialBtn.addEventListener("click", () => {
-    //   this.revertTutorialCompleteModalToBeTutorialModal();
-    //   this.openModal(this.tutorialModal);
-    // });
     this.btnChatTutorial.addEventListener("click", () => {
       // this.closeModal(this.settingsModal);
       this.revertTutorialCompleteModalToBeTutorialModal();
       this.openModal(this.tutorialModal);
+    });
+    
+    //Home button in chat
+    this.chatHomeButton.addEventListener("click", () => {
+      console.log("Chat Home Button Clicked");
+      this.prevChatPage = this.currChatPage; //store previous page
+      this.prevChatPage.style.visibility = 'hidden';
+      this.currChatPage = document.querySelector(".page-home");
+      this.currChatPage.style.visibility = 'visible';
+    });
+
+    
+    this.chatMainAlgoButton.addEventListener("click", () => {
+      console.log("Chat Main Algo Page Button clicked");
+
+      this.prevChatPage = document.querySelector(".page-home");
+      this.currChatPage = document.querySelector(".page-main-algo");
+
+      this.prevChatPage.style.visibility = 'hidden';
+      this.currChatPage.style.visibility = 'visible';
+    });
+
+    this.chatAlgoContextButton.addEventListener("click", () => {
+      console.log("Set Single Modal to Context Image");
+      this.contextImg.style.visibility = 'visible';
+    });
+
+    this.chatAlgoCycleButton.addEventListener("click", () => {
+      console.log("Set Single Modal to Cycle Image");
+      this.step3Img.style.visibility = 'visible';
+    });
+
+    this.chatAlgoStepsButton.addEventListener("click", () => {
+      console.log("Set Single Modal to Steps Image");
+      this.stepImg.style.visibility = 'visible';
+    });
+
+    this.chatAlgoKruskalButton.addEventListener("click", () => {
+      console.log("Set Single Modal to Kruskal Image");
+      this.stepImg.style.visibility = 'visible';
+    });
+
+    this.closeModalButton.addEventListener("click", () => {
+      this.step2Img.style.visibility = 'hidden';
+      this.stepImg.style.visibility = 'hidden';
+      this.contextImg.style.visibility = 'hidden';
+      this.step3Img.style.visibility = 'hidden'; 
+    });
+
+    // Click the X button to close the pseudo code modal
+    this.psudeoCloseButton.addEventListener("click", () => {
+      console.log("Pseudocode close button Clicked");
+      const pseudoModal = document.querySelector(".pseudo");
+      pseudoModal.classList.toggle("hidden");
     });
 
   }

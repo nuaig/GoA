@@ -39,25 +39,25 @@ import {
 import GameRoomUI from "../../utils/UI/gameRoomUI.js";
 
 const reArrangeButton = document.querySelector(".Rearrange-Action");
-const chatOpenButton = document.querySelector(".chat-open-button");
-const chatCloseButton = document.querySelector(".chat-close-button");
-const chatHomeButton = document.getElementById("chat-home-button");
-const contextDiagramButton = document.getElementById("context-diagram-button");
-const psudeoCloseButton = document.querySelector(".button-close-pseudo");
-const chatMainAlgoButton = document.getElementById("button-home-main-algo")
-const chatAlgoContextButton = document.getElementById("button-algo-context");
-const chatAlgoCycleButton = document.getElementById("button-algo-cycle");
-const chatAlgoStepsButton = document.getElementById("button-algo-step");
-const chatAlgoKruskalButton = document.getElementById("button-algo-kruskal");
+// const chatOpenButton = document.querySelector(".chat-open-button");
+// const chatCloseButton = document.querySelector(".chat-close-button");
+// const chatHomeButton = document.getElementById("chat-home-button");
+// const contextDiagramButton = document.getElementById("context-diagram-button");
+// const psudeoCloseButton = document.querySelector(".button-close-pseudo");
+// const chatMainAlgoButton = document.getElementById("button-home-main-algo")
+// const chatAlgoContextButton = document.getElementById("button-algo-context");
+// const chatAlgoCycleButton = document.getElementById("button-algo-cycle");
+// const chatAlgoStepsButton = document.getElementById("button-algo-step");
+// const chatAlgoKruskalButton = document.getElementById("button-algo-kruskal");
 
-let currChatPage = document.querySelector(".page-home"); //default to home page
-let prevChatPage = document.querySelector(".page-home"); //default to home page
+// let currChatPage = document.querySelector(".page-home"); //default to home page
+// let prevChatPage = document.querySelector(".page-home"); //default to home page
 
-const contextImg = document.querySelector(".step1 img");
-const stepImg = document.querySelector(".step4 img");
-const step2Img = document.querySelector(".step2 img");
-const step3Img = document.querySelector(".step3 img");
-const closeModalButton = document.querySelector(".btn-algo-instruction-single-close");
+// const contextImg = document.querySelector(".step1 img");
+// const stepImg = document.querySelector(".step4 img");
+// const step2Img = document.querySelector(".step2 img");
+// const step3Img = document.querySelector(".step3 img");
+// const closeModalButton = document.querySelector(".btn-algo-instruction-single-close");
 
 let curGameSession;
 let currentLevel = 1; // TO DO
@@ -368,83 +368,83 @@ reArrangeButton.addEventListener("click", () => {
   });
 });
 
-// Open chat box when question mark button is clicked
-chatOpenButton.addEventListener("click", () => {
-  console.log("Open Chat Button Clicked");
-  var chatContainer = document.querySelector(".chat-container");
-  chatContainer.style.visibility = 'visible';
-  currChatPage.style.visibility = 'visible';
+// // Open chat box when question mark button is clicked
+// chatOpenButton.addEventListener("click", () => {
+//   console.log("Open Chat Button Clicked");
+//   var chatContainer = document.querySelector(".chat-container");
+//   chatContainer.style.visibility = 'visible';
+//   currChatPage.style.visibility = 'visible';
   
-  var openButton = document.querySelector(".chat-open-button-container");
-  openButton.style.visibility = 'hidden';
-});
+//   var openButton = document.querySelector(".chat-open-button-container");
+//   openButton.style.visibility = 'hidden';
+// });
 
-// Close chat box when close button is clicked
-chatCloseButton.addEventListener("click", () => {
-  console.log("Close Chat Button Clicked");
+// // Close chat box when close button is clicked
+// chatCloseButton.addEventListener("click", () => {
+//   console.log("Close Chat Button Clicked");
 
-  var chatContainer = document.querySelector(".chat-container");
-  chatContainer.style.visibility = 'hidden';
-  currChatPage.style.visibility = 'hidden';
-  prevChatPage.style.visibility = 'hidden';
+//   var chatContainer = document.querySelector(".chat-container");
+//   chatContainer.style.visibility = 'hidden';
+//   currChatPage.style.visibility = 'hidden';
+//   prevChatPage.style.visibility = 'hidden';
 
-  var openButton = document.querySelector(".chat-open-button-container");
-  openButton.style.visibility = 'visible';
-});
+//   var openButton = document.querySelector(".chat-open-button-container");
+//   openButton.style.visibility = 'visible';
+// });
 
-chatHomeButton.addEventListener("click", () => {
-  console.log("Chat Home Button Clicked");
-  prevChatPage = currChatPage; //store previous page
-  prevChatPage.style.visibility = 'hidden';
-  currChatPage = document.querySelector(".page-home");
-  currChatPage.style.visibility = 'visible';
+// chatHomeButton.addEventListener("click", () => {
+//   console.log("Chat Home Button Clicked");
+//   prevChatPage = currChatPage; //store previous page
+//   prevChatPage.style.visibility = 'hidden';
+//   currChatPage = document.querySelector(".page-home");
+//   currChatPage.style.visibility = 'visible';
 
-});
+// });
 
 
-chatMainAlgoButton.addEventListener("click", () => {
-  console.log("Chat Main Algo Page Button clicked");
+// chatMainAlgoButton.addEventListener("click", () => {
+//   console.log("Chat Main Algo Page Button clicked");
 
-  prevChatPage = document.querySelector(".page-home");
-  currChatPage = document.querySelector(".page-main-algo");
+//   prevChatPage = document.querySelector(".page-home");
+//   currChatPage = document.querySelector(".page-main-algo");
 
-  prevChatPage.style.visibility = 'hidden';
-  currChatPage.style.visibility = 'visible';
-});
+//   prevChatPage.style.visibility = 'hidden';
+//   currChatPage.style.visibility = 'visible';
+// });
 
-chatAlgoContextButton.addEventListener("click", () => {
-  console.log("Set Single Modal to Context Image");
-  contextImg.style.visibility = 'visible';
-});
+// chatAlgoContextButton.addEventListener("click", () => {
+//   console.log("Set Single Modal to Context Image");
+//   contextImg.style.visibility = 'visible';
+// });
 
-chatAlgoCycleButton.addEventListener("click", () => {
-  console.log("Set Single Modal to Cycle Image");
-  step3Img.style.visibility = 'visible';
-});
+// chatAlgoCycleButton.addEventListener("click", () => {
+//   console.log("Set Single Modal to Cycle Image");
+//   step3Img.style.visibility = 'visible';
+// });
 
-chatAlgoStepsButton.addEventListener("click", () => {
-  console.log("Set Single Modal to Steps Image");
-  stepImg.style.visibility = 'visible';
-});
+// chatAlgoStepsButton.addEventListener("click", () => {
+//   console.log("Set Single Modal to Steps Image");
+//   stepImg.style.visibility = 'visible';
+// });
 
-chatAlgoKruskalButton.addEventListener("click", () => {
-  console.log("Set Single Modal to Kruskal Image");
-  stepImg.style.visibility = 'visible';
-});
+// chatAlgoKruskalButton.addEventListener("click", () => {
+//   console.log("Set Single Modal to Kruskal Image");
+//   stepImg.style.visibility = 'visible';
+// });
 
-closeModalButton.addEventListener("click", () => {
-  step2Img.style.visibility = 'hidden';
-  stepImg.style.visibility = 'hidden';
-  contextImg.style.visibility = 'hidden';
-  step3Img.style.visibility = 'hidden'; 
-});
+// closeModalButton.addEventListener("click", () => {
+//   step2Img.style.visibility = 'hidden';
+//   stepImg.style.visibility = 'hidden';
+//   contextImg.style.visibility = 'hidden';
+//   step3Img.style.visibility = 'hidden'; 
+// });
 
-// Click the X button to close the pseudo code modal
-psudeoCloseButton.addEventListener("click", () => {
-  console.log("Pseudocode close button Clicked");
-  const pseudoModal = document.querySelector(".pseudo");
-  pseudoModal.classList.toggle("hidden");
-});
+// // Click the X button to close the pseudo code modal
+// psudeoCloseButton.addEventListener("click", () => {
+//   console.log("Pseudocode close button Clicked");
+//   const pseudoModal = document.querySelector(".pseudo");
+//   pseudoModal.classList.toggle("hidden");
+// });
 
 
 function primSetup() {
