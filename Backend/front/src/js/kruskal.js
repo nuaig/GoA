@@ -41,11 +41,7 @@ import GameRoomUI from "../../utils/UI/gameRoomUI.js";
 const reArrangeButton = document.querySelector(".Rearrange-Action");
 const chatOpenButton = document.querySelector(".chat-open-button");
 const chatCloseButton = document.querySelector(".chat-close-button");
-// const chatContextButton = document.querySelector("#button-home-context");
-// const chatContextButton = document.getElementById("button-home-context");
 const chatHomeButton = document.getElementById("chat-home-button");
-// const chatAlgoButton = document.getElementById("button-home-main-algo");
-// const chatPseudoButton = document.getElementById("button-home-pseudo");
 const contextDiagramButton = document.getElementById("context-diagram-button");
 const psudeoCloseButton = document.querySelector(".button-close-pseudo");
 const chatMainAlgoButton = document.getElementById("button-home-main-algo")
@@ -405,17 +401,6 @@ chatHomeButton.addEventListener("click", () => {
 
 });
 
-// chatContextButton.addEventListener("click", () => {
-//   console.log("Chat Context Button Clicked");
-
-  
-//   prevChatPage = document.querySelector(".page-home"); //store previous page
-//   currChatPage = document.querySelector(".page-context");
-  
-//   prevChatPage.style.visibility = 'hidden';
-//   currChatPage.style.visibility = 'visible';
-
-// });
 
 chatMainAlgoButton.addEventListener("click", () => {
   console.log("Chat Main Algo Page Button clicked");
@@ -454,32 +439,6 @@ closeModalButton.addEventListener("click", () => {
   step3Img.style.visibility = 'hidden'; 
 });
 
-
-
-// chatAlgoButton.addEventListener("click", () => {
-//   console.log("Chat Algorithm Button Clicked");
-
-  
-//   prevChatPage = document.querySelector(".page-home"); //store previous page
-//   currChatPage = document.querySelector(".page-algo"); //switch to context page
-  
-//   prevChatPage.style.visibility = 'hidden';
-//   currChatPage.style.visibility = 'visible';
-
-// });
-
-// chatPseudoButton.addEventListener("click", () => {
-//   console.log("Chat Pseudo Button Clicked");
-
-  
-//   prevChatPage = document.querySelector(".page-home"); //store previous page
-//   currChatPage = document.querySelector(".page-pseudo"); 
-  
-//   prevChatPage.style.visibility = 'hidden';
-//   currChatPage.style.visibility = 'visible';
-
-// });
-
 // Click the X button to close the pseudo code modal
 psudeoCloseButton.addEventListener("click", () => {
   console.log("Pseudocode close button Clicked");
@@ -511,10 +470,6 @@ function primSetup() {
   curAlgorithmForGraph.setStartingNode(randomIndex);
 }
 
-// TO DO not sure if we will need
-// window.toggleInstructions = function () {
-//   toggleInstructions(currentAlgorithm);
-// };
 
 async function createModels() {
   const margin = 0.1;
