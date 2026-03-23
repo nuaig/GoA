@@ -202,7 +202,7 @@ class GameRoomUI {
     this.prevChatPage = document.querySelector(".page-home"); //default to home page
 
     this.contextImg = document.querySelector(".step1 img");
-    this.stepImg = document.querySelector(".step4 img");
+    this.step4Img = document.querySelector(".step4 img");
     this.step2Img = document.querySelector(".step2 img");
     this.step3Img = document.querySelector(".step3 img");
     this.closeModalButton = document.querySelector(".btn-algo-instruction-single-close");
@@ -810,7 +810,7 @@ class GameRoomUI {
 
     this.chatAlgoContextButton.addEventListener("click", () => {
       console.log("Set Single Modal to Context Image");
-      this.contextImg.style.visibility = 'visible';
+      this.step2Img.style.visibility = 'visible';
     });
 
     this.chatAlgoCycleButton.addEventListener("click", () => {
@@ -820,17 +820,17 @@ class GameRoomUI {
 
     this.chatAlgoStepsButton.addEventListener("click", () => {
       console.log("Set Single Modal to Steps Image");
-      this.stepImg.style.visibility = 'visible';
+      this.step4Img.style.visibility = 'visible';
     });
 
     this.chatAlgoKruskalButton.addEventListener("click", () => {
       console.log("Set Single Modal to Kruskal Image");
-      this.stepImg.style.visibility = 'visible';
+      this.contextImg.style.visibility = 'visible';
     });
 
     this.closeModalButton.addEventListener("click", () => {
       this.step2Img.style.visibility = 'hidden';
-      this.stepImg.style.visibility = 'hidden';
+      this.step4Img.style.visibility = 'hidden';
       this.contextImg.style.visibility = 'hidden';
       this.step3Img.style.visibility = 'hidden'; 
     });
