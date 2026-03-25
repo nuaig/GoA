@@ -20,6 +20,17 @@ body {
   font-family: "Inter", sans-serif;
 }
 
+.control-notif {
+  position: absolute;
+  top: 2vh;
+  left: 33vw;
+  background-color: white;
+  border-radius: 15px;
+  width: 40vw;
+  text-align: center;
+  font-size: 1.2vw;
+}
+
 /* Outer container for panel describing movement controls */
 .control-instruction {
   display: flex;
@@ -27,7 +38,7 @@ body {
   gap: 5px;
   position: absolute;
   top: 12vh;
-  right: 1vw;
+  right: 0.1vw;
   display: hidden;
   width: 20vw;
   height: 20vh;
@@ -84,6 +95,17 @@ body {
   font-weight: bold;
   color: var(--color-panel-dark);
 }
+
+/* .move-hover-target {
+  display:none;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 15px;
+}
+
+#move-hover-source:hover + .move-hover-target {
+  display: block;
+} */
 
 .highlight-text {
   /* color: red; */
