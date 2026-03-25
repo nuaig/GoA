@@ -45,6 +45,7 @@ let hintBooleans = {
   alreadyVisited: false,
 };
 
+const slidesButton = document.querySelector("#button-algo-slides");
 const reArrangeButton = document.querySelector(".Rearrange-Action");
 let curGameSession;
 let currentLevel = 1;
@@ -1645,6 +1646,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     console.error("Error checking login status:", error);
     window.location.href = "signInSignUp.html";
   }
+});
+
+slidesButton.addEventListener("click", () => {
+  debugPrint("Algorithm Slides Button Clicked");
+  console.log(curRoomUI.algoInstructionModal);
+  curRoomUI.openModal(curRoomUI.algoInstructionModal);
 });
 
 reArrangeButton.addEventListener("click", () => {
