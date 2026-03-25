@@ -15,7 +15,7 @@ const cameraSize = 150
 //const mapSize = window.innerWidth * 0.16; //size of the overall minimap on the screen
 const viewportWidthPx = document.documentElement.clientWidth;
 //const mapSize = (viewportWidthPx * 0.2); //in px for javascript
-const mapSize = 250;
+const mapSize = 240;
 
 function hideLoadingScreen() {
   const loadingScreen = document.getElementById("loading-screen");
@@ -774,14 +774,14 @@ const miniMapCamera = new THREE.OrthographicCamera(
   1, // near clipping plane
   1000 // far clipping plane
 );
-const scale = 50; // Reduce this value to zoom in
+const scale = 40; // Reduce this value to zoom in
 miniMapCamera.left = -scale;
 miniMapCamera.right = scale;
 miniMapCamera.top = scale;
 miniMapCamera.bottom = -scale;
 miniMapCamera.updateProjectionMatrix();
-miniMapCamera.position.set(0, 250, -10); // Position it above the dungeon
-miniMapCamera.lookAt(new THREE.Vector3(0, 0, -10)); // Look directly down
+miniMapCamera.position.set(0, 250, -2); // Position it above the dungeon
+miniMapCamera.lookAt(new THREE.Vector3(0, 0, -2)); // Look directly down
 const miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
 miniMapRenderer.setSize(mapSize, mapSize); // Size of the mini-map
 miniMapRenderer.domElement.id = "miniMapCanvas";
