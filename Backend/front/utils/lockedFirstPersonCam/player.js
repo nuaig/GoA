@@ -91,12 +91,14 @@ export class Player {
       let panelClick = document.querySelector(".control-panel-click");
       panelClick.style.display = "flex";
 
+      let notifPanel = document.querySelector(".control-notif");
+      notifPanel.style.display = "flex";
       let notifMove = document.querySelector(".move-notif");
       notifMove.style.display = "none";
       let notifClick = document.querySelector(".click-notif");
       notifClick.style.display = "flex";
 
-      // setTimeout(hidePanel,  3000);
+      setTimeout(hidePanel,  3000);
     });
 
     //camera unlock and player enters move mode
@@ -116,12 +118,14 @@ export class Player {
       let panelMove = document.querySelector(".control-panel-move");
       panelMove.style.display = "flex";
 
+      let notifPanel = document.querySelector(".control-notif");
+      notifPanel.style.display = "flex";
       let notifClick = document.querySelector(".click-notif");
       notifClick.style.display = "none";
       let notifMove = document.querySelector(".move-notif");
       notifMove.style.display = "flex";
 
-      // setTimeout(hidePanel,  3000);
+      setTimeout(hidePanel,  3000);
     });
 
   }

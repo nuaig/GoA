@@ -118,6 +118,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     focusIcon.style.animation = "none"; // Stop the pulse animation
     focusIcon.classList.remove("focus-effect");
   }
+  setTimeout(hidePanel, 3000);
 });
 
 const controlsTogllerEle = document.querySelector(".Pesudocode-Box-Action");
@@ -868,3 +869,12 @@ function animate() {
   miniMapRenderer.render(scene, miniMapCamera); // Mini-map rendering
 }
 animate();
+
+//function to hide the notification panel
+function hidePanel() {
+  const notifPanel = document.querySelector(".control-notif");
+  if (notifPanel) {
+    notifPanel.style.display = 'none';
+  }
+  
+}
