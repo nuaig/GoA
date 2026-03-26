@@ -35,6 +35,40 @@ body {
   font-family: "Inter", sans-serif;
 }
 
+.control-container {
+  /* background-color: white; */
+  position: absolute;
+  top: 3vh;
+  left: 30vw;
+  width: 40vw;
+  height: 10vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+  flex-direction: column;
+}
+
+.control-panel {
+  background-color: var(--color-hover-orange);
+  max-width: 100%;
+  width: 40vw;
+  max-height: 100%;
+  border-radius: 20px;
+  justify-items: center;
+  align-items: center;
+  font-size: 1.5vw;
+  font-weight: 600;
+}
+
+.control-panel h3 {
+  margin-bottom: 1px;
+}
+
+.control-panel ul {
+  margin-top: 0px;
+}
+
 /* Pseudo-code Instructions, located at top right navigation menu */
 .topnav-instructions {
   position: absolute;
