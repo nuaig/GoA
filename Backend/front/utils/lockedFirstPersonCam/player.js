@@ -76,8 +76,8 @@ export class Player {
 
     //camera locks and player enters click mode
     this.controls.addEventListener('unlock', () => {
+      console.log('lock');
       document.querySelectorAll(".panel").forEach(panel => {
-        console.log('lock');
         panel.classList.add('yellow-panel')
         panel.classList.remove('green-panel');
       });
@@ -90,12 +90,19 @@ export class Player {
       panelMove.style.display = "none";
       let panelClick = document.querySelector(".control-panel-click");
       panelClick.style.display = "flex";
+
+      let notifMove = document.querySelector(".move-notif");
+      notifMove.style.display = "none";
+      let notifClick = document.querySelector(".click-notif");
+      notifClick.style.display = "flex";
+
+      // setTimeout(hidePanel,  3000);
     });
 
     //camera unlock and player enters move mode
     this.controls.addEventListener('lock', () => {
+      console.log('unlock');
       document.querySelectorAll(".panel").forEach(panel => {
-        console.log('unlock');
         panel.classList.add('green-panel')
         panel.classList.remove('yellow-panel');
       });
@@ -109,6 +116,12 @@ export class Player {
       let panelMove = document.querySelector(".control-panel-move");
       panelMove.style.display = "flex";
 
+      let notifClick = document.querySelector(".click-notif");
+      notifClick.style.display = "none";
+      let notifMove = document.querySelector(".move-notif");
+      notifMove.style.display = "flex";
+
+      // setTimeout(hidePanel,  3000);
     });
 
   }
@@ -272,4 +285,13 @@ export class Player {
         break;
     }
   }
+}
+
+//function to hide the notification panel
+function hidePanel() {
+  const notifPanel = document.querySelector(".control-notif");
+  if (notifPanel) {
+    notifPanel.style.display = 'none';
+  }
+  
 }
