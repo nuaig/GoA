@@ -18,6 +18,80 @@
     <div id="Renderer">
       <div id="world" id="world"></div>
     </div>
+    
+    <!-- Container for helper chat (bot right corner)-->
+    <div class="chat-full-container">
+      <div class="chat-open-button-container">
+        <div class="chat-open-button">
+          <button class="button-question-mark" id="chat-open-button">Click for help 🗨️</button>
+        </div>
+      </div>
+    </div>
+
+    <!--Main chat container-->
+    <div class="chat-container">
+      <button class="chat-close-button"  id="chat-close-button">X</button>
+      <button class="chat-home-button" id="chat-home-button">Home</button>
+      <div class="page-home" id="chat-homepage-container">
+        
+        <!--Message header-->
+        <div class="chat-header">
+          <h2>What can I help you with?</h2>
+          
+        </div>
+        <div class="chat-body">
+          <div class="container-msgs">
+            <!--contains the buttons for text options-->
+            <button class="button-msg" id="button-home-main-algo">Learn more about Heap Sort.</button>
+            <button class="button-msg" id="button-home-pseudo">View the pseudo-code for Heap Sort.</button>
+            <button class="button-msg" id="button-home-tutorial">Replay the tutorial.</button>
+          </div>
+        </div>
+      </div>
+
+      <!--Algorithm Main Page-->
+      <div class="chat-page page-main-algo" id="chat-main-algso-container">
+        <!--Message header-->
+        <div class="chat-header">
+          <h2>What do you want to know about Heap Sort</h2>
+        </div>
+        <div class="chat-body">
+          <button class="button-msg" id="button-algo-kruskal">What is Heap Sort?</button>
+          <button class="button-msg hidden" id="button-algo-context">What is a minimum spanning tree?</button>
+          <button class="button-msg hidden" id="button-algo-cycle">What is a cycle?</button>
+          <button class="button-msg hidden" id="button-algo-step">What are the steps?</button>
+           <button class="button-msg" id="button-algo-slides">What are the steps?</button>
+        </div>
+      </div>
+    </div>
+
+      <!--Dijkstra Algorithm Modal with separated slides -->
+    <div class="modal algo-instruction-modal-single hidden">
+      <h2 class="modal__header">Dijkstra’s Algorithm</h2>
+      <!--Each slide shows 1 step-->
+      <div class="slide-single-container"> 
+        <div class="slide-single step1">
+              <img src="AlgorithmsInstructions/heapsortAlgo/1.png" alt="Kruskal Algorithm Step 1">
+        </div>
+        <div class="slide-single step2">
+          <img src="AlgorithmsInstructions/heapsortAlgo/2.png" alt="Kruskal Algorithm Step 2">
+        </div>
+        <div class="slide-single step3">
+          <img src="AlgorithmsInstructions/heapsortAlgo/3.png" alt="Kruskal Algorithm Step 3">
+        </div>
+        <div class="slide-single step4">
+          <img src="AlgorithmsInstructions/heapsortAlgo/4.png" alt="Kruskal Algorithm Step 4">
+        </div>
+        <div class="slide-single step5">
+          <img src="AlgorithmsInstructions/heapsortAlgo/5.png" alt="Kruskal Algorithm Step 5">
+        </div>
+      </div>
+      <!--Close Button-->
+      <div class="button__holder">
+        <button class="btn btn-algo-instruction-single-close">Close</button>
+      </div>
+    </div>
+
     <div class="topnav-centered">
       <p id="UI-Text" class="UI-Text">
         Drag the numbers into the green boxes to create binary heap tree!
@@ -665,6 +739,9 @@
       </div>
     </div>
     <div class="topnav-instructions heapsort-algo-instructions pseudo hidden">
+      <div class="button-close-pseudo">
+        <p>X</p>
+      </div>
       <pre class="code-block">
 HeapSort(Array as <span class="keyword">Arr</span>):
 1. Do <span class="function">BuildMaxHeap</span> 
