@@ -23,6 +23,7 @@
       --color-psuedo-highlight: ##ffe25b;
       --color-hover-orange: #ffcb5b;
       --color-hover-blue: #1766e4;
+      --color-control-panel:#95BCF6;
       /* Colors for buttons */
       --color-btn: #393eda;
       --color-text-dark: #373737;
@@ -41,7 +42,7 @@ body {
   top: 3vh;
   left: 30vw;
   width: 40vw;
-  height: 10vh;
+  height: fit-content;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,23 +51,45 @@ body {
 }
 
 .control-panel {
-  background-color: var(--color-hover-orange);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-control-panel);
   max-width: 100%;
-  width: 40vw;
+  width: 20vw;
+  height: fit-content;
   max-height: 100%;
-  border-radius: 20px;
-  justify-items: center;
+  border-radius: 10px;
+  border: 2px solid var(--color-text-light);
+  justify-content: center;
   align-items: center;
-  font-size: 1.5vw;
   font-weight: 600;
+  padding:6px 12px 3px 12px;
+  gap: 0;
 }
 
 .control-panel h3 {
-  margin-bottom: 1px;
+  margin: 0 0 0 0;
+  font-size: clamp(0.8rem, 1.6vw, 1.5rem);
+  line-height: 1.2;
 }
 
 .control-panel ul {
-  margin-top: 0px;
+  margin: 0px;
+  padding: 0px;
+  list-style-type: none;
+  font-size: clamp(0.7rem, 1.2vw, 1.2rem);
+  line-height: 1.2;
+}
+
+.control-panel li {
+  margin-bottom: 0px;
+}
+
+.inline-icon {
+  vertical-align: middle; /* Aligns the image's middle with the text's middle */
+  width: 45px;            /* Adjust size as needed */
+  height: auto;          
+  margin: 0 0;       
 }
 
 /* Pseudo-code Instructions, located at top right navigation menu */
