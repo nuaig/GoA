@@ -165,7 +165,7 @@ class GameRoomUI {
     this.regularBtn = document.getElementById("regular-mode-btn");
     // stars for each level
     this.svgStars = document.querySelectorAll(
-      ".level__stars__holder svg.feather-star"
+      ".level__stars__holder .feather-star"
     );
 
     // Algorithm Instruction Modal
@@ -175,6 +175,37 @@ class GameRoomUI {
     this.btnAlgoInstrClose = document.querySelector(
       ".btn-algo-instruction-close"
     );
+
+    //Algorithm Single Slide Instruction Modal
+    this.algoInstructionSingleModal = document.querySelector(
+      ".algo-instruction-modal-single"
+    );
+    this.btnAlgoInsrtSingleClose = document.querySelector(
+      ".btn-algo-instruction-single-close"
+    );
+
+    //Chat Replay Tutorial Button
+    this.btnChatTutorial = document.getElementById("button-home-tutorial");
+    //Helper chat UI elements
+    this.chatOpenButton = document.querySelector(".chat-open-button");
+    this.chatCloseButton = document.querySelector(".chat-close-button");
+    this.chatHomeButton = document.getElementById("chat-home-button");
+    this.contextDiagramButton = document.getElementById("context-diagram-button");
+    this.psudeoCloseButton = document.querySelector(".button-close-pseudo");
+    this.chatMainAlgoButton = document.getElementById("button-home-main-algo")
+    this.chatAlgoContextButton = document.getElementById("button-algo-context");
+    this.chatAlgoCycleButton = document.getElementById("button-algo-cycle");
+    this.chatAlgoStepsButton = document.getElementById("button-algo-step");
+    this.chatAlgoKruskalButton = document.getElementById("button-algo-kruskal");
+
+    this.currChatPage = document.querySelector(".page-home"); //default to home page
+    this.prevChatPage = document.querySelector(".page-home"); //default to home page
+
+    this.contextImg = document.querySelector(".step1 img");
+    this.step4Img = document.querySelector(".step4 img");
+    this.step2Img = document.querySelector(".step2 img");
+    this.step3Img = document.querySelector(".step3 img");
+    this.closeModalButton = document.querySelector(".btn-algo-instruction-single-close");
 
     this.openModal(this.tutorialModal);
   }
@@ -198,6 +229,11 @@ class GameRoomUI {
     this.addAllEventListenersLevelSelectionModal();
     // -------Algorithm Instruction Modal-----
     this.addAllEventListenersAlgoInstructionModal();
+    // -------Algorithm Instruction Single Modal----
+    this.addAllEventListenersAlgoInstructionSingleModal();
+
+    // -------Helper Chat----------
+    this.addAllEventListenersHelperChat();
   }
 
   resetAllComponents() {}
@@ -597,6 +633,7 @@ class GameRoomUI {
     this.listenEventHelpButtonInstructionModalOpen();
     this.listenEventGameFeatureInstrModal();
     this.listenEventAlgorithmInstrModal();
+    // this.listenEventChatButtons();
   }
 
   showGameFeatureInstructionModalIfNeeded() {
@@ -664,6 +701,157 @@ class GameRoomUI {
       let subMenu = document.getElementById("subMenu");
 
       subMenu.classList.toggle("open-menu");
+    });
+   
+  }
+
+  addAllEventListenersHelperChat() {
+    this.listenEventChatOpen();
+    this.listenEventChatClose();
+    this.listenEventChatButtons();
+  }
+  
+  //Listens to helper chat button being clicked
+  listenEventChatOpen() {
+    // Open chat box when question mark button is clicked
+    this.chatOpenButton.addEventListener("click", () => {
+      console.log("Open Chat Button Clicked");
+      var chatContainer = document.querySelector(".chat-container");
+      chatContainer.style.visibility = 'visible';
+      this.currChatPage.style.visibility = 'visible';
+      
+      var openButton = document.querySelector(".chat-open-button-container");
+      openButton.style.visibility = 'hidden';
+    });
+  }
+
+  //Listens or close button in helper chat being clicked
+  listenEventChatClose() {
+    // Close chat box when close button is clicked
+    this.chatCloseButton.addEventListener("click", () => {
+      console.log("Close Chat Button Clicked");
+
+      var chatContainer = document.querySelector(".chat-container");
+      chatContainer.style.visibility = 'hidden';
+      this.currChatPage.style.visibility = 'hidden';
+      this.prevChatPage.style.visibility = 'hidden';
+
+      var openButton = document.querySelector(".chat-open-button-container");
+      openButton.style.visibility = 'visible';
+    });
+  }
+
+  //Listens to buttons being clicked in the chatbox
+  listenEventChatButtons() {
+    const contextDiagramBtn = document.querySelector("#context-diagram-button");
+    const algoContextBtn = document.querySelector("#button-algo-context");
+    const algoStepBtn = document.querySelector("#button-algo-step");
+    const algoCycleBtn = document.querySelector("#button-algo-cycle");
+    const algoKruskalBtn = document.querySelector("#button-algo-kruskal");
+    const pseudoBtn = document.querySelector("#button-home-pseudo");
+    
+
+    //Listens to click of algorithm context button in chatbox
+    algoContextBtn.addEventListener("click", () => {
+      console.log("Opened Algo Context Instruction Single Modal");
+      this.openModal(this.algoInstructionSingleModal);
+    });
+
+    //Listens to click of algorithm context button in chatbox
+    algoCycleBtn.addEventListener("click", () => {
+      console.log("Opened Algo Cycle Instruction Single Modal");
+      this.openModal(this.algoInstructionSingleModal);
+    });
+
+    //Listens to click of algorithm step button in chatbox
+    algoStepBtn.addEventListener("click", () => {
+      console.log("Opened Algo Steps Instruction Single Modal");
+      this.openModal(this.algoInstructionSingleModal);
+    });
+
+    //Listens to click of algorithm Kruskal button in chatbox
+    algoKruskalBtn.addEventListener("click", () => {
+      console.log("Opened Algo Steps Instruction Single Modal");
+      this.openModal(this.algoInstructionSingleModal);
+    });
+
+    //Listens to click of pseudo-code button
+    pseudoBtn.addEventListener("click", () => {
+      console.log("Clicked psuedocode button in chatbox");
+      const pseudoModal = document.querySelector(".pseudo");
+      pseudoModal.classList.toggle("hidden");
+    });
+
+    this.btnChatTutorial.addEventListener("click", () => {
+      // this.closeModal(this.settingsModal);
+      this.revertTutorialCompleteModalToBeTutorialModal();
+      this.openModal(this.tutorialModal);
+    });
+    
+    //Home button in chat
+    this.chatHomeButton.addEventListener("click", () => {
+      console.log("Chat Home Button Clicked");
+      this.prevChatPage = this.currChatPage; //store previous page
+      this.prevChatPage.style.visibility = 'hidden';
+      this.currChatPage = document.querySelector(".page-home");
+      this.currChatPage.style.visibility = 'visible';
+    });
+
+    
+    this.chatMainAlgoButton.addEventListener("click", () => {
+      console.log("Chat Main Algo Page Button clicked");
+
+      this.prevChatPage = document.querySelector(".page-home");
+      this.currChatPage = document.querySelector(".page-main-algo");
+
+      this.prevChatPage.style.visibility = 'hidden';
+      this.currChatPage.style.visibility = 'visible';
+    });
+
+    this.chatAlgoContextButton.addEventListener("click", () => {
+      console.log("Set Single Modal to Context Image");
+      this.step2Img.style.visibility = 'visible';
+    });
+
+    this.chatAlgoCycleButton.addEventListener("click", () => {
+      console.log("Set Single Modal to Cycle Image");
+      this.step3Img.style.visibility = 'visible';
+    });
+
+    this.chatAlgoStepsButton.addEventListener("click", () => {
+      console.log("Set Single Modal to Steps Image");
+      this.step4Img.style.visibility = 'visible';
+    });
+
+    this.chatAlgoKruskalButton.addEventListener("click", () => {
+      console.log("Set Single Modal to Kruskal Image");
+      this.contextImg.style.visibility = 'visible';
+    });
+
+    this.closeModalButton.addEventListener("click", () => {
+      this.step2Img.style.visibility = 'hidden';
+      this.step4Img.style.visibility = 'hidden';
+      this.contextImg.style.visibility = 'hidden';
+      this.step3Img.style.visibility = 'hidden'; 
+    });
+
+    // Click the X button to close the pseudo code modal
+    this.psudeoCloseButton.addEventListener("click", () => {
+      console.log("Pseudocode close button Clicked");
+      const pseudoModal = document.querySelector(".pseudo");
+      pseudoModal.classList.toggle("hidden");
+    });
+  }
+
+  /* All event listeners for algorithm instruction single modal */
+  addAllEventListenersAlgoInstructionSingleModal() {
+    this.listenEventCloseButtonAlgoInstructionSingleModal();
+  }
+
+  /* Algorithm Single Modal Close Button */
+  listenEventCloseButtonAlgoInstructionSingleModal() {
+    this.btnAlgoInsrtSingleClose.addEventListener("click", () => {
+      this.closeModal(this.algoInstructionSingleModal);
     });
   }
 
@@ -781,11 +969,13 @@ class GameRoomUI {
   }
 
   listenEventSettingsModalTutorial() {
+
     this.btnSettingsTutorial.addEventListener("click", () => {
       this.closeModal(this.settingsModal);
       this.revertTutorialCompleteModalToBeTutorialModal();
       this.openModal(this.tutorialModal);
     });
+
   }
 
   // Button to go back to main Dungeon in setting modal

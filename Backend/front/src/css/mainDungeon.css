@@ -1,29 +1,266 @@
+:root{
+  /* Colors for navigation/control instruction panel */
+  --color-move-panel: #92EA6E;
+  --color-click-panel: #95BCF6;
+  --color-panel-text-highlight: #FFF5C6;
+  --color-panel-dark: #373737;
+  --color-highlight: #EAD16F;
+
+  /* Colors for buttons */
+  /* --color-btn: #95BCF6; */
+  --color-btn: #393eda;
+  --color-text-dark: #373737;
+  --color-text-light: #e3f4ff;
+  --color-text-highlight: #ffa500;
+  --color-btn-highlight: #637bdb;
+}
+
 body {
   margin: 0;
   font-family: "Inter", sans-serif;
 }
 
+.control-notif {
+  position: absolute;
+  top: 2vh;
+  left: 33vw;
+  background-color: var(--color-highlight);
+  border: 2px solid var(--color-text-light);
+  border-radius: 15px;
+  width: 40vw;
+  height: 4vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2vw;
+  font-weight: 550;
+}
+
+.move-notif {
+  display:none;
+}
+
+.click-notif {
+  display: flex;
+}
+
+/* Outer container for panel describing movement controls */
+.control-instruction {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: absolute;
+  top: 12vh;
+  right: 0.1vw;
+  display: hidden;
+  width: 20vw;
+  height: 20vh;
+}
+
+/* Panel to describe the current mode */
+.mode-panel {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 0.3vw;
+  padding-left: 7px;
+  max-width: 90%;
+  /* background-color: purple; */
+}
+
+/* Panel to describe the navigation/movement controls */
+.control-panel {
+  /* height: 100px; */
+}
+
+
+/* ESC key icon */
+.esc-key {
+  background-color: var(--color-panel-dark);
+  border-radius: 25px;
+  padding: 8px 12px;
+  color: var(--color-panel-text-highlight);
+  font-weight: bold;
+  font-size: 1vw;
+  white-space: nowrap;
+}
+
+.panel-text {
+  display: flex;
+  max-width: 100%;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  font-size: 1vw;
+  font-weight: bold;
+  color: var(--color-panel-dark);
+}
+
+/* Click Mode / Move Mode text */
+.mode-text {
+  display: flex;
+  max-width: 90%;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  font-size: 1.2vw;
+  font-weight: bold;
+  color: var(--color-panel-dark);
+}
+
+/* .move-hover-target {
+  display:none;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 15px;
+}
+
+#move-hover-source:hover + .move-hover-target {
+  display: block;
+} */
+
+.highlight-text {
+  /* color: red; */
+  color: black;
+  background-color: var(--color-highlight);
+  border-radius: 18px;
+  padding: 2px 5px;
+  /* font-weight: bold; */
+
+}
+
+/* visual for a panel in the control panel layout */
+.panel {
+  display: grid;
+  place-items: center;
+  background-color: var(--color-click-panel);  
+  border-radius: 18px;
+  display: hidden;
+  max-width: 90%;
+}
+
+.yellow-panel {
+  background-color: var(--color-click-panel);
+}
+
+.green-panel {
+  background-color: var(--color-move-panel);
+}
+
+.wasd-section, .camera-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 90%;
+    gap: 1vw;
+  }
+
+.wasd-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 2.7vw);
+    grid-template-rows: repeat(2, 2.7vw);
+  }
+
+.key {
+    background-color: var(--color-panel-dark);
+    color: var(--color-panel-text-highlight);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2vw;
+    font-weight: bold;
+    width: 2.5vw;
+    height: 2.5vw;
+  }
+
+
+  /* W key sits in center of top row */
+  .key-w { grid-column: 2; grid-row: 1; }
+  .key-a { grid-column: 1; grid-row: 2; }
+  .key-s { grid-column: 2; grid-row: 2; }
+  .key-d { grid-column: 3; grid-row: 2; }
+
+  .move-section label, .camera-section label, .control-panel-click label {
+    font-size: 1.1vw;
+    font-weight: bold;
+    text-align: center;
+    color: var(--color-panel-dark);
+  }
+
+  .move-section {
+    text-align: center;
+  }
+
+  .cursor-icon {
+    font-size: 2.5vw;
+    line-height: 1;
+  }
+
+.control-panel-move {
+  /* visibility: hidden; */
+  /* position: absolute; */
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0.5vw;
+  gap: 0.5vw;
+  max-width: 90%;
+  display: none; 
+}
+
+.control-panel-click {
+  /* position: absolution; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* padding: 0.5vw; */
+  max-width: 95%;
+  /* padding: 1.5vw; */
+}
+
+.click-icon img {
+  width: 4vw;
+}
+
+/* outer container for top right icons */
 .Action-Icons-Holder {
   position: absolute;
   top: 2vh;
   right: 0.5vw;
-
-  /* background-color: #343a40;
-  border: solid #eaebf1 2px; */
   border-radius: 10px;
   padding: 0 15px;
 }
 
+/*contianer for icons on top right */
 .Action-Icons {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+/*individual container for icons on top right */
 .Action-Icons-Holder svg {
   width: 75px;
   height: 75px;
   cursor: pointer;
+}
+
+/* Styling for buttons in main dungeon */
+.main-dungeon-btn {
+  background-color: var(--color-btn);
+  color: var(--color-text-light);
+  cursor: pointer;
+  border-radius: 20px;
+  font-weight: normal;
+  font-size: 1vw;
+  padding: 0.5vw 1.1vw;
+  border: 1.7px solid var(--color-text-light);
+}
+
+.main-dungeon-btn:hover {
+  background-color: var(--color-btn-highlight);
 }
 
 /* MODAL WINDOW */
@@ -247,6 +484,7 @@ body {
   top: 10%;
   left: 5%;
 }
+/*bottom text box*/
 .topnav-centered {
   float: none;
   position: absolute;
@@ -407,14 +645,11 @@ button:active {
 }
 
 #miniMapCanvas {
-  width: 200px; /* Adjust size as needed */
-  height: 200px; /* Adjust size as needed */
-  border-radius: 50%; /* This creates the circular shape */
+  border-radius: 10%; /* This creates the circular shape */
   overflow: hidden; /* Ensures nothing leaks outside the border */
   position: absolute;
   bottom: 10px;
   right: 10px;
-  background-color: #343a40;
   border: 3px solid #ffffff;
 }
 
@@ -426,29 +661,58 @@ button:active {
   z-index: 2;
 }
 
+/* Each symbol is manually positioned onto the screen over the map*/
 .heapsort-symbol {
-  top: 164px;
-  left: 280px;
+  top: 124px;
+  left: 214px;
+  /* top: 5.7em;
+  left: 10.5em; */
 }
 
 .kruskal-symbol {
-  top: 164px;
-  left: 93px;
+  top: 102px;
+  left: 50px;
+  /* top: 8.5vh;
+  left: 5vw; */
 }
 
 .Dijkstra-symbol {
-  top: 233px;
-  left: 93px;
+  top: 124px;
+  left: 50px;
+  /* top: 13.5vh;
+  left: 5vw; */
 }
 
 .prim-symbol {
-  top: 196px;
-  left: 45px;
+  top: 115px;
+  left: 27px;
+  /* top: 7.1em;
+  left: 1.6em; */
 }
 
 .treasure-symbol {
-  top: 82px;
-  left: 181px;
+  top: 15px;
+  left: 124px;
+}
+
+.map-label {
+  position: absolute;
+  /* font-family: 'DM Sans', sans-serif; */
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 2;
+  top: 190px;
+  left: 29px;
+}
+
+.map-label ul {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  color: var(--color-text-dark);
+  letter-spacing: 0.2px;
+  word-spacing: 1px;
 }
 
 .firework.active {

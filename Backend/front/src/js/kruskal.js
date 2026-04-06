@@ -29,6 +29,7 @@ import {
   isTriangleInequalitySatisfied,
   setFont,
   createNodeLabel,
+  createLabelSolidCircle,
   updateNodeLabel,
   updateNodeLabelColor,
   getRandomColor,
@@ -38,6 +39,26 @@ import {
 import GameRoomUI from "../../utils/UI/gameRoomUI.js";
 
 const reArrangeButton = document.querySelector(".Rearrange-Action");
+// const chatOpenButton = document.querySelector(".chat-open-button");
+// const chatCloseButton = document.querySelector(".chat-close-button");
+// const chatHomeButton = document.getElementById("chat-home-button");
+// const contextDiagramButton = document.getElementById("context-diagram-button");
+// const psudeoCloseButton = document.querySelector(".button-close-pseudo");
+// const chatMainAlgoButton = document.getElementById("button-home-main-algo")
+// const chatAlgoContextButton = document.getElementById("button-algo-context");
+// const chatAlgoCycleButton = document.getElementById("button-algo-cycle");
+// const chatAlgoStepsButton = document.getElementById("button-algo-step");
+// const chatAlgoKruskalButton = document.getElementById("button-algo-kruskal");
+
+// let currChatPage = document.querySelector(".page-home"); //default to home page
+// let prevChatPage = document.querySelector(".page-home"); //default to home page
+
+// const contextImg = document.querySelector(".step1 img");
+// const stepImg = document.querySelector(".step4 img");
+// const step2Img = document.querySelector(".step2 img");
+// const step3Img = document.querySelector(".step3 img");
+// const closeModalButton = document.querySelector(".btn-algo-instruction-single-close");
+
 let curGameSession;
 let currentLevel = 1; // TO DO
 
@@ -109,6 +130,8 @@ const dungeonRoomURL = new URL(
 let chestList = [];
 let openChestList = [];
 let chestLabelList = [];
+let chestLabelBackgroundList = []; //chest label background circles
+let edgeLabelBackgroundList = []; // edge label background circles
 let edgeList = [];
 let edgeLabelList = [];
 let ringList = [];
@@ -120,6 +143,11 @@ const gridSize = 40;
 let labels = [];
 let dungeonRoomMixer;
 let dungeonRoomAction;
+
+const labelChestColor = 0x242a3b; //Color for chest label background circle
+const labelChesteSize = 1; //Size for chest label background circle
+const ringInner = 0.9;
+const ringOuter = 1.1;
 
 const startPosition = { x: 0, y: 5, z: 35 };
 const midPosition = { x: 0, y: 5, z: 26 };
@@ -327,6 +355,7 @@ reArrangeButton.addEventListener("click", () => {
     chestList[i].position.copy(position);
     openChestList[i].position.copy(position);
     chestLabelList[i].position.copy(position.clone().setY(position.y + 2.5));
+    chestLabelBackgroundList[i].position.copy(position.clone().setY(position.y + 2.4));
   }
 
   console.log(edgeList[0].userData.startCube);
@@ -338,6 +367,85 @@ reArrangeButton.addEventListener("click", () => {
     updateLinePosition(line, chestList[start], chestList[end]);
   });
 });
+
+// // Open chat box when question mark button is clicked
+// chatOpenButton.addEventListener("click", () => {
+//   console.log("Open Chat Button Clicked");
+//   var chatContainer = document.querySelector(".chat-container");
+//   chatContainer.style.visibility = 'visible';
+//   currChatPage.style.visibility = 'visible';
+  
+//   var openButton = document.querySelector(".chat-open-button-container");
+//   openButton.style.visibility = 'hidden';
+// });
+
+// // Close chat box when close button is clicked
+// chatCloseButton.addEventListener("click", () => {
+//   console.log("Close Chat Button Clicked");
+
+//   var chatContainer = document.querySelector(".chat-container");
+//   chatContainer.style.visibility = 'hidden';
+//   currChatPage.style.visibility = 'hidden';
+//   prevChatPage.style.visibility = 'hidden';
+
+//   var openButton = document.querySelector(".chat-open-button-container");
+//   openButton.style.visibility = 'visible';
+// });
+
+// chatHomeButton.addEventListener("click", () => {
+//   console.log("Chat Home Button Clicked");
+//   prevChatPage = currChatPage; //store previous page
+//   prevChatPage.style.visibility = 'hidden';
+//   currChatPage = document.querySelector(".page-home");
+//   currChatPage.style.visibility = 'visible';
+
+// });
+
+
+// chatMainAlgoButton.addEventListener("click", () => {
+//   console.log("Chat Main Algo Page Button clicked");
+
+//   prevChatPage = document.querySelector(".page-home");
+//   currChatPage = document.querySelector(".page-main-algo");
+
+//   prevChatPage.style.visibility = 'hidden';
+//   currChatPage.style.visibility = 'visible';
+// });
+
+// chatAlgoContextButton.addEventListener("click", () => {
+//   console.log("Set Single Modal to Context Image");
+//   contextImg.style.visibility = 'visible';
+// });
+
+// chatAlgoCycleButton.addEventListener("click", () => {
+//   console.log("Set Single Modal to Cycle Image");
+//   step3Img.style.visibility = 'visible';
+// });
+
+// chatAlgoStepsButton.addEventListener("click", () => {
+//   console.log("Set Single Modal to Steps Image");
+//   stepImg.style.visibility = 'visible';
+// });
+
+// chatAlgoKruskalButton.addEventListener("click", () => {
+//   console.log("Set Single Modal to Kruskal Image");
+//   stepImg.style.visibility = 'visible';
+// });
+
+// closeModalButton.addEventListener("click", () => {
+//   step2Img.style.visibility = 'hidden';
+//   stepImg.style.visibility = 'hidden';
+//   contextImg.style.visibility = 'hidden';
+//   step3Img.style.visibility = 'hidden'; 
+// });
+
+// // Click the X button to close the pseudo code modal
+// psudeoCloseButton.addEventListener("click", () => {
+//   console.log("Pseudocode close button Clicked");
+//   const pseudoModal = document.querySelector(".pseudo");
+//   pseudoModal.classList.toggle("hidden");
+// });
+
 
 function primSetup() {
   // const randomIndex = Math.floor(Math.random() * chestList.length);
@@ -362,10 +470,6 @@ function primSetup() {
   curAlgorithmForGraph.setStartingNode(randomIndex);
 }
 
-// TO DO not sure if we will need
-// window.toggleInstructions = function () {
-//   toggleInstructions(currentAlgorithm);
-// };
 
 async function createModels() {
   const margin = 0.1;
@@ -426,6 +530,10 @@ async function createModels() {
 
     const chestLabel = createNodeLabel(`${i}`, labelPosition, scene);
     chestLabelList.push(chestLabel);
+
+    const chestLabelBackground = createLabelSolidCircle(labelPosition, labelChesteSize, labelChestColor, scene);
+    chestLabelBackgroundList.push(chestLabelBackground);
+
   }
 
   if (curRoomUI.currentAlgorithm === "Prim") {
@@ -466,7 +574,7 @@ fontLoader.load(
 );
 
 const labelDepth = 0.1;
-let hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
+let hoverRing = createRing(ringInner, ringOuter, labelDepth, 0x000000);
 scene.add(hoverRing);
 
 function updateNodeColorsForSameTree(edge) {
@@ -493,7 +601,8 @@ function updateNodeColorsForSameTree(edge) {
   } else {
     let newColor;
     do {
-      newColor = getRandomColor();
+      // newColor = getRandomColor();
+      newColor = 0x00ff00;  // green color for node
     } while (usedColors.has(newColor));
 
     usedColors.add(newColor);
@@ -517,7 +626,7 @@ function handleSelectionEffect(intersectedObject) {
   closedEnd.visible = false;
   openEnd.visible = true;
 
-  const permanentRing = createRing(0.8, 0.9, labelDepth, 0x000000);
+  const permanentRing = createRing(ringInner, ringOuter, labelDepth, 0x000000);
   permanentRing.position.copy(intersectedObject.userData.label.position);
   permanentRing.position.y -= labelDepth / 2;
   scene.add(permanentRing);
@@ -652,7 +761,7 @@ function handleEdgeSelection(
     }
 
     setTimeout(() => {
-      intersectedObject.material.color.set(0x74c0fc);
+      intersectedObject.material.color.set(0x74c0fc); //line color
       if (intersectedObject.userData.label) {
         intersectedObject.userData.label.material.color.set(0x000000);
       }
@@ -686,6 +795,7 @@ function handleEdgeSelection(
 
 let raycaster;
 
+// Draws lines between chests with number labels and background circles
 function drawLines() {
   console.log("Drawing lines between chests.");
   console.log("Graph edges:", graph.edges);
@@ -703,6 +813,7 @@ function drawLines() {
     lines.push(line);
     edgeList.push(line);
     edgeLabelList.push(line.userData.label);
+    edgeLabelBackgroundList.push(line.userData.labelBackground);
   });
 
   curRoomUI.disableMouseEventListeners_K_P();
@@ -752,14 +863,15 @@ function drawLines() {
       sphereInter.position.copy(intersects[0].point);
       sphereInter.visible = true;
 
+      //changes the color of the edge after hovering
       if (selectedLine !== intersectedObject) {
         if (selectedLine && !selectedLine.userData.selected) {
-          selectedLine.material.color.set(0x74c0fc);
+          selectedLine.material.color.set(0x74e2fc);
           hoverRing.visible = false;
         }
         selectedLine = intersectedObject;
         if (!selectedLine.userData.selected) {
-          selectedLine.material.color.set(0x00ff00);
+          selectedLine.material.color.set(0x00ff00); //green line
           hoverRing.position.copy(selectedLine.userData.label.position);
           hoverRing.visible = true;
         }
@@ -772,7 +884,7 @@ function drawLines() {
       hoverRing.visible = false;
 
       if (selectedLine && !selectedLine.userData.selected) {
-        selectedLine.material.color.set(0x74c0fc);
+        selectedLine.material.color.set(0x74e2fc);
         hoverRing.visible = false;
       }
       selectedLine = null;
@@ -865,11 +977,18 @@ function animate() {
 }
 animate();
 
+// Update number label rotation to always face the camera
 function updateLabelRotation() {
   chestLabelList.forEach((label) => {
     label.lookAt(camera.position);
   });
+  chestLabelBackgroundList.forEach((label) => {
+    label.lookAt(camera.position);
+  });
   edgeLabelList.forEach((label) => {
+    label.lookAt(camera.position);
+  });
+  edgeLabelBackgroundList.forEach((label) => {
     label.lookAt(camera.position);
   });
   ringList.forEach((label) => {
@@ -956,10 +1075,20 @@ function resetScene() {
     if (label.geometry) label.geometry.dispose();
     if (label.material) label.material.dispose();
   });
+  edgeLabelBackgroundList.forEach((label) => {
+    scene.remove(label);
+    if (label.geometry) label.geometry.dispose();
+    if (label.material) label.material.dispose();
+  });
   ringList.forEach((ring) => {
     scene.remove(ring);
     if (ring.geometry) ring.geometry.dispose();
     if (ring.material) ring.material.dispose();
+  });
+  chestLabelBackgroundList.forEach((label) => {
+    scene.remove(label);
+    if (label.geometry) label.geometry.dispose();
+    if (label.material) label.material.dispose();
   });
 
   // Reset arrays and variables
@@ -968,7 +1097,9 @@ function resetScene() {
   chestLabelList.length = 0;
   edgeList.length = 0;
   edgeLabelList.length = 0;
+  edgeLabelBackgroundList.length = 0;
   ringList.length = 0;
+  chestLabelBackgroundList.length = 0;
 
   // Clear raycaster references
   curRoomUI.disableMouseEventListeners_K_P();
@@ -1012,7 +1143,7 @@ function createHoverElements() {
   sphereInter.visible = false;
   scene.add(sphereInter);
 
-  hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
+  hoverRing = createRing(ringInner, ringOuter, labelDepth, 0x000000);
   hoverRing.visible = false;
   scene.add(hoverRing);
 }
@@ -1055,6 +1186,11 @@ function setUpTutorialModel() {
   curRoomUI.currentAlgorithm = "Kruskal";
   createModels();
   createHoverElements();
+}
+
+function openChatbox() {
+  const chatbox = document.getElementById("chat-question-mark");
+
 }
 
 curRoomUI.callbacks.resetLevel = function (curlvl) {

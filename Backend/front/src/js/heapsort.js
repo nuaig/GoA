@@ -115,6 +115,8 @@ let correctPositions = new Map();
 let currentSwapIndices = null;
 let lastUnsortedIndex = arrayElements.length;
 let currentStep = 0;
+const slidesButton = document.querySelector("#button-algo-slides");
+
 
 // Step 1 : Building Binary Heap Tree
 let currentIndexForBuildingBinaryHeap = 0;
@@ -337,6 +339,11 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 document.addEventListener("DOMContentLoaded", generateArray);
+
+slidesButton.addEventListener("click", () => {
+  console.log(curRoomUI.algoInstructionModal);
+  curRoomUI.openModal(curRoomUI.algoInstructionModal);
+});
 
 let messageTimeoutID = null;
 

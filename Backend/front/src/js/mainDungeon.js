@@ -8,6 +8,15 @@ import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import { gsap } from "gsap";
 
+//colors
+const mapBackgroundColor = "#95bcf6"
+//Size for minimap
+const cameraSize = 150
+//const mapSize = window.innerWidth * 0.16; //size of the overall minimap on the screen
+const viewportWidthPx = document.documentElement.clientWidth;
+//const mapSize = (viewportWidthPx * 0.2); //in px for javascript
+const mapSize = 240;
+
 function hideLoadingScreen() {
   const loadingScreen = document.getElementById("loading-screen");
   loadingScreen.style.opacity = 1;
@@ -109,6 +118,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     focusIcon.style.animation = "none"; // Stop the pulse animation
     focusIcon.classList.remove("focus-effect");
   }
+  setTimeout(hidePanel, 3000);
 });
 
 const controlsTogllerEle = document.querySelector(".Pesudocode-Box-Action");
@@ -758,23 +768,23 @@ signOutHandler.addEventListener("click", async (event) => {
 
 // Mini-map
 const miniMapCamera = new THREE.OrthographicCamera(
-  150 / -2, // left
-  150 / 2, // right
-  150 / 2, // top
-  150 / -2, // bottom
+  cameraSize / -2, // left
+  cameraSize / 2, // right
+  cameraSize / 2, // top
+  cameraSize / -2, // bottom
   1, // near clipping plane
   1000 // far clipping plane
 );
-const scale = 50; // Reduce this value to zoom in
+const scale = 40; // Reduce this value to zoom in
 miniMapCamera.left = -scale;
 miniMapCamera.right = scale;
 miniMapCamera.top = scale;
 miniMapCamera.bottom = -scale;
 miniMapCamera.updateProjectionMatrix();
-miniMapCamera.position.set(0, 250, -10); // Position it above the dungeon
-miniMapCamera.lookAt(new THREE.Vector3(0, 0, -10)); // Look directly down
+miniMapCamera.position.set(0, 250, -2); // Position it above the dungeon
+miniMapCamera.lookAt(new THREE.Vector3(0, 0, -2)); // Look directly down
 const miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
-miniMapRenderer.setSize(350, 350); // Size of the mini-map
+miniMapRenderer.setSize(mapSize, mapSize); // Size of the mini-map
 miniMapRenderer.domElement.id = "miniMapCanvas";
 
 document.body.appendChild(miniMapRenderer.domElement); // Append it to the body or a specific element
@@ -789,9 +799,10 @@ miniMapRenderer.domElement.style.left = "15px";
 //   miniMapCamera.updateProjectionMatrix();
 // }
 
+// map background that covers the actual top-down view
 const mapBackground = new THREE.Mesh(
   new THREE.CircleGeometry(100, 32),
-  new THREE.MeshBasicMaterial({ color: "#868e96" })
+  new THREE.MeshBasicMaterial({ color: mapBackgroundColor })
 );
 mapBackground.rotation.x = -Math.PI / 2;
 scene.add(mapBackground);
@@ -858,3 +869,12 @@ function animate() {
   miniMapRenderer.render(scene, miniMapCamera); // Mini-map rendering
 }
 animate();
+
+//function to hide the notification panel
+function hidePanel() {
+  const notifPanel = document.querySelector(".control-notif");
+  if (notifPanel) {
+    notifPanel.style.display = 'none';
+  }
+  
+}

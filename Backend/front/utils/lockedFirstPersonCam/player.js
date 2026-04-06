@@ -6,7 +6,7 @@ const CENTER_SCREEN = new THREE.Vector2();
 const uiTextHolder = document.querySelector(".UI-Text");
 const roomEnterText = "Click to enter this room!";
 let generalText =
-  "Brave adventurer! Solve the Algorithmic riddles in each room to gather clues and unlock the gate to the treasure!";
+  "Welcome, adventurer! Complete the puzzle in each room to unlock the treasure!";
 const lockedDoorText = "This door is locked. Please try another door.";
 const treasureDoorLockedText =
   "Conquer and master all rooms to ignite every symbol above the door, for only then will the door to the treasure finally unlock.";
@@ -73,6 +73,61 @@ export class Player {
 
     document.addEventListener("keyup", this.onKeyUp.bind(this));
     document.addEventListener("keydown", this.onKeyDown.bind(this));
+
+    //camera locks and player enters click mode
+    this.controls.addEventListener('unlock', () => {
+      console.log('lock');
+      document.querySelectorAll(".panel").forEach(panel => {
+        panel.classList.add('yellow-panel')
+        panel.classList.remove('green-panel');
+      });
+      let textClick = document.getElementById("click-mode");
+      textClick.classList.add('highlight-text');
+      let textMove = document.getElementById("move-mode");
+      textMove.classList.remove('highlight-text');
+
+      let panelMove = document.querySelector(".control-panel-move");
+      panelMove.style.display = "none";
+      let panelClick = document.querySelector(".control-panel-click");
+      panelClick.style.display = "flex";
+
+      let notifPanel = document.querySelector(".control-notif");
+      notifPanel.style.display = "flex";
+      let notifMove = document.querySelector(".move-notif");
+      notifMove.style.display = "none";
+      let notifClick = document.querySelector(".click-notif");
+      notifClick.style.display = "flex";
+
+      setTimeout(hidePanel,  3000);
+    });
+
+    //camera unlock and player enters move mode
+    this.controls.addEventListener('lock', () => {
+      console.log('unlock');
+      document.querySelectorAll(".panel").forEach(panel => {
+        panel.classList.add('green-panel')
+        panel.classList.remove('yellow-panel');
+      });
+      let textClick = document.getElementById("click-mode");
+      textClick.classList.remove('highlight-text');
+      let textMove = document.getElementById("move-mode");
+      textMove.classList.add('highlight-text');
+
+      let panelClick = document.querySelector(".control-panel-click");
+      panelClick.style.display = "none";
+      let panelMove = document.querySelector(".control-panel-move");
+      panelMove.style.display = "flex";
+
+      let notifPanel = document.querySelector(".control-notif");
+      notifPanel.style.display = "flex";
+      let notifClick = document.querySelector(".click-notif");
+      notifClick.style.display = "none";
+      let notifMove = document.querySelector(".move-notif");
+      notifMove.style.display = "flex";
+
+      setTimeout(hidePanel,  3000);
+    });
+
   }
 
   update(dt) {
@@ -182,17 +237,21 @@ export class Player {
     return this.camera.position;
   }
 
+
   onKeyUp(event) {
     switch (event.code) {
       case "Escape":
         if (event.repeat) break;
-        if (this.controls.isLocked) {
-          console.log("unlocking controls");
-          this.controls.unlock();
-        } else {
-          console.log("locking controls");
+        if(!this.controls.isLocked){
           this.controls.lock();
         }
+        // if (this.controls.isLocked) {
+        //   console.log("unlocking controls");
+        //   this.controls.unlock();
+        // } else {
+        //   console.log("locking controls");
+        //   this.controls.lock();
+        // }
         break;
       case "KeyW":
         this.input.z = 0;
@@ -230,4 +289,13 @@ export class Player {
         break;
     }
   }
+}
+
+//function to hide the notification panel
+function hidePanel() {
+  const notifPanel = document.querySelector(".control-notif");
+  if (notifPanel) {
+    notifPanel.style.display = 'none';
+  }
+  
 }
