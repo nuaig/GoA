@@ -986,7 +986,7 @@ function handleEdgeSelection(
       "Incorrect Selection. Make sure to meet the following conditions:";
 
     setTimeout(() => {
-      intersectedObject.material.color.set(0x74c0fc);
+      intersectedObject.material.color.set(0x74e2fc);
       if (intersectedObject.userData.label) {
         intersectedObject.userData.label.material.color.set(0x000000);
       }
@@ -1055,9 +1055,10 @@ function drawLines() {
       sphereInter.position.copy(intersects[0].point);
       sphereInter.visible = true;
 
+      //this code is not used (similar code exists in kruskal.js)
       if (selectedLine !== intersectedObject) {
         if (selectedLine && !selectedLine.userData.selected) {
-          selectedLine.material.color.set(0x74c0fc);
+          selectedLine.material.color.set(0x74e2fc);
           hoverRing.visible = false;
         }
         selectedLine = intersectedObject;
@@ -1075,7 +1076,7 @@ function drawLines() {
       hoverRing.visible = false;
 
       if (selectedLine && !selectedLine.userData.selected) {
-        selectedLine.material.color.set(0x74c0fc);
+        selectedLine.material.color.set(0x74e2fc);
         hoverRing.visible = false;
       }
       selectedLine = null;

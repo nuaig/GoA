@@ -1,22 +1,130 @@
+:root {
+      --chat-bkgd-color: #242A3B; /* Global variable */
+      --chat-heading-text: white;
+      --chat-button-color: #2354DE;
+      --chat-button-text:blue;
+      --chat-border:white;
+      /* Chat styles - change these variables to edit font */
+      --font-chat-heading: 'Inter', sans-serif;
+      --fontsize-chat-heading: 18px;
+      --fontweight-chat-heading: semi-bold;
+      --fontcolor-chat-heading: white;
+      /* Chat Button styles - change these variables to edit font */
+      --font-button: 'Inter', sans-serif;
+      --fontsize-button: 18px;
+      --fontweight-button: regular;
+      --fontcolor-button: white;
+      --fontsize-bot-button: 20px;
+      /* UI styles */
+      --score-box-color: #242A3B;
+      --score-font: 'Inter', sans-serif;
+      --score-font-size: 25px;
+      --color-psuedo-background: #1344ce;
+      --color-psuedo-highlight: ##ffe25b;
+      --color-hover-orange: #ffcb5b;
+      --color-hover-blue: #1766e4;
+      --color-control-panel:#95BCF6;
+      /* Colors for buttons */
+      --color-btn: #393eda;
+      --color-text-dark: #373737;
+      --color-text-light: #e3f4ff;
+      --color-btn-highlight: #637bdb;
+    }
+
 body {
   margin: 0;
   font-family: "Inter", sans-serif;
 }
 
+.control-container {
+  /* background-color: white; */
+  position: absolute;
+  top: 3vh;
+  left: 30vw;
+  width: 40vw;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+  flex-direction: column;
+}
+
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-control-panel);
+  max-width: 100%;
+  width: 20vw;
+  height: fit-content;
+  max-height: 100%;
+  border-radius: 10px;
+  border: 2px solid var(--color-text-light);
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  padding:6px 12px 3px 12px;
+  gap: 0;
+}
+
+.control-panel h3 {
+  margin: 0 0 0 0;
+  font-size: clamp(0.8rem, 1.6vw, 1.5rem);
+  line-height: 1.2;
+}
+
+.control-panel ul {
+  margin: 0px;
+  padding: 0px;
+  list-style-type: none;
+  font-size: clamp(0.7rem, 1.2vw, 1.2rem);
+  line-height: 1.2;
+}
+
+.control-panel li {
+  margin-bottom: 0px;
+}
+
+.inline-icon {
+  vertical-align: middle; /* Aligns the image's middle with the text's middle */
+  width: 45px;            /* Adjust size as needed */
+  height: auto;          
+  margin: 0 0;       
+}
+
+/* Pseudo-code Instructions, located at top right navigation menu */
 .topnav-instructions {
   position: absolute;
-  top: calc(2vh + 75px);
-  left: 83%;
+  /* top: calc(2vh + 75px); */
+  top: calc(10vh + 55px);
+  left: 16%;
   transform: translate(-50%, 0%);
-  background-color: rgb(72, 121, 212);
+  background-color: var(--color-psuedo-background); 
   width: 28%;
   height: 27%;
   border: solid #eaebf1 2px;
+  border-radius: 10px;
   padding: 15px;
-  box-shadow: 0.5rem 0.5rem 0;
+  /* box-shadow: 0.5rem 0.5rem 0; */
   overflow: hidden;
-  /* display: none; */
+  /* display: hidden; */
 }
+
+.room-btn {
+  background-color: var(--color-btn);
+  color: var(--color-text-light);
+  cursor: pointer;
+  border-radius: 20px;
+  font-weight: 300;
+  font-size: 1vw;
+  padding: 0.5vw 1.1vw;
+  border: 1.7px solid var(--color-text-light);
+}
+
+.room-btn:hover {
+  background-color: var(--color-btn-highlight);
+}
+
 
 .tutorial-instructions-modal {
   font-style: monospace;
@@ -33,6 +141,19 @@ body {
   overflow: hidden;
   z-index: 3;
   /* display: none; */
+}
+
+/* Syle for X close button on pseudo-code */
+.button-close-pseudo {
+  color: white;
+  font-weight: semi-bold;
+  position: absolute;
+  right: calc(2vh);
+  top:0%;
+  font-size: 20px;
+  cursor: pointer;
+  pointer-events: auto;
+  /* display: hidden; */
 }
 
 .tutorial-instructions-modal h3 {
@@ -91,7 +212,7 @@ body {
 }
 
 .code-block .function {
-  color: #4ec9b0;
+  color: #ffc745;
 }
 
 .code-block .variable {
@@ -102,7 +223,7 @@ body {
   color: #f1c40f;
 } */
 .highlight {
-  background-color: #1864ab;
+  background-color: #16177a;
   display: inline-block;
 }
 
@@ -286,12 +407,16 @@ body {
 .health-label,
 .score-label {
   text-transform: uppercase;
-  font-size: 18px;
+  font-size: var(--score-font-size);
+  font-family: var(--score-font);
+  letter-spacing: 2px;
+  font-weight: regular;
   padding-bottom: 6px;
 }
 .health {
   float: none;
   flex: 1;
+  font-size: var(--score-font-size);
   padding: 0 1em;
 
   border-right: 1px solid #d0ebff;
@@ -313,6 +438,7 @@ body {
 .score {
   float: none;
   flex: 1;
+  font-size: var(--score-font-size);
   padding: 0 1em;
 }
 
@@ -322,10 +448,274 @@ body {
   padding: 15px;
   text-align: center;
   pointer-events: none;
-  background-color: #343a40;
+  background-color: var(--score-box-color);
   border: solid #eaebf1 2px;
-  font-weight: 600;
   border-radius: 10px;
+}
+
+/* .chat-full-container {
+  display: flex;
+  background-color: red;
+} */
+
+/* Parrot character next to chat box */
+.chat-character {
+  position: fixed;
+  z-index: 50;
+  /* position: absolute; */
+  right: -12%;
+  bottom: -1%;
+  pointer-events: none;
+  
+}
+
+#character-img {
+  width: 75%;
+  height: auto;
+}
+
+/* Container for chat open button */
+.chat-open-button-container {
+  position:absolute;
+  display:flex;
+  z-index: 60;
+  bottom: 3.5vh;
+  right: 1vw;
+  max-width: 20vw;
+
+  pointer-events: none;
+  visibility: visible;
+}
+
+/* Help menu button styling*/
+.button-question-mark {
+  padding: 0.7vw 2.1vw;
+  text-align: center;
+  font-family: var(--font-button);
+  font-size: 20px;
+  border-radius: 30px;
+  background-color: var(--color-btn);
+  font-weight: 400;
+  color: var(--color-text-light);
+  border: 2px solid var(--color-text-light);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+
+/* Hover effect to expand button*/
+.button-question-mark:hover {
+  background-color: var(--color-btn-highlight);
+  
+}
+
+/* Text displayed on hover --- remove later
+.button-question-mark:hover:after {
+  content: "Click for help"; 
+  color: black;
+  position: absolute;
+  font-size: 22px;
+}
+*/
+
+/* Styling for opened chat container */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;  
+  justify-content: space-between;
+  visibility: hidden;
+  width: 20%;
+  height: 75%;
+  position: absolute;
+  right: 2%;
+  bottom: 5%;
+  padding: 15px;
+  text-align: center;
+  pointer-events: none;
+  background-color: var(--chat-bkgd-color);
+  border: solid #eaebf1 2px;
+  border-radius: 20px;
+  
+}
+
+.page-main-algo {
+  position: absolute;
+  visibility: hidden;
+}
+
+.page-home {
+  position: absolute;
+  visibility: hidden;
+}
+
+.page-context{
+  position: absolute;
+  visibility: hidden;
+  color: white;
+}
+
+.page-algo{
+  position: absolute;
+  visibility: hidden;
+  color: white;
+}
+
+.page-pseudo{
+  position: absolute;
+  visibility: hidden;
+  color: white;
+} 
+
+/*Home page button styling */
+#button-home-context {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.chat-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-family: var(--font-chat-heading);
+  font-size: var(--fontsize-chat-heading);
+  font-weight: var(--fontweight-chat-heading);
+  color: var(--fontcolor-chat-heading);
+  /* background-color: red; */
+  padding-left: 5%;
+  padding-right: 5%;
+  padding-top: 8%;
+}
+
+.chat-body {
+  padding-left: 5%;
+  padding-right: 5%;
+  /* background-color: green; */
+  
+}
+
+/* Close chatroom button styling */
+.chat-close-button {
+  position: absolute;
+  top: 0%;
+  right: 0%;
+  font-size: 24px;
+  font-weight: semi-bold;
+  background: none;
+  border: none;
+  color: var(--fontcolor-chat-heading);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.chat-close-button:hover {
+  color: var(--color-hover-orange);
+  /* font-weight: bold; */
+  transform: scale(1.05);
+}
+
+.chat-close-button:active {
+  box-shadow: none;
+  transform: none;
+}
+
+.chat-home-button{
+  position: absolute;
+  top: 0.5%;
+  left: 0%; 
+  font-size: 24px;
+  font-weight: semi-bold;
+  background: none;
+  border: none;
+  color: var(--fontcolor-chat-heading);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.chat-home-button:hover {
+  color: var(--color-hover-orange);
+  /* font-weight: bold;  */
+  transform: scale(1.05);
+}
+
+.chat-home-button:active {
+  box-shadow: none;
+  transform: none;
+}
+
+/* Container to hold chat buttons vertically */
+.container-msgs {
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  align-items: center; /* Center items vertically */
+  gap: 15px; /*Space between buttons*/
+  margin-top: 5%; /* Space from header */
+}
+
+
+/* Individual chat button styling */
+.button-msg {
+  width: 90%; /* Make buttons take full width */
+  font-family: var(--font-button);
+  font-weight: var(--fontweight-button);
+  font-size: var(--fontsize-button); 
+  color: var(--fontcolor-button);
+  padding: 20px;
+  background-color: var(--chat-button-color); /* Button background color */
+  color: white; /* Button text color */
+  border: none; /* Remove default border */
+  border-radius: 10px; /* Rounded corners */
+  cursor: pointer; /* Change cursor on hover */
+  pointer-events: auto;
+}
+
+.button-msg:hover {
+  background-color: var(--color-hover-blue);
+  transform: scale(1.01);
+
+}
+
+.button-msg:active {
+  box-shadow: none;
+  transform: none;
+}
+
+.bot-button {
+  width: 70%;
+  font-family: var(--font-button);
+  font-weight: var(--fontweight-button);
+  font-size: var(--fontsize-bot-button); 
+  background-color: var(--chat-button-color);
+  color: var(--fontcolor-button);
+  border-radius: 10px;
+  border: none;
+  cursor: pointer; /* Change cursor on hover */
+  pointer-events: auto;
+}
+
+.bot-button:hover {
+  background-color: var(--color-hover-orange);
+  color: black;
+  transform: scale(1.01);
+}
+
+.bot-button:active {
+  box-shadow: none;
+  transform: none;
+}
+
+/* For text inside chatbox */
+.chat-text {
+  position: relative;
+  align-items: center;
+  align-content: center;
+  
+  padding-left: 5%;
+  padding-right: 10%;
+  padding-top: 5%;
+  font-size: 22px;
+  text-align: left;
 }
 
 /*Modal*/
@@ -359,7 +749,9 @@ body {
   transform: translate(-50%, -50%);
   max-width: 80rem;
   min-width: 40vw;
-  background-color: #343a40;
+  /* max-height: 10rem; */
+  /* background-color: #343a40; */
+  background-color: var(--score-box-color);
   padding: 2.5rem 3rem;
   box-shadow: 0 4rem 6rem rgba(0, 0, 0, 0.3);
   z-index: 99;
@@ -387,10 +779,14 @@ body {
   padding: 1rem;
 }
 
+/* Modal Header Item*/
 .modal h2 {
   text-transform: uppercase;
-  font-size: 2rem;
   margin-top: 0;
+  font-size: clamp(1.5rem, 2.5vw, 5rem);
+  min-height: 5%;
+  min-width: 80%;
+  /* background-color: red; */
 }
 
 .control__header,
@@ -463,6 +859,7 @@ body {
 
 .button__holder {
   display: flex;
+  /* background-color: red; */
 }
 
 .button__holder .btn {
@@ -702,8 +1099,9 @@ button:active {
   color: #a5d8ff;
   font-size: larger;
   font-family: "Inter", sans-serif;
-  font-size: 20;
+  font-size: 24px;
   font-weight: 300;
+  letter-spacing: 0.5px;
 
   margin: 0;
   line-height: 1.5;
@@ -759,6 +1157,23 @@ button:active {
 .algo-instruction-modal .mySwiper .modal__header {
   margin: 0;
 }
+
+.algo-instruction-modal-single {
+  max-width: 70vw;
+  max-height: 90vh;
+
+  min-width: 60vw;
+  min-height: 80vh;
+  width: 100%;
+  /* height: 5%; */
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .algo-instruction .slide {
   display: flex;
   align-items: center;
@@ -769,11 +1184,68 @@ button:active {
   width: 100%;
 }
 
+.slide-single-container {
+  display: grid;
+  grid-template-columns: repeat(1,1fr);
+  position: relative;
+
+  min-width: 50%;
+  max-width: 80%;
+  max-height: 100%;
+  min-height: 80%;
+  width: 100%;
+
+  padding: 0 0 50px 0;
+  overflow: hidden;  
+}
+
+/* styling to control the visibility of each slide's image */
+.step1 img {
+  visibility: hidden;
+}
+
+.step2 img {
+  visibility: hidden;
+}
+
+.step3 img {
+  visibility: hidden;
+}
+
+.step4 img {
+  visibility: hidden;
+}
+
+.step5 img {
+  visibility: hidden;
+}
+
+
+
 .slide img {
   width: 90%; /* Increase size by 25% */
   height: auto; /* Maintain aspect ratio */
   border-radius: 4%;
 }
+
+/* styling for the slide's invididual containers */
+.slide-single {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: center;
+  display: block;
+  z-index: 1;
+}
+
+/* styling for the slide's svg image */
+.slide-single img {
+  max-width: 100%;
+  max-height: 100%;
+  min-height: 100%;
+  border-radius: 4%;
+  height: 100%;
+}
+
 /* swiper button css */
 .nav-btn {
   height: 40px;

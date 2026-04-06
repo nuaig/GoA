@@ -5,6 +5,12 @@ import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 let font;
 const labels = [];
 
+//colors used in this page
+const textColor = 0xffd700; // Gold color for text
+const labelEdgeColor = 0xffffff; //Color for edge label background circle
+const labelEdgeSize = 1; //Size for edge label background circle
+
+
 export function setFont(loadedFont) {
   font = loadedFont;
 }
@@ -30,6 +36,20 @@ export function createRing(innerRadius, outerRadius, depth, color) {
   ring.rotation.x = -Math.PI / 2;
   ring.visible = false;
   return ring;
+}
+
+// Creates a solid 2D circle to be used as a label background for graph weights
+export function createLabelSolidCircle(position, radius=0.8, color=0xffffff, scene) {
+  const circleGeo = new THREE.CircleGeometry(radius, 32);
+  const circleMaterial = new THREE.MeshBasicMaterial({ color: color });
+  const circle = new THREE.Mesh(circleGeo, circleMaterial);
+  //place slightly behind the number label 
+  circle.position.copy(position);
+  circle.position.y -= 0.1;
+  circle.rotation.x = -Math.PI / 2;
+  
+  scene.add(circle);
+  return circle;
 }
 
 // Function to create text labels
@@ -69,7 +89,7 @@ export function createNodeLabel(
   scene,
   size = 1.2,
   depth = 0.3,
-  color = 0xffd700
+  color = textColor
 ) {
   const textGeometry = new TextGeometry(text, {
     font: font,
@@ -98,7 +118,7 @@ export function updateNodeLabel(
   newText,
   size = 0.35,
   depth = 0.15,
-  color = 0xffd700
+  color = textColor
 ) {
   textMesh.geometry.dispose();
   textMesh.material.dispose();
@@ -138,6 +158,7 @@ export function getRandomColor() {
   return colors[randomIndex];
 }
 
+//never used
 export function updateComponentColors(uf, nodes, componentColors) {
   const newColors = {};
   nodes.forEach((node) => {
@@ -149,10 +170,11 @@ export function updateComponentColors(uf, nodes, componentColors) {
   });
 }
 
+// Draws a line between start and end with a number weight label and background circle
 export function drawLine(startCube, endCube, weight, edge, scene) {
   const lineMaterial = new MeshLineMaterial({
-    color: 0x74c0fc,
-    lineWidth: 0.2, // Set the desired line width
+    color: 0x74e2fc,
+    lineWidth: 0.4, // Set the desired line width
   });
 
   const points = [];
@@ -180,11 +202,14 @@ export function drawLine(startCube, endCube, weight, edge, scene) {
   // Create label in the middle of the line
   const midPoint = new THREE.Vector3(
     (startCube.position.x + endCube.position.x) / 2,
-    (startCube.position.y + endCube.position.y) / 2 + 0.5,
+    (startCube.position.y + endCube.position.y) / 2 + 0.7,
     (startCube.position.z + endCube.position.z) / 2
   );
+
+  // Create a background circle for the label
   const label = createLabel(weight.toString(), midPoint, 0x000000, scene);
-  mesh.userData = { startCube, endCube, label, edge, selected: false }; // Store edge data and selected state
+  const labelBackground = createLabelSolidCircle(midPoint, labelEdgeSize, labelEdgeColor, scene);
+  mesh.userData = { startCube, endCube, label, labelBackground, edge, selected: false }; // Store edge data and selected state
 
   return mesh;
 }
@@ -214,13 +239,15 @@ export function updateLinePosition(mesh, startCube, endCube) {
   // Update the label position
   const midPoint = new THREE.Vector3(
     (startCube.position.x + endCube.position.x) / 2,
-    (startCube.position.y + endCube.position.y) / 2 + 0.5,
+    (startCube.position.y + endCube.position.y) / 2 + 0.7,
     (startCube.position.z + endCube.position.z) / 2
   );
   mesh.userData.label.position.copy(midPoint);
   if (mesh.userData.ring) {
     mesh.userData.ring.position.copy(mesh.userData.label.position);
   }
+  mesh.userData.labelBackground.position.copy(midPoint);
+  mesh.userData.labelBackground.position.y -= 0.1; // Slightly behind the label
 }
 
 // Usage:
@@ -239,7 +266,7 @@ export function isTriangleInequalitySatisfied(a, b, c, margin) {
 // Function to highlight a chest
 export function highlightChest(chest, scene) {
   const circleGeometry = new THREE.CircleGeometry(1, 32);
-  const circleMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+  const circleMaterial = new THREE.MeshBasicMaterial({ color: textColor });
   const circle = new THREE.Mesh(circleGeometry, circleMaterial);
   circle.position.set(
     chest.position.x,
