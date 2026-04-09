@@ -20,30 +20,6 @@ body {
   font-family: "Inter", sans-serif;
 }
 
-.control-notif {
-  position: absolute;
-  top: 2vh;
-  left: 33vw;
-  background-color: var(--color-highlight);
-  border: 2px solid var(--color-text-light);
-  border-radius: 15px;
-  width: 40vw;
-  height: 4vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2vw;
-  font-weight: 550;
-}
-
-.move-notif {
-  display:none;
-}
-
-.click-notif {
-  display: flex;
-}
-
 /* Outer container for panel describing movement controls */
 .control-instruction {
   display: flex;

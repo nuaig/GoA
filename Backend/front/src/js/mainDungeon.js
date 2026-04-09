@@ -87,7 +87,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   const focusIcon = document.querySelector(".Pesudocode-Box-Action");
 
-  setTimeout(hidePanel, 3000);
 });
 
 const controlsTogllerEle = document.querySelector(".Pesudocode-Box-Action");
@@ -839,11 +838,3 @@ function animate() {
 }
 animate();
 
-//function to hide the notification panel
-function hidePanel() {
-  const notifPanel = document.querySelector(".control-notif");
-  if (notifPanel) {
-    notifPanel.style.display = 'none';
-  }
-  
-}
