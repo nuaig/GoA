@@ -50,6 +50,48 @@ body {
   flex-direction: column;
 }
 
+/* A* only: compact heuristic to the right of the control panel (clears action buttons) */
+#heuristic-container.astar-heuristic-container {
+  position: absolute;
+  top: 3vh;
+  right: clamp(11rem, 18vw, 22rem);
+  left: auto;
+  transform: none;
+  z-index: 98;
+  margin: 0;
+  background: rgba(52, 58, 64, 0.95);
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 2px solid var(--color-text-light, #eaebf1);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#heuristic-container.astar-heuristic-container #heuristic-label {
+  color: #a5d8ff;
+  font-weight: 600;
+  font-family: monospace;
+  font-size: clamp(0.68rem, 1.05vw, 0.8rem);
+}
+
+#heuristic-container.astar-heuristic-container #heuristicSelect {
+  background-color: #212529;
+  color: white;
+  border: 1px solid #495057;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-weight: 500;
+  font-size: clamp(0.65rem, 1vw, 0.78rem);
+  cursor: pointer;
+  max-width: min(14rem, 28vw);
+}
+
+#heuristic-container.astar-heuristic-container #heuristicSelect:hover {
+  border-color: #74c0fc;
+}
+
 .control-panel {
   display: flex;
   flex-direction: column;
@@ -328,46 +370,6 @@ body {
   background-color: green !important; /* soft mint green */
   color: #212529 !important; /* dark readable text */
   font-weight: 600;
-}
-
-/* Centered Top Heuristic Dropdown */
-#heuristic-container {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-
-  background: rgba(0, 0, 0, 0.75);
-  padding: 10px 16px;
-  border-radius: 12px;
-  backdrop-filter: blur(6px);
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-#heuristic-label {
-  color: #a5d8ff;
-  font-weight: 600;
-  font-family: monospace;
-}
-
-/* Style the select itself */
-#heuristicSelect {
-  background-color: #212529;
-  color: white;
-  border: 1px solid #495057;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-/* Hover effect */
-#heuristicSelect:hover {
-  border-color: #74c0fc;
 }
 
 .button-nav {

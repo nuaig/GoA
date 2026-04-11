@@ -13,10 +13,158 @@
       <div class="world" id="world"></div>
     </div>
 
+    <div id="header-with-health" class="header">
+        <div class="header-content">
+          <div class="health">
+            <div class="health-label">Lives</div>
+            <div id="health-bar">
+              <img
+                class="health-icon"
+                src="./symbols/health-full-icon.svg"
+                alt="Health Icon"
+                width="20"
+                height="20"
+              />
+              <img
+                class="health-icon"
+                src="./symbols/health-full-icon.svg"
+                alt="Health Icon"
+                width="20"
+                height="20"
+              />
+              <img
+                class="health-icon"
+                src="./symbols/health-full-icon.svg"
+                alt="Health Icon"
+                width="20"
+                height="20"
+              />
+              <img
+                class="health-icon"
+                src="./symbols/health-full-icon.svg"
+                alt="Health Icon"
+                width="20"
+                height="20"
+              />
+              <img
+                class="health-icon"
+                src="./symbols/health-full-icon.svg"
+                alt="Health Icon"
+                width="20"
+                height="20"
+              />
+            </div>
+          </div>
+          <div class="score">
+            <div class="score-label">Score</div>
+            <div class="score-label-2">00</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="header-without-health" class="header hidden">
+        <div class="header-content">
+          <div class="score">
+            <div class="score-label">Score</div>
+            <div class="score-label-2">00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-container">
+        <div class="control-panel">
+          <h3>Controls:</h3>
+          <ul>
+            <li>
+              <img src="symbols/left_drag_yellow_icon.png" alt="left click mouse icon" class="inline-icon" />
+              : Rotate room
+            </li>
+            <li>
+              <img src="symbols/left_click_yellow_icon.png" alt="left click mouse icon" class="inline-icon" />
+              : Select edge
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="heuristic-container" class="astar-heuristic-container">
+        <label for="heuristicSelect" id="heuristic-label">Heuristic:</label>
+        <select id="heuristicSelect">
+          <option value="zero">Zero Heuristic (h=0)</option>
+          <option value="euclid">Euclidean</option>
+          <option value="w_euclid">Weighted Euclidean</option>
+        </select>
+      </div>
+
+    <!-- Container for helper chat (bot right corner)-->
+    <div class="chat-full-container">
+      <div class="chat-open-button-container">
+        <div class="chat-open-button">
+          <button class="button-question-mark" id="chat-open-button">Click for help 🗨️</button>
+        </div>
+      </div>
+    </div>
+
+    <!--Main chat container-->
+    <div class="chat-container">
+      <button class="chat-close-button" id="chat-close-button">X</button>
+      <button class="chat-home-button" id="chat-home-button">Home</button>
+      <div class="page-home" id="chat-homepage-container">
+        <div class="chat-header">
+          <h2>What can I help you with?</h2>
+        </div>
+        <div class="chat-body">
+          <div class="container-msgs">
+            <button class="button-msg" id="button-home-main-algo">Learn more about the A* algorithm.</button>
+            <button class="button-msg" id="button-home-pseudo">View the pseudo-code for the A* algorithm.</button>
+            <button class="button-msg" id="button-home-tutorial">Replay the tutorial.</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-page page-main-algo" id="chat-main-algso-container">
+        <div class="chat-header">
+          <h2>What do you want to know about A*?</h2>
+        </div>
+        <div class="chat-body">
+          <button class="button-msg" id="button-algo-kruskal">What is A*?</button>
+          <button class="button-msg hidden" id="button-algo-context">What is a heuristic?</button>
+          <button class="button-msg hidden" id="button-algo-cycle">What is a cycle?</button>
+          <button class="button-msg hidden" id="button-algo-step">What are the steps?</button>
+          <button class="button-msg" id="button-algo-slides">What are the steps?</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- A* Algorithm Modal with separated slides -->
+    <div class="modal algo-instruction-modal-single hidden">
+      <h2 class="modal__header">A* Algorithm</h2>
+      <div class="slide-single-container">
+        <div class="slide-single step1">
+          <img src="AlgorithmsInstructions/AstarAlgo/1.png" alt="A* Algorithm Step 1" />
+        </div>
+        <div class="slide-single step2">
+          <img src="AlgorithmsInstructions/AstarAlgo/2.png" alt="A* Algorithm Step 2" />
+        </div>
+        <div class="slide-single step3">
+          <img src="AlgorithmsInstructions/AstarAlgo/3.png" alt="A* Algorithm Step 3" />
+        </div>
+        <div class="slide-single step4">
+          <img src="AlgorithmsInstructions/AstarAlgo/4.png" alt="A* Algorithm Step 4" />
+        </div>
+        <div class="slide-single step5">
+          <img src="AlgorithmsInstructions/AstarAlgo/5.png" alt="A* Algorithm Step 5" />
+        </div>
+      </div>
+      <div class="button__holder">
+        <button class="btn btn-algo-instruction-single-close">Close</button>
+      </div>
+    </div>
+
     <div class="topnav-centered">
       <p id="UI-Text" class="UI-Text">
-        Start by selecting node 0, then find the shortest path to every other
-        node in the graph!
+        Start by selecting the source node (node 0), then find the shortest path to the goal using
+        f(n) = g(n) + h(n).
       </p>
       <ul class="UI-Text Hint-Text hidden">
         <li>
@@ -36,7 +184,7 @@
             height="48"
             style="cursor: pointer"
           />
-          Select the edge with the smallest total distance from the start
+          Pick the unvisited node with the smallest f(n) = g(n) + h(n).
         </li>
         <li>
           <img
@@ -55,50 +203,22 @@
             height="48"
             style="cursor: pointer"
           />
-          >Only connect to nodes that haven't been visited yet
+          Relax edges only to neighbors that improve g(n).
         </li>
       </ul>
     </div>
 
-    <!-- Top Right Icons Row -->
+    <!-- Top Right Icons Row (matches Dijkstra: text buttons + hidden pseudo slot) -->
     <div class="Action-Icons-Holder">
       <div class="Action-Icons">
-        <!-- Rearrange Icon -->
-        <img
-          class="Rearrange-Action"
-          src="./symbols/rearrange-icon.svg"
-          alt="Rearrange Icon"
-          width="76"
-          height="76"
-          style="cursor: pointer"
-        />
-        <!-- Psudocode Icon -->
-        <img
-          class="Pesudocode-Icon"
-          src="./symbols/psudocode-icon.svg"
-          alt="Psudocode Icon"
-          width="76"
-          height="76"
-          style="cursor: pointer"
-        />
-        <!-- Instruction Icon -->
-        <img
-          class="Instruction-Icon"
-          src="./symbols/instruction-icon.svg"
-          alt="Instruction Icon"
-          width="76"
-          height="76"
-          style="cursor: pointer"
-        />
-        <!-- Settings Icon -->
-        <img
-          class="settings__icon"
-          src="./symbols/settings-icon.svg"
-          alt="Settings Icon"
-          width="76"
-          height="76"
-          style="cursor: pointer"
-        />
+        <div class="Rearrange-Action">
+          <button class="room-btn">Rearrange chests</button>
+        </div>
+        <div class="Pesudocode-Icon hidden"></div>
+        <div class="Instruction-Icon"></div>
+        <div class="settings__icon">
+          <button class="room-btn">Settings</button>
+        </div>
       </div>
     </div>
 
@@ -117,6 +237,9 @@
 
     <!-- Psudocode Shown when Psudocode Is Pressed -->
     <div class="topnav-instructions pseudo Astar-pseudo hidden">
+      <div class="button-close-pseudo">
+        <p>X</p>
+      </div>
       <pre class="code-block">
 A*:
 1. Goal: Find shortest path from source node "s" to goal node "g"
@@ -153,66 +276,6 @@ f(n) = g(n) + h(n)
 
 At every step, A* selects the unvisited node with the smallest f(n) value, guiding the search intelligently toward the goal.
 </span>      </pre>
-    </div>
-
-    <!-- Top Left Lives -->
-    <div id="header-with-health" class="header">
-      <div class="header-content">
-        <div class="health">
-          <div class="health-label">Lives</div>
-          <div id="health-bar">
-            <img
-              class="health-icon"
-              src="./symbols/health-full-icon.svg"
-              alt="Health Icon"
-              width="20"
-              height="20"
-            />
-            <img
-              class="health-icon"
-              src="./symbols/health-full-icon.svg"
-              alt="Health Icon"
-              width="20"
-              height="20"
-            />
-            <img
-              class="health-icon"
-              src="./symbols/health-full-icon.svg"
-              alt="Health Icon"
-              width="20"
-              height="20"
-            />
-            <img
-              class="health-icon"
-              src="./symbols/health-full-icon.svg"
-              alt="Health Icon"
-              width="20"
-              height="20"
-            />
-            <img
-              class="health-icon"
-              src="./symbols/health-full-icon.svg"
-              alt="Health Icon"
-              width="20"
-              height="20"
-            />
-          </div>
-        </div>
-        <div class="score">
-          <div class="score-label">Score</div>
-          <div class="score-label-2">00</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Top Left Score -->
-    <div id="header-without-health" class="header hidden">
-      <div class="header-content">
-        <div class="score">
-          <div class="score-label">Score</div>
-          <div class="score-label-2">00</div>
-        </div>
-      </div>
     </div>
 
     <!-- Welcome Modal -->
@@ -542,15 +605,6 @@ At every step, A* selects the unvisited node with the smallest f(n) value, guidi
             </thead>
             <tbody></tbody>
           </table>
-        </div>
-
-        <div id="heuristic-container">
-          <label for="heuristicSelect" id="heuristic-label">Heuristic:</label>
-          <select id="heuristicSelect">
-            <option value="zero">Zero Heuristic (h=0)</option>
-            <option value="euclid">Euclidean</option>
-            <option value="w_euclid">Weighted Euclidean</option>
-          </select>
         </div>
 
         <!-- Distance Table -->

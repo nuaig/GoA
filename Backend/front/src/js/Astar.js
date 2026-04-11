@@ -24,6 +24,7 @@ import {
   isTriangleInequalitySatisfied,
   setFont,
   createNodeLabel,
+  createLabelSolidCircle,
   updateNodeLabel,
   createRing,
 } from "../../utils/graphRelated/drawLine.js";
@@ -93,8 +94,10 @@ let chestList = [];
 let openChestList = [];
 let selectedEdgesThisStep = [];
 let chestLabelList = [];
+let chestLabelBackgroundList = [];
 let edgeList = [];
 let edgeLabelList = [];
+let edgeLabelBackgroundList = [];
 let ringList = [];
 let sphereInter;
 const mixers = [];
@@ -117,6 +120,8 @@ const fontLoader = new FontLoader();
 let font;
 let levelTitle;
 const labelDepth = 0.1;
+const labelChestColor = 0x242a3b;
+const labelChesteSize = 1;
 let hoverRing = createRing(0.8, 0.9, labelDepth, 0x000000);
 scene.add(hoverRing);
 let raycaster;
@@ -480,6 +485,13 @@ async function createModels() {
 
     const chestLabel = createNodeLabel(labelText, labelPosition, scene);
     chestLabelList.push(chestLabel);
+    const chestLabelBackground = createLabelSolidCircle(
+      labelPosition,
+      labelChesteSize,
+      labelChestColor,
+      scene,
+    );
+    chestLabelBackgroundList.push(chestLabelBackground);
     debugPrint(`[createModels] Label created for node ${i}.`);
   }
 
@@ -538,6 +550,7 @@ function drawLines() {
     lines.push(line);
     edgeList.push(line);
     edgeLabelList.push(line.userData.label);
+    edgeLabelBackgroundList.push(line.userData.labelBackground);
   });
 
   curRoomUI.disableMouseEventListeners_K_P();
@@ -1037,9 +1050,15 @@ function updateLabelRotation() {
   chestLabelList.forEach((label, i) => {
     label.lookAt(camera.position);
   });
+  chestLabelBackgroundList.forEach((bg) => {
+    bg.lookAt(camera.position);
+  });
 
   edgeLabelList.forEach((label, i) => {
     label.lookAt(camera.position);
+  });
+  edgeLabelBackgroundList.forEach((bg) => {
+    bg.lookAt(camera.position);
   });
 
   ringList.forEach((label, i) => {
@@ -1132,6 +1151,11 @@ function resetScene() {
     if (label.material) label.material.dispose();
     debugPrint(`[resetScene] Removed chest label ${i}`);
   });
+  chestLabelBackgroundList.forEach((label) => {
+    scene.remove(label);
+    if (label.geometry) label.geometry.dispose();
+    if (label.material) label.material.dispose();
+  });
 
   // Remove and dispose edge lines
   edgeList.forEach((edge, i) => {
@@ -1148,6 +1172,11 @@ function resetScene() {
     if (label.material) label.material.dispose();
     debugPrint(`[resetScene] Removed edge label ${i}`);
   });
+  edgeLabelBackgroundList.forEach((label) => {
+    scene.remove(label);
+    if (label.geometry) label.geometry.dispose();
+    if (label.material) label.material.dispose();
+  });
 
   // Remove and dispose selection rings
   ringList.forEach((ring, i) => {
@@ -1161,8 +1190,10 @@ function resetScene() {
   chestList.length = 0;
   openChestList.length = 0;
   chestLabelList.length = 0;
+  chestLabelBackgroundList.length = 0;
   edgeList.length = 0;
   edgeLabelList.length = 0;
+  edgeLabelBackgroundList.length = 0;
   ringList.length = 0;
   debugPrint("[resetScene] Cleared all model and label lists.");
 
@@ -1843,6 +1874,9 @@ reArrangeButton.addEventListener("click", () => {
     chestList[i].position.copy(position);
     openChestList[i].position.copy(position);
     chestLabelList[i].position.copy(position.clone().setY(position.y + 2.5));
+    chestLabelBackgroundList[i].position.copy(
+      position.clone().setY(position.y + 2.4),
+    );
   }
 
   debugPrint(edgeList[0].userData.startCube);

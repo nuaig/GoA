@@ -68,11 +68,6 @@ body {
   /* background-color: purple; */
 }
 
-/* Panel to describe the navigation/movement controls */
-.control-panel {
-  /* height: 100px; */
-}
-
 
 /* ESC key icon */
 .esc-key {
@@ -676,8 +671,15 @@ button:active {
   left: 5vw; */
 }
 
+.Astar-symbol {
+  top: 45px;
+  left: 50px;
+  /* top: 8.5vh;
+  left: 5vw; */
+}
+
 .Dijkstra-symbol {
-  top: 124px;
+  top: 125px;
   left: 50px;
   /* top: 13.5vh;
   left: 5vw; */

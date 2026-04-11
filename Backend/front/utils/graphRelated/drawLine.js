@@ -47,7 +47,8 @@ export function createLabelSolidCircle(position, radius=0.8, color=0xffffff, sce
   circle.position.copy(position);
   circle.position.y -= 0.1;
   circle.rotation.x = -Math.PI / 2;
-  
+  circle.renderOrder = 0;
+
   scene.add(circle);
   return circle;
 }
@@ -78,6 +79,8 @@ function createLabel(text, position, color = 0x000000, scene) {
   // Position the text mesh at the specified position
   textMesh.position.copy(position);
   textMesh.rotation.x = -Math.PI / 2;
+  // Draw after edge backgrounds so weight text stays on top (avoids “empty” white circles)
+  textMesh.renderOrder = 1;
   scene.add(textMesh);
   labels.push(textMesh);
   return textMesh;
@@ -108,6 +111,7 @@ export function createNodeLabel(
   const textMaterial = new THREE.MeshBasicMaterial({ color: color });
   const textMesh = new THREE.Mesh(textGeometry, textMaterial);
   textMesh.position.copy(position);
+  textMesh.renderOrder = 1;
 
   scene.add(textMesh);
   return textMesh;
@@ -206,9 +210,14 @@ export function drawLine(startCube, endCube, weight, edge, scene) {
     (startCube.position.z + endCube.position.z) / 2
   );
 
-  // Create a background circle for the label
+  // Background first, then text — so weight stays visible on top of the white disk
+  const labelBackground = createLabelSolidCircle(
+    midPoint,
+    labelEdgeSize,
+    labelEdgeColor,
+    scene
+  );
   const label = createLabel(weight.toString(), midPoint, 0x000000, scene);
-  const labelBackground = createLabelSolidCircle(midPoint, labelEdgeSize, labelEdgeColor, scene);
   mesh.userData = { startCube, endCube, label, labelBackground, edge, selected: false }; // Store edge data and selected state
 
   return mesh;
