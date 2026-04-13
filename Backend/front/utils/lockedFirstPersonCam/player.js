@@ -273,3 +273,12 @@ export class Player {
     }
   }
 }
+
+//function to hide the notification panel
+function hidePanel() {
+  const notifPanel = document.querySelector(".control-notif");
+  if (notifPanel) {
+    notifPanel.style.display = 'none';
+  }
+  
+}
