@@ -87,38 +87,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   const focusIcon = document.querySelector(".Pesudocode-Box-Action");
 
-  // Check if the effect has already been shown
-  const effectShown = localStorage.getItem("effectShown");
-
-  if (!effectShown) {
-    // Create and append the overlay
-    const overlay = document.createElement("div");
-    overlay.classList.add("focus-overlay");
-    document.body.appendChild(overlay);
-
-    // Function to remove the pulse effect and overlay
-    // Function to remove the pulse effect, overlay, and reset z-index
-    function removeFocusEffectAndShowControls() {
-      overlay.remove(); // Remove the overlay
-      focusIcon.style.animation = "none"; // Stop the pulse animation
-      focusIcon.classList.remove("focus-effect"); // Remove the class if it still exists
-
-      // Revert the z-index to default
-      focusIcon.style.zIndex = "1"; // Or use the initial/default z-index value
-
-      openModal(controlsModal);
-
-      // Store a flag in localStorage to indicate the effect has been shown
-      localStorage.setItem("effectShown", "true");
-    }
-
-    // Remove focus mode after a certain time or on click
-    focusIcon.addEventListener("click", removeFocusEffectAndShowControls);
-  } else {
-    focusIcon.style.animation = "none"; // Stop the pulse animation
-    focusIcon.classList.remove("focus-effect");
-  }
-  setTimeout(hidePanel, 3000);
 });
 
 const controlsTogllerEle = document.querySelector(".Pesudocode-Box-Action");
@@ -886,11 +854,3 @@ function animate() {
 }
 animate();
 
-//function to hide the notification panel
-function hidePanel() {
-  const notifPanel = document.querySelector(".control-notif");
-  if (notifPanel) {
-    notifPanel.style.display = 'none';
-  }
-  
-}

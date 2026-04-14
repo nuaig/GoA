@@ -20,30 +20,6 @@ body {
   font-family: "Inter", sans-serif;
 }
 
-.control-notif {
-  position: absolute;
-  top: 2vh;
-  left: 33vw;
-  background-color: var(--color-highlight);
-  border: 2px solid var(--color-text-light);
-  border-radius: 15px;
-  width: 40vw;
-  height: 4vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2vw;
-  font-weight: 550;
-}
-
-.move-notif {
-  display:none;
-}
-
-.click-notif {
-  display: flex;
-}
-
 /* Outer container for panel describing movement controls */
 .control-instruction {
   display: flex;
@@ -558,17 +534,6 @@ button:active {
   }
 }
 
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-  }
-}
 
 /* To prevent the overlay from covering the pulsing icon */
 .Pesudocode-Box-Action {
@@ -578,20 +543,6 @@ button:active {
   animation: pulse 1.5s infinite;
 }
 
-/* Optional: Add transition to overlay to make it smoother */
-.focus-overlay {
-  transition: opacity 0.3s ease;
-}
-
-.focus-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
-  z-index: 999; /* Ensure it is above everything else */
-}
 
 /* Sub Menu */
 .sub-menu-wrap {
@@ -658,8 +609,8 @@ button:active {
 
 /* Each symbol is manually positioned onto the screen over the map*/
 .heapsort-symbol {
-  top: 124px;
-  left: 214px;
+  top: 102px;
+  left: 212px;
   /* top: 5.7em;
   left: 10.5em; */
 }
