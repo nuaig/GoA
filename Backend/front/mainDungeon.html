@@ -15,7 +15,6 @@
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
   </head>
   <body>
-    <!-- <a target="_blank" href="https://icons8.com/icon/67410/synchronize">Synchronize</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a> -->
     <div id="Renderer">
       <div id="World">
         <div class ="control-instruction"> 
@@ -26,16 +25,13 @@
               </div>
               <div class = "esc-key">ESC</div>
               <div class = "panel-text">
-                <p>key to change mode</p>
+                <p>key for Settings</p>
               </div>
             </div>
           </div>
           <div class = "panel">
             <div class = "mode-text">
-              <p id = "click-mode">Click Mode</p>
-              <p>/</p>
-              <p id = "move-mode">Move Mode</p>
-              <!-- <div class = "move-hover-target mode-descr"> Move Mode: walk around in this mode. </div> -->
+              <p id = "move-mode">Movement Controls</p>
             </div>
             <div class = "control-panel">
               <div class = "control-panel-move">
@@ -48,17 +44,10 @@
                   </div>
                   <label>Move</label>
                 </div>
-
                 <div class="camera-section">
                   <div class="cursor-icon">🖱️</div>
                   <label>Turn Camera</label>
                 </div>
-              </div>
-              <div class = "control-panel-click">
-                <div class = "click-icon">
-                  <img src="public/symbols/cursor-click-icon.svg" alt="Click using cursor to interact"/>
-                </div>
-                <label>Click to interact with items</label>
               </div>
             </div>
           </div>
@@ -68,22 +57,6 @@
           <p id="UI-Text" class="UI-Text">
             Complete the puzzle in each room to unlock the treasure!
           </p>
-        </div>
-        <!--BUTTONS at top right of screen-->
-        <div class="Action-Icons-Holder">
-          <div class="Action-Icons">
-            <div class = "Leaderboard-icon">
-              <button class = "main-dungeon-btn">Leaderboard</button>
-            </div>
-            <!-- This is incorrectly named. It should be the Control Information Btn-->
-             <!-- Keeping it hidden for now. Can delete after finalizing change.-->
-            <div class = "Pesudocode-Box-Action hidden">
-              <button>Information</button>
-            </div>
-            <div class = "settings__icon">
-              <button class = "main-dungeon-btn">Settings</button>
-            </div>
-          </div>
         </div>
         <div class="overlay hidden"></div>
         <div class="modal modal__control hidden">
@@ -227,6 +200,26 @@
             />
           </svg>
         </div>
+        <div class="modal modal-esc-menu hidden">
+          <h2 class="modal__header menu__header">Settings Menu</h2>
+          <div class="button__holder">
+            <button class="btn btn__leaderboard">Leaderboard</button>
+          </div>
+          <div class="button__holder">
+            <button class="btn btn__map__game__instruction">
+              Map & Instructions
+            </button>
+          </div>
+          <div class="button__holder">
+            <button class="btn btn__dashboard">Dashboard</button>
+          </div>
+          <div class="button__holder">
+            <button class="btn btn__sign_out">Sign Out</button>
+          </div>
+          <div class="button__holder">
+            <button class="esc-menu-close-btn btn__close">Close Menu</button>
+          </div>
+        </div>
         <div class="modal modal__settings hidden">
           <h2 class="modal__header settings__header">Settings</h2>
           <div class="button__holder">
@@ -265,7 +258,7 @@
           <div class="button__holder">
             <!-- <button class="btn btn__again">Try again</button> -->
             <button class="btn btn__game__instruction__start">
-              Start the game &rarr;
+              Close
             </button>
           </div>
         </div>
