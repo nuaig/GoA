@@ -937,8 +937,7 @@ body {
 }
 
 .instruction {
-  max-width: 90vw;
-  width: 65rem;
+  max-height: 100rem;
 }
 
 .instruction__img {
