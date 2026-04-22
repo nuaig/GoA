@@ -95,14 +95,9 @@ export class Player {
     //pointer unlocked, camera cannot move. show menu
     this.controls.addEventListener('unlock', () => {
       console.log("controls unlocked");
-      
+
       //open settings modal
       openModal2(escMenuModal);
-
-      //hide movement control instructions
-      let controlInstructions = document.querySelector(".control-instruction");
-      controlInstructions.style.display = "none";
-
     });
 
     //pointer locked. camera moves. hide menu
@@ -114,11 +109,6 @@ export class Player {
       if(leaderboardModel){
         closeModal2(leaderboardModel);
       }
-      
-
-      //show movement control instructions
-      let controlInstructions = document.querySelector(".control-instruction");
-      controlInstructions.style.display = "flex";
     });
 
     //Close button in settings modal closes menu 
@@ -126,8 +116,13 @@ export class Player {
       this.controls.lock();
      }
     );
+    // Lock controls on first click without auto-opening settings at login.
+    const lockOnFirstClick = () => {
+      this.controls.lock();
+      document.removeEventListener("click", lockOnFirstClick);
+    };
+    document.addEventListener("click", lockOnFirstClick);
 
-    openModal2(escMenuModal); // start game with sesttings
   }
 
   update(dt) {
