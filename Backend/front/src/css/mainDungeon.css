@@ -26,8 +26,8 @@ body {
   flex-direction: column;
   gap: 5px;
   position: absolute;
-  top: 12vh;
-  right: 0.1vw;
+  top: 1.5vh;
+  right: 0vw;
   display: hidden;
   width: 20vw;
   height: 20vh;
@@ -43,12 +43,6 @@ body {
   max-width: 90%;
   /* background-color: purple; */
 }
-
-/* Panel to describe the navigation/movement controls */
-.control-panel {
-  /* height: 100px; */
-}
-
 
 /* ESC key icon */
 .esc-key {
@@ -85,39 +79,13 @@ body {
   color: var(--color-panel-dark);
 }
 
-/* .move-hover-target {
-  display:none;
-  background-color: white;
-  border: 1px solid black;
-  border-radius: 15px;
-}
-
-#move-hover-source:hover + .move-hover-target {
-  display: block;
-} */
-
-.highlight-text {
-  /* color: red; */
-  color: black;
-  background-color: var(--color-highlight);
-  border-radius: 18px;
-  padding: 2px 5px;
-  /* font-weight: bold; */
-
-}
-
 /* visual for a panel in the control panel layout */
 .panel {
   display: grid;
   place-items: center;
-  background-color: var(--color-click-panel);  
+  background-color: var(--color-move-panel);  
   border-radius: 18px;
-  display: hidden;
   max-width: 90%;
-}
-
-.yellow-panel {
-  background-color: var(--color-click-panel);
 }
 
 .green-panel {
@@ -151,14 +119,13 @@ body {
     height: 2.5vw;
   }
 
-
   /* W key sits in center of top row */
   .key-w { grid-column: 2; grid-row: 1; }
   .key-a { grid-column: 1; grid-row: 2; }
   .key-s { grid-column: 2; grid-row: 2; }
   .key-d { grid-column: 3; grid-row: 2; }
 
-  .move-section label, .camera-section label, .control-panel-click label {
+  .move-section label, .camera-section label, .control-panel-move label {
     font-size: 1.1vw;
     font-weight: bold;
     text-align: center;
@@ -175,53 +142,14 @@ body {
   }
 
 .control-panel-move {
-  /* visibility: hidden; */
-  /* position: absolute; */
   display: flex;
   align-items: center;
   justify-content: space-around;
   padding: 0.5vw;
   gap: 0.5vw;
   max-width: 90%;
-  display: none; 
 }
 
-.control-panel-click {
-  /* position: absolution; */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* padding: 0.5vw; */
-  max-width: 95%;
-  /* padding: 1.5vw; */
-}
-
-.click-icon img {
-  width: 4vw;
-}
-
-/* outer container for top right icons */
-.Action-Icons-Holder {
-  position: absolute;
-  top: 2vh;
-  right: 0.5vw;
-  border-radius: 10px;
-  padding: 0 15px;
-}
-
-/*contianer for icons on top right */
-.Action-Icons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/*individual container for icons on top right */
-.Action-Icons-Holder svg {
-  width: 75px;
-  height: 75px;
-  cursor: pointer;
-}
 
 /* Styling for buttons in main dungeon */
 .main-dungeon-btn {
@@ -263,7 +191,7 @@ body {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
-  z-index: 100;
+  z-index: 9;
   transition: all 0.5s;
 }
 
@@ -285,7 +213,8 @@ body {
 .settings__header,
 .leaderboard__header,
 .level__selection__header,
-.game__completion__header {
+.game__completion__header,
+.menu__header {
   color: #a5d8ff;
   border-bottom: solid #a5d8ff;
 }
@@ -300,20 +229,30 @@ body {
   width: 35rem;
 }
 .game-instruction-modal {
-  max-width: 90vw;
-  width: 65rem;
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  max-height: 50rem;
 }
 
-.instruction__img {
-  width: 65rem;
-  max-width: 100%; /* Prevent overflow */
-  height: auto; /* Maintain aspect ratio */
+.instruction__img { 
+  max-width: 100%;
+  height: auto; /* Maintains aspect ratio automatically */
+  display: block; /* Removes bottom gap */
 }
 
 .modal__leaderboard,
-.modal__settings {
+.modal__settings
+.modal-esc-menu {
   max-width: 80vw;
   width: 35rem;
+}
+
+.modal-esc-menu {
+  z-index: 10;
+}
+.modal__leaderboard {
+  z-index: 11;
 }
 
 /* Leaderboard Modal */
@@ -388,6 +327,7 @@ body {
 
 .button__holder {
   display: flex;
+  justify-content: center;
 }
 
 .button__holder .btn {
@@ -403,6 +343,15 @@ body {
   right: 20px; /* Adjust to your liking */
   cursor: pointer;
   transform: translate(0, 0); /* Ensure proper alignment */
+}
+
+.esc-menu-close-btn {
+  background-color: #1a896a;
+  border: none;
+  color: white;
+  border-radius: 25px;
+  text-align: center;
+  max-width: 50%;
 }
 
 .btn p {

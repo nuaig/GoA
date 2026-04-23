@@ -153,35 +153,36 @@ gameInstructionStartButton.addEventListener("click", () => {
   closeModal(gameInstructionModal);
 });
 
-controlsTogllerEle.addEventListener("click", () => {
-  openModal(controlsModal);
-});
+//EMILY
+// controlsTogllerEle.addEventListener("click", () => {
+//   openModal(controlsModal);
+// });
 
-controlsCloseButton.addEventListener("click", () => {
-  closeModal(controlsModal);
-});
+// controlsCloseButton.addEventListener("click", () => {
+//   closeModal(controlsModal);
+// });
 
-settingsCloseButton.addEventListener("click", () => {
-  closeModal(settingsModal);
-});
+// settingsCloseButton.addEventListener("click", () => {
+//   closeModal(settingsModal);
+// });
 
 leaderboardCloseButton.addEventListener("click", () => {
   closeModal(leaderboardModal);
 });
 
-leaderboardTogglerIconEle.addEventListener("click", () => {
-  openModal(leaderboardModal);
-});
+// leaderboardTogglerIconEle.addEventListener("click", () => {
+//   openModal(leaderboardModal);
+// });
 
 leaderboardButtonEle.addEventListener("click", () => {
-  closeModal(settingsModal);
+  // closeModal(settingsModal);
   openModal(leaderboardModal);
 });
 
-// Event listener for opening the settings modal
-settingsTogglerEle.addEventListener("click", () => {
-  openModal(settingsModal);
-});
+// // Event listener for opening the settings modal
+// settingsTogglerEle.addEventListener("click", () => {
+//   openModal(settingsModal);
+// });
 
 gameInstructionSettingsButton.addEventListener("click", () => {
   closeModal(settingsModal);
