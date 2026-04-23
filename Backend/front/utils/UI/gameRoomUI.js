@@ -105,6 +105,12 @@ class GameRoomUI {
     this.reArrangeButton = document.querySelector(".Rearrange-Action");
     this.helpInstructionButton = document.querySelector(".Instruction-Icon");
 
+    //Settings Menu Modal
+    this.escMenuModal = document.querySelector(".modal-esc-menu");
+    this.escMenuCloseButton = document.querySelector(
+      ".modal-esc-menu .btn__close"
+    );
+
     // Tutorial Modal
     this.tutorialInstructionModal = document.querySelector(
       ".tutorial-instructions-modal"
@@ -210,6 +216,12 @@ class GameRoomUI {
     this.openModal(this.tutorialModal);
   }
 
+  // NOTES FOR EMILY ON MODALS
+  /**
+   * Use 1 function to contain all event listeners for modal (put it in function below)
+   * have individual function for each action within the modal (ex: close, open)
+   * add close to closeAllModals()
+   */
   /**
    * Adds event listeners for buttons and UI interactions.
    */
@@ -952,6 +964,26 @@ class GameRoomUI {
     const pseudoModal = document.querySelector(".pseudo");
     pseudoModal.classList.add("hidden");
   }
+
+  // ------ (Esc) Settings Menu Modal  ------
+  //Adds event listerners for the menu settings modal.
+  //Hangles opening and closing the modal. 
+  // addAllEventListenersEscMenuModal() {
+  //   this.listenEventSettingsModalOpen();
+  // }
+
+  /**
+   * Adds an event listener for opening the settings modal.
+   * - When the escape button is pressed, the settings modal is opened.
+   */
+  // listenEventEscMenuModalOpen() {
+  //   this.settingsTogglerEle.addEventListener("click", () => {
+  //     if(!this.escMenuModal.checkVisibility()){
+  //       this.openModal(this.escMenuModal);
+  //     }
+      
+  //   });
+  // }
 
   // -------Setting Modal--------
   /**

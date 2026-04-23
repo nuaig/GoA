@@ -8,22 +8,22 @@
     <script type="module" src="src/js/dijkstra.js"></script>
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
   </head>
-  <body>
+  <body class="dijkstra-room">
     <div id="Renderer">
       <div class="world" id="world"></div>
     </div>
     <!-- Container for control instruction panel in dungeon -->
     <div class = "control-container">
-      <div class = "control-panel">
+      <div class = "control-panel dijkstra-control-panel">
         <h3>Controls:</h3>
         <ul>
           <li>
-            <img src="symbols/left_drag_yellow_icon.png" alt="left click mouse icon" class="inline-icon">
-             : Rotate room
+            <img src="symbols/left_drag_yellow_icon.png" alt="Left click drag icon" class="inline-icon">
+             Left Click & Drag Room : Rotate room
             </li>
           <li>
-            <img src="symbols/left_click_yellow_icon.png" alt="left click mouse icon" class="inline-icon">
-            : Select edge
+            <img src="symbols/left_click_yellow_icon.png" alt="Left click icon" class="inline-icon">
+            Left Click : Click on Edges & Chests
           </li>
         </ul>
       </div>

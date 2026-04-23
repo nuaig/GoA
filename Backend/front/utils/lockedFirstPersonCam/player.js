@@ -74,47 +74,60 @@ export class Player {
     document.addEventListener("keyup", this.onKeyUp.bind(this));
     document.addEventListener("keydown", this.onKeyDown.bind(this));
 
-    //camera locks and player enters click mode
+    const overlay = document.querySelector(".overlay") //screen blur when in settings modal is open
+    let escMenuModal = document.querySelector(".modal-esc-menu"); //settings modal
+    let escMenuModalCloseBtn = document.querySelector(".modal-esc-menu .btn__close"); //close button in settings modal
+    let leaderboardModel = document.querySelector(".modal__leaderboard");
+
+    //open settings modal
+    let openModal2 = function (modalType) {
+      modalType.classList.remove("hidden");
+      overlay.classList.remove("hidden");
+
+    };
+
+    //close settings modal 
+    let closeModal2 = function (modalType) {
+      modalType.classList.add("hidden");
+      overlay.classList.add("hidden");
+    };
+
+    //pointer unlocked, camera cannot move. show menu
     this.controls.addEventListener('unlock', () => {
-      console.log('lock');
-      document.querySelectorAll(".panel").forEach(panel => {
-        panel.classList.add('yellow-panel')
-        panel.classList.remove('green-panel');
-      });
-      let textClick = document.getElementById("click-mode");
-      textClick.classList.add('highlight-text');
-      let textMove = document.getElementById("move-mode");
-      textMove.classList.remove('highlight-text');
+      console.log("controls unlocked");
 
-      let panelMove = document.querySelector(".control-panel-move");
-      panelMove.style.display = "none";
-      let panelClick = document.querySelector(".control-panel-click");
-      panelClick.style.display = "flex";
-
+      //open settings modal
+      openModal2(escMenuModal);
     });
 
-    //camera unlock and player enters move mode
+    //pointer locked. camera moves. hide menu
     this.controls.addEventListener('lock', () => {
-      console.log('unlock');
-      document.querySelectorAll(".panel").forEach(panel => {
-        panel.classList.add('green-panel')
-        panel.classList.remove('yellow-panel');
-      });
-      let textClick = document.getElementById("click-mode");
-      textClick.classList.remove('highlight-text');
-      let textMove = document.getElementById("move-mode");
-      textMove.classList.add('highlight-text');
+      console.log("controls locked");
 
-      let panelClick = document.querySelector(".control-panel-click");
-      panelClick.style.display = "none";
-      let panelMove = document.querySelector(".control-panel-move");
-      panelMove.style.display = "flex";
+      //close settings modal
+      closeModal2(escMenuModal);
+      if(leaderboardModel){
+        closeModal2(leaderboardModel);
+      }
     });
+
+    //Close button in settings modal closes menu 
+    escMenuModalCloseBtn.addEventListener("click", () => {
+      this.controls.lock();
+     }
+    );
+    // Lock controls on first click without auto-opening settings at login.
+    const lockOnFirstClick = () => {
+      this.controls.lock();
+      document.removeEventListener("click", lockOnFirstClick);
+    };
+    document.addEventListener("click", lockOnFirstClick);
 
   }
 
   update(dt) {
     if (this.controls.isLocked === true) {
+      // console.log(this.controls.isLocked);
       // Calculate the forward and right vectors based on the camera's direction
       const forward = new THREE.Vector3();
       this.camera.getWorldDirection(forward); // Forward direction based on camera orientation
@@ -224,15 +237,15 @@ export class Player {
   onKeyUp(event) {
     switch (event.code) {
       case "Escape":
-        if (event.repeat) break;
-        if(!this.controls.isLocked){
-          this.controls.lock();
-        }
-        // if (this.controls.isLocked) {
-        //   console.log("unlocking controls");
+        console.log("Esc pressed.");
+        this.controls.lock();
+        // if (event.repeat) break;
+        //controls need to be locked to move
+        // if(this.controls.isLocked == true) {
+        //   console.log("controls locked");
         //   this.controls.unlock();
         // } else {
-        //   console.log("locking controls");
+        //   console.log("controls unlocked");
         //   this.controls.lock();
         // }
         break;
@@ -272,13 +285,4 @@ export class Player {
         break;
     }
   }
-}
-
-//function to hide the notification panel
-function hidePanel() {
-  const notifPanel = document.querySelector(".control-notif");
-  if (notifPanel) {
-    notifPanel.style.display = 'none';
-  }
-  
 }
