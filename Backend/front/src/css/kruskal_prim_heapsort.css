@@ -83,6 +83,115 @@ body {
   margin-bottom: 0px;
 }
 
+/* Dijkstra-only control panel sizing */
+.dijkstra-room .dijkstra-control-panel {
+  width: min(90vw, 42rem);
+  height: auto;
+  padding: 0.45rem 1rem;
+  box-sizing: border-box;
+}
+
+.dijkstra-room .dijkstra-control-panel ul {
+  text-align: center;
+  width: 100%;
+}
+
+.dijkstra-room .dijkstra-control-panel li {
+  white-space: normal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.dijkstra-room .dijkstra-control-panel .inline-icon {
+  width: clamp(24px, 2vw, 34px);
+}
+
+/* Kruskal/Prim-only control panel sizing */
+.kruskal-room .kruskal-control-panel,
+.prim-room .prim-control-panel {
+  width: min(90vw, 42rem);
+  height: auto;
+  padding: 0.45rem 1rem;
+  box-sizing: border-box;
+}
+
+.kruskal-room .kruskal-control-panel ul,
+.prim-room .prim-control-panel ul {
+  text-align: center;
+  width: 100%;
+}
+
+.kruskal-room .kruskal-control-panel li,
+.prim-room .prim-control-panel li {
+  white-space: normal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.kruskal-room .kruskal-control-panel .inline-icon,
+.prim-room .prim-control-panel .inline-icon {
+  width: clamp(24px, 2vw, 34px);
+}
+
+/* Dijkstra-only responsive layout for hints/tables */
+.dijkstra-room .topnav-centered {
+  top: auto;
+  bottom: clamp(0.75rem, 2vh, 1.5rem);
+  left: 54%;
+  transform: translateX(-50%);
+  width: min(58vw, 56rem);
+  padding: clamp(0.75rem, 1.5vw, 1.2rem);
+}
+
+.dijkstra-room #tables-container {
+  left: clamp(0.5rem, 1.2vw, 1rem) !important;
+  bottom: clamp(0.75rem, 2vh, 1.5rem) !important;
+}
+
+@media (max-width: 1200px) {
+  .dijkstra-room .topnav-centered {
+    left: 50%;
+    width: min(94vw, 56rem);
+  }
+
+  .dijkstra-room #tables-container {
+    left: 50% !important;
+    transform: translateX(-50%);
+    bottom: calc(clamp(0.75rem, 2vh, 1.5rem) + clamp(8rem, 16vh, 11rem))
+      !important;
+    width: min(94vw, 44rem);
+  }
+
+  .dijkstra-room #tables-container > div {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .dijkstra-room #tables-container {
+    bottom: calc(clamp(0.75rem, 2vh, 1.5rem) + clamp(10rem, 21vh, 14rem))
+      !important;
+  }
+
+  .dijkstra-room #tables-container > div {
+    grid-template-columns: 1fr;
+  }
+}
+
 .inline-icon {
   vertical-align: middle; /* Aligns the image's middle with the text's middle */
   width: 45px;            /* Adjust size as needed */
