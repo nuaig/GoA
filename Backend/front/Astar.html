@@ -8,7 +8,7 @@
     <script type="module" src="src/js/Astar.js"></script>
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
   </head>
-  <body>
+  <body class="astar-room">
     <div id="Renderer">
       <div class="world" id="world"></div>
     </div>
@@ -72,27 +72,27 @@
       </div>
 
       <div class="control-container">
-        <div class="control-panel">
+      <div class="control-panel dijkstra-control-panel">
           <h3>Controls:</h3>
           <ul>
             <li>
-              <img src="symbols/left_drag_yellow_icon.png" alt="left click mouse icon" class="inline-icon" />
-              : Rotate room
+              <img src="symbols/left_drag_yellow_icon.png" alt="Left click drag icon" class="inline-icon" />
+              Left Click & Drag Room : Rotate room
             </li>
             <li>
-              <img src="symbols/left_click_yellow_icon.png" alt="left click mouse icon" class="inline-icon" />
-              : Select edge
+              <img src="symbols/left_click_yellow_icon.png" alt="Left click icon" class="inline-icon" />
+              Left Click : Click on Edges & Chests
             </li>
           </ul>
         </div>
       </div>
 
       <div id="heuristic-container" class="astar-heuristic-container">
-        <label for="heuristicSelect" id="heuristic-label">Heuristic:</label>
+        <label for="heuristicSelect" id="heuristic-label">h:</label>
         <select id="heuristicSelect">
-          <option value="zero">Zero Heuristic (h=0)</option>
-          <option value="euclid">Euclidean</option>
-          <option value="w_euclid">Weighted Euclidean</option>
+          <option value="zero">0</option>
+          <option value="euclid">Euc</option>
+          <option value="w_euclid">1.5Euc</option>
         </select>
       </div>
 
@@ -490,7 +490,7 @@ At every step, A* selects the unvisited node with the smallest f(n) value, guidi
     <!-- Start Game Modal -->
     <div class="modal instruction hidden">
       <img
-        class="instruction__img_Astar"
+        class="instruction__img_djkstra instruction__img_Astar"
         src="GameFeatures/Astar-game-features.png"
         alt="A* Game Features"
       />
@@ -549,95 +549,79 @@ At every step, A* selects the unvisited node with the smallest f(n) value, guidi
     </div>
     <div class="overlay hidden"></div>
 
-    <!-- Edge Table UI -->
+    <!-- A* Tables -->
     <div
-      id="tables-container"
-      class="edge-table-container"
+      id="astar-tables-wrapper"
       style="
         display: none;
         position: absolute;
         bottom: 10px;
         left: 10px;
-        background: #343a40;
-        color: white;
-        padding: 10px;
-        border-radius: 8px;
         z-index: 99;
       "
     >
+      <!-- Priority Queue UI -->
       <div
+        id="priority-queue-container"
+        class="priority-queue-container"
         style="
-          position: absolute;
-          bottom: 10px;
-          left: 10px;
-          right: 10px;
-          display: flex;
-          gap: 20px;
-          justify-content: space-between;
-          z-index: 99;
-          font-family: monospace;
+          background: #343a40;
+          color: white;
+          padding: 10px;
+          border-radius: 8px;
         "
       >
-        <!-- Edge Table -->
-        <div
-          style="
-            background: #343a40;
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            flex: 1;
-          "
+        <h3 style="margin: 0 0 10px 0">Priority Queue</h3>
+        <table
+          id="priorityQueueTable"
+          border="1"
+          cellpadding="5"
+          cellspacing="0"
+          style="border-collapse: collapse; width: 100%; font-family: monospace"
         >
-          <h3 style="margin: 0 0 10px 0">Graph Edges</h3>
-          <table
-            id="edgeTable"
-            border="1"
-            cellpadding="5"
-            cellspacing="0"
-            style="border-collapse: collapse; width: 100%"
-          >
-            <thead>
-              <tr style="background-color: #1971c2">
-                <th>From</th>
-                <th>To</th>
-                <th>Weight</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+          <thead>
+            <tr style="background-color: #1971c2">
+              <th>Node</th>
+              <th>g(n)</th>
+              <th>h(n)</th>
+              <th>f(n)</th>
+            </tr>
+          </thead>
+          <tbody id="priority-queue-body">
+            <!-- Queue rows will be inserted here -->
+          </tbody>
+        </table>
+      </div>
 
-        <!-- Distance Table -->
-        <div
-          style="
-            background: #343a40;
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            flex: 1;
-          "
+      <!-- Settled g(n) Tracker -->
+      <div
+        id="settled-g-container"
+        class="settled-g-container"
+        style="
+          background: #343a40;
+          color: white;
+          padding: 10px;
+          border-radius: 8px;
+        "
+      >
+        <h3 style="margin: 0 0 10px 0">Visited g(n)</h3>
+        <table
+          id="settledGTable"
+          border="1"
+          cellpadding="5"
+          cellspacing="0"
+          style="border-collapse: collapse; width: 100%; font-family: monospace"
         >
-          <h3 style="margin: 0 0 10px 0">A* Values</h3>
-          <table
-            id="distanceTable"
-            border="1"
-            cellpadding="5"
-            cellspacing="0"
-            style="border-collapse: collapse; width: 100%"
-          >
-            <thead>
-              <tr style="background-color: #1971c2">
-                <th>Node</th>
-                <th>g(n)</th>
-                <th>h(n)</th>
-                <th>f(n)</th>
-              </tr>
-            </thead>
-            <tbody id="distance-table-body">
-              <!-- Rows will be inserted here -->
-            </tbody>
-          </table>
-        </div>
+          <thead>
+            <tr style="background-color: #1971c2">
+              <th>Node</th>
+              <th>g(n)</th>
+            </tr>
+          </thead>
+          <tbody id="settled-g-body">
+            <!-- Settled rows will be inserted here -->
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -655,6 +639,36 @@ At every step, A* selects the unvisited node with the smallest f(n) value, guidi
         z-index: 999;
       "
     ></div>
+
+    <!-- Candidate Decision Modal -->
+    <div
+      id="candidate-decision-modal"
+      style="
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #343a40;
+        color: white;
+        border-radius: 8px;
+        border: 2px solid #1971c2;
+        padding: 18px;
+        z-index: 1100;
+        width: 360px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      "
+    >
+      <h3 style="margin: 0 0 8px 0; color: white">Choose Candidate</h3>
+      <p
+        id="candidate-decision-message"
+        style="margin: 0 0 12px 0; color: #d0ebff; font-size: 13px; line-height: 1.35"
+      ></p>
+      <div
+        id="candidate-decision-buttons"
+        style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center"
+      ></div>
+    </div>
 
     <!-- Dialog -->
     <div
@@ -674,12 +688,12 @@ At every step, A* selects the unvisited node with the smallest f(n) value, guidi
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       "
     >
-      <h3 style="margin-top: 0; color: white">Distance Update</h3>
-      <p style="margin-bottom: 10px">Update the distance from node 0 the destination node</p>
+      <h3 style="margin-top: 0; color: white">Priority Update</h3>
+      <p style="margin-bottom: 10px">Enter f(n) = g(n) + h(n) for the selected edge's destination node.</p>
       <input
         type="text"
         id="dialog-input"
-        placeholder="Enter something..."
+        placeholder="Enter g(n) + h(n)"
         style="
           width: 100%;
           padding: 10px;

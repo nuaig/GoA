@@ -52,6 +52,13 @@ let curEdges;
 let graph;
 let clickBlockedUntil = 0;
 let currentlyHighlightedNodeIndex;
+const priorityQueueState = new Map();
+const settledGState = [];
+let pendingCandidateDecision = null;
+let transientQueueEntries = [];
+let currentSettledNode = null;
+let lastDialogSubmitAt = 0;
+let suppressInputDialogUntil = 0;
 // Define max score per level
 const levelMaxScores = {
   1: 40,
@@ -131,27 +138,27 @@ const clock = new THREE.Clock();
 // Steps for the A* tutorial
 const tutorialSteps = [
   {
-    instruction: "Step 0: Click on node 0 to begin.",
-    explanation: "Start node. g(0)=0. With h(n)=0, A* behaves like Dijkstra.",
+    instruction: "Step 0: Click on node S to begin.",
+    explanation: "Start node S. g(S)=0. With h(n)=0, A* behaves like Dijkstra.",
     expectedChests: [0],
     expectedEdges: null,
-    errorMessage: "Click node 0.",
+    errorMessage: "Click node S.",
   },
   {
-    instruction: "Step 1: Click edge (0,2). Enter 1.",
+    instruction: "Step 1: Click edge (S,2). Enter 1.",
     explanation: "g(2)=1. Node 2 enters the open set.",
     expectedChests: null,
     expectedEdges: [[0, 2]],
     updatedDistance: { 2: 1 },
-    errorMessage: "Click edge (0,2).",
+    errorMessage: "Click edge (S,2).",
   },
   {
-    instruction: "Step 2: Click edge (0,1). Enter 2.",
+    instruction: "Step 2: Click edge (S,1). Enter 2.",
     explanation: "g(1)=2. Node 1 enters the open set.",
     expectedChests: null,
     expectedEdges: [[0, 1]],
     updatedDistance: { 1: 2 },
-    errorMessage: "Click edge (0,1).",
+    errorMessage: "Click edge (S,1).",
   },
   {
     instruction: "Step 3: Click node 2 (smallest f).",
@@ -169,57 +176,57 @@ const tutorialSteps = [
     errorMessage: "Click edge (2,3).",
   },
   {
-    instruction: "Step 5: Click edge (2,4). Enter 4.",
-    explanation: "g(4)=g(2)+3=4. Add goal node 4.",
+    instruction: "Step 5: Click edge (2,G). Enter 4.",
+    explanation: "g(G)=g(2)+3=4. Add goal node G.",
     expectedChests: null,
     expectedEdges: [[2, 4]],
     updatedDistance: { 4: 4 },
-    errorMessage: "Click edge (2,4).",
+    errorMessage: "Click edge (2,G).",
   },
   {
-    instruction: "Step 6: Click edge (2,1). Enter 2.",
-    explanation: "Candidate g(1)=g(2)+3=4 from edge (2,1) but g(1)=2 from edge (0,1).",
+    instruction: "Step 6: Click edge (2,1). Enter 4.",
+    explanation: "Candidate g(1)=g(2)+3=4 from edge (2,1) but g(1)=2 from edge (S,1).",
     expectedChests: null,
     expectedEdges: [[2, 1]],
-    updatedDistance: { 1: 2 },
+    updatedDistance: { 1: 4 },
     errorMessage: "Click edge (2,1).",
   },
   {
     instruction: "Step 7: Click node 1.",
-    explanation: "Smallest in open set is node 1 with g(1)=2.",
+    explanation: "After Step 6, node 1 still has the smallest value in the queue (g=2), so we visit node 1 next.",
     expectedChests: [1],
     expectedEdges: null,
     errorMessage: "Click node 1.",
   },
   {
-    instruction: "Step 8: Click edge (1,3). Enter 4.",
-    explanation: "Candidate g(1)=g(3)+4=7 from edge (3,1) and g(1)=4 from edge (0,1).",
+    instruction: "Step 8: Click edge (1,3). Enter 6.",
+    explanation: "From node 1, going to node 3 gives candidate g(3)=6, while we already have g(3)=3 from node 2.",
     expectedChests: null,
     expectedEdges: [[1, 3]],
-    updatedDistance: { 3: 4 },
+    updatedDistance: { 3: 6 },
     errorMessage: "Click edge (1,3).",
   },
   {
     instruction: "Step 10: Click node 3.",
-    explanation: "Here we have to choose between Node 3 and Node 4. g(3)=4 and g(4)=4. We can choose either one which is why h=0 is not the best since it makes us explore more nodes than we need. We will choose Node 3 to show how h=0 operates",
+    explanation: "After comparing candidates, node 3 is still the smallest remaining value in the queue (g=3), so we visit node 3.",
     expectedChests: [3],
     expectedEdges: null,
     errorMessage: "Click node 3.",
   },
   {
-    instruction: "Step 11: Click on edge (3,4). Enter 4.",
-    explanation: "Candidate g(4) = g(3) + 1=5. But we know g(4)=4 from edge (2,4).",
+    instruction: "Step 11: Click edge (3,G). Enter 4.",
+    explanation: "From node 3 to node G, candidate g(G)=4. Compare it with current g(G)=4 and keep 4.",
     expectedChests: null,
     expectedEdges: [[3, 4]],
     updatedDistance: { 4: 4 },
-    errorMessage: "Click edge (3,4).",
+    errorMessage: "Click edge (3,G).",
   },
   {
-    instruction: "Step 12: Click node 4 (goal).",
-    explanation: "Next is node 4 with g(4)=4, and it’s the goal. Stop.",
+    instruction: "Step 12: Click node G (goal).",
+    explanation: "Now node G is next with g(G)=4, and it is the goal. Stop.",
     expectedChests: [4],
     expectedEdges: null,
-    errorMessage: "Click node 4.",
+    errorMessage: "Click node G.",
   },
 ];
 
@@ -504,19 +511,47 @@ async function createModels() {
 }
 
 /*
- * Shows the tables in the beginning of the scene loading.
- * 1. Retrieves the "tables-container" element.
+ * Shows the priority queue panel in the beginning of scene loading.
+ * 1. Retrieves the queue container element.
  * 2. Makes it visible by setting its display style to "block".
  */
-function showTables() {
-  const container = document.getElementById("tables-container");
-  if (container) {
-    container.style.display = "block";
-    debugPrint("[showTables] Tables container is now visible.");
-  } else {
-    debugPrint("[showTables] Tables container not found.");
+function showPriorityQueue() {
+  const wrapper = document.getElementById("astar-tables-wrapper");
+  if (!wrapper) {
+    debugPrint("[showPriorityQueue] Queue container not found.");
+    return;
   }
+
+  // UI-only difficulty ramp: hide all tables in regular level 3.
+  const shouldHideAllTables = !curRoomUI.isTutorial && curRoomUI.currentLevel === 3;
+  if (shouldHideAllTables) {
+    wrapper.style.display = "none";
+    return;
+  }
+
+  wrapper.style.display = "flex";
+  debugPrint("[showPriorityQueue] Queue container is now visible.");
 }
+
+function showSettledGTable() {
+  const wrapper = document.getElementById("astar-tables-wrapper");
+  const settledContainer = document.getElementById("settled-g-container");
+  if (!wrapper || !settledContainer) return;
+
+  // UI-only difficulty ramp: hide all tables in regular level 3.
+  const shouldHideAllTables = !curRoomUI.isTutorial && curRoomUI.currentLevel === 3;
+  if (shouldHideAllTables) {
+    wrapper.style.display = "none";
+    return;
+  }
+
+  wrapper.style.display = "flex";
+
+  // UI-only difficulty ramp: hide visited g(n) table in regular level 2.
+  const shouldHideSettledTable = !curRoomUI.isTutorial && curRoomUI.currentLevel === 2;
+  settledContainer.style.display = shouldHideSettledTable ? "none" : "block";
+}
+
 
 /*
  * Draws lines between chests (edges of the graph) and sets up interaction logic.
@@ -528,7 +563,8 @@ function showTables() {
 function drawLines() {
   sceneLoadCount++;
   if (sceneLoadCount > 1) {
-    showTables();
+    showPriorityQueue();
+    showSettledGTable();
   }
   debugPrint("[drawLines] Drawing lines between chests.");
   debugPrint("[drawLines] Graph edges:", graph.edges);
@@ -729,28 +765,8 @@ function drawLines() {
           openChestList[index].visible = true;
           openChestList[index].userData.clicked = true;
 
-          // ====== CONDITIONAL HIGHLIGHTING ======
-          const row = document.getElementById(`row-${index}`);
-
-          if (row) {
-            if (
-              currentlyHighlightedNodeIndex !== null &&
-              currentlyHighlightedNodeIndex !== index
-            ) {
-              const prevRow = document.getElementById(
-                `row-${currentlyHighlightedNodeIndex}`,
-              );
-              if (prevRow) {
-                prevRow.classList.remove("current-node-row");
-                prevRow.classList.add("visited-node-row");
-              }
-            }
-
-            row.classList.add("current-node-row");
-            row.classList.remove("visited-node-row");
-            currentlyHighlightedNodeIndex = index;
-          }
-          // ====== END HIGHLIGHTING ======
+          markPriorityQueueVisited(index);
+          currentlyHighlightedNodeIndex = index;
 
           Object.keys(hintBooleans).forEach(
             (key) => (hintBooleans[key] = false),
@@ -1021,27 +1037,461 @@ function animate() {
  *
  * @param {Array<[number, number, number]>} edges - List of edges as [from, to, weight] tuples.
  */
-function updateEdgeTable(edges) {
-  const tableBody = document.querySelector("#edgeTable tbody");
-  if (!tableBody) {
-    console.warn("[updateEdgeTable] Table body not found.");
-    return;
+function getNodeDisplayLabel(node) {
+  if (node === graph.startNode) return "S";
+  if (node === graph.goalNode) return "G";
+  return `${node}`;
+}
+
+
+function formatQueueValue(value) {
+  return Number.isFinite(value) ? Number(value).toFixed(2) : "∞";
+}
+
+function getCandidateValuesForNode(node, selectedEdge = null) {
+  const values = [];
+
+  // Current visible queue candidates for this node
+  Array.from(priorityQueueState.values())
+    .filter((entry) => entry.discovered && !entry.visited && entry.node === node)
+    .forEach((entry) => {
+      if (Number.isFinite(Number(entry.f))) values.push(Number(entry.f));
+    });
+
+  // Transient pushed candidates for this node
+  transientQueueEntries
+    .filter((entry) => entry.node === node)
+    .forEach((entry) => {
+      if (Number.isFinite(Number(entry.f))) values.push(Number(entry.f));
+    });
+
+  // Candidates from the currently selected edge
+  if (selectedEdge) {
+    const maybeValues = [selectedEdge.oldF, selectedEdge.newF];
+    maybeValues.forEach((value) => {
+      if (Number.isFinite(Number(value))) {
+        values.push(Number(value));
+      }
+    });
+  }
+  const unique = [...new Set(values.map((v) => Number(v.toFixed(2))))].sort(
+    (a, b) => a - b,
+  );
+  return unique;
+}
+
+function clearTransientQueueForNode(node) {
+  transientQueueEntries = transientQueueEntries.filter((e) => e.node !== node);
+}
+
+function closeCandidateDecisionModal() {
+  const modal = document.getElementById("candidate-decision-modal");
+  const message = document.getElementById("candidate-decision-message");
+  const buttons = document.getElementById("candidate-decision-buttons");
+  if (modal) modal.style.display = "none";
+  if (message) message.textContent = "";
+  if (buttons) buttons.innerHTML = "";
+}
+
+function ensureCandidateHistoryRows(selected, candidateValues) {
+  const hVal = computeHeuristicUI(selected.end);
+
+  candidateValues.forEach((candidateF) => {
+    const fValue = Number(candidateF);
+    const gValue = Number.isFinite(hVal) ? fValue - hVal : selected.newG;
+
+    const existsInPersistentQueue = Array.from(priorityQueueState.values())
+      .filter((entry) => entry.discovered && !entry.visited)
+      .some(
+        (entry) =>
+          entry.node === selected.end &&
+          Math.abs(Number(entry.f) - fValue) < 0.001,
+      );
+
+    const existsInTransientQueue = transientQueueEntries.some(
+      (entry) =>
+        entry.node === selected.end && Math.abs(Number(entry.f) - fValue) < 0.001,
+    );
+
+    if (!existsInPersistentQueue && !existsInTransientQueue) {
+      transientQueueEntries.push({
+        node: selected.end,
+        g: Number(gValue),
+        h: hVal,
+        f: fValue,
+        discovered: true,
+        visited: false,
+        transient: true,
+      });
+    }
+  });
+}
+
+function finalizeRegularCorrectInput(selected) {
+  // Award score only after correct decision in regular mode (cap at level max)
+  curRoomUI.currentScore = Math.min(
+    curRoomUI.currentScore + correctActionScoreAddition,
+    levelMaxScores[curRoomUI.currentLevel],
+  );
+  curRoomUI.updateScore(curRoomUI.currentScore);
+
+  if (curRoomUI.uiText.innerText !== "Visit a new node!") {
+    curRoomUI.uiText.innerText = "Correct!";
   }
 
-  debugPrint("[updateEdgeTable] Populating table with edges:", edges);
+  const targetNode = selected.end;
+  const bestF = Math.min(Number(selected.oldF), Number(selected.newF));
+  const shouldUseNewPath =
+    Math.abs(bestF - Number(selected.newF)) < 0.001 &&
+    selected.newG < selected.oldG;
 
-  tableBody.innerHTML = ""; // Clear existing rows
-  edges.forEach(([from, to, weight], index) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td>${from}</td><td>${to}</td><td>${weight}</td>`;
-    tableBody.appendChild(row);
-    debugPrint(
-      `[updateEdgeTable] Added row ${index}: [${from}, ${to}, ${weight}]`,
+  if (shouldUseNewPath) {
+    // Preserve the replaced queue candidate as history so users can see evolution over time.
+    const oldF = Number(selected.oldF);
+    const newF = Number(selected.newF);
+    const hVal = computeHeuristicUI(targetNode);
+    const oldG =
+      Number.isFinite(Number(selected.oldG))
+        ? Number(selected.oldG)
+        : Number.isFinite(oldF) && Number.isFinite(hVal)
+          ? oldF - hVal
+          : Number(selected.newG);
+    const shouldKeepOldAsHistory =
+      Number.isFinite(oldF) && Number.isFinite(newF) && Math.abs(oldF - newF) > 0.001;
+
+    if (shouldKeepOldAsHistory) {
+      const alreadyInTransient = transientQueueEntries.some(
+        (entry) =>
+          entry.node === targetNode && Math.abs(Number(entry.f) - oldF) < 0.001,
+      );
+      if (!alreadyInTransient) {
+        transientQueueEntries.push({
+          node: targetNode,
+          g: Number(oldG),
+          h: hVal,
+          f: oldF,
+          discovered: true,
+          visited: false,
+          transient: true,
+        });
+      }
+    }
+
+    updatePriorityQueueNode(targetNode, selected.newG);
+  }
+
+  const selectedLine = edgeList.find((line) => {
+    const edge = line.userData?.edge;
+    return (
+      edge &&
+      ((edge.start === selected.start && edge.end === selected.end) ||
+        (edge.start === selected.end && edge.end === selected.start))
     );
   });
 
-  debugPrint("[updateEdgeTable] Edge table update complete.");
+  if (selectedLine) {
+    selectedLine.userData.selected = true;
+    selectedLine.material.color.set(0x800080);
+    if (selectedLine.userData.label) {
+      selectedLine.userData.label.material.color.set(0x000000);
+    }
+    debugPrint("[finalizeRegularCorrectInput] Edge visually marked completed.");
+  }
+
+  Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
+  document.querySelector(".Hint-Text").classList.add("hidden");
+
+  curRoomUI.selectedEdgeForInput = null;
+  curRoomUI.inputCompleted = true;
+  document.getElementById("input-dialog").style.display = "none";
+  document.getElementById("input-backdrop").style.display = "none";
+  document.getElementById("dialog-input").value = "";
+  pendingCandidateDecision = null;
+  closeCandidateDecisionModal();
+  renderPriorityQueue();
+  curRoomUI.isModalOpen = false;
+  clickBlockedUntil = Date.now() + 500;
+  suppressInputDialogUntil = Date.now() + 900;
+
+  if (curRoomUI.readyForNextStep) {
+    nextTutorialStep();
+    curRoomUI.readyForNextStep = false;
+    selectedEdgesThisStep = [];
+  }
 }
+
+function showCandidateDecisionModal(selected, candidateValues) {
+  const modal = document.getElementById("candidate-decision-modal");
+  const message = document.getElementById("candidate-decision-message");
+  const buttons = document.getElementById("candidate-decision-buttons");
+  if (!modal || !message || !buttons) return;
+
+  const best = Math.min(...candidateValues);
+  message.textContent = `There are ${candidateValues.length} candidates for ${getNodeDisplayLabel(selected.end)} (${candidateValues.map((v) => v.toFixed(2)).join(", ")}). Which one should update g(n)?`;
+  buttons.innerHTML = "";
+
+  candidateValues.forEach((value) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = value.toFixed(2);
+    btn.style.backgroundColor = "#1971c2";
+    btn.style.color = "white";
+    btn.style.border = "none";
+    btn.style.padding = "7px 12px";
+    btn.style.borderRadius = "4px";
+    btn.style.cursor = "pointer";
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (Math.abs(value - best) < 0.001) {
+        finalizeRegularCorrectInput(selected);
+      } else {
+        hintBooleans.wrongWeightEntered = true;
+        updateHintsFromBooleans();
+        curRoomUI.uiText.innerText =
+          "Not the best choice. Pick the smallest f(n) candidate.";
+        shakeScreen?.();
+      }
+    });
+    buttons.appendChild(btn);
+  });
+
+  modal.style.display = "block";
+  document.getElementById("input-backdrop").style.display = "block";
+  curRoomUI.isModalOpen = true;
+  clickBlockedUntil = Date.now() + 300;
+  suppressInputDialogUntil = Date.now() + 900;
+}
+
+function completeTutorialEdgeStep(nodeId, finalG, selectedEdge, isCorrectSetter) {
+  updatePriorityQueueNode(nodeId, Number(finalG));
+
+  if (selectedEdge) {
+    const selectedLine = edgeList.find((line) => {
+      const edge = line.userData?.edge;
+      return (
+        edge &&
+        ((edge.start === selectedEdge[0] && edge.end === selectedEdge[1]) ||
+          (edge.start === selectedEdge[1] && edge.end === selectedEdge[0]))
+      );
+    });
+
+    if (selectedLine) {
+      selectedLine.userData.selected = true;
+      selectedLine.material.color.set(0x800080);
+      if (selectedLine.userData.label) {
+        selectedLine.userData.label.material.color.set(0x000000);
+      }
+    }
+  }
+
+  isCorrectSetter(true);
+  Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
+  document.querySelector(".Hint-Text").classList.add("hidden");
+
+  nextTutorialStep();
+  document.getElementById("input-dialog").style.display = "none";
+  document.getElementById("input-backdrop").style.display = "none";
+  document.getElementById("dialog-input").value = "";
+  closeCandidateDecisionModal();
+  curRoomUI.isModalOpen = false;
+}
+
+function showTutorialDecisionModal(nodeId, currentG, candidateG, selectedEdge, isCorrectSetter) {
+  const modal = document.getElementById("candidate-decision-modal");
+  const message = document.getElementById("candidate-decision-message");
+  const buttons = document.getElementById("candidate-decision-buttons");
+  if (!modal || !message || !buttons) return;
+
+  const candidates = [...new Set([Number(currentG), Number(candidateG)].filter(Number.isFinite))].sort((a, b) => a - b);
+  const best = Math.min(...candidates);
+  const pathOne = candidates[0]?.toFixed(2) ?? "0.00";
+  const pathTwo = candidates[1]?.toFixed(2) ?? pathOne;
+  message.textContent = `We have 2 candidates from 2 different paths for node ${getNodeDisplayLabel(nodeId)}. Path 1 has weight ${pathOne} and Path 2 has weight ${pathTwo}. Choose the smallest value: ${best.toFixed(2)}.`;
+  buttons.innerHTML = "";
+
+  candidates.forEach((value) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = value.toFixed(2);
+    btn.style.backgroundColor = "#1971c2";
+    btn.style.color = "white";
+    btn.style.border = "none";
+    btn.style.padding = "7px 12px";
+    btn.style.borderRadius = "4px";
+    btn.style.cursor = "pointer";
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (Math.abs(value - best) < 0.001) {
+        completeTutorialEdgeStep(nodeId, best, selectedEdge, isCorrectSetter);
+      } else {
+        hintBooleans.wrongWeightEntered = true;
+        updateHintsFromBooleans();
+        curRoomUI.uiText.innerText =
+          "Keep the smaller value in the queue for A*.";
+        shakeScreen?.();
+      }
+    });
+    buttons.appendChild(btn);
+  });
+
+  modal.style.display = "block";
+  document.getElementById("input-backdrop").style.display = "block";
+  curRoomUI.isModalOpen = true;
+  clickBlockedUntil = Date.now() + 300;
+  suppressInputDialogUntil = Date.now() + 900;
+}
+
+function initializePriorityQueue(nodes) {
+  priorityQueueState.clear();
+  settledGState.length = 0;
+  transientQueueEntries = [];
+  currentSettledNode = null;
+  nodes.forEach((node) => {
+    const isStart = node === graph.startNode;
+    const g = isStart ? 0 : Infinity;
+    const h = computeHeuristicUI(node);
+    const f = Number.isFinite(g) ? g + h : Infinity;
+    priorityQueueState.set(node, {
+      node,
+      g,
+      h,
+      f,
+      discovered: isStart,
+      visited: false,
+    });
+  });
+  renderPriorityQueue();
+  renderSettledGTable();
+}
+
+function updatePriorityQueueNode(node, gValue) {
+  const existing = priorityQueueState.get(node) ?? {
+    node,
+    discovered: false,
+    visited: false,
+  };
+  const h = computeHeuristicUI(node);
+  const g = Number(gValue);
+  const f = g + h;
+  priorityQueueState.set(node, {
+    ...existing,
+    g,
+    h,
+    f,
+    discovered: true,
+    visited: false,
+  });
+  renderPriorityQueue();
+}
+
+function markPriorityQueueVisited(node) {
+  const existing = priorityQueueState.get(node);
+  if (!existing) return;
+  const poppedF = Number(existing.f);
+  priorityQueueState.set(node, {
+    ...existing,
+    visited: true,
+  });
+
+  // If a transient history row duplicates the popped top (same node + same f),
+  // remove one copy so the visual "pop" is reflected immediately.
+  const duplicateIdx = transientQueueEntries.findIndex(
+    (entry) =>
+      entry.node === node &&
+      Number.isFinite(poppedF) &&
+      Math.abs(Number(entry.f) - poppedF) < 0.001,
+  );
+  if (duplicateIdx !== -1) {
+    transientQueueEntries.splice(duplicateIdx, 1);
+  }
+
+  if (
+    Number.isFinite(existing.g) &&
+    !settledGState.some((entry) => entry.node === node)
+  ) {
+    settledGState.push({ node, g: Number(existing.g) });
+  }
+  currentSettledNode = node;
+  renderPriorityQueue();
+  renderSettledGTable();
+}
+
+function renderPriorityQueue() {
+  const tableBody = document.getElementById("priority-queue-body");
+  if (!tableBody) return;
+
+  const mergedEntries = Array.from(priorityQueueState.values())
+    .filter((entry) => entry.discovered && !entry.visited)
+    .concat(transientQueueEntries)
+    .filter((entry) => Number.isFinite(entry.f) || entry.f === Infinity);
+
+  // Prevent visually duplicated rows (same node + same f value)
+  const seen = new Set();
+  const entries = mergedEntries
+    .filter((entry) => {
+      const key = `${entry.node}|${Number.isFinite(entry.f) ? Number(entry.f).toFixed(2) : "INF"}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => {
+      if (!Number.isFinite(a.f) && !Number.isFinite(b.f)) return a.node - b.node;
+      if (!Number.isFinite(a.f)) return 1;
+      if (!Number.isFinite(b.f)) return -1;
+      if (a.f === b.f) return a.node - b.node;
+      return a.f - b.f;
+    });
+
+  tableBody.innerHTML = "";
+  if (entries.length === 0) {
+    const emptyRow = document.createElement("tr");
+    emptyRow.innerHTML = `<td colspan="4">Queue is empty.</td>`;
+    tableBody.appendChild(emptyRow);
+    return;
+  }
+
+  entries.forEach((entry, index) => {
+    const row = document.createElement("tr");
+    if (index === 0) {
+      row.classList.add("priority-queue-min-row");
+    }
+    row.innerHTML = `
+      <td>${getNodeDisplayLabel(entry.node)}</td>
+      <td>${formatQueueValue(entry.g)}</td>
+      <td>${formatQueueValue(entry.h)}</td>
+      <td>${formatQueueValue(entry.f)}</td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
+function renderSettledGTable() {
+  const tableBody = document.getElementById("settled-g-body");
+  if (!tableBody) return;
+
+  tableBody.innerHTML = "";
+  if (settledGState.length === 0) {
+    const emptyRow = document.createElement("tr");
+    emptyRow.innerHTML = `<td colspan="2">No visited nodes yet.</td>`;
+    tableBody.appendChild(emptyRow);
+    return;
+  }
+
+  settledGState.forEach((entry) => {
+    const row = document.createElement("tr");
+    if (entry.node === currentSettledNode) {
+      row.classList.add("settled-current-node-row");
+    }
+    row.innerHTML = `
+      <td>${getNodeDisplayLabel(entry.node)}</td>
+      <td>${formatQueueValue(entry.g)}</td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
 
 /*
  * Rotates all labels and rings to always face the camera.
@@ -1224,14 +1674,12 @@ function resetScene() {
 
   selectedEdgesThisStep = [];
   curRoomUI.selectedEdgeForInput = null;
-
-  curNodes.forEach((node) => {
-    const row = document.getElementById(`row-${node}`);
-    if (row) {
-      row.classList.remove("visited-node-row");
-      row.classList.remove("current-node-row");
-    }
-  });
+  priorityQueueState.clear();
+  settledGState.length = 0;
+  transientQueueEntries = [];
+  currentSettledNode = null;
+  renderPriorityQueue();
+  renderSettledGTable();
 
   debugPrint("[resetScene] Scene reset complete.");
 }
@@ -1263,30 +1711,14 @@ function createHoverElements() {
 /**
  * Refreshes the A* table: recomputes h(n) for all nodes and updates f(n) = g(n) + h(n) in the DOM.
  */
-function refreshHeuristicTable() {
+function refreshPriorityQueueHeuristics() {
   if (!graph) return;
-
-  for (const node of graph.nodes) {
+  for (const [node, value] of priorityQueueState.entries()) {
     const h = computeHeuristicUI(node);
-
-    const hCell = document.getElementById(`h-${node}`);
-    if (hCell) hCell.textContent = h.toFixed(2);
-
-    const gCell = document.getElementById(`g-${node}`);
-    const fCell = document.getElementById(`f-${node}`);
-
-    if (!fCell) continue;
-
-    // if g is ∞, keep f as ∞
-    const gText = gCell?.textContent ?? "∞";
-    const gVal = gText === "∞" ? Infinity : Number(gText);
-
-    if (!Number.isFinite(gVal)) {
-      fCell.textContent = "∞";
-    } else {
-      fCell.textContent = (gVal + h).toFixed(2);
-    }
+    const f = Number.isFinite(value.g) ? value.g + h : Infinity;
+    priorityQueueState.set(node, { ...value, h, f });
   }
+  renderPriorityQueue();
 }
 
 /*
@@ -1374,17 +1806,16 @@ function setUpGameModel(currentLevel) {
     `[setUpGameModel] Start: ${graph.startNode}, Goal: ${graph.goalNode}`,
   );
 
-  updateEdgeTable(graph.edges);
   createModels().then(() => {
     // SET HEURISTIC FIRST
     graph.heuristicType =
       document.getElementById("heuristicSelect")?.value ?? "zero";
 
-    // THEN build table (so h(n) is correct)
-    initializeDistanceTable(graph.nodes);
-
-    // THEN build algorithm
+    // Build algorithm and queue after node positions are available
     curAlgorithmForGraph = new AstarAlgorithm(graph, graph.startNode);
+    initializePriorityQueue(graph.nodes);
+    showPriorityQueue();
+    showSettledGTable();
 
     curRoomUI.currentAlgorithm = "Astar";
   });
@@ -1401,65 +1832,6 @@ function setUpGameModel(currentLevel) {
  *
  * @param {Array<number>} nodes - List of node indices to populate in the table.
  */
-function initializeDistanceTable(nodes) {
-  const tableBody = document.getElementById("distance-table-body");
-  if (!tableBody) {
-    console.warn(
-      "[initializeDistanceTable] Table body element not found: #distance-table-body",
-    );
-    return;
-  }
-
-  debugPrint("[initializeDistanceTable] Initializing table with nodes:", nodes);
-
-  tableBody.innerHTML = ""; // Clear any old rows
-
-  nodes.forEach((node) => {
-    const row = document.createElement("tr");
-    row.id = `row-${node}`;
-
-    const nodeCell = document.createElement("td");
-
-    if (node === graph.startNode) {
-      nodeCell.textContent = "S";
-    } else if (node === graph.goalNode) {
-      nodeCell.textContent = "G";
-    } else {
-      nodeCell.textContent = node;
-    }
-
-    // g(n)
-    const gCell = document.createElement("td");
-    gCell.textContent = node === graph.startNode ? "0" : "∞";
-    gCell.id = `g-${node}`;
-
-    // h(n)
-    const hCell = document.createElement("td");
-    hCell.textContent = computeHeuristicUI(node).toFixed(2);
-    hCell.id = `h-${node}`;
-
-    // f(n)
-    const fCell = document.createElement("td");
-    if (node === graph.startNode) {
-      const h = computeHeuristicUI(node);
-      fCell.textContent = (0 + h).toFixed(2);
-    } else {
-      fCell.textContent = "∞";
-    }
-    fCell.id = `f-${node}`;
-
-    row.appendChild(nodeCell);
-    row.appendChild(gCell);
-    row.appendChild(hCell);
-    row.appendChild(fCell);
-    tableBody.appendChild(row);
-  });
-
-  debugPrint(
-    "[initializeDistanceTable] Distance table initialization complete.",
-  );
-}
-
 /**
  * Computes heuristic h(n) for a node for UI display (uses graph positions and heuristicType).
  * @param {number} node - Node id
@@ -1500,13 +1872,12 @@ function setUpTutorialModel() {
   curRoomUI.currentAlgorithm = "Astar";
   debugPrint("[setUpTutorialModel] Astar algorithm initialized and set.");
 
-  updateEdgeTable(graph.edges);
-  debugPrint("[setUpTutorialModel] Edge table updated.");
-
   createModels().then(() => {
-    initializeDistanceTable(graph.nodes);
+    initializePriorityQueue(graph.nodes);
+    showPriorityQueue();
+    showSettledGTable();
   });
-  debugPrint("[setUpTutorialModel] Distance table initialized.");
+  debugPrint("[setUpTutorialModel] Priority queue initialized.");
 
   debugPrint("[setUpTutorialModel] Models created.");
 
@@ -1519,6 +1890,11 @@ function setUpTutorialModel() {
  * Sets modal state to prevent interactions with the underlying scene.
  */
 function showInputDialog() {
+  if (Date.now() < suppressInputDialogUntil) {
+    debugPrint("[showInputDialog] Suppressed to prevent dialog re-open race.");
+    return;
+  }
+
   document.getElementById("input-dialog").style.display = "block";
   document.getElementById("input-backdrop").style.display = "block";
   const dialog = document.getElementById("input-dialog");
@@ -1528,6 +1904,8 @@ function showInputDialog() {
   // Prevent interactions underneath
   curRoomUI.isModalOpen = true;
   debugPrint("[showInputDialog] Modal state set to true.");
+
+  pendingCandidateDecision = null;
 
   const input = document.getElementById("dialog-input");
   input.focus();
@@ -1542,6 +1920,12 @@ function showInputDialog() {
  * 3. Closes the dialog and advances the tutorial if appropriate.
  */
 function closeInputDialog() {
+  const now = Date.now();
+  if (now - lastDialogSubmitAt < 200) {
+    return;
+  }
+  lastDialogSubmitAt = now;
+
   debugPrint("[closeInputDialog] Closing input dialog...");
   Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
 
@@ -1558,48 +1942,64 @@ function closeInputDialog() {
     if (expected) {
       const [node, correctValue] = Object.entries(expected)[0];
 
-      if (inputValue === correctValue.toString()) {
+      const nodeId = Number(node);
+      const candidateG = Number(correctValue);
+      const expectedF = candidateG + computeHeuristicUI(nodeId);
+      const inputF = Number(inputValue);
+      const currentKnownG = Number(priorityQueueState.get(nodeId)?.g);
+
+      if (
+        Number.isFinite(inputF) &&
+        (Math.abs(inputF - Number(expectedF.toFixed(2))) < 0.001 ||
+          Math.abs(inputF - Number(currentKnownG.toFixed?.(2) ?? currentKnownG)) < 0.001)
+      ) {
         debugPrint(`[closeInputDialog] Correct input received: ${inputValue}`);
         isCorrect = true;
 
-        // A* table has g(n), h(n), f(n) columns with ids g-{node}, h-{node}, f-{node}
-        const gVal = Number(correctValue);
-        const gCell = document.getElementById(`g-${node}`);
-        if (gCell) {
-          gCell.textContent = correctValue;
-          debugPrint(`[closeInputDialog] Updated g(n) cell for node ${node}`);
-        }
-        const hVal = computeHeuristicUI(Number(node));
-        const hCell = document.getElementById(`h-${node}`);
-        if (hCell) {
-          hCell.textContent = hVal.toFixed(2);
-        }
-        const fCell = document.getElementById(`f-${node}`);
-        if (fCell) {
-          fCell.textContent = (gVal + hVal).toFixed(2);
-        }
+        const hasComparison =
+          Number.isFinite(currentKnownG) &&
+          Number.isFinite(candidateG) &&
+          Math.abs(currentKnownG - candidateG) > 0.001;
 
-        if (selectedEdge) {
-          const selectedLine = edgeList.find((line) => {
-            const edge = line.userData?.edge;
-            return (
-              edge &&
-              ((edge.start === selectedEdge[0] &&
-                edge.end === selectedEdge[1]) ||
-                (edge.start === selectedEdge[1] &&
-                  edge.end === selectedEdge[0]))
-            );
-          });
-
-          if (selectedLine) {
-            selectedLine.userData.selected = true;
-            selectedLine.material.color.set(0x800080);
-            if (selectedLine.userData.label) {
-              selectedLine.userData.label.material.color.set(0x000000);
-            }
-            debugPrint("[closeInputDialog] Selected edge marked as visited.");
+        if (hasComparison) {
+          // Keep previous visible value as a queue candidate in tutorial view.
+          const hVal = computeHeuristicUI(nodeId);
+          const existingTransient = transientQueueEntries.some(
+            (entry) =>
+              entry.node === nodeId &&
+              Math.abs(Number(entry.f) - Number(candidateG + hVal)) < 0.001,
+          );
+          if (!existingTransient) {
+            transientQueueEntries.push({
+              node: nodeId,
+              g: candidateG,
+              h: hVal,
+              f: candidateG + hVal,
+              discovered: true,
+              visited: false,
+              transient: true,
+            });
+            renderPriorityQueue();
           }
+
+          document.getElementById("input-dialog").style.display = "none";
+          document.getElementById("dialog-input").value = "";
+          showTutorialDecisionModal(
+            nodeId,
+            currentKnownG,
+            candidateG,
+            selectedEdge,
+            (value) => {
+              isCorrect = value;
+            },
+          );
+          return;
         }
+
+        completeTutorialEdgeStep(nodeId, candidateG, selectedEdge, (value) => {
+          isCorrect = value;
+        });
+        return;
       } else {
         console.warn(
           `[closeInputDialog] Incorrect input: ${inputValue}, expected: ${correctValue}`,
@@ -1643,87 +2043,45 @@ function closeInputDialog() {
     }
 
     const inputF = Number(inputValue);
-    const improves = selected.newG < selected.oldG;
-    const expectedF = improves ? selected.newF : selected.oldF;
+    const candidateValues = getCandidateValuesForNode(selected.end, selected);
+    if (candidateValues.length > 1) {
+      if (!Number.isFinite(inputF)) {
+        console.warn("[closeInputDialog] Incorrect non-numeric input:", inputValue);
+        hintBooleans.wrongWeightEntered = true;
+        updateHintsFromBooleans();
+        GameHelper.handleWrongSelection(
+          curRoomUI,
+          "",
+          curRoomUI.isTutorial,
+          curGameSession,
+        );
+        curRoomUI.uiText.innerText = "Incorrect input. Try again.";
+        shakeScreen?.();
+        return;
+      }
+
+      const mergedCandidates = [
+        ...new Set([...candidateValues, Number(inputF.toFixed(2))]),
+      ].sort((a, b) => a - b);
+
+      debugPrint("[closeInputDialog] Multi-candidate value entered:", inputF);
+      ensureCandidateHistoryRows(selected, mergedCandidates);
+      renderPriorityQueue();
+
+      // close first dialog, open second decision modal
+      document.getElementById("input-dialog").style.display = "none";
+      document.getElementById("dialog-input").value = "";
+      pendingCandidateDecision = null;
+      showCandidateDecisionModal(selected, mergedCandidates);
+      return;
+    }
 
     if (
       Number.isFinite(inputF) &&
-      Math.abs(inputF - Number(expectedF)) < 0.001
+      candidateValues.some((v) => Math.abs(inputF - v) < 0.001)
     ) {
-      debugPrint("[closeInputDialog] Correct weight entered:", inputF);
-
-      // Award score only after correct f(n) is entered in regular mode (cap at level max)
-      curRoomUI.currentScore = Math.min(
-        curRoomUI.currentScore + correctActionScoreAddition,
-        levelMaxScores[curRoomUI.currentLevel],
-      );
-      curRoomUI.updateScore(curRoomUI.currentScore);
-
-      if (curRoomUI.uiText.innerText !== "Visit a new node!") {
-        curRoomUI.uiText.innerText = "Correct!";
-      }
-
-      const targetNode = selected.end;
-
-      if (improves) {
-        // Update g(n)
-        const gCell = document.getElementById(`g-${targetNode}`);
-        if (gCell) {
-          gCell.textContent = selected.newG.toString();
-        }
-
-        // Update h(n)
-        const h = computeHeuristicUI(targetNode);
-        const hCell = document.getElementById(`h-${targetNode}`);
-        if (hCell) {
-          hCell.textContent = h.toFixed(2);
-        }
-
-        // Update f(n)
-        const fCell = document.getElementById(`f-${targetNode}`);
-        if (fCell) {
-          fCell.textContent = selected.newF.toFixed(2);
-        }
-      }
-
-      const selectedLine = edgeList.find((line) => {
-        const edge = line.userData?.edge;
-        return (
-          edge &&
-          ((edge.start === selected.start && edge.end === selected.end) ||
-            (edge.start === selected.end && edge.end === selected.start))
-        );
-      });
-
-      if (selectedLine) {
-        selectedLine.userData.selected = true;
-        selectedLine.material.color.set(0x800080);
-        if (selectedLine.userData.label) {
-          selectedLine.userData.label.material.color.set(0x000000);
-        }
-        debugPrint(
-          "[closeInputDialog] Selected edge visually marked as completed.",
-        );
-      }
-
-      Object.keys(hintBooleans).forEach((key) => (hintBooleans[key] = false));
-      document.querySelector(".Hint-Text").classList.add("hidden");
-
-      curRoomUI.selectedEdgeForInput = null;
-      curRoomUI.inputCompleted = true;
-      document.getElementById("input-dialog").style.display = "none";
-      document.getElementById("input-backdrop").style.display = "none";
-      document.getElementById("dialog-input").value = "";
-      curRoomUI.isModalOpen = false;
-
-      if (curRoomUI.readyForNextStep) {
-        debugPrint(
-          "[closeInputDialog] Advancing to next step after correct input.",
-        );
-        nextTutorialStep();
-        curRoomUI.readyForNextStep = false;
-        selectedEdgesThisStep = [];
-      }
+      debugPrint("[closeInputDialog] Candidate value entered:", inputF);
+      finalizeRegularCorrectInput(selected);
     } else {
       console.warn("[closeInputDialog] Incorrect weight entered:", inputF);
       hintBooleans.wrongWeightEntered = true;
@@ -1735,19 +2093,6 @@ function closeInputDialog() {
         curRoomUI.isTutorial,
         curGameSession,
       );
-
-      selectedEdgesThisStep = selectedEdgesThisStep.filter(
-        ([s0, s1]) =>
-          !(
-            (s0 === selected.start && s1 === selected.end) ||
-            (s0 === selected.end && s1 === selected.start)
-          ),
-      );
-
-      document.getElementById("input-dialog").style.display = "none";
-      document.getElementById("input-backdrop").style.display = "none";
-      document.getElementById("dialog-input").value = "";
-      curRoomUI.isModalOpen = false;
 
       curRoomUI.uiText.innerText = "Incorrect input. Try again.";
       shakeScreen?.();
