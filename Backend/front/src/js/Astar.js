@@ -1721,6 +1721,45 @@ function refreshPriorityQueueHeuristics() {
   renderPriorityQueue();
 }
 
+function getHeuristicWeightFromInput() {
+  const input = document.getElementById("heuristicWeightInput");
+  const parsed = Number(input?.value);
+  if (!Number.isFinite(parsed)) return 1;
+  return Math.max(0, parsed);
+}
+
+function updateInputDialogHeuristicInfo() {
+  const infoEl = document.getElementById("dialog-heuristic-info");
+  const instructionEl = document.getElementById("dialog-instruction-text");
+  if (!infoEl || !instructionEl || !graph) return;
+
+  let targetNode = null;
+
+  const selected = curRoomUI.selectedEdgeForInput;
+  if (selected && Number.isFinite(Number(selected.end))) {
+    targetNode = Number(selected.end);
+  } else if (curRoomUI.isTutorial) {
+    const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
+    const expectedEdge = currentStep?.expectedEdges?.[0];
+    if (Array.isArray(expectedEdge) && expectedEdge.length >= 2) {
+      targetNode = Number(expectedEdge[1]);
+    }
+  }
+
+  if (!Number.isFinite(Number(targetNode))) {
+    infoEl.textContent = "h(n) will appear once you select an edge.";
+    return;
+  }
+
+  const hVal = Number(computeHeuristicUI(targetNode));
+  const weight = Number(getHeuristicWeightFromInput());
+
+  instructionEl.textContent =
+    "Enter f(n) = g(n) + h(n) for the selected edge's destination node.";
+
+  infoEl.textContent = `Node ${getNodeDisplayLabel(targetNode)}: h(n) = ${hVal.toFixed(2)} (weight ${weight.toFixed(2)} × Euclidean distance).`;
+}
+
 /*
  * Sets up the game state and visuals based on the selected level.
  *
@@ -1807,9 +1846,9 @@ function setUpGameModel(currentLevel) {
   );
 
   createModels().then(() => {
-    // SET HEURISTIC FIRST
-    graph.heuristicType =
-      document.getElementById("heuristicSelect")?.value ?? "zero";
+    // Set weighted Euclidean heuristic from UI before building A*.
+    graph.heuristicWeight = getHeuristicWeightFromInput();
+    graph.heuristicType = graph.heuristicWeight === 0 ? "zero" : "euclid";
 
     // Build algorithm and queue after node positions are available
     curAlgorithmForGraph = new AstarAlgorithm(graph, graph.startNode);
@@ -1838,7 +1877,14 @@ function setUpGameModel(currentLevel) {
  * @returns {number}
  */
 function computeHeuristicUI(node) {
-  if (graph.heuristicType === "zero") return 0;
+  const weight = Number.isFinite(Number(graph?.heuristicWeight))
+    ? Number(graph.heuristicWeight)
+    : graph?.heuristicType === "w_euclid"
+      ? 1.5
+      : graph?.heuristicType === "euclid"
+        ? 1
+        : 0;
+  if (weight <= 0) return 0;
 
   const p = graph.nodePositions?.[node];
   const g = graph.nodePositions?.[graph.goalNode];
@@ -1848,10 +1894,7 @@ function computeHeuristicUI(node) {
   const dz = p.z - g.z;
   const euclid = Math.sqrt(dx * dx + dz * dz);
 
-  if (graph.heuristicType === "euclid") return euclid;
-  if (graph.heuristicType === "w_euclid") return 1.5 * euclid;
-
-  return 0;
+  return weight * euclid;
 }
 
 /*
@@ -1867,6 +1910,7 @@ function setUpTutorialModel() {
   debugPrint("[setUpTutorialModel] Tutorial graph created:", graph);
 
   curNodes = graph.nodes;
+  graph.heuristicWeight = 0;
   graph.heuristicType = "zero";
   curAlgorithmForGraph = new AstarAlgorithm(graph, graph.startNode);
   curRoomUI.currentAlgorithm = "Astar";
@@ -1906,6 +1950,7 @@ function showInputDialog() {
   debugPrint("[showInputDialog] Modal state set to true.");
 
   pendingCandidateDecision = null;
+  updateInputDialogHeuristicInfo();
 
   const input = document.getElementById("dialog-input");
   input.focus();
@@ -2122,14 +2167,15 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const sel = document.getElementById("heuristicSelect");
-  if (!sel) return;
+  const heuristicInput = document.getElementById("heuristicWeightInput");
+  if (!heuristicInput) return;
 
-  sel.addEventListener("change", () => {
-    if (!graph) return;
-
-    // update heuristic mode
-    graph.heuristicType = sel.value;
+  const onHeuristicWeightChange = () => {
+    if (!graph || curRoomUI.isTutorial) return;
+    const weight = getHeuristicWeightFromInput();
+    heuristicInput.value = String(weight);
+    graph.heuristicWeight = weight;
+    graph.heuristicType = weight === 0 ? "zero" : "euclid";
 
     // FULL RESET
     resetScene();
@@ -2138,7 +2184,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Rebuild game model with new heuristic
     setUpGameModel(curRoomUI.currentLevel);
-  });
+  };
+
+  heuristicInput.addEventListener("change", onHeuristicWeightChange);
+  heuristicInput.addEventListener("blur", onHeuristicWeightChange);
 });
 
 document.addEventListener("DOMContentLoaded", async function () {
@@ -2290,11 +2339,11 @@ setUpGameModel(currentLevel);
 
 // ===== UI Callbacks Section =====
 curRoomUI.callbacks.resetLevel = function (curlvl) {
-  // Restore heuristic dropdown
-  const heuristicSelect = document.getElementById("heuristicSelect");
-  if (heuristicSelect) {
-    heuristicSelect.disabled = false;
-    heuristicSelect.style.display = "inline-block";
+  // Restore heuristic weight input (default Euclidean = 1).
+  const heuristicInput = document.getElementById("heuristicWeightInput");
+  if (heuristicInput) {
+    heuristicInput.disabled = false;
+    heuristicInput.value = "1";
   }
   curRoomUI.uiText.innerHTML = `Start by selecting the source node (Node S), then find the shortest path to the goal node using f(n) = g(n) + h(n)!`;
   curRoomUI.health = resetHealth();
@@ -2314,11 +2363,11 @@ curRoomUI.callbacks.resetLevel = function (curlvl) {
 };
 
 curRoomUI.callbacks.startTutorial = function () {
-  // ===== Lock heuristic to zero for tutorial =====
-  const heuristicSelect = document.getElementById("heuristicSelect");
-  if (heuristicSelect) {
-    heuristicSelect.value = "zero";
-    heuristicSelect.disabled = true;
+  // ===== Lock heuristic weight to 0 for tutorial (zero heuristic) =====
+  const heuristicInput = document.getElementById("heuristicWeightInput");
+  if (heuristicInput) {
+    heuristicInput.value = "0";
+    heuristicInput.disabled = true;
   }
   currentlyHighlightedNodeIndex = null;
   curRoomUI.currentTutorialStep = 0;

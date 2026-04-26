@@ -13,7 +13,14 @@ export class AstarAlgorithm {
       graph.goalNode ??
       Math.max(...Object.keys(graph.nodes || this.buildNodeSet(graph.edges)));
 
-    this.heuristicType = graph.heuristicType ?? "zero"; // "zero" | "euclid" | "w_euclid"
+    this.heuristicType = graph.heuristicType ?? "zero"; // legacy fallback
+    this.heuristicWeight = Number.isFinite(Number(graph.heuristicWeight))
+      ? Number(graph.heuristicWeight)
+      : this.heuristicType === "euclid"
+        ? 1
+        : this.heuristicType === "w_euclid"
+          ? 1.5
+          : 0;
 
     this.adjacencyList = this.buildAdjacencyList(graph.edges);
 
@@ -67,12 +74,14 @@ export class AstarAlgorithm {
 
   /**
    * Heuristic h(n): estimated cost from node to goal.
-   * "zero" => 0 (Dijkstra-like). "euclid" / "w_euclid" use graph node positions.
+   * Uses weighted Euclidean: h(n) = weight * euclidean(n, goal).
    * @param {number} node
    * @returns {number}
    */
   heuristic(node) {
-    if (this.heuristicType === "zero") return 0;
+    if (!Number.isFinite(this.heuristicWeight) || this.heuristicWeight <= 0) {
+      return 0;
+    }
 
     const p = this.graph.nodePositions?.[Number(node)];
     const g = this.graph.nodePositions?.[Number(this.goalNode)];
@@ -82,9 +91,7 @@ export class AstarAlgorithm {
     const dz = p.z - g.z;
     const euclid = Math.sqrt(dx * dx + dz * dz);
 
-    if (this.heuristicType === "euclid") return euclid;
-    if (this.heuristicType === "w_euclid") return 1.5 * euclid;
-    return 0;
+    return this.heuristicWeight * euclid;
   }
 
   /**

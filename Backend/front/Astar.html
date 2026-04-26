@@ -202,12 +202,16 @@
 
     <div class="astar-top-right-row">
       <div id="heuristic-container" class="astar-heuristic-container">
-        <label for="heuristicSelect" id="heuristic-label">h:</label>
-        <select id="heuristicSelect">
-          <option value="zero">0</option>
-          <option value="euclid">Euc</option>
-          <option value="w_euclid">1.5Euc</option>
-        </select>
+        <label for="heuristicWeightInput" id="heuristic-label">h:</label>
+        <input
+          id="heuristicWeightInput"
+          type="number"
+          min="0"
+          step="0.1"
+          value="1"
+          title="Heuristic weight multiplier (h = weight * Euclidean)"
+          aria-label="Heuristic weight"
+        />
       </div>
 
       <!-- Top Right Icons Row (matches Dijkstra: text buttons + hidden pseudo slot) -->
@@ -692,7 +696,13 @@ At every step, A* selects the unvisited node with the smallest f(n) value, guidi
       "
     >
       <h3 style="margin-top: 0; color: white">Priority Update</h3>
-      <p style="margin-bottom: 10px">Enter f(n) = g(n) + h(n) for the selected edge's destination node.</p>
+      <p id="dialog-instruction-text" style="margin-bottom: 8px">
+        Enter f(n) = g(n) + h(n) for the selected edge's destination node.
+      </p>
+      <p
+        id="dialog-heuristic-info"
+        style="margin: 0 0 10px 0; color: #d0ebff; font-size: 13px; line-height: 1.35"
+      ></p>
       <input
         type="text"
         id="dialog-input"
