@@ -49,13 +49,20 @@ body {
   flex-direction: column;
 }
 
+/* A* keeps heuristic + top buttons in one row */
+.astar-room .astar-top-right-row {
+  position: absolute;
+  top: clamp(0.6rem, 2vh, 1rem);
+  right: clamp(0.5rem, 1vw, 1rem);
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 /* A* heuristic: sit between controls and top-right buttons */
 .astar-room #heuristic-container.astar-heuristic-container {
-  position: absolute;
-  top: clamp(0.6rem, 2.4vh, 1rem);
-  right: clamp(14rem, 21vw, 18rem);
-  left: auto;
-  transform: none;
+  position: static;
   z-index: 98;
   margin: 0;
   background: rgba(52, 58, 64, 0.95);
@@ -151,10 +158,17 @@ body {
   margin-bottom: 0px;
 }
 
-/* Dijkstra/A* control panel sizing */
-.dijkstra-room .dijkstra-control-panel,
-.astar-room .dijkstra-control-panel {
+/* Dijkstra control panel sizing */
+.dijkstra-room .dijkstra-control-panel {
   width: min(84vw, 38rem);
+  height: auto;
+  padding: 0.4rem 0.7rem;
+  box-sizing: border-box;
+}
+
+/* A* control panel sizing (slightly narrower) */
+.astar-room .dijkstra-control-panel {
+  width: min(64vw, 24rem);
   height: auto;
   padding: 0.4rem 0.7rem;
   box-sizing: border-box;
@@ -317,7 +331,6 @@ body {
   }
 
   .astar-room #heuristic-container.astar-heuristic-container {
-    right: clamp(10rem, 16vw, 13rem);
     max-width: clamp(8rem, 15vw, 10rem);
   }
 }
@@ -339,8 +352,7 @@ body {
   }
 
   .astar-room #heuristic-container.astar-heuristic-container {
-    top: clamp(4.8rem, 11vh, 5.8rem);
-    right: 0.75rem;
+    max-width: clamp(8rem, 18vw, 10rem);
   }
 
   .astar-room .topnav-centered {
@@ -510,6 +522,13 @@ body {
   border: solid #eaebf1 2px; */
   border-radius: 10px;
   padding: 0 15px;
+}
+
+.astar-room .Action-Icons-Holder {
+  position: static;
+  top: auto;
+  right: auto;
+  padding: 0;
 }
 
 .Action-Icons {

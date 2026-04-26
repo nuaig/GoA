@@ -217,7 +217,9 @@ world.gravity.set(0, 0, 0);
 world.doors = [];
 const renderer = new THREE.WebGLRenderer();
 renderer.setClearColor("#000");
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.domElement.id = "mainCanvas";
 document.body.appendChild(renderer.domElement);
 
 const player = new Player(scene, world);
@@ -710,6 +712,7 @@ populateLeaderboard();
 
 // Handle window resize
 window.addEventListener("resize", () => {
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   player.camera.aspect = window.innerWidth / window.innerHeight;
   player.camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);

@@ -302,7 +302,7 @@ function updateHintsFromBooleans() {
     debugPrint("Hint: wrongEdgeSelected");
   }
   if (hintBooleans.needToPressStarterNode) {
-    messages.push("Please press on node 0 to begin.");
+    messages.push("Please press on node S to begin.");
     debugPrint("Hint: needToPressStarterNode");
   }
   if (hintBooleans.wrongWeightEntered) {
@@ -783,7 +783,7 @@ function drawLines() {
           }
 
           curRoomUI.uiText.innerText =
-            "Evaluate neighbors of this node and update f(n) values if needed.";
+            "Evaluate neighbors of this node and update f(n) values.";
           if (index === graph.goalNode) {
             // advance step so nextTutorialStep() sees completion
             curRoomUI.currentTutorialStep++;
@@ -2296,7 +2296,7 @@ curRoomUI.callbacks.resetLevel = function (curlvl) {
     heuristicSelect.disabled = false;
     heuristicSelect.style.display = "inline-block";
   }
-  curRoomUI.uiText.innerHTML = `Start by selecting the source node (Node 0), then find the shortest path to the goal node using f(n) = g(n) + h(n)!`;
+  curRoomUI.uiText.innerHTML = `Start by selecting the source node (Node S), then find the shortest path to the goal node using f(n) = g(n) + h(n)!`;
   curRoomUI.health = resetHealth();
   document.querySelector(".Hint-Text").classList.add("hidden");
   curRoomUI.closeCompletionModal();

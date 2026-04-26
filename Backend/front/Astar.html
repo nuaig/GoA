@@ -77,24 +77,16 @@
           <ul>
             <li>
               <img src="symbols/left_drag_yellow_icon.png" alt="Left click drag icon" class="inline-icon" />
-              Left Click & Drag Room : Rotate room
+              Left Click & Drag : Rotate room
             </li>
             <li>
               <img src="symbols/left_click_yellow_icon.png" alt="Left click icon" class="inline-icon" />
-              Left Click : Click on Edges & Chests
+              Left Click : Click on Edges/Chests
             </li>
           </ul>
         </div>
       </div>
 
-      <div id="heuristic-container" class="astar-heuristic-container">
-        <label for="heuristicSelect" id="heuristic-label">h:</label>
-        <select id="heuristicSelect">
-          <option value="zero">0</option>
-          <option value="euclid">Euc</option>
-          <option value="w_euclid">1.5Euc</option>
-        </select>
-      </div>
 
     <!-- Container for helper chat (bot right corner)-->
     <div class="chat-full-container">
@@ -163,7 +155,7 @@
 
     <div class="topnav-centered">
       <p id="UI-Text" class="UI-Text">
-        Start by selecting the source node (node 0), then find the shortest path to the goal using
+        Start by selecting the source node (node S), then find the shortest path to the goal using
         f(n) = g(n) + h(n).
       </p>
       <ul class="UI-Text Hint-Text hidden">
@@ -208,16 +200,27 @@
       </ul>
     </div>
 
-    <!-- Top Right Icons Row (matches Dijkstra: text buttons + hidden pseudo slot) -->
-    <div class="Action-Icons-Holder">
-      <div class="Action-Icons">
-        <div class="Rearrange-Action">
-          <button class="room-btn">Rearrange chests</button>
-        </div>
-        <div class="Pesudocode-Icon hidden"></div>
-        <div class="Instruction-Icon"></div>
-        <div class="settings__icon">
-          <button class="room-btn">Settings</button>
+    <div class="astar-top-right-row">
+      <div id="heuristic-container" class="astar-heuristic-container">
+        <label for="heuristicSelect" id="heuristic-label">h:</label>
+        <select id="heuristicSelect">
+          <option value="zero">0</option>
+          <option value="euclid">Euc</option>
+          <option value="w_euclid">1.5Euc</option>
+        </select>
+      </div>
+
+      <!-- Top Right Icons Row (matches Dijkstra: text buttons + hidden pseudo slot) -->
+      <div class="Action-Icons-Holder">
+        <div class="Action-Icons">
+          <div class="Rearrange-Action">
+            <button class="room-btn">Rearrange chests</button>
+          </div>
+          <div class="Pesudocode-Icon hidden"></div>
+          <div class="Instruction-Icon"></div>
+          <div class="settings__icon">
+            <button class="room-btn">Settings</button>
+          </div>
         </div>
       </div>
     </div>
