@@ -375,11 +375,7 @@ function nextTutorialStep() {
       debugPrint(
         "[nextTutorialStep] Handling level completion via GameHelper.",
       );
-      GameHelper.handleLevelCompletion(
-        curRoomUI,
-        curGameSession,
-        levelMaxScores[curRoomUI.currentLevel],
-      );
+      completeLevelWithHeuristicComparison();
     }
   } else {
     debugPrint("[nextTutorialStep] Proceeding to next tutorial step.");
@@ -791,11 +787,7 @@ function drawLines() {
             if (curRoomUI.isTutorial) {
               curRoomUI.updateTutorialModalToBeTutorialCompleteModal?.();
             } else {
-              GameHelper.handleLevelCompletion(
-                curRoomUI,
-                curGameSession,
-                levelMaxScores[curRoomUI.currentLevel],
-              );
+              completeLevelWithHeuristicComparison();
             }
             return;
           }
@@ -1760,6 +1752,185 @@ function updateInputDialogHeuristicInfo() {
   infoEl.textContent = `Node ${getNodeDisplayLabel(targetNode)}: h(n) = ${hVal.toFixed(2)} (weight ${weight.toFixed(2)} × Euclidean distance).`;
 }
 
+function buildAdjacencyListFromGraph(localGraph) {
+  const adjacency = {};
+  (localGraph.nodes || []).forEach((node) => {
+    adjacency[node] = [];
+  });
+  (localGraph.edges || []).forEach(([from, to, weight]) => {
+    if (!adjacency[from]) adjacency[from] = [];
+    if (!adjacency[to]) adjacency[to] = [];
+    adjacency[from].push({ node: to, weight: Number(weight) });
+    adjacency[to].push({ node: from, weight: Number(weight) });
+  });
+  return adjacency;
+}
+
+function computeWeightedHeuristic(localGraph, node, goalNode, weightMultiplier) {
+  if (!Number.isFinite(weightMultiplier) || weightMultiplier <= 0) return 0;
+  const p = localGraph.nodePositions?.[Number(node)];
+  const g = localGraph.nodePositions?.[Number(goalNode)];
+  if (!p || !g) return 0;
+  const dx = p.x - g.x;
+  const dz = p.z - g.z;
+  const euclid = Math.sqrt(dx * dx + dz * dz);
+  return weightMultiplier * euclid;
+}
+
+function runWeightedAstarSummary(localGraph, weightMultiplier) {
+  const startNode = Number(localGraph.startNode);
+  const goalNode = Number(localGraph.goalNode);
+  const adjacency = buildAdjacencyListFromGraph(localGraph);
+  const nodes = Object.keys(adjacency).map(Number);
+
+  const gScore = {};
+  const previous = {};
+  const closed = new Set();
+  const open = [];
+  let nodesVisited = 0;
+
+  nodes.forEach((node) => {
+    gScore[node] = Infinity;
+    previous[node] = null;
+  });
+
+  const startH = computeWeightedHeuristic(
+    localGraph,
+    startNode,
+    goalNode,
+    weightMultiplier,
+  );
+  gScore[startNode] = 0;
+  open.push({ node: startNode, f: startH });
+
+  while (open.length > 0) {
+    open.sort((a, b) => (a.f === b.f ? a.node - b.node : a.f - b.f));
+    const current = open.shift();
+    if (!current) break;
+    if (closed.has(current.node)) continue;
+
+    closed.add(current.node);
+    nodesVisited++;
+
+    if (current.node === goalNode) break;
+
+    const neighbors = adjacency[current.node] || [];
+    neighbors.forEach(({ node: neighbor, weight }) => {
+      if (closed.has(neighbor)) return;
+      const tentativeG = gScore[current.node] + weight;
+      if (tentativeG < gScore[neighbor]) {
+        gScore[neighbor] = tentativeG;
+        previous[neighbor] = current.node;
+        const h = computeWeightedHeuristic(
+          localGraph,
+          neighbor,
+          goalNode,
+          weightMultiplier,
+        );
+        open.push({ node: neighbor, f: tentativeG + h });
+      }
+    });
+  }
+
+  const path = [];
+  if (Number.isFinite(gScore[goalNode])) {
+    let cur = goalNode;
+    while (cur !== null && cur !== undefined) {
+      path.push(cur);
+      if (cur === startNode) break;
+      cur = previous[cur];
+    }
+    path.reverse();
+  }
+
+  return {
+    weight: Number(weightMultiplier.toFixed(2)),
+    nodesVisited,
+    pathCost: Number.isFinite(gScore[goalNode])
+      ? Number(gScore[goalNode].toFixed(2))
+      : Infinity,
+    path,
+  };
+}
+
+function buildHeuristicComparisonHTML() {
+  if (!graph) return "";
+
+  const baselineWeights = [0, 1, 1.5];
+  const userWeight = Number(getHeuristicWeightFromInput().toFixed(2));
+  const weights = [...baselineWeights];
+  if (!weights.some((w) => Math.abs(w - userWeight) < 0.001)) {
+    weights.push(userWeight);
+  }
+
+  const runs = weights
+    .map((weight) => runWeightedAstarSummary(graph, weight))
+    .sort((a, b) => a.weight - b.weight);
+  const zeroRun = runs.find((run) => Math.abs(run.weight) < 0.001);
+  const optimalCost = zeroRun?.pathCost;
+
+  const rows = runs
+    .map((run) => {
+      const isOptimal =
+        Number.isFinite(optimalCost) &&
+        Number.isFinite(run.pathCost) &&
+        Math.abs(run.pathCost - optimalCost) < 0.001;
+      const isUserOnly =
+        Math.abs(run.weight - userWeight) < 0.001 &&
+        !baselineWeights.some((w) => Math.abs(w - run.weight) < 0.001);
+      const weightLabel = isUserOnly
+        ? `${run.weight.toFixed(2)}x (your weight)`
+        : `${run.weight.toFixed(2)}x`;
+      const pathCost = Number.isFinite(run.pathCost)
+        ? run.pathCost.toFixed(2)
+        : "∞";
+      return `
+        <tr>
+          <td style="padding: 6px; border: 1px solid #495057;">${weightLabel}</td>
+          <td style="padding: 6px; border: 1px solid #495057;">${run.nodesVisited}</td>
+          <td style="padding: 6px; border: 1px solid #495057;">${pathCost}</td>
+          <td style="padding: 6px; border: 1px solid #495057;">${isOptimal ? "Yes" : "No"}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  return `
+    <div style="margin-top: 10px; text-align: left;">
+      <p style="margin: 0 0 8px 0; color: #d0ebff; font-size: 14px;">
+        Heuristic comparison on this graph:
+      </p>
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px; color: #e3f4ff;">
+        <thead>
+          <tr style="background: #212529;">
+            <th style="padding: 6px; border: 1px solid #495057;">Weight</th>
+            <th style="padding: 6px; border: 1px solid #495057;">Visited Nodes</th>
+            <th style="padding: 6px; border: 1px solid #495057;">Path Cost</th>
+            <th style="padding: 6px; border: 1px solid #495057;">Optimal</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p style="margin: 10px 0 0 0; color: #74c0fc; font-size: 13px; line-height: 1.4;">
+        Note: Sometimes all weights look the same on a specific graph. Across graphs, weights closer to Euclidean often visit fewer nodes.
+        Also, 1.5x can be inadmissible and may not always return the most optimal path.
+      </p>
+    </div>
+  `;
+}
+
+function completeLevelWithHeuristicComparison() {
+  const heuristicComparisonHTML = buildHeuristicComparisonHTML();
+  GameHelper.handleLevelCompletion(
+    curRoomUI,
+    curGameSession,
+    levelMaxScores[curRoomUI.currentLevel],
+  );
+  if (heuristicComparisonHTML && curRoomUI?.labelCompletionText) {
+    curRoomUI.labelCompletionText.innerHTML += heuristicComparisonHTML;
+  }
+}
+
 /*
  * Sets up the game state and visuals based on the selected level.
  *
@@ -2169,10 +2340,19 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const heuristicInput = document.getElementById("heuristicWeightInput");
   if (!heuristicInput) return;
+  let lastAppliedWeight = null;
 
   const onHeuristicWeightChange = () => {
     if (!graph || curRoomUI.isTutorial) return;
     const weight = getHeuristicWeightFromInput();
+    if (
+      lastAppliedWeight !== null &&
+      Math.abs(Number(lastAppliedWeight) - Number(weight)) < 0.0001
+    ) {
+      return;
+    }
+
+    lastAppliedWeight = weight;
     heuristicInput.value = String(weight);
     graph.heuristicWeight = weight;
     graph.heuristicType = weight === 0 ? "zero" : "euclid";
@@ -2187,7 +2367,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   heuristicInput.addEventListener("change", onHeuristicWeightChange);
-  heuristicInput.addEventListener("blur", onHeuristicWeightChange);
+  heuristicInput.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    onHeuristicWeightChange();
+  });
 });
 
 document.addEventListener("DOMContentLoaded", async function () {
