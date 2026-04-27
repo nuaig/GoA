@@ -59,6 +59,7 @@ let transientQueueEntries = [];
 let currentSettledNode = null;
 let lastDialogSubmitAt = 0;
 let suppressInputDialogUntil = 0;
+let stepAdvanceInProgress = false;
 // Define max score per level
 const levelMaxScores = {
   1: 40,
@@ -681,7 +682,11 @@ function drawLines() {
 
   onClick = function (event) {
     event.preventDefault();
-    if (curRoomUI.isModalOpen || Date.now() < clickBlockedUntil) {
+    if (
+      curRoomUI.isModalOpen ||
+      Date.now() < clickBlockedUntil ||
+      stepAdvanceInProgress
+    ) {
       debugPrint("[onClick] Ignored: modal is open or click is blocked.");
       return;
     }
@@ -793,7 +798,11 @@ function drawLines() {
           }
           curAlgorithmForGraph.resumeFromNode(index);
 
-          setTimeout(() => nextTutorialStep(), 500);
+          // Advance immediately so fast clicks don't land in a stale step.
+          stepAdvanceInProgress = true;
+          clickBlockedUntil = Date.now() + 250;
+          nextTutorialStep();
+          stepAdvanceInProgress = false;
         } else {
           debugPrint("[onClick] Wrong node clicked.");
           if (currentStep.expectedChests.includes(0)) {
@@ -1665,6 +1674,7 @@ function resetScene() {
   debugPrint("[resetScene] Score reset and stars cleared.");
 
   selectedEdgesThisStep = [];
+  stepAdvanceInProgress = false;
   curRoomUI.selectedEdgeForInput = null;
   priorityQueueState.clear();
   settledGState.length = 0;
@@ -2340,19 +2350,20 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const heuristicInput = document.getElementById("heuristicWeightInput");
   if (!heuristicInput) return;
-  let lastAppliedWeight = null;
 
   const onHeuristicWeightChange = () => {
     if (!graph || curRoomUI.isTutorial) return;
     const weight = getHeuristicWeightFromInput();
+    const currentGraphWeight = Number.isFinite(Number(graph.heuristicWeight))
+      ? Number(graph.heuristicWeight)
+      : null;
     if (
-      lastAppliedWeight !== null &&
-      Math.abs(Number(lastAppliedWeight) - Number(weight)) < 0.0001
+      currentGraphWeight !== null &&
+      Math.abs(currentGraphWeight - Number(weight)) < 0.0001
     ) {
       return;
     }
 
-    lastAppliedWeight = weight;
     heuristicInput.value = String(weight);
     graph.heuristicWeight = weight;
     graph.heuristicType = weight === 0 ? "zero" : "euclid";
