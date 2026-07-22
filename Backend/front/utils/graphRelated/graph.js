@@ -117,6 +117,30 @@ export function createSpecificGraphDijkstraTutorial() {
   return new Graph(nodes, edges);
 }
 
+/**
+ * Tutorial graph for A* (heuristic 0): nodes 0–4, goal 4.
+ * Edges chosen so the tutorial steps match the algorithm trace.
+ */
+export function createSpecificGraphAstarTutorial() {
+  const nodes = [0, 1, 2, 3, 4];
+
+  const edges = [
+    [0, 1, 2],
+    [0, 2, 1],
+    [1, 2, 3],
+    [1, 3, 4],
+    [2, 3, 2],
+    [2, 4, 3],
+    [3, 4, 1],
+  ];
+
+  const graph = new Graph(nodes, edges);
+  graph.startNode = 0;
+  graph.goalNode = 4;
+
+  return graph;
+}
+
 export function createSpecificGraphPrimTutorial() {
   const nodes = [0, 1, 2, 3, 4]; // Nodes
   const edges = [

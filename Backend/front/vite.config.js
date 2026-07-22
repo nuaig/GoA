@@ -30,6 +30,7 @@ export default defineConfig({
         prim: resolve(__dirname, "./Prim.html"),
         dashboard: resolve(__dirname, "./dashboard.html"),
         dijkstra: resolve(__dirname, "./Dijkstra.html"),
+        Astar: resolve(__dirname, "./Astar.html"),
         // Add more HTML files as needed
       },
     },

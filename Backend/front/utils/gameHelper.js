@@ -68,9 +68,14 @@ export class GameHelper {
     // Update level UI
     curRoomUI.updateLevelStatus(curRoomUI.currentLevel, curRoomUI.totalStars);
 
-    // First-time completion handling
+    // Full congrats (glow, fireworks) only when level 3 is completed with 3 stars
+    const threeStars = curRoomUI.totalStars + 1 === 3;
     const updateStatus =
-      curRoomUI.currentLevel !== 3 ? "completed" : "completed_first_time";
+      curRoomUI.currentLevel !== 3
+        ? "completed"
+        : threeStars
+          ? "completed_first_time"
+          : "completed";
 
     curRoomUI.gameStatusService.updateGameStatus(
       curRoomUI.gameName, // dynamic: "Kruskal", "Dijkstra", etc.

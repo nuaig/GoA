@@ -342,10 +342,31 @@ class GameRoomUI {
 
       this.resetAllLevels();
 
-      const levels = gameStatus.games[this.gameName]?.[mode];
-      if (!levels) {
-        console.error(`No levels found for mode: ${mode}`);
-        return;
+      // Legacy users may lack `games.Astar` (or other games) until first DB write — default progress for UI.
+      const defaultLevels = () => [
+        { level: 1, score: 0, stars: 0, status: "unlocked" },
+        { level: 2, score: 0, stars: 0, status: "locked" },
+        { level: 3, score: 0, stars: 0, status: "locked" },
+      ];
+      if (!gameStatus.games) gameStatus.games = {};
+      const entry = gameStatus.games[this.gameName];
+      if (!entry || typeof entry !== "object") {
+        gameStatus.games[this.gameName] = {
+          training: defaultLevels(),
+          regular: defaultLevels(),
+        };
+      } else {
+        if (!Array.isArray(entry.training))
+          entry.training = defaultLevels();
+        if (!Array.isArray(entry.regular)) entry.regular = defaultLevels();
+      }
+      let levels = gameStatus.games[this.gameName][mode];
+      if (!Array.isArray(levels)) {
+        gameStatus.games[this.gameName][mode] = defaultLevels();
+        levels = gameStatus.games[this.gameName][mode];
+      }
+      if (this.gameStatusService?.gameStatus) {
+        this.gameStatusService.gameStatus = gameStatus;
       }
 
       let highestCompletedLevel = 0;
@@ -588,7 +609,8 @@ class GameRoomUI {
       if (
         this.gameName == "Kruskal" ||
         this.gameName == "Prim" ||
-        this.gameName == "Dijkstra"
+        this.gameName == "Dijkstra" ||
+        this.gameName == "Astar"
       ) {
         this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
       }
@@ -620,7 +642,10 @@ class GameRoomUI {
     } else if (this.gameName == "Dijkstra") {
       message =
         "";
-    } else if (this.gameName == "Heapsort") {
+    } else if (this.gameName == "Astar") {
+      message =
+        "";
+    }else if (this.gameName == "Heapsort") {
       message =
         "<br>Keep in mind to always maintain the Max-Heap property: The largest element must be at the root. Swap it with the last element, remove it, and reheapify until the array is sorted.";
     }
@@ -718,6 +743,10 @@ class GameRoomUI {
   }
 
   addAllEventListenersHelperChat() {
+    // Pages without helper chat (e.g. older Astar.html) omit these nodes — skip safely.
+    if (!this.chatOpenButton || !this.chatCloseButton) {
+      return;
+    }
     this.listenEventChatOpen();
     this.listenEventChatClose();
     this.listenEventChatButtons();
@@ -857,6 +886,9 @@ class GameRoomUI {
 
   /* All event listeners for algorithm instruction single modal */
   addAllEventListenersAlgoInstructionSingleModal() {
+    if (!this.btnAlgoInsrtSingleClose) {
+      return;
+    }
     this.listenEventCloseButtonAlgoInstructionSingleModal();
   }
 
@@ -1135,7 +1167,8 @@ class GameRoomUI {
           if (
             this.gameName == "Kruskal" ||
             this.gameName == "Prim" ||
-            this.gameName == "Dijkstra"
+            this.gameName == "Dijkstra" ||
+            this.gameName == "Astar"
           ) {
             this.initailCameraAnimationGSAP_K_P(); // Trigger the camera animation
           }
@@ -1306,14 +1339,15 @@ class GameRoomUI {
     }, 1000);
   }
 
-  // -------For Kruskal, Prim, and Dijkstra Only------------
+  // -------For Kruskal, Prim, Astar and Dijkstra Only------------
   // enable Mouse event listeners
   enableMouseEventListeners_K_P() {
     console.log(this.gameName);
     if (
       this.gameName == "Kruskal" ||
       this.gameName == "Prim" ||
-      this.gameName == "Dijkstra"
+      this.gameName == "Dijkstra" || 
+      this.gameName == "Astar"
     ) {
       if (this.callbacks?.onMouseMove) {
         console.log("mousemove added back");
@@ -1331,7 +1365,8 @@ class GameRoomUI {
     if (
       this.gameName == "Kruskal" ||
       this.gameName == "Prim" ||
-      this.gameName == "Dijkstra"
+      this.gameName == "Dijkstra" || 
+      this.gameName == "Astar"
     ) {
       if (this.callbacks?.onMouseMove) {
         console.log("mousemove removed");
@@ -1347,7 +1382,7 @@ class GameRoomUI {
       }
     }
   }
-  // -------Done For Kruskal, Prim, and Dijkstra Only------------
+  // -------Done For Kruskal, Prim, Astar and Dijkstra Only------------
 }
 
 export default GameRoomUI;

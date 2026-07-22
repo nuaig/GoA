@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>A* Algorithm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" media="screen" href="src/css/kruskal_prim_heapsort.css" />
+    <script type="module" src="src/js/Astar.js"></script>
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+  </head>
+  <body class="astar-room">
+    <div id="Renderer">
+      <div class="world" id="world"></div>
+    </div>
+
+    <div id="header-with-health" class="header">
+        <div class="header-content">
+          <div class="health">
+            <div class="health-label">Lives</div>
+            <div id="health-bar">
+              <img
+                class="health-icon"
+                src="./symbols/health-full-icon.svg"
+                alt="Health Icon"
+                width="20"
+                height="20"
+              />
+              <img
+                class="health-icon"
+                src="./symbols/health-full-icon.svg"
+                alt="Health Icon"
+                width="20"
+                height="20"
+              />
+              <img
+                class="health-icon"
+                src="./symbols/health-full-icon.svg"
+                alt="Health Icon"
+                width="20"
+                height="20"
+              />
+              <img
+                class="health-icon"
+                src="./symbols/health-full-icon.svg"
+                alt="Health Icon"
+                width="20"
+                height="20"
+              />
+              <img
+                class="health-icon"
+                src="./symbols/health-full-icon.svg"
+                alt="Health Icon"
+                width="20"
+                height="20"
+              />
+            </div>
+          </div>
+          <div class="score">
+            <div class="score-label">Score</div>
+            <div class="score-label-2">00</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="header-without-health" class="header hidden">
+        <div class="header-content">
+          <div class="score">
+            <div class="score-label">Score</div>
+            <div class="score-label-2">00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-container">
+      <div class="control-panel dijkstra-control-panel">
+          <h3>Controls:</h3>
+          <ul>
+            <li>
+              <img src="symbols/left_drag_yellow_icon.png" alt="Left click drag icon" class="inline-icon" />
+              Left Click & Drag : Rotate room
+            </li>
+            <li>
+              <img src="symbols/left_click_yellow_icon.png" alt="Left click icon" class="inline-icon" />
+              Left Click : Click on Edges/Chests
+            </li>
+          </ul>
+        </div>
+      </div>
+
+
+    <!-- Container for helper chat (bot right corner)-->
+    <div class="chat-full-container">
+      <div class="chat-open-button-container">
+        <div class="chat-open-button">
+          <button class="button-question-mark" id="chat-open-button">Click for help 🗨️</button>
+        </div>
+      </div>
+    </div>
+
+    <!--Main chat container-->
+    <div class="chat-container">
+      <button class="chat-close-button" id="chat-close-button">X</button>
+      <button class="chat-home-button" id="chat-home-button">Home</button>
+      <div class="page-home" id="chat-homepage-container">
+        <div class="chat-header">
+          <h2>What can I help you with?</h2>
+        </div>
+        <div class="chat-body">
+          <div class="container-msgs">
+            <button class="button-msg" id="button-home-main-algo">Learn more about the A* algorithm.</button>
+            <button class="button-msg" id="button-home-pseudo">View the pseudo-code for the A* algorithm.</button>
+            <button class="button-msg" id="button-home-tutorial">Replay the tutorial.</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-page page-main-algo" id="chat-main-algso-container">
+        <div class="chat-header">
+          <h2>What do you want to know about A*?</h2>
+        </div>
+        <div class="chat-body">
+          <button class="button-msg" id="button-algo-kruskal">What is A*?</button>
+          <button class="button-msg hidden" id="button-algo-context">What is a heuristic?</button>
+          <button class="button-msg hidden" id="button-algo-cycle">What is a cycle?</button>
+          <button class="button-msg hidden" id="button-algo-step">What are the steps?</button>
+          <button class="button-msg" id="button-algo-slides">What are the steps?</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- A* Algorithm Modal with separated slides -->
+    <div class="modal algo-instruction-modal-single hidden">
+      <h2 class="modal__header">A* Algorithm</h2>
+      <div class="slide-single-container">
+        <div class="slide-single step1">
+          <img src="AlgorithmsInstructions/AstarAlgo/1.png" alt="A* Algorithm Step 1" />
+        </div>
+        <div class="slide-single step2">
+          <img src="AlgorithmsInstructions/AstarAlgo/2.png" alt="A* Algorithm Step 2" />
+        </div>
+        <div class="slide-single step3">
+          <img src="AlgorithmsInstructions/AstarAlgo/3.png" alt="A* Algorithm Step 3" />
+        </div>
+        <div class="slide-single step4">
+          <img src="AlgorithmsInstructions/AstarAlgo/4.png" alt="A* Algorithm Step 4" />
+        </div>
+        <div class="slide-single step5">
+          <img src="AlgorithmsInstructions/AstarAlgo/5.png" alt="A* Algorithm Step 5" />
+        </div>
+      </div>
+      <div class="button__holder">
+        <button class="btn btn-algo-instruction-single-close">Close</button>
+      </div>
+    </div>
+
+    <div class="topnav-centered">
+      <p id="UI-Text" class="UI-Text">
+        Start by selecting the source node (node S), then find the shortest path to the goal using
+        f(n) = g(n) + h(n).
+      </p>
+      <ul class="UI-Text Hint-Text hidden">
+        <li>
+          <img
+            class="red-cross-icon"
+            src="./symbols/red-cross-icon.svg"
+            alt="Red Cross Icon"
+            width="48"
+            height="48"
+            style="cursor: pointer"
+          />
+          <img
+            class="green-check-icon"
+            src="./symbols/green-check-icon.svg"
+            alt="Green Check Icon"
+            width="48"
+            height="48"
+            style="cursor: pointer"
+          />
+          Pick the unvisited node with the smallest f(n) = g(n) + h(n).
+        </li>
+        <li>
+          <img
+            class="red-cross-icon"
+            src="./symbols/red-cross-icon.svg"
+            alt="Red Cross Icon"
+            width="48"
+            height="48"
+            style="cursor: pointer"
+          />
+          <img
+            class="green-check-icon"
+            src="./symbols/green-check-icon.svg"
+            alt="Green Check Icon"
+            width="48"
+            height="48"
+            style="cursor: pointer"
+          />
+          Relax edges only to neighbors that improve g(n).
+        </li>
+      </ul>
+    </div>
+
+    <div class="astar-top-right-row">
+      <div id="heuristic-container" class="astar-heuristic-container">
+        <label for="heuristicWeightInput" id="heuristic-label">h:</label>
+        <input
+          id="heuristicWeightInput"
+          type="number"
+          min="0"
+          step="0.1"
+          value="1"
+          title="Heuristic weight multiplier (h = weight * Euclidean)"
+          aria-label="Heuristic weight"
+        />
+      </div>
+
+      <!-- Top Right Icons Row (matches Dijkstra: text buttons + hidden pseudo slot) -->
+      <div class="Action-Icons-Holder">
+        <div class="Action-Icons">
+          <div class="Rearrange-Action">
+            <button class="room-btn">Rearrange chests</button>
+          </div>
+          <div class="Pesudocode-Icon hidden"></div>
+          <div class="Instruction-Icon"></div>
+          <div class="settings__icon">
+            <button class="room-btn">Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Shown when Instruction Icon Is Pressed -->
+    <div class="sub-menu-wrap" id="subMenu">
+      <div class="sub-menu">
+        <div class="sub-menu-btn sub-menu-game-features">
+          <p>Game Features</p>
+        </div>
+        <hr />
+        <div class="sub-menu-btn sub-menu-algo-instructions">
+          <p>Algorithm</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Psudocode Shown when Psudocode Is Pressed -->
+    <div class="topnav-instructions pseudo Astar-pseudo hidden">
+      <div class="button-close-pseudo">
+        <p>X</p>
+      </div>
+      <pre class="code-block">
+A*:
+1. Goal: Find shortest path from source node "s" to goal node "g"
+2. Initialize g(s)=0, g(other)=∞
+3. f(n) = g(n) + h(n)
+4. Repeat until goal is reached:
+   + select unvisited node with smallest f(n)
+   + for each neighbor v:
+     - compute new g = g(current) + weight
+     - if new g &lt; old g:
+         update g(v)
+         update f(v)   
+      </pre>
+    </div>
+
+    <!-- Tutorial Walk Through -->
+    <div class="tutorial-instructions-modal hidden">
+      <h3>Tutorial Walk-through</h3>
+      <pre class="code-block">
+        <strong>Instruction:</strong>  
+        <span class="tuto-instruction-text">Select the starting node to begin the tutorial after reading the explanation below.</span>
+
+        <strong>Explanation:</strong>  
+<span class="tuto-explanation-text">
+The treasure chests are nodes, and the lines between them are weighted edges. 
+Your goal is to find the shortest path from the starting node to a specific goal node. 
+
+A* algorithm improves on Dijkstra’s approach by using a heuristic — an estimate of how far each node is from the goal. 
+
+For each node, A* computes:
+g(n) = the distance from the start node to n  
+h(n) = the estimated distance from n to the goal  
+f(n) = g(n) + h(n)
+
+At every step, A* selects the unvisited node with the smallest f(n) value, guiding the search intelligently toward the goal.
+</span>      </pre>
+    </div>
+
+    <!-- Welcome Modal -->
+    <div class="modal modal__tutorial hidden">
+      <h2 class="modal__header tutorial__header">
+        Welcome to A* Room!
+      </h2>
+      <p class="label__tutorial_text">
+        Would you like to learn A* Algorithm through an interactive
+        walk-through tutorial?
+      </p>
+
+      <div class="button__holder">
+        <button class="btn btn__tutorial__yes">Yes</button>
+        <button class="btn btn__tutorial__no_or_continue">No</button>
+      </div>
+    </div>
+
+    <!-- Menu Shown When Settings Icon Pressed -->
+    <div class="modal modal__settings hidden">
+      <h2 class="modal__header settings__header">Settings</h2>
+      <div class="button__holder">
+        <button class="btn btn__setting__restart">Restart this level</button>
+      </div>
+      <div class="button__holder">
+        <button class="btn btn__setting__diffLvl">
+          Choose different level
+        </button>
+      </div>
+      <div class="button__holder">
+        <button class="btn btn__setting__tutorial">Tutorial</button>
+      </div>
+      <div class="button__holder">
+        <button class="btn btn__setting__mainDungeon">
+          Go back to main dungeon
+        </button>
+      </div>
+      <img
+        class="btn__close"
+        src="./symbols/close-icon.svg"
+        alt="Close Icon"
+        width="36"
+        height="36"
+        style="cursor: pointer"
+      />
+    </div>
+
+    <!-- Level Choice Modal -->
+    <div class="modal modal__level__selection hidden">
+      <h2 class="modal__header level__selection__header">
+        A* Room Levels
+      </h2>
+      <div id="mode-container" class="mode-selection">
+        <button
+          id="training-mode-btn"
+          class="btn mode-btn training-mode active"
+        >
+          Training Mode
+        </button>
+        <button id="regular-mode-btn" class="btn mode-btn regular-mode">
+          Regular Mode
+        </button>
+      </div>
+      <button class="btn btn__level__1 level__btn__holder">
+        <p class="btn__level">Level 1</p>
+        <div class="level__stars__holder">
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
+            width="24"
+            height="24"
+          />
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
+            width="24"
+            height="24"
+          />
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
+            width="24"
+            height="24"
+          />
+        </div>
+        <div></div>
+      </button>
+      <button class="btn btn__level__2 level__btn__holder level__locked">
+        <p class="btn__level">Level 2</p>
+        <div class="level__stars__holder">
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="SmallEmpty Star Icon"
+            width="24"
+            height="24"
+          />
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
+            width="24"
+            height="24"
+          />
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
+            width="24"
+            height="24"
+          />
+        </div>
+        <div>
+          <img
+            class="feather feather-lock"
+            src="./symbols/lock-icon.svg"
+            alt="Lock Icon"
+            width="24"
+            height="24"
+          />
+        </div>
+      </button>
+      <button class="btn btn__level__3 level__btn__holder level__locked">
+        <p class="btn__level">Level 3</p>
+        <div class="level__stars__holder">
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
+            width="24"
+            height="24"
+          />
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
+            width="24"
+            height="24"
+          />
+          <img
+            class="feather feather-star"
+            src="./symbols/star-small-empty-icon.svg"
+            alt="Small Empty Star Icon"
+            width="24"
+            height="24"
+          />
+        </div>
+        <div>
+          <img
+            class="feather feather-lock"
+            src="./symbols/lock-icon.svg"
+            alt="Lock Icon"
+            width="24"
+            height="24"
+          />
+        </div>
+      </button>
+
+      <img
+        class="btn__close btn__level__close hidden"
+        src="./symbols/close-icon.svg"
+        alt="Close Icon"
+        width="36"
+        height="36"
+        style="cursor: pointer"
+      />
+    </div>
+
+    <!-- Completion Modal -->
+    <div class="modal modal__completion hidden">
+      <h2 class="modal__header modal__completion__header">Congratulations!</h2>
+      <div class="stars__rating">
+        <img
+          class="star"
+          src="./symbols/star-big-full-icon.svg"
+          alt="Full Star"
+          width="90"
+          height="90"
+        />
+        <img
+          class="star"
+          src="./symbols/star-big-full-icon.svg"
+          alt="Full Star"
+          width="90"
+          height="90"
+        />
+        <img
+          class="star"
+          src="./symbols/star-big-full-icon.svg"
+          alt="Full Star"
+          width="90"
+          height="90"
+        />
+      </div>
+      <p class="label__final_score">Final Score : <span>00</span></p>
+      <p class="label__completion_text">
+        You have successfully completed level 1 of A* Algorithm!
+      </p>
+      <div class="button__holder">
+        <button class="btn btn__setting__mainDungeon">
+          Go back to Main Dungeon
+        </button>
+        <button class="btn btn__again">Try again</button>
+        <button class="btn btn__next">Next Level &rarr;</button>
+        <button class="btn btn__change__level">Change Level</button>
+      </div>
+    </div>
+
+    <!-- Start Game Modal -->
+    <div class="modal instruction hidden">
+      <img
+        class="instruction__img_djkstra instruction__img_Astar"
+        src="GameFeatures/Astar-game-features.png"
+        alt="A* Game Features"
+      />
+      <div class="button__holder">
+        <button class="btn btn__instruction__start">
+          Start the game &rarr;
+        </button>
+      </div>
+    </div>
+
+    <!-- Algorithm Modal -->
+    <div class="modal algo-instruction-modal hidden">
+      <div class="algo-instruction mySwiper">
+        <h2 class="modal__header">
+          Step-by-Step Guide to A* Algorithm
+        </h2>
+        <div class="testi-content swiper-wrapper">
+          <div class="slide swiper-slide">
+            <img
+              src="AlgorithmsInstructions/AstarAlgo/1.png"
+              alt="A* Algorithm Step 1"
+            />
+          </div>
+          <div class="slide swiper-slide">
+            <img
+              src="AlgorithmsInstructions/AstarAlgo/2.png"
+              alt="A* Algorithm Step 2"
+            />
+          </div>
+          <div class="slide swiper-slide">
+            <img
+              src="AlgorithmsInstructions/AstarAlgo/3.png"
+              alt="A* Algorithm Step 3"
+            />
+          </div>
+          <div class="slide swiper-slide">
+            <img
+              src="AlgorithmsInstructions/AstarAlgo/4.png"
+              alt="A* Algorithm Step 4"
+            />
+          </div>
+          <div class="slide swiper-slide">
+            <img
+              src="AlgorithmsInstructions/AstarAlgo/5.png"
+              alt="A* Algorithm Step 5"
+            />
+          </div>
+        </div>
+        <div class="swiper-button-next nav-btn"></div>
+        <div class="swiper-button-prev nav-btn"></div>
+        <div class="swiper-pagination"></div>
+      </div>
+      <div class="button__holder">
+        <button class="btn btn-algo-instruction-close">Close</button>
+      </div>
+    </div>
+    <div class="overlay hidden"></div>
+
+    <!-- A* Tables -->
+    <div
+      id="astar-tables-wrapper"
+      style="
+        display: none;
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        z-index: 99;
+      "
+    >
+      <!-- Priority Queue UI -->
+      <div
+        id="priority-queue-container"
+        class="priority-queue-container"
+        style="
+          background: #343a40;
+          color: white;
+          padding: 10px;
+          border-radius: 8px;
+        "
+      >
+        <h3 style="margin: 0 0 10px 0">Priority Queue</h3>
+        <table
+          id="priorityQueueTable"
+          border="1"
+          cellpadding="5"
+          cellspacing="0"
+          style="border-collapse: collapse; width: 100%; font-family: monospace"
+        >
+          <thead>
+            <tr style="background-color: #1971c2">
+              <th>Node</th>
+              <th>g(n)</th>
+              <th>h(n)</th>
+              <th>f(n)</th>
+            </tr>
+          </thead>
+          <tbody id="priority-queue-body">
+            <!-- Queue rows will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Settled g(n) Tracker -->
+      <div
+        id="settled-g-container"
+        class="settled-g-container"
+        style="
+          background: #343a40;
+          color: white;
+          padding: 10px;
+          border-radius: 8px;
+        "
+      >
+        <h3 style="margin: 0 0 10px 0">Visited g(n)</h3>
+        <table
+          id="settledGTable"
+          border="1"
+          cellpadding="5"
+          cellspacing="0"
+          style="border-collapse: collapse; width: 100%; font-family: monospace"
+        >
+          <thead>
+            <tr style="background-color: #1971c2">
+              <th>Node</th>
+              <th>g(n)</th>
+            </tr>
+          </thead>
+          <tbody id="settled-g-body">
+            <!-- Settled rows will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Backdrop -->
+    <div
+      id="input-backdrop"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 999;
+      "
+    ></div>
+
+    <!-- Candidate Decision Modal -->
+    <div
+      id="candidate-decision-modal"
+      style="
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #343a40;
+        color: white;
+        border-radius: 8px;
+        border: 2px solid #1971c2;
+        padding: 18px;
+        z-index: 1100;
+        width: 360px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      "
+    >
+      <h3 style="margin: 0 0 8px 0; color: white">Choose Candidate</h3>
+      <p
+        id="candidate-decision-message"
+        style="margin: 0 0 12px 0; color: #d0ebff; font-size: 13px; line-height: 1.35"
+      ></p>
+      <div
+        id="candidate-decision-buttons"
+        style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center"
+      ></div>
+    </div>
+
+    <!-- Dialog -->
+    <div
+      id="input-dialog"
+      style="
+        display: none;
+        position: fixed;
+        bottom: 280px; 
+        left: 30px;
+        background: #343a40;
+        color: white;
+        border-radius: 8px;
+        border: 2px solid #1971c2;
+        padding: 20px;
+        z-index: 1000;
+        width: 300px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      "
+    >
+      <h3 style="margin-top: 0; color: white">Priority Update</h3>
+      <p id="dialog-instruction-text" style="margin-bottom: 8px">
+        Enter f(n) = g(n) + h(n) for the selected edge's destination node.
+      </p>
+      <p
+        id="dialog-heuristic-info"
+        style="margin: 0 0 10px 0; color: #d0ebff; font-size: 13px; line-height: 1.35"
+      ></p>
+      <input
+        type="text"
+        id="dialog-input"
+        placeholder="Enter g(n) + h(n)"
+        style="
+          width: 100%;
+          padding: 10px;
+          border-radius: 5px;
+          border: none;
+          font-size: 14px;
+          box-sizing: border-box;
+          margin-bottom: 15px;
+        "
+      />
+      <div style="text-align: center">
+        <button
+          id="dialog-ok-btn"
+          style="
+            background-color: #1971c2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+          "
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

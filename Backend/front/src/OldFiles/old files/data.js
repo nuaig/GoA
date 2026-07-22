@@ -24,6 +24,13 @@ const mistakeData = {
     average: { 1: 4.5, 2: 7, 3: 5 },
     best: { 1: 2, 2: 4, 3: 3 },
   },
+  astar: {
+    first: { 1: 5, 2: 8, 3: 6 },
+    last: { 1: 3, 2: 6, 3: 4 },
+    average: { 1: 4.5, 2: 7, 3: 5 },
+    best: { 1: 2, 2: 4, 3: 3 },
+  },
+  
 };
 
 const scoreData = {
@@ -46,6 +53,12 @@ const scoreData = {
     best: { 1: 92, 2: 88, 3: 97 },
   },
   dijkstra: {
+    first: { 1: 55, 2: 60, 3: 58 },
+    last: { 1: 78, 2: 83, 3: 80 },
+    average: { 1: 65, 2: 67, 3: 70 },
+    best: { 1: 92, 2: 88, 3: 97 },
+  },
+  astar: {
     first: { 1: 55, 2: 60, 3: 58 },
     last: { 1: 78, 2: 83, 3: 80 },
     average: { 1: 65, 2: 67, 3: 70 },
@@ -74,6 +87,11 @@ const trialsData = {
     2: { total: 5, success: 3, failure: 2 },
     3: { total: 5, success: 4, failure: 1 },
   },
+  astar: {
+    1: { total: 5, success: 2, failure: 3 },
+    2: { total: 5, success: 3, failure: 2 },
+    3: { total: 5, success: 4, failure: 1 },
+  },
 };
 
 const completionPercentageData = {
@@ -81,6 +99,7 @@ const completionPercentageData = {
   kruskal: 62, // 62% completion
   heapsort: 85, // 85% completion
   dijkstra: 30, // 30% completion
+  astar: 50, // 50% completion
 };
 
 const completionTimeTakenData = {
@@ -108,6 +127,12 @@ const completionTimeTakenData = {
     average: { 1: 120, 2: 140, 3: 160 },
     best: { 1: 100, 2: 115, 3: 135 },
   },
+  astar: {
+    first: { 1: 140, 2: 160, 3: 180 },
+    last: { 1: 110, 2: 130, 3: 150 },
+    average: { 1: 120, 2: 140, 3: 160 },
+    best: { 1: 100, 2: 115, 3: 135 },
+  },
 };
 
 const mistakeReductionUserData = {
@@ -127,6 +152,11 @@ const mistakeReductionUserData = {
     3: [4, 3, 2],
   },
   dijkstra: {
+    1: [4, 3, 2, 1],
+    2: [5, 4, 3, 2],
+    3: [7, 6, 5, 4, 3],
+  },
+  astar: {
     1: [4, 3, 2, 1],
     2: [5, 4, 3, 2],
     3: [7, 6, 5, 4, 3],

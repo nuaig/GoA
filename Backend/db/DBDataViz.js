@@ -1334,6 +1334,12 @@ const completionData = {
     2: { success: 68, failure: 32 },
     3: { success: 65, failure: 35 },
   },
+  Astar: {
+    allLevels: { success: 70, failure: 30 },
+    1: { success: 78, failure: 22 },
+    2: { success: 68, failure: 32 },
+    3: { success: 65, failure: 35 },
+  },
 };
 // console.log(completionData);
 // testCompletionData();

@@ -207,6 +207,13 @@ let example_score = {
     3: [2, 0, 1, 4, 10],
     allLevels: [2, 3, 24, 17, 10],
   },
+  astar: {
+    1: [0, 1, 20, 0, 0],
+    2: [0, 2, 3, 13, 0],
+    3: [2, 0, 1, 4, 10],
+    allLevels: [2, 3, 24, 17, 10],
+  },
+  
 };
 let scoreAnalysisChart = null;
 function renderOverallScoreChart(selectedGame) {
