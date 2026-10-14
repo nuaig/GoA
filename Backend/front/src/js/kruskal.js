@@ -599,11 +599,8 @@ function updateNodeColorsForSameTree(edge) {
   } else if (nodeStartColor && !nodeEndColor) {
     getNodesWithSameParentsAndColor(edge, nodeStartColor);
   } else {
-    let newColor;
-    do {
-      // newColor = getRandomColor();
-      newColor = 0x00ff00;  // green color for node
-    } while (usedColors.has(newColor));
+    // All components share the same green, so don't loop waiting for an unused color
+    const newColor = 0x00ff00; // green color for node
 
     usedColors.add(newColor);
 
