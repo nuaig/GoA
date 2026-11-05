@@ -48,8 +48,18 @@ async function isSafeClickTarget(page, { x, y }) {
  * @param {string} cfg.hookName       window property of the dev hook
  * @param {[number, number]} cfg.initialCounts  [chests, edges] of the random level-1 graph
  * @param {[number, number]} cfg.tutorialCounts [chests, edges] of the tutorial graph
+ * @param {[string, string]} [cfg.countHooks] hook names behind the counts (default chests, edges)
+ * @param {number[]} [cfg.cameraEnd] camera position once the intro animation settled
  */
-export function createRoomPage({ gameName, path, hookName, initialCounts, tutorialCounts }) {
+export function createRoomPage({
+  gameName,
+  path,
+  hookName,
+  initialCounts,
+  tutorialCounts,
+  countHooks = ["chestCount", "edgeCount"],
+  cameraEnd = CAMERA_END,
+}) {
   // ------------------------------------------------------------ hook access
   const hook = (page, fn, ...args) =>
     page.evaluate(([h, name, a]) => window[h][name](...a), [hookName, fn, args]);
@@ -79,7 +89,7 @@ export function createRoomPage({ gameName, path, hookName, initialCounts, tutori
       .poll(
         async () => {
           const pos = await hook(page, "cameraPosition");
-          return pos.every((c, i) => Math.abs(c - CAMERA_END[i]) < 1e-3);
+          return pos.every((c, i) => Math.abs(c - cameraEnd[i]) < 1e-3);
         },
         { timeout: 20_000, message: "camera animation did not settle" }
       )
@@ -192,7 +202,7 @@ export function createRoomPage({ gameName, path, hookName, initialCounts, tutori
 
   // ------------------------------------------------------------ setup
 
-  const counts = (page) => hooks(page, ["chestCount", "edgeCount"]);
+  const counts = (page) => hooks(page, countHooks);
 
   /** Loads the room with mocks and waits for the welcome modal + initial graph. */
   async function openRoom(page) {
@@ -228,7 +238,7 @@ export function createRoomPage({ gameName, path, hookName, initialCounts, tutori
     await expect(page.locator(".modal__tutorial")).toBeHidden();
     await expect(page.locator(".tutorial-instructions-modal")).toBeVisible();
     await expect
-      .poll(() => hooks(page, ["isTutorial", "chestCount", "edgeCount"]), {
+      .poll(() => hooks(page, ["isTutorial", ...countHooks]), {
         timeout: 90_000,
         message: "tutorial graph never loaded",
       })
@@ -249,7 +259,7 @@ export function createRoomPage({ gameName, path, hookName, initialCounts, tutori
     await expect
       .poll(
         () =>
-          hooks(page, ["currentMode", "currentLevel", "isTutorial", "chestCount", "edgeCount"]),
+          hooks(page, ["currentMode", "currentLevel", "isTutorial", ...countHooks]),
         { timeout: 90_000, message: "level 1 graph never loaded" }
       )
       .toEqual(["regular", 1, false, ...initialCounts]);
