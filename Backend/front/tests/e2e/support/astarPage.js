@@ -102,7 +102,9 @@ export async function driveTutorialStep(page, step, index, { submit = "ok" } = {
   expect(await stepIndex(page)).toBe(index);
   let decision = null;
 
-  if (Array.isArray(step.expectedChests)) {
+  if (step.type === "info") {
+    await page.locator(".tutorial-instructions-modal .tuto-next-btn").click();
+  } else if (Array.isArray(step.expectedChests)) {
     await clickChest(page, step.expectedChests[0]);
   } else if (Array.isArray(step.expectedEdges)) {
     const [u, v] = step.expectedEdges[0];

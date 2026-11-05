@@ -27,6 +27,10 @@ test.describe("A* regular mode", () => {
     expect(errors, "uncaught page errors").toEqual([]);
   });
 
+  test("regular levels never show the tutorial Next button", async ({ page }) => {
+    await expect(page.locator(".tutorial-instructions-modal .tuto-next-btn")).toBeHidden();
+  });
+
   test("a wrong chest click costs exactly one life", async ({ page }) => {
     const [step] = await hook(page, "regularSteps");
     expect(step.expectedChests).toEqual([0]);

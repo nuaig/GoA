@@ -46,6 +46,7 @@ let hintBooleans = {
 
 const slidesButton = document.querySelector("#button-algo-slides");
 const reArrangeButton = document.querySelector(".Rearrange-Action");
+const tutorialNextButton = document.querySelector(".tuto-next-btn");
 let curGameSession;
 let currentLevel = 1;
 let curNodes;
@@ -252,6 +253,9 @@ function updateTutorialStep(isTutorial = true) {
   // Update explanation text
   document.querySelector(".tuto-explanation-text").innerHTML = step.explanation;
   debugPrint("[updateTutorialStep] Explanation updated:", step.explanation);
+
+  // Info pages (e.g. the intro) advance with the Next button instead of a click
+  tutorialNextButton?.classList.toggle("hidden", step.type !== "info");
 }
 
 /*
@@ -611,6 +615,15 @@ function drawLines() {
     const currentStep = curRoomUI.isTutorial
       ? tutorialSteps[curRoomUI.currentTutorialStep]
       : curAlgorithmForGraph.steps[curRoomUI.currentTutorialStep];
+
+    // ========== INFO PAGE (tutorial intro) ==========
+    // Chests and edges can't be selected until the player presses Next.
+    if (curRoomUI.isTutorial && currentStep?.type === "info") {
+      if (chestIntersects.length > 0 || edgeIntersects.length > 0) {
+        updateHintsFromBooleans();
+      }
+      return;
+    }
 
     // ========== NODE CLICK ==========
     if (chestIntersects.length > 0) {
@@ -2336,6 +2349,15 @@ if (slidesButton) {
   });
 }
 
+tutorialNextButton?.addEventListener("click", (event) => {
+  // Keep this click from reaching the window-level scene click handler
+  event.stopPropagation();
+  if (!curRoomUI.isTutorial) return;
+  if (tutorialSteps[curRoomUI.currentTutorialStep]?.type !== "info") return;
+  document.querySelector(".Hint-Text").classList.add("hidden");
+  nextTutorialStep();
+});
+
 reArrangeButton.addEventListener("click", () => {
   debugPrint("Rearrange Button Clicked");
   const margin = 0.1;
@@ -2441,6 +2463,7 @@ setUpGameModel(currentLevel);
 
 // ===== UI Callbacks Section =====
 curRoomUI.callbacks.resetLevel = function (curlvl) {
+  tutorialNextButton?.classList.add("hidden");
   // Restore heuristic weight input (default Euclidean = 1).
   const heuristicInput = document.getElementById("heuristicWeightInput");
   if (heuristicInput) {
