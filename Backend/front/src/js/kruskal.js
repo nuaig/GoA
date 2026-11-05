@@ -37,6 +37,7 @@ import {
   highlightChest,
 } from "../../utils/graphRelated/drawLine.js";
 import GameRoomUI from "../../utils/UI/gameRoomUI.js";
+import { tutorialSteps } from "./kruskalTutorialSteps.js";
 
 const reArrangeButton = document.querySelector(".Rearrange-Action");
 // const chatOpenButton = document.querySelector(".chat-open-button");
@@ -163,59 +164,6 @@ correctActionScoreAddition = Math.floor(
   levelMaxScores[curRoomUI.currentLevel] / (numNodes - 1)
 );
 
-const tutorialSteps = [
-  {
-    instruction:
-      "Select any edge to begin the tutorial after reading the explanation below.",
-    explanation:
-      "The treasure chests represent nodes, and the lines between them represent edges. Node 0 will be your starting node. Your goal is to open all the chests by forming a Minimum Spanning Tree (MST). An MST is a subset of edges that connects all nodes without forming cycles while keeping the total weight at a minimum.",
-    expectedEdge: null, // No specific edge expected at this step
-    errorMessage: "Click on any edge to start the tutorial.",
-  },
-  {
-    instruction:
-      "Select edge 0-2 with weight 1 by clicking on it. Make sure to read the explanation before you select the edge.",
-    explanation:
-      "First, sort all edges in ascending order. Select the edge with the minimum weight to be added to the MST. The first edge to be added is the edge between node 0 and 2 with weight 1 since it is the smallest.",
-    expectedEdge: [0, 2, 1],
-    errorMessage:
-      "Wrong selection! Start with the smallest edge (0-2 with weight 1).",
-  },
-  {
-    instruction:
-      "Select edge 0-1 with weight 2 by clicking on it. Make sure to read the explanation before you select the edge.",
-    explanation:
-      "The next edge in the sorted list is between node 0 and 1 with weight 2. Check if it will cause a cycle. Since edge 0-1 doesn't form a cycle, it can be safely added to the MST.",
-    expectedEdge: [0, 1, 2],
-    errorMessage:
-      "Wrong selection! The next smallest edge is 0-1 with weight 2.",
-  },
-  {
-    instruction:
-      "Make a mistake by selecting edge 1-2 with weight 3 by clicking on it. Make sure to read the explanation before you select the edge.",
-    explanation:
-      "Edge 1-2 with weight 3 is the next minimum-weight edge. However, adding it to the MST will create a cycle. Therefore, this selection is incorrect.",
-    expectedEdge: [1, 2, 3],
-    errorMessage:
-      "Let's try to click edge 1-2 with weight 3 to see why that is not a good choice",
-  },
-  {
-    instruction:
-      "Select edge 1-3 with weight 4 by clicking on it. Make sure to read the explanation before you select the edge.",
-    explanation:
-      "Edge 1-3 with weight 4 is the next edge with minimum weight. Since it doesn't cause a cycle, it can be safely added to the MST and you will achieve the minimum spanning tree since all nodes are already connected.",
-    expectedEdge: [1, 3, 4],
-    errorMessage:
-      "Wrong selection! Pick the edge between nodes 1 and 3 with weight 4.",
-  },
-  {
-    instruction: "Voila! You've successfully built the MST.",
-    explanation:
-      "You have connected all nodes without forming cycles while maintaining the minimum total weight. Congratulations on completing the tutorial!",
-    expectedEdge: null, // No specific edge expected for completion
-    errorMessage: "You've completed the tutorial! Click anywhere to exit.",
-  },
-];
 
 function updateTutorialStep() {
   document.querySelector(".tuto-instruction-text").innerHTML =
@@ -1217,3 +1165,75 @@ curRoomUI.callbacks.startTutorial = function () {
   updateNodeLabel(levelTitle, `Tutorial`, 0.9, 0.3, 0x212529);
   setUpTutorialModel();
 };
+
+// ===== Dev-only E2E test hook (stripped from production builds) =====
+// Read-only helpers used by tests/e2e (Playwright). Never mutates game state.
+// Same function names as window.__dijkstraTest in dijkstra.js where they apply.
+if (import.meta.env.DEV) {
+  const testRaycaster = new THREE.Raycaster();
+  testRaycaster.params.Line.threshold = 0.5; // same as the game's raycaster
+
+  // World position -> CSS pixel coordinates on the renderer canvas.
+  const toScreen = (worldPos) => {
+    const ndc = worldPos.clone().project(camera);
+    const rect = renderer.domElement.getBoundingClientRect();
+    return {
+      x: rect.left + ((ndc.x + 1) / 2) * rect.width,
+      y: rect.top + ((1 - ndc.y) / 2) * rect.height,
+      onScreen: ndc.z < 1 && Math.abs(ndc.x) <= 1 && Math.abs(ndc.y) <= 1,
+    };
+  };
+
+  const findEdgeLine = (u, v) =>
+    edgeList.find(({ userData: { edge } }) =>
+      (edge.start === u && edge.end === v) || (edge.start === v && edge.end === u)
+    );
+
+  window.__roomTest = {
+    stepIndex: () => curRoomUI.currentTutorialStep,
+    isTutorial: () => curRoomUI.isTutorial,
+    isModalOpen: () => curRoomUI.isModalOpen,
+    health: () => curRoomUI.health,
+    chestCount: () => chestList.length,
+    edgeCount: () => edgeList.length,
+    cameraPosition: () => camera.position.toArray(),
+    tutorialSteps: () => JSON.parse(JSON.stringify(tutorialSteps)),
+    currentMode: () => curRoomUI.currentMode,
+    currentLevel: () => curRoomUI.currentLevel,
+    graphEdges: () => graph.edges.map((e) => [...e]), // [from, to, weight][]
+    // Kruskal opens a chest by swapping the closed model for the open one.
+    isChestOpened: (i) => !!openChestList[i]?.visible,
+    // Kruskal-specific
+    isEdgeSelected: (u, v) => !!findEdgeLine(u, v)?.userData?.selected,
+    selectedEdges: () => curAlgorithmForGraph.selectedEdges.map((e) => [...e]),
+    currentWeight: () => curAlgorithmForGraph.currentWeight,
+    hintVisible: () => !document.querySelector(".Hint-Text").classList.contains("hidden"),
+    uiText: () => curRoomUI.uiText.innerText,
+    // Center of the closed chest's bounding box.
+    chestScreenPos(i) {
+      const chest = chestList[i];
+      if (!chest) return null;
+      return toScreen(new THREE.Box3().setFromObject(chest).getCenter(new THREE.Vector3()));
+    },
+    // Point at fraction t along the edge line (0.5 = midpoint, at line height).
+    edgeScreenPos(u, v, t = 0.5) {
+      const line = findEdgeLine(u, v);
+      if (!line) return null;
+      const { startCube, endCube } = line.userData;
+      return toScreen(startCube.position.clone().lerp(endCube.position, t));
+    },
+    // What onClick's raycast would hit at client (x, y): mirrors its math.
+    // onClick raycasts only edges ([...lines, ...labels]; labels is always
+    // empty), so chests never block or receive a click: chest is always null.
+    pickAt(x, y) {
+      const mouse = new THREE.Vector2(
+        (x / window.innerWidth) * 2 - 1,
+        -(y / window.innerHeight) * 2 + 1
+      );
+      testRaycaster.setFromCamera(mouse, camera);
+      const edge = testRaycaster.intersectObjects([...edgeList, ...labels])[0]
+        ?.object?.userData?.edge;
+      return { chest: null, edge: edge ? [edge.start, edge.end] : null };
+    },
+  };
+}
