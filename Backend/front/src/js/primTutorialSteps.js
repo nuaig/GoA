@@ -1,71 +1,80 @@
-// Steps for the Prim tutorial (tutorial graph: createSpecificGraphPrimTutorial).
-// expectedEdge: [start, end, weight] the player should click, or null for "any edge".
+// Steps for the Prim tutorial (tutorial graph: createSpecificGraphPrimTutorial):
+//   0-1 = 3, 0-2 = 1, 1-2 = 4, 1-3 = 2, 1-4 = 6, 2-3 = 5, 3-4 = 7; start node 0.
+//
+// Step types:
+//   - type: "info"   -> read-only page; the player presses the Next button.
+//   - expectedEdge   -> [start, end, weight] the player should click,
+//                       or null for "any edge" (used by the final page).
+// Text is rendered as HTML inside a <pre>, so use <br> for line breaks.
 export const tutorialSteps = [
   {
-    instruction:
-      "Select any edge to begin the tutorial after reading the explanation below.",
+    type: "info",
+    instruction: "Read the notes below, then press Next.",
     explanation:
-      "The treasure chests represent nodes, and the lines between them represent edges. Your goal is to open all the chests by forming a Minimum Spanning Tree (MST). An MST is a subset of edges that connects all nodes without forming cycles while keeping the total weight at a minimum.",
-    expectedEdge: null, // No specific edge expected at this step
-    errorMessage: "Click on any edge to start the tutorial.",
+      "• If you see overlapping edges or overlapping numbers in the graph, click the \"Rearrange chests\" button in the upper right corner.<br>" +
+      "• To read more about Prim's algorithm, including its pseudo-code, use the \"Click for help\" button in the lower right corner.<br>" +
+      "• Our goal is to build a Minimum Spanning Tree (MST): a set of edges that connects all nodes (chests) without forming any cycle, with the smallest possible total weight. A graph with 5 nodes needs exactly 4 edges.<br>" +
+      "• Prim's algorithm grows the tree from one starting node, here node 0 (marked \"Start\"). Node 0 is \"visited\"; all other nodes are \"unvisited\".<br>" +
+      "• In each iteration, we look at the edges that connect a visited node to an unvisited node and pick the one with the smallest weight. Its unvisited node becomes visited. We stop when every node is visited.",
+    expectedEdge: null,
+    errorMessage: "Read the introduction, then press Next to begin.",
   },
   {
-    instruction:
-      "Select edge 0-2 with weight 1 by clicking on it. Make sure to read the explanation before you select the edge.",
+    instruction: "Step 1: Click on edge 0-2 with weight 1.",
     explanation:
-      "You can start with any node as starting node but for this tutorial, let's start from node 0. Mark this node 0 as visited. You have to choose the edge with the minimum weight that connects any visited node (0) to any unvisited node (1, 2, 3, 4). There are only two edges that connects visisted node 0 to other unvisited nodes. Edge 0-1 has minimum weight among them.",
+      "Visited: {0}. Edges from a visited node to an unvisited node: 0-2 (weight 1) and 0-1 (weight 3). The smallest is 0-2, so we add it, and node 2 becomes visited.<br><br>" +
+      "MST so far: 0-2. Total weight = 1.",
     expectedEdge: [0, 2, 1],
-    errorMessage: "Wrong selection!",
+    errorMessage: "Wrong selection! Start with edge 0-2 with weight 1.",
   },
   {
     instruction:
-      "Make a mistake by selecting edge 1-3 with weight 2 by clicking on it. Read the explanation carefully to understand why this is wrong.",
+      "Step 2: Make a mistake on purpose: click on edge 1-3 with weight 2 and see why it is rejected.",
     explanation:
-      "Even though this edge 1-3 with weight 2 is the next minimum edge in the whole graph. However, this edge is not connecting to any visited node. Therefore, it is a wrong choice.",
+      "Edge 1-3 (weight 2) is the smallest edge left in the whole graph, but Prim's algorithm only looks at edges that touch a visited node. Visited: {0, 2}. Neither node 1 nor node 3 is visited, so 1-3 is not connected to the tree yet. The hints below show which rule it breaks.",
     expectedEdge: [1, 3, 2],
-    errorMessage: "Wrong selection!",
+    errorMessage:
+      "Let's try to click edge 1-3 with weight 2 to see why that is not a good choice.",
   },
   {
-    instruction:
-      "Select edge 0-1 with weight 3 by clicking on it. Make sure to read the explanation before you select the edge.",
+    instruction: "Step 3: Click on edge 0-1 with weight 3.",
     explanation:
-      "Look at all the edges that connects visited nodes (0, 2) to unvisited nodes (1, 3, 4). You will find that edge 0-1 with weight 3 is the edge with minimum weight among them. Therefore, it is added to the MST.",
+      "Visited: {0, 2}. Edges from a visited node to an unvisited node: 0-1 (weight 3), 1-2 (weight 4), 2-3 (weight 5). The smallest is 0-1, so we add it, and node 1 becomes visited.<br><br>" +
+      "MST so far: 0-2, 0-1. Total weight = 1 + 3 = 4.",
     expectedEdge: [0, 1, 3],
-    errorMessage:
-      "Let's try to click edge 1-2 with weight 3 to see why that is not a good choice.",
+    errorMessage: "Wrong selection! Pick edge 0-1 with weight 3.",
   },
   {
-    instruction:
-      "Select edge 1-3 with weight 2 by clicking on it. Make sure to read the explanation before you select the edge.",
+    instruction: "Step 4: Click on edge 1-3 with weight 2.",
     explanation:
-      "Look at all the edges that connects visited nodes (0, 1, 2) to unvisited nodes (3, 4). You will find that edge 1-3 with weight 2 is the edge with minimum weight among them. Therefore, it is added to the MST.",
+      "Visited: {0, 1, 2}. Edges from a visited node to an unvisited node: 1-3 (weight 2), 2-3 (weight 5), 1-4 (weight 6). The smallest is 1-3. It was rejected in Step 2 only because it didn't touch the tree; now node 1 is visited, so we add it, and node 3 becomes visited.<br><br>" +
+      "MST so far: 0-2, 0-1, 1-3. Total weight = 1 + 3 + 2 = 6.",
     expectedEdge: [1, 3, 2],
-    errorMessage:
-      "Let's try to click edge 1-2 with weight 3 to see why that is not a good choice.",
+    errorMessage: "Wrong selection! Pick edge 1-3 with weight 2.",
   },
   {
     instruction:
-      "Make a mistake by selecting edge 1-2 with weight 4 by clicking on it. Read the explanation carefully to understand why this is wrong.",
+      "Step 5: Make a mistake on purpose: click on edge 1-2 with weight 4 and see why it is rejected.",
     explanation:
-      "Even though this edge 1-2 with weight 4 is the next available edge with minimum weight, there are two reasons why this is incorrect. First reason is that it will cause a cycle and the other is that it is connected to two visited nodes (1, 2).",
+      "Edge 1-2 (weight 4) connects two nodes that are both already visited. They are already joined through node 0 (1 → 0 → 2), so adding 1-2 would form a cycle. Prim's algorithm never adds an edge between two visited nodes. The hints below show which rule it breaks.",
     expectedEdge: [1, 2, 4],
     errorMessage:
-      "Wrong selection! Pick the edge between nodes 1 and 3 with weight 4.",
+      "Let's try to click edge 1-2 with weight 4 to see why that is not a good choice.",
   },
   {
-    instruction:
-      "Select edge 1-4 with weight 6 by clicking on it. Make sure to read the explanation before you select the edge.",
+    instruction: "Step 6: Click on edge 1-4 with weight 6.",
     explanation:
-      "Look at all the edges that connects visited nodes (0, 1, 2, 3) to unvisited nodes (4). You will find that edge 1-4 with weight 6 is the edge with minimum weight among them. Therefore, it is added to the MST and you will achieve the minimum spanning tree since all nodes are already connected.",
+      "Visited: {0, 1, 2, 3}. Edges from a visited node to an unvisited node: 1-4 (weight 6) and 3-4 (weight 7). The smallest is 1-4, so we add it, and node 4 becomes visited.<br><br>" +
+      "All 5 nodes are now visited and the MST has 4 edges, so we are done.<br>" +
+      "MST: 0-2, 0-1, 1-3, 1-4. Total weight = 1 + 3 + 2 + 6 = 12.",
     expectedEdge: [1, 4, 6],
-    errorMessage:
-      "Wrong selection! Pick the edge between nodes 1 and 3 with weight 4.",
+    errorMessage: "Wrong selection! Pick edge 1-4 with weight 6.",
   },
   {
-    instruction: "Voila! You've successfully built the MST.",
+    instruction: "Voila! You've built the Minimum Spanning Tree.",
     explanation:
-      "You have connected all nodes without forming cycles while maintaining the minimum total weight. Congratulations on completing the tutorial!",
-    expectedEdge: null, // No specific edge expected for completion
+      "The MST is 0-2, 0-1, 1-3, 1-4, with total weight 12. It connects all nodes, contains no cycle, and no other set of 4 edges has a smaller total weight.",
+    expectedEdge: null,
     errorMessage: "You've completed the tutorial! Click anywhere to exit.",
   },
 ];

@@ -41,6 +41,7 @@ const MISTAKE_STEPS = tutorialSteps
   .map((s, i) => (/make a mistake/i.test(s.instruction) ? i : -1))
   .filter((i) => i >= 0);
 const instruction = (page) => page.locator(".tutorial-instructions-modal .tuto-instruction-text");
+const nextButton = (page) => page.locator(".tutorial-instructions-modal .tuto-next-btn");
 const hint = (page) => page.locator(".Hint-Text");
 const hintIcons = (page) => Promise.all([0, 1, 2].map((i) => hintIcon(page, i)));
 /** Time for a wrongly scheduled timer (e.g. the 3 s red flash) to fire. */
@@ -55,6 +56,11 @@ const pathEdge = (i) => tutorialSteps[i].expectedEdge?.slice(0, 2) ?? STEP0_EDGE
  */
 async function driveStep(page, i) {
   expect(await stepIndex(page)).toBe(i);
+  if (tutorialSteps[i].type === "info") {
+    await nextButton(page).click();
+    await expect.poll(() => stepIndex(page), { message: `step ${i} did not advance` }).toBe(i + 1);
+    return snapshot(page);
+  }
   // Registered only once the step has advanced, so a missed click is retried.
   await clickEdge(page, ...pathEdge(i), async () => (await stepIndex(page)) === i + 1);
   await expect.poll(() => stepIndex(page), { message: `step ${i} did not advance` }).toBe(i + 1);
@@ -108,8 +114,8 @@ test.describe("Prim tutorial", () => {
     expect(await hook(page, "treeNodes")).toEqual([0]);
     expect(await hook(page, "isChestOpened", 0)).toBe(true);
     expect(await hook(page, "isChestOpened", 1)).toBe(false);
-    // Prim.html has no tutorial Next button (no "info" steps).
-    await expect(page.locator(".tutorial-instructions-modal .tuto-next-btn")).toHaveCount(0);
+    // Step 0 is the intro info page, so the Next button is shown.
+    await expect(nextButton(page)).toBeVisible();
   });
 
   test("completes the whole tutorial with real clicks", async ({ page }) => {
@@ -248,6 +254,37 @@ test.describe("Prim tutorial", () => {
     expect(s.health).toBe(4); // no mistake was made
     expect(s.ui).toBe("Correct! Current weight is 4."); // step errorMessage overwritten
     await expect(instruction(page)).toHaveText(tutorialSteps[2].instruction);
+  });
+
+  test("starts on the intro page with a Next button", async ({ page }) => {
+    expect(tutorialSteps[0].type).toBe("info");
+    await expect(nextButton(page)).toBeVisible();
+    await expect(instruction(page)).toHaveText("Read the notes below, then press Next.");
+    const explanation = page.locator(".tutorial-instructions-modal .tuto-explanation-text");
+    await expect(explanation).toContainText("Rearrange chests");
+    await expect(explanation).toContainText("Click for help");
+    await expect(explanation).toContainText('node 0 (marked "Start")');
+  });
+
+  test("clicking an edge on the intro page only shows a hint", async ({ page }) => {
+    await clickEdge(page, 0, 2, async () => (await snapshot(page)).ui === tutorialSteps[0].errorMessage);
+    await page.waitForTimeout(1_000);
+    const s = await snapshot(page);
+    expect(s.step).toBe(0);
+    expect(s.selected).toEqual([]);
+    expect(s.health).toBe(4);
+    expect(await hook(page, "isEdgeSelected", 0, 2)).toBe(false);
+    await expect(nextButton(page)).toBeVisible();
+  });
+
+  test("Next moves to Step 1, hides itself and selects nothing", async ({ page }) => {
+    await nextButton(page).click();
+    await expect.poll(() => stepIndex(page)).toBe(1);
+    await expect(nextButton(page)).toBeHidden();
+    await expect(instruction(page)).toHaveText(tutorialSteps[1].instruction);
+    expect((await snapshot(page)).selected).toEqual([]);
+    await driveStep(page, 1);
+    expect(await hook(page, "isEdgeSelected", 0, 2)).toBe(true);
   });
 
   test("Rearrange chests mid-tutorial does not break it", async ({ page }) => {

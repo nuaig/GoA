@@ -495,10 +495,11 @@ body {
   color: #dcdcaa;
 }
 
-/* Dijkstra/Kruskal tutorial walk-through panel (scrollable text + Next button).
-   Scoped with the --dijkstra / --kruskal modifiers so Prim/Heapsort/A* are unaffected. */
+/* Dijkstra/Kruskal/Prim tutorial walk-through panel (scrollable text + Next button).
+   Scoped with the --dijkstra / --kruskal / --prim modifiers so Heapsort/A* are unaffected. */
 .tutorial-instructions-modal--dijkstra .code-block,
-.tutorial-instructions-modal--kruskal .code-block {
+.tutorial-instructions-modal--kruskal .code-block,
+.tutorial-instructions-modal--prim .code-block {
   /* Keep the panel (header + text + Next button) above the Graph Edges /
      Distance tables pinned to the bottom-left (~300px tall). */
   max-height: max(140px, calc(98vh - 480px));
@@ -513,17 +514,20 @@ body {
 }
 
 .tutorial-instructions-modal--dijkstra .code-block strong,
-.tutorial-instructions-modal--kruskal .code-block strong {
+.tutorial-instructions-modal--kruskal .code-block strong,
+.tutorial-instructions-modal--prim .code-block strong {
   margin-bottom: 4px;
 }
 
 .tutorial-instructions-modal--dijkstra .code-block strong ~ strong,
-.tutorial-instructions-modal--kruskal .code-block strong ~ strong {
+.tutorial-instructions-modal--kruskal .code-block strong ~ strong,
+.tutorial-instructions-modal--prim .code-block strong ~ strong {
   margin-top: 14px;
 }
 
 .tutorial-instructions-modal--dijkstra .tuto-next-btn,
-.tutorial-instructions-modal--kruskal .tuto-next-btn {
+.tutorial-instructions-modal--kruskal .tuto-next-btn,
+.tutorial-instructions-modal--prim .tuto-next-btn {
   pointer-events: auto;
   cursor: pointer;
   font-weight: bold;
@@ -532,7 +536,8 @@ body {
 
 /* Only set display when not hidden, so the .hidden rule keeps working. */
 .tutorial-instructions-modal--dijkstra .tuto-next-btn:not(.hidden),
-.tutorial-instructions-modal--kruskal .tuto-next-btn:not(.hidden) {
+.tutorial-instructions-modal--kruskal .tuto-next-btn:not(.hidden),
+.tutorial-instructions-modal--prim .tuto-next-btn:not(.hidden) {
   display: block;
   margin: 10px 0 0 auto;
 }

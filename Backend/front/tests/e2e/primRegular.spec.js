@@ -67,6 +67,10 @@ test.describe("Prim regular mode", () => {
     expect(errors, "uncaught page errors").toEqual([]);
   });
 
+  test("regular levels never show the tutorial Next button", async ({ page }) => {
+    await expect(page.locator(".tutorial-instructions-modal .tuto-next-btn")).toBeHidden();
+  });
+
   test("plays level 1 to completion", async ({ page }) => {
     const edges = await hook(page, "graphEdges");
     expect(edges).toHaveLength(7);

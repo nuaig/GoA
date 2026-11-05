@@ -43,6 +43,7 @@ import GameRoomUI from "../../utils/UI/gameRoomUI.js";
 import { tutorialSteps } from "./primTutorialSteps.js";
 
 const reArrangeButton = document.querySelector(".Rearrange-Action");
+const tutorialNextButton = document.querySelector(".tuto-next-btn");
 let curGameSession;
 
 let currentLevel = 1; // TO DO
@@ -155,6 +156,11 @@ function updateTutorialStep() {
     tutorialSteps[curRoomUI.currentTutorialStep].instruction;
   document.querySelector(".tuto-explanation-text").innerHTML =
     tutorialSteps[curRoomUI.currentTutorialStep].explanation;
+  // Info pages (e.g. the intro) advance with the Next button instead of a click
+  tutorialNextButton?.classList.toggle(
+    "hidden",
+    tutorialSteps[curRoomUI.currentTutorialStep].type !== "info"
+  );
 }
 
 // Call this function whenever the user makes a correct selection
@@ -233,6 +239,14 @@ function initailCameraAnimationGSAP() {
 }
 
 // disableEventListeners(); // TO DO not sure if we will need this
+
+tutorialNextButton?.addEventListener("click", (event) => {
+  // Keep this click from reaching the window-level scene click handler
+  event.stopPropagation();
+  if (!curRoomUI.isTutorial) return;
+  if (tutorialSteps[curRoomUI.currentTutorialStep]?.type !== "info") return;
+  nextTutorialStep();
+});
 
 reArrangeButton.addEventListener("click", () => {
   console.log("Rearrange Button Clicked");
@@ -757,6 +771,12 @@ function drawLines() {
         const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
         console.log(currentStep);
 
+        // Edges can't be selected on info pages until the player presses Next.
+        if (currentStep.type === "info") {
+          curRoomUI.uiText.innerText = currentStep.errorMessage;
+          return;
+        }
+
         if (currentStep.expectedEdge === null) {
           // Allow any edge selection
           nextTutorialStep();
@@ -1027,6 +1047,7 @@ function setUpTutorialModel() {
 }
 
 curRoomUI.callbacks.resetLevel = function (curlvl) {
+  tutorialNextButton?.classList.add("hidden");
   curRoomUI.uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
   curRoomUI.health = resetHealth();
   document.querySelector(".Hint-Text").classList.add("hidden");
@@ -1045,7 +1066,7 @@ curRoomUI.callbacks.resetLevel = function (curlvl) {
 curRoomUI.callbacks.startTutorial = function () {
   curRoomUI.currentTutorialStep = 0;
   updateTutorialStep();
-  curRoomUI.uiText.innerHTML = `Please click on the Edge to Create Minimum Spanning Tree`;
+  curRoomUI.uiText.innerHTML = `Please follow the steps shown in the tutorial window.`;
   resetScene();
   updateNodeLabel(levelTitle, `Tutorial`, 0.9, 0.3, 0x212529);
   setUpTutorialModel();
