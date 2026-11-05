@@ -32,6 +32,7 @@ import {
 } from "./../../utils/graphRelated/drawLine.js";
 import GameRoomUI from "./../../utils/UI/gameRoomUI.js";
 import { GameHelper } from "./../../utils/gameHelper.js";
+import { tutorialSteps } from "./dijkstraTutorialSteps.js";
 
 // ===== Variable Decleration Section =====
 const DEBUG_MODE = false;
@@ -47,6 +48,7 @@ let hintBooleans = {
 
 const slidesButton = document.querySelector("#button-algo-slides");
 const reArrangeButton = document.querySelector(".Rearrange-Action");
+const tutorialNextButton = document.querySelector(".tuto-next-btn");
 let curGameSession;
 let currentLevel = 1;
 let curNodes;
@@ -140,123 +142,6 @@ scene.add(hoverRing);
 let raycaster;
 const clock = new THREE.Clock();
 
-// Steps for the Dijkstra tutorial
-const tutorialSteps = [
-  {
-    instruction: "Step 0: Click on node 0 to begin.",
-    explanation: "Node 0 is the source node. we start here.",
-    expectedChests: [0],
-    expectedEdges: null,
-    errorMessage: "Incorrect! Please press on node 0.",
-  },
-  {
-    instruction:
-      "Step 1: Click on edge (0, 2). Type 1 in the input dialog, and press OK.",
-    explanation:
-      "Current distance from source to node 2 is ∞. Weight of edge (0, 2) = 1 < ∞, so new distance is 1.",
-    expectedChests: null,
-    expectedEdges: [[0, 2]],
-    updatedDistance: { 2: 1 },
-    errorMessage: "Click the edge (0, 2) to record the distance to node 2.",
-  },
-  {
-    instruction:
-      "Step 2: Click on edge (0, 1). Type 2 in the input dialog, and press OK.",
-    explanation:
-      "Current distance from source to node 1 is ∞. Weight of edge (0, 1) = 2 < ∞, so new distance is 2.",
-    expectedChests: null,
-    expectedEdges: [[0, 1]],
-    updatedDistance: { 1: 2 },
-    errorMessage: "Click the edge (0, 1) to update the distance to node 1.",
-  },
-  {
-    instruction:
-      "Step 3: Click on the unvisited node that has the shortest distance from source: node 2.",
-    explanation:
-      "Out of all unvisited nodes, node 2 has the shortest distance from source. So we visit it next.",
-    expectedChests: [2],
-    expectedEdges: null,
-    errorMessage:
-      "Incorrect! Click on node 2 — it's the nearest unvisited node.",
-  },
-  {
-    instruction:
-      "Step 4: Click on edge (2, 1). Type 2 in the input dialog, and press OK.",
-    explanation:
-      "We check path to node 1 via node 2. Distance to 2 = 1, edge weight = 3, so total = 1 + 3 = 4. 4 > current distance 2, so we keep 2.",
-    expectedChests: null,
-    expectedEdges: [[2, 1]],
-    updatedDistance: { 1: 2 },
-    errorMessage: "Click (2, 1) to compare if it's a better path to node 1.",
-  },
-  {
-    instruction:
-      "Step 5: Click on edge (2, 4). Type 7 in the input dialog, and press OK.",
-    explanation:
-      "We check path to node 4 via node 2. Distance to 2 = 1, edge weight = 6, so total = 1 + 6 = 7. Current distance is ∞, so we update to 7.",
-    expectedChests: null,
-    expectedEdges: [[2, 4]],
-    updatedDistance: { 4: 7 },
-    errorMessage: "Click (2, 4) to record the current distance to node 4.",
-  },
-  {
-    instruction:
-      "Step 6: Click on edge (2, 3). Type 3 in the input dialog, and press OK.",
-    explanation:
-      "We check path to node 3 via node 2. Distance to 2 = 1, edge weight = 2, so total = 1 + 2 = 3. Current distance is ∞, so we update to 3.",
-    expectedChests: null,
-    expectedEdges: [[2, 3]],
-    updatedDistance: { 3: 3 },
-    errorMessage: "Click (2, 3) to update the distance to node 3.",
-  },
-  {
-    instruction:
-      "Step 7: Click on the unvisited node that has the shortest distance from source: node 1.",
-    explanation:
-      "Out of all unvisited nodes, node 1 has the shortest distance from source. So we visit it next.",
-    expectedChests: [1],
-    expectedEdges: null,
-    errorMessage: "Incorrect! Click on node 1 — it’s the next closest node.",
-  },
-  {
-    instruction:
-      "Step 8: Click on edge (1, 3). Type 3 in the input dialog, and press OK.",
-    explanation:
-      "We check path to node 3 via node 1. Distance to 1 = 2, edge weight = 3, so total = 2 + 3 = 5. 5 > current distance 3, so we keep 3.",
-    expectedChests: null,
-    expectedEdges: [[1, 3]],
-    updatedDistance: { 3: 3 },
-    errorMessage: "Click (1, 3) to evaluate its path to node 3.",
-  },
-  {
-    instruction:
-      "Step 9: Click on the unvisited node that has the shortest distance from source: node 3.",
-    explanation:
-      "Out of all unvisited nodes, node 3 has the shortest distance from source. So we visit it next.",
-    expectedChests: [3],
-    expectedEdges: null,
-    errorMessage: "Incorrect! Click on node 3 to visit it next.",
-  },
-  {
-    instruction:
-      "Step 10: Click on edge (3, 4). Type 4 in the input dialog, and press OK.",
-    explanation:
-      "We check path to node 4 via node 3. Distance to 3 = 3, edge weight = 1, so total = 3 + 1 = 4. 4 < current distance 7, so we update to 4.",
-    expectedChests: null,
-    expectedEdges: [[3, 4]],
-    updatedDistance: { 4: 4 },
-    errorMessage: "Click (3, 4) to update the distance to node 4.",
-  },
-  {
-    instruction:
-      "Step 11: Click on the unvisited node that has the shortest distance from source: node 4.",
-    explanation:
-      "Out of all unvisited nodes, node 4 has the shortest distance from source. So we visit it next.",
-    expectedChests: [4],
-    expectedEdges: null,
-    errorMessage: "Click on node 4 to complete Dijkstra’s algorithm.",
-  },
-];
 
 // ===== Function Decleration Section =====
 /*
@@ -374,6 +259,9 @@ function updateTutorialStep(isTutorial = true) {
   // Update explanation text
   document.querySelector(".tuto-explanation-text").innerHTML = step.explanation;
   debugPrint("[updateTutorialStep] Explanation updated:", step.explanation);
+
+  // Info pages (e.g. the intro) advance with the Next button instead of a click
+  tutorialNextButton?.classList.toggle("hidden", step.type !== "info");
 }
 
 /*
@@ -685,6 +573,15 @@ function drawLines() {
     const currentStep = curRoomUI.isTutorial
       ? tutorialSteps[curRoomUI.currentTutorialStep]
       : curAlgorithmForGraph.steps[curRoomUI.currentTutorialStep];
+
+    // ========== INFO PAGE (tutorial intro) ==========
+    // Chests and edges can't be selected until the player presses Next.
+    if (curRoomUI.isTutorial && currentStep?.type === "info") {
+      if (chestIntersects.length > 0 || edgeIntersects.length > 0) {
+        updateHintsFromBooleans();
+      }
+      return;
+    }
 
     // ========== NODE CLICK ==========
     if (chestIntersects.length > 0) {
@@ -1670,6 +1567,15 @@ slidesButton.addEventListener("click", () => {
   curRoomUI.openModal(curRoomUI.algoInstructionModal);
 });
 
+tutorialNextButton?.addEventListener("click", (event) => {
+  // Keep this click from reaching the window-level scene click handler
+  event.stopPropagation();
+  if (!curRoomUI.isTutorial) return;
+  if (tutorialSteps[curRoomUI.currentTutorialStep]?.type !== "info") return;
+  document.querySelector(".Hint-Text").classList.add("hidden");
+  nextTutorialStep();
+});
+
 reArrangeButton.addEventListener("click", () => {
   debugPrint("Rearrange Button Clicked");
   const margin = 0.1;
@@ -1773,6 +1679,7 @@ createDungeonRoom();
 
 // ===== UI Callbacks Section =====
 curRoomUI.callbacks.resetLevel = function (curlvl) {
+  tutorialNextButton?.classList.add("hidden");
   curRoomUI.uiText.innerHTML = `Start by selecting the source node (Node 0), then relax all edges going out of this node!`;
   curRoomUI.health = resetHealth();
   document.querySelector(".Hint-Text").classList.add("hidden");
@@ -1799,3 +1706,73 @@ curRoomUI.callbacks.startTutorial = function () {
   updateNodeLabel(levelTitle, `Tutorial`, 0.9, 0.3, 0x212529);
   setUpTutorialModel();
 };
+
+// ===== Dev-only E2E test hook (stripped from production builds) =====
+// Read-only helpers used by tests/e2e (Playwright). Never mutates game state.
+if (import.meta.env.DEV) {
+  const testRaycaster = new THREE.Raycaster();
+  testRaycaster.params.Line.threshold = 0.5; // same as the game's raycaster
+
+  // World position -> CSS pixel coordinates on the renderer canvas.
+  const toScreen = (worldPos) => {
+    const ndc = worldPos.clone().project(camera);
+    const rect = renderer.domElement.getBoundingClientRect();
+    return {
+      x: rect.left + ((ndc.x + 1) / 2) * rect.width,
+      y: rect.top + ((1 - ndc.y) / 2) * rect.height,
+      onScreen: ndc.z < 1 && Math.abs(ndc.x) <= 1 && Math.abs(ndc.y) <= 1,
+    };
+  };
+
+  const findEdgeLine = (u, v) =>
+    edgeList.find(({ userData: { edge } }) =>
+      (edge.start === u && edge.end === v) || (edge.start === v && edge.end === u)
+    );
+
+  window.__dijkstraTest = {
+    stepIndex: () => curRoomUI.currentTutorialStep,
+    isTutorial: () => curRoomUI.isTutorial,
+    isModalOpen: () => curRoomUI.isModalOpen,
+    health: () => curRoomUI.health,
+    clickBlockedMs: () => Math.max(0, clickBlockedUntil - Date.now()),
+    chestCount: () => chestList.length,
+    edgeCount: () => edgeList.length,
+    cameraPosition: () => camera.position.toArray(),
+    tutorialSteps: () => JSON.parse(JSON.stringify(tutorialSteps)),
+    // Regular (non-tutorial) mode: generated steps (may grow after chest clicks).
+    regularSteps: () => JSON.parse(JSON.stringify(curAlgorithmForGraph.steps)),
+    currentMode: () => curRoomUI.currentMode,
+    currentLevel: () => curRoomUI.currentLevel,
+    graphEdges: () => graph.edges.map((e) => [...e]), // [from, to, weight][]
+    isChestOpened: (i) => !!openChestList[i]?.userData?.clicked,
+    // Center of the closed chest's bounding box.
+    chestScreenPos(i) {
+      const chest = chestList[i];
+      if (!chest) return null;
+      return toScreen(new THREE.Box3().setFromObject(chest).getCenter(new THREE.Vector3()));
+    },
+    // Point at fraction t along the edge line (0.5 = midpoint, at line height).
+    edgeScreenPos(u, v, t = 0.5) {
+      const line = findEdgeLine(u, v);
+      if (!line) return null;
+      const { startCube, endCube } = line.userData;
+      return toScreen(startCube.position.clone().lerp(endCube.position, t));
+    },
+    // What onClick's raycast would hit at client (x, y): mirrors its math.
+    pickAt(x, y) {
+      const mouse = new THREE.Vector2(
+        (x / window.innerWidth) * 2 - 1,
+        -(y / window.innerHeight) * 2 + 1
+      );
+      testRaycaster.setFromCamera(mouse, camera);
+      let chest = testRaycaster.intersectObjects([...chestList])[0]?.object;
+      while (chest && chest.userData.nodeIndex === undefined) chest = chest.parent;
+      const edge = testRaycaster.intersectObjects([...edgeList, ...labels])[0]
+        ?.object?.userData?.edge;
+      return {
+        chest: chest ? chest.userData.nodeIndex : null,
+        edge: edge ? [edge.start, edge.end] : null,
+      };
+    },
+  };
+}

@@ -495,6 +495,43 @@ body {
   color: #dcdcaa;
 }
 
+/* Dijkstra-only tutorial walk-through panel (scrollable text + Next button).
+   Scoped with the --dijkstra modifier so Kruskal/Prim/Heapsort/A* are unaffected. */
+.tutorial-instructions-modal--dijkstra .code-block {
+  /* Keep the panel (header + text + Next button) above the Graph Edges /
+     Distance tables pinned to the bottom-left (~300px tall). */
+  max-height: max(140px, calc(98vh - 480px));
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0;
+  /* Collapse the source indentation inside <pre>; line breaks come from <br>. */
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+.tutorial-instructions-modal--dijkstra .code-block strong {
+  margin-bottom: 4px;
+}
+
+.tutorial-instructions-modal--dijkstra .code-block strong ~ strong {
+  margin-top: 14px;
+}
+
+.tutorial-instructions-modal--dijkstra .tuto-next-btn {
+  pointer-events: auto;
+  cursor: pointer;
+  font-weight: bold;
+  border: solid #eaebf1 2px;
+}
+
+/* Only set display when not hidden, so the .hidden rule keeps working. */
+.tutorial-instructions-modal--dijkstra .tuto-next-btn:not(.hidden) {
+  display: block;
+  margin: 10px 0 0 auto;
+}
+
 /* .highlight {
   color: #f1c40f;
 } */
