@@ -156,12 +156,26 @@ const stepInstructions = [
 ];
 
 
+const tutorialNextButton = document.querySelector(".tuto-next-btn");
+
 function updateTutorialStep() {
   document.querySelector(".tuto-instruction-text").innerHTML =
     tutorialSteps[curRoomUI.currentTutorialStep].instruction;
   document.querySelector(".tuto-explanation-text").innerHTML =
     tutorialSteps[curRoomUI.currentTutorialStep].explanation;
+  // Info pages (e.g. the intro) advance with the Next button instead of a drag
+  tutorialNextButton?.classList.toggle(
+    "hidden",
+    tutorialSteps[curRoomUI.currentTutorialStep].type !== "info"
+  );
 }
+
+tutorialNextButton?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  if (!curRoomUI.isTutorial) return;
+  if (tutorialSteps[curRoomUI.currentTutorialStep]?.type !== "info") return;
+  nextTutorialStep();
+});
 
 // Call this function whenever the user makes a correct selection
 function nextTutorialStep() {
@@ -640,6 +654,15 @@ controls.addEventListener("dragend", function (event) {
 
   if (curRoomUI.isTutorial) {
     const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
+    if (currentStep.type === "info") {
+      // Info pages: nothing can be moved until the player presses Next.
+      draggableTextMesh.position.copy(initialPositionDragged);
+      if (event.object.userData.linkedMesh) {
+        event.object.position.copy(initialPositionDragged);
+      }
+      displayMessage(currentStep.errorMessage, curRoomUI.uiText);
+      return;
+    }
     if (currentStep.expectedAction === null) {
       draggableTextMesh.position.copy(initialPositionDragged);
       if (event.object.userData.linkedMesh) {
@@ -1231,6 +1254,7 @@ function render() {
 render();
 
 curRoomUI.callbacks.resetLevel = function (curlvl) {
+  tutorialNextButton?.classList.add("hidden");
   curRoomUI.uiText.innerHTML = stepInstructions[0];
   curRoomUI.health = resetHealth();
 

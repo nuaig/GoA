@@ -30,6 +30,7 @@ const SORT_STEPS = [9, 10, 11, 12, 13, 14, 15];
 const LAST_STEP = tutorialSteps.length - 1;
 
 const instruction = (page) => page.locator(".tutorial-instructions-modal .tuto-instruction-text");
+const nextButton = (page) => page.locator(".tutorial-instructions-modal .tuto-next-btn");
 const uiText = (page) => page.locator("#UI-Text");
 const sameValues = (a, b) => [...a].sort((x, y) => x - y).join() === [...b].sort((x, y) => x - y).join();
 
@@ -50,8 +51,9 @@ async function driveStep(page, i) {
   const advanced = last
     ? () => hook(page, "isSorted")
     : async () => (await stepIndex(page)) === i + 1;
-  if (i === 0) {
-    await dragTo(page, 0, 0, advanced);
+  if (tutorialSteps[i].type === "info") {
+    await nextButton(page).click();
+    await expect.poll(advanced, { message: `step ${i} did not advance` }).toBe(true);
   } else if (BUILD_STEPS.includes(i)) {
     const index = i - 1;
     expect(await hook(page, "buildIndex")).toBe(index);
@@ -104,7 +106,7 @@ test.describe("Heapsort tutorial", () => {
   });
 
   test("full tutorial with real drags ends at the tutorial-complete modal", async ({ page }) => {
-    // Step 0: a drag even onto the matching slot only snaps back and advances.
+    // Step 0: the intro page; Next advances, nothing is placed.
     await driveStep(page, 0);
     expect(await snapshot(page)).toMatchObject({
       step: 1,
@@ -149,6 +151,26 @@ test.describe("Heapsort tutorial", () => {
     expect(await hook(page, "currentLevel")).toBeNull(); // set to null on tutorial completion
     expect(await hook(page, "completionModalOpen")).toBe(false);
     expect(BUILD_STEPS.length + HEAPIFY_STEPS.length + SORT_STEPS.length + 1).toBe(16);
+  });
+
+  test("starts on the intro page with a Next button", async ({ page }) => {
+    expect(tutorialSteps[0].type).toBe("info");
+    await expect(nextButton(page)).toBeVisible();
+    await expect(page.locator(".tuto-explanation-text")).toContainText("Click for help");
+  });
+
+  test("dragging on the intro page snaps back without advancing or costing a life", async ({ page }) => {
+    await dragTo(page, 0, 0, async () => (await hook(page, "uiText")) === tutorialSteps[0].errorMessage);
+    await page.waitForTimeout(1_000);
+    expect(await snapshot(page)).toMatchObject({
+      step: 0,
+      health: 4,
+      buildIndex: 0,
+      tree: [null, null, null, null, null],
+    });
+    await expect(nextButton(page)).toBeVisible();
+    await driveStep(page, 0);
+    await expect(nextButton(page)).toBeHidden();
   });
 
   test("wrong placement in the build phase costs a life and keeps the step", async ({ page }) => {

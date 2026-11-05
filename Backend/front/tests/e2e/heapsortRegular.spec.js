@@ -53,6 +53,10 @@ test.describe("Heapsort regular level 1", () => {
     expect(errors, "uncaught page errors").toEqual([]);
   });
 
+  test("regular levels never show the tutorial Next button", async ({ page }) => {
+    await expect(page.locator(".tutorial-instructions-modal .tuto-next-btn")).toBeHidden();
+  });
+
   test("played to completion with real drags posts a successful game session", async ({ page }) => {
     const start = await snapshot(page);
     expect(start).toMatchObject({ health: 4, phase: 0, buildIndex: 0, score: 0 });

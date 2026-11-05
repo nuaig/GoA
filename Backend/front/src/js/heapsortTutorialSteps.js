@@ -1,131 +1,138 @@
 // Steps for the Heapsort tutorial (array [1, 5, 3, 4, 11]).
-// expectedAction: [value] to place in the tree (build phase), [a, b] values to swap, or null.
+//
+// Step types:
+//   - type: "info"     -> read-only page; the player presses the Next button.
+//   - expectedAction   -> [value] to place into the tree (build phase), or
+//                         [a, b] the values to swap (max-heap and sort phases).
+// Text is rendered as HTML inside a <pre>, so use <br> for line breaks.
 export const tutorialSteps = [
   {
-    instruction:
-      "Let's start by building a Binary Heap from the given array: [1, 5, 3, 4, 11]. Let's try to click, hold and drag one of the elements in the array to begin the tutorial. ",
+    type: "info",
+    instruction: "Read the notes below, then press Next.",
     explanation:
-      "Step 1 of HeapSort is converting the array into a Binary Heap. A Binary Heap is a complete binary tree where elements are inserted from top to bottom, left to right. We are building a **Max-Heap**, where each parent is **greater than or equal to** its children.",
-    expectedAction: null, // No specific action yet
-    errorMessage: "Click on the tree area to start the tutorial.",
+      "• To read more about Heap Sort, including its pseudo-code, use the \"Click for help\" button in the lower right corner.<br>" +
+      "• Our goal is to sort the array [1, 5, 3, 4, 11] from smallest to largest using Heap Sort.<br>" +
+      "• Heap Sort has 3 phases:<br>" +
+      "&nbsp;&nbsp;1. Build a binary heap: place the array elements into a complete binary tree, top to bottom, left to right.<br>" +
+      "&nbsp;&nbsp;2. Turn it into a max heap: every parent must be greater than or equal to its children.<br>" +
+      "&nbsp;&nbsp;3. Sort: repeatedly swap the root (the largest element) with the last element of the heap, remove it from the heap, and restore the max heap.<br>" +
+      "• In the array, the element at index i has its left child at index 2i + 1 and its right child at index 2i + 2.<br>" +
+      "• You move elements by clicking, holding and dragging them.",
+    expectedAction: null,
+    errorMessage: "Read the introduction, then press Next to begin.",
   },
   {
-    instruction: "Drag and insert 1 (index-0) at the root of the heap.",
+    instruction: "Step 1: Drag 1 (index 0) into the root of the tree.",
     explanation:
-      "In a binary heap, elements are inserted from top to bottom, left to right. We will fill the index-0 element at the top. Therefore, the first element in the array (1) becomes the root node in the binary heap. One thing to note is that each element from Binary Heap will have maximum 2 elements (left and right children).",
-    expectedAction: [1], // Expecting node 1 to be placed at the root
+      "Elements are placed top to bottom, left to right. Index 0 is the root, so the first element, 1, goes at the top. Each node can have at most 2 children.",
+    expectedAction: [1],
     errorMessage: "Place 1 at the root of the tree.",
   },
   {
-    instruction:
-      "Drag and Insert 5 (index-1)  as the left child of 1 in Binary Heap.",
+    instruction: "Step 2: Drag 5 (index 1) to the left child of 1.",
     explanation:
-      "In a binary heap, elements are inserted from top to bottom, left to right. Since highest layer is already filled, we will go down one layer and start filling it from left to right. Therefore, the next element 5 (index-1) becomes the left child of 1.",
-    expectedAction: [5], // Expecting node 5 to be placed as the left child of 1
-    errorMessage: "Place 5 as the left child of node 1.",
+      "The top level is full, so we move down one level and fill it from left to right. Index 1 is the left child of index 0 (2·0 + 1 = 1).",
+    expectedAction: [5],
+    errorMessage: "Place 5 as the left child of 1.",
   },
   {
-    instruction:
-      "Drag and Insert 3 (index-2) as the right child of 1 in Binary Heap.",
+    instruction: "Step 3: Drag 3 (index 2) to the right child of 1.",
     explanation:
-      "Since this second layer isn't filled yet, we will keep filling it from left to right. As a result, the next element 3 (index-2) will be dragged and inserted as the right child of 1 (index-0) to maintain the binary heap structure.",
-    expectedAction: [3], // Expecting node 3 to be placed as the right child of 1
-    errorMessage: "Place 3 as the right child of node 1.",
+      "We keep filling the second level from left to right. Index 2 is the right child of index 0 (2·0 + 2 = 2).",
+    expectedAction: [3],
+    errorMessage: "Place 3 as the right child of 1.",
   },
   {
-    instruction:
-      "Drag and Insert 4 (index-3) as the left child of 5 in Binary Heap.",
+    instruction: "Step 4: Drag 4 (index 3) to the left child of 5.",
     explanation:
-      "Since second layer is already filled, you will go down to next layer and continue the left-to-right insertion. Therefore, the next element 4 (index-3) is placed as the left child of 5.",
-    expectedAction: [4], // Expecting node 4 to be placed as the left child of 5
-    errorMessage: "Place 4 as the left child of node 5.",
+      "The second level is full, so we move down again. Index 3 is the left child of index 1 (2·1 + 1 = 3).",
+    expectedAction: [4],
+    errorMessage: "Place 4 as the left child of 5.",
   },
   {
-    instruction:
-      "Drag and Insert 11 (index-4) as the right child of 5 in Binary Heap.",
+    instruction: "Step 5: Drag 11 (index 4) to the right child of 5.",
     explanation:
-      "Continuing the left-to-right insertion, the last element 11 (index-4) is placed as the right child of 5 to maintain the binary heap structure.",
-    expectedAction: [11], // Expecting node 11 to be placed as the right child of 5
-    errorMessage: "Place 11 as the right child of node 5.",
+      "Index 4 is the right child of index 1 (2·1 + 2 = 4). All 5 elements are now in the tree: this is the binary heap [1, 5, 3, 4, 11].",
+    expectedAction: [11],
+    errorMessage: "Place 11 as the right child of 5.",
   },
-
   {
-    instruction:
-      "Now that you have binary heap data structure. Let's start building Max Heap. Swap 5 and 11 to maintain the Max-Heap property.",
+    instruction: "Step 6: Swap 5 and 11.",
     explanation:
-      "Step 2 of Heapsort is to build Max Heap which means every element will be larger than its children. You will start at the last parent node (index ⌊n/2 - 1⌋). If that parent node is smaller than its children, we will need to swap it with the largest child. As a result, 5 (index-1) will be swapped with 11 (index-4).",
+      "Phase 2: build the max heap. We start at the last parent node, index ⌊5/2⌋ − 1 = 1 (value 5), and move backwards to index 0. Node 5 has children 4 (index 3) and 11 (index 4). 11 is larger than 5, so we swap 5 with its largest child, 11.<br><br>" +
+      "Array: [1, 11, 3, 4, 5]",
     expectedAction: [5, 11],
     errorMessage: "",
   },
   {
-    instruction:
-      "Next step is to decrement the index of last parent node (index-1). The parent node you will be checking becomes index-0. Now, swap 1 (index-0) and 11 (index-1)",
+    instruction: "Step 7: Swap 1 and 11.",
     explanation:
-      "If you look at last parent node (index-1) which becomes 11 after previous swap, you will notice that it meets max heap property since it is larger than its children. You will move backwards from that parent index and land on index-0. After checking both of its children, wee will swap 1 (index-0) with 11 (index-1) as 11 is the bigger child.",
-    expectedAction: [1, 11], // Expecting node 11 to be placed as the right child of 1
+      "Index 1 (now 11) is larger than its children 4 and 5, so it is fine. We move back to index 0 (value 1). Its children are 11 (index 1) and 3 (index 2). The largest child, 11, is bigger than 1, so we swap them.<br><br>" +
+      "Array: [11, 1, 3, 4, 5]",
+    expectedAction: [1, 11],
     errorMessage: "",
   },
   {
-    instruction:
-      "Swap 1 (index-1) and 5 (index-4) to maintain the Max-Heap property. Before you decrement the parent index, always remember to check if the sub-tree still maintains max heap property after swapping.",
+    instruction: "Step 8: Swap 1 and 5.",
     explanation:
-      "After each swap, continue checking the newly swapped value with its children and swapping downwards to keep the entire subtree in correct heap order. After swapping 1 to index-1, it still violates the Max-Heap rule as it has a larger child (5 at index-4)",
+      "After a swap, we keep checking the value we moved down. 1 is now at index 1, with children 4 (index 3) and 5 (index 4). The largest child, 5, is bigger than 1, so we swap them.<br><br>" +
+      "Array: [11, 5, 3, 4, 1]. Every parent is now larger than its children, so the max heap is complete.",
     expectedAction: [1, 5],
     errorMessage: "",
   },
   {
-    instruction:
-      "Max-Heap construction is complete! Now, let's proceed with HeapSort. Swap the root (maximum element 11) with the last element 1 (index-4) and remove it.",
+    instruction: "Step 9: Swap the root 11 with the last element 1.",
     explanation:
-      "HeapSort works by repeatedly removing the largest element (root) and swapping it with the last element. This step **places the largest element at the correct sorted position**.",
+      "Phase 3: sort. The root of a max heap is the largest element. We swap it with the last element of the heap (index 4) and remove it from the heap, so 11 is now in its final sorted position.<br><br>" +
+      "Array: [1, 5, 3, 4 | 11]",
     expectedAction: [11, 1],
     errorMessage: "",
   },
   {
-    instruction:
-      "Reheapify the heap after removing the root node. Swap 1 (index-0) and 5 (index-1) to restructure max-heap. ",
+    instruction: "Step 10: Swap 1 and 5.",
     explanation:
-      "After removing the root (11), the heap is **restructured**. The new root (1 at index-0) violates the Max-Heap property, so we swap it with 5 (index-1).",
+      "The new root 1 is smaller than its children 5 (index 1) and 3 (index 2). We swap it with the largest child, 5.<br><br>" +
+      "Array: [5, 1, 3, 4 | 11]",
     expectedAction: [1, 5],
     errorMessage: "",
   },
   {
-    instruction:
-      "Continue checking the newly swapped value with its children and swapping downwards as needed. Swap 1 (index-1) with its left child 4 (index-3).",
+    instruction: "Step 11: Swap 1 and 4.",
     explanation:
-      "We check the newly swapped element 1 (index-1) with its children to see if it requires more swapping downwards. Since left child 4 (index-3) is bigger than its parent 1 (index-1), we swap them to maintain max heap property",
+      "1 is now at index 1, and its only child left in the heap is 4 (index 3). 4 is bigger, so we swap them.<br><br>" +
+      "Array: [5, 4, 3, 1 | 11]. The max heap is restored.",
     expectedAction: [1, 4],
     errorMessage: "",
   },
   {
-    instruction:
-      "Now that we have max heap again, swap the root (maximum element 5) with the last element 1 (index-3) and remove it.",
+    instruction: "Step 12: Swap the root 5 with the last element 1.",
     explanation:
-      "After restoring heap order, we remove the largest element (root) and swapping it with the last element. As we remove largest elements one after another, the array will becomed sorted",
+      "We remove the largest element again by swapping the root 5 with the last element of the heap (index 3).<br><br>" +
+      "Array: [1, 4, 3 | 5, 11]",
     expectedAction: [5, 1],
     errorMessage: "",
   },
   {
-    instruction:
-      "Re-Heapify the tree. Swap 1 (index-0) with its left child 4 (index-1)",
+    instruction: "Step 13: Swap 1 and 4.",
     explanation:
-      "After removing the root node, you must restore the Max-Heap property by performing heapify operations. as a result, the new root 1 (index-0) will be swapped with 4 (index-1) since 4 is the largest child of 1.",
+      "The new root 1 has children 4 (index 1) and 3 (index 2). We swap it with the largest child, 4.<br><br>" +
+      "Array: [4, 1, 3 | 5, 11]",
     expectedAction: [1, 4],
     errorMessage: "",
   },
   {
-    instruction:
-      "Now that we have max heap again, swap the root (maximum element 4) with the last element 3 (index-2) and remove 4.",
+    instruction: "Step 14: Swap the root 4 with the last element 3.",
     explanation:
-      "Once the heap is restructured, we continue **extracting the max element**. Swap 4 with 3.",
+      "1 at index 1 has no children left in the heap, so the max heap is restored. We swap the root 4 with the last element of the heap (index 2).<br><br>" +
+      "Array: [3, 1 | 4, 5, 11]",
     expectedAction: [4, 3],
     errorMessage: "",
   },
   {
-    instruction:
-      "Since we still have the max Heap after previous swap, let's swap the root (maximum element 3) with the last element 1 (index-1) and remove 3.",
+    instruction: "Step 15: Swap the root 3 with the last element 1.",
     explanation:
-      "After this swap, we will see that all elements will be sorted and heapsort algorithm will be completed.",
+      "The root 3 is larger than its only child 1, so the heap is already a max heap. We swap the root 3 with the last element (index 1).<br><br>" +
+      "Array: [1 | 3, 4, 5, 11]. Only one element is left in the heap, so the array is sorted: [1, 3, 4, 5, 11].",
     expectedAction: [3, 1],
     errorMessage: "",
   },

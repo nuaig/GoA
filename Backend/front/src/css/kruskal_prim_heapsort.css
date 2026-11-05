@@ -495,12 +495,13 @@ body {
   color: #dcdcaa;
 }
 
-/* Dijkstra/Kruskal/Prim/A* tutorial walk-through panel (scrollable text + Next button).
-   Scoped with the --dijkstra / --kruskal / --prim / --astar modifiers so Heapsort is unaffected. */
+/* Tutorial walk-through panel for all rooms (scrollable text + Next button).
+   Scoped with per-room modifiers (--dijkstra, --kruskal, --prim, --astar, --heapsort). */
 .tutorial-instructions-modal--dijkstra .code-block,
 .tutorial-instructions-modal--kruskal .code-block,
 .tutorial-instructions-modal--prim .code-block,
-.tutorial-instructions-modal--astar .code-block {
+.tutorial-instructions-modal--astar .code-block,
+.tutorial-instructions-modal--heapsort .code-block {
   /* Keep the panel (header + text + Next button) above the Graph Edges /
      Distance tables pinned to the bottom-left (~300px tall). */
   max-height: max(140px, calc(98vh - 480px));
@@ -517,21 +518,24 @@ body {
 .tutorial-instructions-modal--dijkstra .code-block strong,
 .tutorial-instructions-modal--kruskal .code-block strong,
 .tutorial-instructions-modal--prim .code-block strong,
-.tutorial-instructions-modal--astar .code-block strong {
+.tutorial-instructions-modal--astar .code-block strong,
+.tutorial-instructions-modal--heapsort .code-block strong {
   margin-bottom: 4px;
 }
 
 .tutorial-instructions-modal--dijkstra .code-block strong ~ strong,
 .tutorial-instructions-modal--kruskal .code-block strong ~ strong,
 .tutorial-instructions-modal--prim .code-block strong ~ strong,
-.tutorial-instructions-modal--astar .code-block strong ~ strong {
+.tutorial-instructions-modal--astar .code-block strong ~ strong,
+.tutorial-instructions-modal--heapsort .code-block strong ~ strong {
   margin-top: 14px;
 }
 
 .tutorial-instructions-modal--dijkstra .tuto-next-btn,
 .tutorial-instructions-modal--kruskal .tuto-next-btn,
 .tutorial-instructions-modal--prim .tuto-next-btn,
-.tutorial-instructions-modal--astar .tuto-next-btn {
+.tutorial-instructions-modal--astar .tuto-next-btn,
+.tutorial-instructions-modal--heapsort .tuto-next-btn {
   pointer-events: auto;
   cursor: pointer;
   font-weight: bold;
@@ -542,7 +546,8 @@ body {
 .tutorial-instructions-modal--dijkstra .tuto-next-btn:not(.hidden),
 .tutorial-instructions-modal--kruskal .tuto-next-btn:not(.hidden),
 .tutorial-instructions-modal--prim .tuto-next-btn:not(.hidden),
-.tutorial-instructions-modal--astar .tuto-next-btn:not(.hidden) {
+.tutorial-instructions-modal--astar .tuto-next-btn:not(.hidden),
+.tutorial-instructions-modal--heapsort .tuto-next-btn:not(.hidden) {
   display: block;
   margin: 10px 0 0 auto;
 }
