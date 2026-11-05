@@ -37,6 +37,7 @@ const STEP0_EDGE = [2, 3];
 
 const MISTAKE_STEP = tutorialSteps.findIndex((s) => /make a mistake/i.test(s.instruction));
 const instruction = (page) => page.locator(".tutorial-instructions-modal .tuto-instruction-text");
+const nextButton = (page) => page.locator(".tutorial-instructions-modal .tuto-next-btn");
 const hint = (page) => page.locator(".Hint-Text");
 /** Time for a wrongly scheduled timer (e.g. the 3 s red flash) to fire. */
 const settle = (page, ms = 1_000) => page.waitForTimeout(ms);
@@ -50,7 +51,13 @@ const pathEdge = (i) => tutorialSteps[i].expectedEdge?.slice(0, 2) ?? STEP0_EDGE
  */
 async function driveStep(page, i) {
   expect(await stepIndex(page)).toBe(i);
-  await clickEdge(page, ...pathEdge(i));
+  if (tutorialSteps[i].type === "info") {
+    await nextButton(page).click();
+    await expect.poll(() => stepIndex(page), { message: `step ${i} did not advance` }).toBe(i + 1);
+    return snapshot(page);
+  }
+  // Registered only once the step has advanced, so a missed click is retried.
+  await clickEdge(page, ...pathEdge(i), async () => (await stepIndex(page)) === i + 1);
   await expect.poll(() => stepIndex(page), { message: `step ${i} did not advance` }).toBe(i + 1);
   return snapshot(page);
 }
@@ -105,7 +112,7 @@ test.describe("Kruskal tutorial", () => {
     expect(await hook(page, "health")).toBe(4);
     const healthAfter = [];
 
-    // Step 0 (any edge): advances only, nothing selected.
+    // Step 0 (intro page): Next advances, nothing selected.
     let s = await driveStep(page, 0);
     expect(s.selected).toEqual([]);
     healthAfter.push(s.health);
@@ -197,28 +204,59 @@ test.describe("Kruskal tutorial", () => {
     await expectCompletedMst(page, { health: 3 });
   });
 
-  // NOTE: current behavior, possibly a bug. Step 0 (expectedEdge null) returns
-  // before handleEdgeSelection(), so clicking the minimum edge (0,2) there only
-  // advances the step; (0,2) is NOT selected, and step 1 can click it again.
-  // (So there is no dead end today - the feared "selected on step 0, then
-  // ignored on step 1" scenario does not happen.)
-  test("step 0: clicking the minimum edge (0,2) only advances; it is not selected", async ({
-    page,
-  }) => {
-    await clickEdge(page, 0, 2);
-    await expect.poll(() => stepIndex(page)).toBe(1);
+  test("starts on the intro page with a Next button", async ({ page }) => {
+    expect(tutorialSteps[0].type).toBe("info");
+    await expect(nextButton(page)).toBeVisible();
+    await expect(instruction(page)).toHaveText("Read the notes below, then press Next.");
+    const explanation = page.locator(".tutorial-instructions-modal .tuto-explanation-text");
+    await expect(explanation).toContainText("Rearrange chests");
+    await expect(explanation).toContainText("Click for help");
+    await expect(explanation).toContainText("0-2 (1), 0-1 (2), 1-2 (3), 1-3 (4), 2-3 (5)");
+  });
+
+  test("clicking an edge on the intro page only shows a hint", async ({ page }) => {
+    await clickEdge(page, 0, 2, async () => (await snapshot(page)).ui === tutorialSteps[0].errorMessage);
+    await settle(page);
     const s = await snapshot(page);
+    expect(s.step).toBe(0);
     expect(s.selected).toEqual([]);
     expect(s.weight).toBe(0);
     expect(s.health).toBe(4);
-    expect(s.hint).toBe(false);
     expect(await hook(page, "isEdgeSelected", 0, 2)).toBe(false);
     expect(await hook(page, "isChestOpened", 0)).toBe(false);
-    expect(await hook(page, "isChestOpened", 2)).toBe(false);
+    await expect(nextButton(page)).toBeVisible();
+  });
 
-    // Step 1 asks for (0,2) again; it is still clickable and now gets selected.
-    await driveSteps(page, 1, tutorialSteps.length - 1);
-    await expectCompletedMst(page, { health: 3 });
+  test("Next moves to Step 1, hides itself and selects nothing", async ({ page }) => {
+    await nextButton(page).click();
+    await expect.poll(() => stepIndex(page)).toBe(1);
+    await expect(nextButton(page)).toBeHidden();
+    await expect(instruction(page)).toHaveText(tutorialSteps[1].instruction);
+    await settle(page);
+    const s = await snapshot(page);
+    expect(s.selected).toEqual([]);
+    expect(s.health).toBe(4);
+    // The first real step still works right after the intro.
+    await driveStep(page, 1);
+    expect(await hook(page, "isEdgeSelected", 0, 2)).toBe(true);
+  });
+
+  test("long text wraps and scrolls inside the panel; Next stays clickable", async ({ page }) => {
+    const m = await page.evaluate(() => {
+      const block = document.querySelector(".tutorial-instructions-modal .code-block");
+      const btn = document.querySelector(".tutorial-instructions-modal .tuto-next-btn");
+      const r = btn.getBoundingClientRect();
+      return {
+        horizontalOverflow: block.scrollWidth - block.clientWidth,
+        overflowY: getComputedStyle(block).overflowY,
+        buttonOnTop: document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === btn,
+        buttonInViewport: r.top >= 0 && r.bottom <= window.innerHeight,
+      };
+    });
+    expect(m.horizontalOverflow).toBeLessThanOrEqual(1);
+    expect(m.overflowY).toBe("auto");
+    expect(m.buttonOnTop).toBe(true);
+    expect(m.buttonInViewport).toBe(true);
   });
 
   // NOTE: current behavior, possibly a bug. On the "make a mistake" step the

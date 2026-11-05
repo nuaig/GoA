@@ -109,6 +109,10 @@ test.describe("Kruskal regular mode", () => {
     expect(errors, "uncaught page errors").toEqual([]);
   });
 
+  test("regular levels never show the tutorial Next button", async ({ page }) => {
+    await expect(page.locator(".tutorial-instructions-modal .tuto-next-btn")).toBeHidden();
+  });
+
   test("plays level 1 to completion", async ({ page }) => {
     // About 1 in 3 random level-1 graphs has no order that avoids the colour
     // freeze (see safeKruskalOrder); restart the level until one does.
