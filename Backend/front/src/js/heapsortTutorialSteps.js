@@ -10,130 +10,148 @@ export const tutorialSteps = [
     type: "info",
     instruction: "Read the notes below, then press Next.",
     explanation:
-      "• To read more about Heap Sort, including its pseudo-code, use the \"Click for help\" button in the lower right corner.<br>" +
-      "• Our goal is to sort the array [1, 5, 3, 4, 11] from smallest to largest using Heap Sort.<br>" +
-      "• Heap Sort has 3 phases:<br>" +
-      "&nbsp;&nbsp;1. Build a binary heap: place the array elements into a complete binary tree, top to bottom, left to right.<br>" +
-      "&nbsp;&nbsp;2. Turn it into a max heap: every parent must be greater than or equal to its children.<br>" +
-      "&nbsp;&nbsp;3. Sort: repeatedly swap the root (the largest element) with the last element of the heap, remove it from the heap, and restore the max heap.<br>" +
-      "• In the array, the element at index i has its left child at index 2i + 1 and its right child at index 2i + 2.<br>" +
-      "• You move elements by clicking, holding and dragging them.",
+      "• We will sort this list from smallest to largest: [1, 5, 3, 4, 11].<br>" +
+      "• Heap Sort has 3 parts.<br>" +
+      "• Part 1: Put each number into the tree. Fill the top first, then go down. On each row, fill left to right.<br>" +
+      "• Part 2: Fix the tree so every number is bigger than (or equal to) the numbers under it. Start at the last parent and walk BOTTOM-UP toward the top.<br>" +
+      "• Part 3: Sorting — always start at the TOP. Swap the top number with the LAST number still being sorted. Then fix FROM THE TOP DOWN: look at the left and right children under the current number, swap with the LARGER child if that child is bigger, and keep going down from the new spot until the number is ≥ what is under it. (Not bottom-up like Part 2.) Repeat until the list is sorted.<br>" +
+      "• Each number has a spot in the list called its index (0, 1, 2, …).<br>" +
+      "• Heap Sort uses a formula to find the spots under a number: left = 2i + 1, right = 2i + 2. The 2 means each number can have 2 children. i is that number's index.<br>" +
+      "• Drag a number to move it. Need more help? Use \"Click for help\" in the lower right.",
     expectedAction: null,
-    errorMessage: "Read the introduction, then press Next to begin.",
+    errorMessage: "Press Next to begin.",
   },
   {
-    instruction: "Step 1: Drag 1 (index 0) into the root of the tree.",
+    instruction: "Step 1: Drag 1 (index 0) into the root of the tree (top of the tree).",
     explanation:
-      "Elements are placed top to bottom, left to right. Index 0 is the root, so the first element, 1, goes at the top. Each node can have at most 2 children.",
+      "Put the list into the tree from top to bottom, left to right. The first number goes at the root (top of the tree).",
     expectedAction: [1],
-    errorMessage: "Place 1 at the root of the tree.",
+    errorMessage: "Drag 1 to the top of the tree.",
   },
   {
     instruction: "Step 2: Drag 5 (index 1) to the left child of 1.",
     explanation:
-      "The top level is full, so we move down one level and fill it from left to right. Index 1 is the left child of index 0 (2·0 + 1 = 1).",
+      "Next number goes under 1, on the left.<br>" +
+      "We use the Heap Sort formula for the left child: 2i + 1.<br>" +
+      "• 2 = each number can have 2 children<br>" +
+      "• i = 0 (the index of the number above, which is 1)<br>" +
+      "• + 1 = take the left child<br>" +
+      "So 2·0 + 1 = 1. That is why 5 goes at index 1.",
     expectedAction: [5],
-    errorMessage: "Place 5 as the left child of 1.",
+    errorMessage: "Drag 5 under 1, on the left.",
   },
   {
     instruction: "Step 3: Drag 3 (index 2) to the right child of 1.",
     explanation:
-      "We keep filling the second level from left to right. Index 2 is the right child of index 0 (2·0 + 2 = 2).",
+      "Next number goes under 1, on the right.<br>" +
+      "Right-child formula: 2i + 2.<br>" +
+      "• 2 = each number can have 2 children<br>" +
+      "• i = 0 (index of 1 above)<br>" +
+      "• + 2 = take the right child<br>" +
+      "So 2·0 + 2 = 2. That is why 3 goes at index 2.",
     expectedAction: [3],
-    errorMessage: "Place 3 as the right child of 1.",
+    errorMessage: "Drag 3 under 1, on the right.",
   },
   {
     instruction: "Step 4: Drag 4 (index 3) to the left child of 5.",
     explanation:
-      "The second level is full, so we move down again. Index 3 is the left child of index 1 (2·1 + 1 = 3).",
+      "The row under 1 is full, so go down one more row. Put 4 under 5, on the left.<br>" +
+      "Left-child formula again: 2i + 1, with i = 1 (index of 5).<br>" +
+      "2·1 + 1 = 3. That is why 4 goes at index 3.",
     expectedAction: [4],
-    errorMessage: "Place 4 as the left child of 5.",
+    errorMessage: "Drag 4 under 5, on the left.",
   },
   {
     instruction: "Step 5: Drag 11 (index 4) to the right child of 5.",
     explanation:
-      "Index 4 is the right child of index 1 (2·1 + 2 = 4). All 5 elements are now in the tree: this is the binary heap [1, 5, 3, 4, 11].",
+      "Put 11 under 5, on the right.<br>" +
+      "Right-child formula: 2i + 2, with i = 1 (index of 5).<br>" +
+      "2·1 + 2 = 4. That is why 11 goes at index 4. All numbers are in the tree.",
     expectedAction: [11],
-    errorMessage: "Place 11 as the right child of 5.",
+    errorMessage: "Drag 11 under 5, on the right.",
   },
   {
     instruction: "Step 6: Swap 5 and 11.",
     explanation:
-      "Phase 2: build the max heap. We start at the last parent node, index ⌊5/2⌋ − 1 = 1 (value 5), and move backwards to index 0. Node 5 has children 4 (index 3) and 11 (index 4). 11 is larger than 5, so we swap 5 with its largest child, 11.<br><br>" +
+      "Part 2 starts. The actual rule (SOT): every number must be bigger than (or equal to) the numbers under it. We only check numbers that have children. Numbers at the bottom with nothing under them are leaves — skip them.<br>" +
+      "With 5 numbers, the last parent is at index ⌊5/2⌋ − 1 = 1. That spot holds 5. That is why we start with 5: not 4 or 11 (leaves), and not 1 yet (higher up — we go bottom-up).<br>" +
+      "Under 5 are 4 and 11. 11 is bigger than 5, so swap them.<br><br>" +
       "Array: [1, 11, 3, 4, 5]",
     expectedAction: [5, 11],
-    errorMessage: "",
+    errorMessage: "Swap 5 with 11.",
   },
   {
     instruction: "Step 7: Swap 1 and 11.",
     explanation:
-      "Index 1 (now 11) is larger than its children 4 and 5, so it is fine. We move back to index 0 (value 1). Its children are 11 (index 1) and 3 (index 2). The largest child, 11, is bigger than 1, so we swap them.<br><br>" +
+      "Keep the same rule: bigger numbers above smaller ones. After the swap, 11 is already bigger than 4 and 5 under it, so leave it. Move one parent left, to the top (index 0), which holds 1. Under it are 11 and 3. 11 is bigger than 1, so swap them.<br><br>" +
       "Array: [11, 1, 3, 4, 5]",
     expectedAction: [1, 11],
-    errorMessage: "",
+    errorMessage: "Swap 1 with 11.",
   },
   {
     instruction: "Step 8: Swap 1 and 5.",
     explanation:
-      "After a swap, we keep checking the value we moved down. 1 is now at index 1, with children 4 (index 3) and 5 (index 4). The largest child, 5, is bigger than 1, so we swap them.<br><br>" +
-      "Array: [11, 5, 3, 4, 1]. Every parent is now larger than its children, so the max heap is complete.",
+      "Same rule still. 1 moved down. Under it now are 4 and 5. 5 is bigger than 1, so swap them.<br><br>" +
+      "Array: [11, 5, 3, 4, 1]. The rule holds everywhere — Part 2 is done.",
     expectedAction: [1, 5],
-    errorMessage: "",
+    errorMessage: "Swap 1 with 5.",
   },
   {
-    instruction: "Step 9: Swap the root 11 with the last element 1.",
+    instruction: "Step 9: Swap the root 11 (top of the tree) with the last element 1.",
     explanation:
-      "Phase 3: sort. The root of a max heap is the largest element. We swap it with the last element of the heap (index 4) and remove it from the heap, so 11 is now in its final sorted position.<br><br>" +
+      "Part 3 — sorting. Unlike Part 2 (bottom-up from the last parent), sorting always starts at the TOP.<br>" +
+      "The top number is the biggest still being sorted, so swap it with the LAST number still being sorted. Next we will fix FROM THE TOP DOWN: look at the left and right children under the current number, swap with the LARGER child if that child is bigger, and keep going down from the new spot until the number is ≥ what is under it.<br>" +
+      "Numbers to the right of | are already sorted and stay put.<br><br>" +
       "Array: [1, 5, 3, 4 | 11]",
     expectedAction: [11, 1],
-    errorMessage: "",
+    errorMessage: "Swap 11 with 1.",
   },
   {
     instruction: "Step 10: Swap 1 and 5.",
     explanation:
-      "The new root 1 is smaller than its children 5 (index 1) and 3 (index 2). We swap it with the largest child, 5.<br><br>" +
+      "Fix FROM THE TOP DOWN. 1 is on top. Look at its left and right children: 5 and 3. 5 is the LARGER child and bigger than 1, so swap them.<br><br>" +
       "Array: [5, 1, 3, 4 | 11]",
     expectedAction: [1, 5],
-    errorMessage: "",
+    errorMessage: "Swap 1 with 5.",
   },
   {
     instruction: "Step 11: Swap 1 and 4.",
     explanation:
-      "1 is now at index 1, and its only child left in the heap is 4 (index 3). 4 is bigger, so we swap them.<br><br>" +
-      "Array: [5, 4, 3, 1 | 11]. The max heap is restored.",
+      "Keep going down from the new spot. The only child still under 1 (and still being sorted) is 4. 4 is bigger than 1, so swap them.<br><br>" +
+      "Array: [5, 4, 3, 1 | 11]. 1 is now ≥ what is under it — the top-down fix is done.",
     expectedAction: [1, 4],
-    errorMessage: "",
+    errorMessage: "Swap 1 with 4.",
   },
   {
-    instruction: "Step 12: Swap the root 5 with the last element 1.",
+    instruction: "Step 12: Swap the root 5 (top of the tree) with the last element 1.",
     explanation:
-      "We remove the largest element again by swapping the root 5 with the last element of the heap (index 3).<br><br>" +
+      "Back to the TOP. Swap the top number with the LAST number still being sorted.<br><br>" +
       "Array: [1, 4, 3 | 5, 11]",
     expectedAction: [5, 1],
-    errorMessage: "",
+    errorMessage: "Swap 5 with 1.",
   },
   {
     instruction: "Step 13: Swap 1 and 4.",
     explanation:
-      "The new root 1 has children 4 (index 1) and 3 (index 2). We swap it with the largest child, 4.<br><br>" +
+      "Fix FROM THE TOP DOWN again. Under 1 are left and right children 4 and 3. 4 is the LARGER child and bigger than 1, so swap them.<br><br>" +
       "Array: [4, 1, 3 | 5, 11]",
     expectedAction: [1, 4],
-    errorMessage: "",
+    errorMessage: "Swap 1 with 4.",
   },
   {
-    instruction: "Step 14: Swap the root 4 with the last element 3.",
+    instruction: "Step 14: Swap the root 4 (top of the tree) with the last element 3.",
     explanation:
-      "1 at index 1 has no children left in the heap, so the max heap is restored. We swap the root 4 with the last element of the heap (index 2).<br><br>" +
+      "1 has nothing under it left to sort, so stop going down. Back to the TOP: swap the top number with the LAST number still being sorted.<br><br>" +
       "Array: [3, 1 | 4, 5, 11]",
     expectedAction: [4, 3],
-    errorMessage: "",
+    errorMessage: "Swap 4 with 3.",
   },
   {
-    instruction: "Step 15: Swap the root 3 with the last element 1.",
+    instruction: "Step 15: Swap the root 3 (top of the tree) with the last element 1.",
     explanation:
-      "The root 3 is larger than its only child 1, so the heap is already a max heap. We swap the root 3 with the last element (index 1).<br><br>" +
-      "Array: [1 | 3, 4, 5, 11]. Only one element is left in the heap, so the array is sorted: [1, 3, 4, 5, 11].",
+      "Fix FROM THE TOP DOWN: 3 is already ≥ 1 under it, so no swap needed. Swap the top number with the LAST number still being sorted.<br><br>" +
+      "Array: [1 | 3, 4, 5, 11]. Only one number is left to sort — the list is done: [1, 3, 4, 5, 11].",
     expectedAction: [3, 1],
-    errorMessage: "",
+    errorMessage: "Swap 3 with 1.",
   },
 ];
