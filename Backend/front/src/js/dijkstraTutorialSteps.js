@@ -12,29 +12,27 @@ export const tutorialSteps = [
     type: "info",
     instruction: "Read the notes below, then press Next.",
     explanation:
-      "• If you see overlapping edges or overlapping numbers in the graph, click the \"Rearrange chests\" button in the upper right corner.<br>" +
-      "• To read more about Dijkstra's algorithm, use the \"Click for help\" button in the lower right corner.<br>" +
-      "• Our goal is to find the shortest distance from the source node (node 0 in this example) to all other nodes.<br>" +
-      "• We start by marking all nodes \"unvisited\". The distance from the source node to itself starts at 0, and the distance from the source to every other node starts at infinity (∞). These starting values are shown in the right table below (Distance from Source).<br>" +
-      "• Then we go through a series of iterations, updating the distances from the source node to the other nodes.",
+      "• Goal: find the shortest distance from node 0 to every other node.<br>" +
+      "• Start: node 0 = 0. Every other node = infinity (∞). See the Distance from Source table.<br>" +
+      "• Each round: open the closest unvisited node, then check its edges and update distances if a shorter path is found.<br>" +
+      "• Overlap? Use \"Rearrange chests\" (upper right). More help: \"Click for help\" (lower right).",
     expectedChests: null,
     expectedEdges: null,
-    errorMessage: "Read the introduction, then press Next to begin.",
+    errorMessage: "Press Next to begin.",
   },
   {
     instruction: "Step 0: Click on node 0 to begin.",
     explanation:
-      "In each iteration, we choose the unvisited node with the minimum distance from the source. The distance from the source node to itself is 0, so we always start from the source node.<br>" +
-      "When you click on node 0, its chest opens: node 0 is now visited.",
+      "Always start at the closest unvisited node. Node 0 is closest (distance 0). Click it to mark it visited.",
     expectedChests: [0],
     expectedEdges: null,
-    errorMessage: "Incorrect! Please click on node 0.",
+    errorMessage: "Click on node 0.",
   },
   {
     instruction:
       "Step 1: Click on edge (0, 2). Type 1 in the input dialog, and press OK.",
     explanation:
-      "We need to \"Relax\" (process) all edges (u, v) going out of the selected node u, in no specific order. Relaxing edge (u, v) means checking whether going from the source to u, then following edge (u, v) to v, gives a shorter distance from the source to v. If it does, we update the distance to v.<br><br>" +
+      "\"Relax\" an edge (u, v): ask if path-to-u + edge weight is shorter than the current distance to v. If yes, update it.<br><br>" +
       "distance from source \"0\" to \"0\" = 0<br>" +
       "weight of edge (0, 2) = 1<br>" +
       "distance from source to node \"2\" = ∞<br>" +
@@ -42,7 +40,7 @@ export const tutorialSteps = [
     expectedChests: null,
     expectedEdges: [[0, 2]],
     updatedDistance: { 2: 1 },
-    errorMessage: "Click the edge (0, 2) to record the distance to node 2.",
+    errorMessage: "Click the edge (0, 2).",
   },
   {
     instruction:
@@ -55,24 +53,23 @@ export const tutorialSteps = [
     expectedChests: null,
     expectedEdges: [[0, 1]],
     updatedDistance: { 1: 2 },
-    errorMessage: "Click the edge (0, 1) to update the distance to node 1.",
+    errorMessage: "Click the edge (0, 1).",
   },
   {
     instruction:
       "Step 3: All edges going out of node 0 have been relaxed, so we select a new node. Click on node 2.",
     explanation:
-      "Among all unvisited nodes, choose the one with the shortest distance from the source (see the Distance from Source table below).<br>" +
-      "Unvisited nodes: node 1 = 2, node 2 = 1, node 3 = ∞, node 4 = ∞. Node 2 has the shortest distance, so we visit it next.",
+      "Pick the closest unvisited node.<br>" +
+      "Unvisited nodes: node 1 = 2, node 2 = 1, node 3 = ∞, node 4 = ∞. Node 2 is closest.",
     expectedChests: [2],
     expectedEdges: null,
-    errorMessage:
-      "Incorrect! Click on node 2 — it's the nearest unvisited node.",
+    errorMessage: "Click on node 2.",
   },
   {
     instruction:
       "Step 4: Click on edge (2, 1). Type 2 in the input dialog, and press OK.",
     explanation:
-      "Edge (2, 0) leads to node 0, which is already visited, so we skip it.<br><br>" +
+      "Skip edges to visited nodes (like 2 → 0).<br><br>" +
       "distance from source to node \"2\" = 1<br>" +
       "weight of edge (2, 1) = 3<br>" +
       "distance from source to node \"1\" = 2<br>" +
@@ -80,7 +77,7 @@ export const tutorialSteps = [
     expectedChests: null,
     expectedEdges: [[2, 1]],
     updatedDistance: { 1: 2 },
-    errorMessage: "Click (2, 1) to compare if it's a better path to node 1.",
+    errorMessage: "Click (2, 1).",
   },
   {
     instruction:
@@ -93,7 +90,7 @@ export const tutorialSteps = [
     expectedChests: null,
     expectedEdges: [[2, 4]],
     updatedDistance: { 4: 7 },
-    errorMessage: "Click (2, 4) to record the current distance to node 4.",
+    errorMessage: "Click (2, 4).",
   },
   {
     instruction:
@@ -106,23 +103,23 @@ export const tutorialSteps = [
     expectedChests: null,
     expectedEdges: [[2, 3]],
     updatedDistance: { 3: 3 },
-    errorMessage: "Click (2, 3) to update the distance to node 3.",
+    errorMessage: "Click (2, 3).",
   },
   {
     instruction:
       "Step 7: All edges going out of node 2 have been relaxed. Click on node 1.",
     explanation:
-      "Among all unvisited nodes, choose the one with the shortest distance from the source.<br>" +
-      "Unvisited nodes: node 1 = 2, node 3 = 3, node 4 = 7. Node 1 has the shortest distance, so we visit it next.",
+      "Pick the closest unvisited node.<br>" +
+      "Unvisited nodes: node 1 = 2, node 3 = 3, node 4 = 7. Node 1 is closest.",
     expectedChests: [1],
     expectedEdges: null,
-    errorMessage: "Incorrect! Click on node 1 — it’s the next closest node.",
+    errorMessage: "Click on node 1.",
   },
   {
     instruction:
       "Step 8: Click on edge (1, 3). Type 3 in the input dialog, and press OK.",
     explanation:
-      "Edges (1, 0) and (1, 2) lead to visited nodes, so we skip them.<br><br>" +
+      "Skip edges to visited nodes (1 → 0 and 1 → 2).<br><br>" +
       "distance from source to node \"1\" = 2<br>" +
       "weight of edge (1, 3) = 4<br>" +
       "distance from source to node \"3\" = 3<br>" +
@@ -130,23 +127,23 @@ export const tutorialSteps = [
     expectedChests: null,
     expectedEdges: [[1, 3]],
     updatedDistance: { 3: 3 },
-    errorMessage: "Click (1, 3) to evaluate its path to node 3.",
+    errorMessage: "Click (1, 3).",
   },
   {
     instruction:
       "Step 9: All edges going out of node 1 have been relaxed. Click on node 3.",
     explanation:
-      "Among all unvisited nodes, choose the one with the shortest distance from the source.<br>" +
-      "Unvisited nodes: node 3 = 3, node 4 = 7. Node 3 has the shortest distance, so we visit it next.",
+      "Pick the closest unvisited node.<br>" +
+      "Unvisited nodes: node 3 = 3, node 4 = 7. Node 3 is closest.",
     expectedChests: [3],
     expectedEdges: null,
-    errorMessage: "Incorrect! Click on node 3 to visit it next.",
+    errorMessage: "Click on node 3.",
   },
   {
     instruction:
       "Step 10: Click on edge (3, 4). Type 4 in the input dialog, and press OK.",
     explanation:
-      "Edges (3, 1) and (3, 2) lead to visited nodes, so we skip them.<br><br>" +
+      "Skip edges to visited nodes.<br><br>" +
       "distance from source to node \"3\" = 3<br>" +
       "weight of edge (3, 4) = 1<br>" +
       "distance from source to node \"4\" = 7<br>" +
@@ -154,15 +151,15 @@ export const tutorialSteps = [
     expectedChests: null,
     expectedEdges: [[3, 4]],
     updatedDistance: { 4: 4 },
-    errorMessage: "Click (3, 4) to update the distance to node 4.",
+    errorMessage: "Click (3, 4).",
   },
   {
     instruction:
       "Step 11: All edges going out of node 3 have been relaxed. Click on node 4, the last unvisited node.",
     explanation:
-      "Node 4 is the only unvisited node left, with distance 4. Once it is visited, every node is visited, and the table shows the shortest distance from node 0 to every node.",
+      "Only node 4 is left (distance 4). Visit it — every node is done, and the table shows the shortest distances from node 0.",
     expectedChests: [4],
     expectedEdges: null,
-    errorMessage: "Click on node 4 to complete Dijkstra’s algorithm.",
+    errorMessage: "Click on node 4.",
   },
 ];

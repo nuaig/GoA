@@ -10,14 +10,12 @@ export const tutorialSteps = [
     type: "info",
     instruction: "Read the notes below, then press Next.",
     explanation:
-      "• We will sort this list from smallest to largest: [1, 5, 3, 4, 11].<br>" +
-      "• Heap Sort has 3 parts.<br>" +
-      "• Part 1: Put each number into the tree. Fill the top first, then go down. On each row, fill left to right.<br>" +
-      "• Part 2: Fix the tree so every number is bigger than (or equal to) the numbers under it. Start at the last parent and walk BOTTOM-UP toward the top.<br>" +
-      "• Part 3: Sorting — always start at the TOP. Swap the top number with the LAST number still being sorted. Then fix FROM THE TOP DOWN: look at the left and right children under the current number, swap with the LARGER child if that child is bigger, and keep going down from the new spot until the number is ≥ what is under it. (Not bottom-up like Part 2.) Repeat until the list is sorted.<br>" +
-      "• Each number has a spot in the list called its index (0, 1, 2, …).<br>" +
-      "• Heap Sort uses a formula to find the spots under a number: left = 2i + 1, right = 2i + 2. The 2 means each number can have 2 children. i is that number's index.<br>" +
-      "• Drag a number to move it. Need more help? Use \"Click for help\" in the lower right.",
+      "• Goal: sort [1, 5, 3, 4, 11] from smallest to largest.<br>" +
+      "• Part 1: Put the numbers into the tree, top to bottom, left to right.<br>" +
+      "• Part 2: Make every number bigger than the ones under it. Work bottom-up.<br>" +
+      "• Part 3: Move the top (biggest) number to the end. Then fix the tree from the top down. Repeat.<br>" +
+      "• Spot tip: left child = 2i + 1, right child = 2i + 2 (i = a number's index).<br>" +
+      "• Drag to move numbers. More help: \"Click for help\" (lower right).",
     expectedAction: null,
     errorMessage: "Press Next to begin.",
   },
@@ -31,7 +29,7 @@ export const tutorialSteps = [
   {
     instruction: "Step 2: Drag 5 (index 1) to the left child of 1.",
     explanation:
-      "Next number goes under 1, on the left.<br>" +
+      "Keep filling top to bottom, left to right. The top row is full, so the next number goes under 1, on the left.<br>" +
       "We use the Heap Sort formula for the left child: 2i + 1.<br>" +
       "• 2 = each number can have 2 children<br>" +
       "• i = 0 (the index of the number above, which is 1)<br>" +
@@ -43,7 +41,7 @@ export const tutorialSteps = [
   {
     instruction: "Step 3: Drag 3 (index 2) to the right child of 1.",
     explanation:
-      "Next number goes under 1, on the right.<br>" +
+      "Keep filling top to bottom, left to right. The left spot under 1 is taken, so the next number goes on the right.<br>" +
       "Right-child formula: 2i + 2.<br>" +
       "• 2 = each number can have 2 children<br>" +
       "• i = 0 (index of 1 above)<br>" +
@@ -55,7 +53,7 @@ export const tutorialSteps = [
   {
     instruction: "Step 4: Drag 4 (index 3) to the left child of 5.",
     explanation:
-      "The row under 1 is full, so go down one more row. Put 4 under 5, on the left.<br>" +
+      "Keep filling top to bottom, left to right. The row under 1 is full, so go down one row and start on the left: put 4 under 5, on the left.<br>" +
       "Left-child formula again: 2i + 1, with i = 1 (index of 5).<br>" +
       "2·1 + 1 = 3. That is why 4 goes at index 3.",
     expectedAction: [4],
@@ -64,7 +62,7 @@ export const tutorialSteps = [
   {
     instruction: "Step 5: Drag 11 (index 4) to the right child of 5.",
     explanation:
-      "Put 11 under 5, on the right.<br>" +
+      "Keep filling top to bottom, left to right. The left spot under 5 is taken, so put 11 under 5, on the right.<br>" +
       "Right-child formula: 2i + 2, with i = 1 (index of 5).<br>" +
       "2·1 + 2 = 4. That is why 11 goes at index 4. All numbers are in the tree.",
     expectedAction: [11],
@@ -73,8 +71,10 @@ export const tutorialSteps = [
   {
     instruction: "Step 6: Swap 5 and 11.",
     explanation:
-      "Part 2 starts. The actual rule (SOT): every number must be bigger than (or equal to) the numbers under it. We only check numbers that have children. Numbers at the bottom with nothing under them are leaves — skip them.<br>" +
-      "With 5 numbers, the last parent is at index ⌊5/2⌋ − 1 = 1. That spot holds 5. That is why we start with 5: not 4 or 11 (leaves), and not 1 yet (higher up — we go bottom-up).<br>" +
+      "Part 2 starts. The actual rule (SOT): every number must be bigger than (or equal to) the numbers under it.<br>" +
+      "We go bottom-up: i counts down from the last spot, one at a time: i = 4 → 3 → 2 → 1 → 0.<br>" +
+      "• i = 4, 3, 2 hold 11, 4 and 3. Nothing is under them (they are leaves), so we skip them.<br>" +
+      "• i = 1 holds 5. It is the first number with children, so we start here. (Shortcut: the last parent is at ⌊5/2⌋ − 1 = 1.)<br>" +
       "Under 5 are 4 and 11. 11 is bigger than 5, so swap them.<br><br>" +
       "Array: [1, 11, 3, 4, 5]",
     expectedAction: [5, 11],
@@ -83,7 +83,10 @@ export const tutorialSteps = [
   {
     instruction: "Step 7: Swap 1 and 11.",
     explanation:
-      "Keep the same rule: bigger numbers above smaller ones. After the swap, 11 is already bigger than 4 and 5 under it, so leave it. Move one parent left, to the top (index 0), which holds 1. Under it are 11 and 3. 11 is bigger than 1, so swap them.<br><br>" +
+      "Keep counting i down: i = 4 → 3 → 2 → 1 → 0.<br>" +
+      "• i = 4, 3, 2 now hold 5, 4 and 3. They are still leaves, so we skip them.<br>" +
+      "• i = 1 was Step 6. It now holds 11, which is already bigger than 4 and 5 under it, so leave it.<br>" +
+      "• Next is i = 0. It holds 1. Under it are 11 and 3. 11 is bigger than 1, so swap them.<br><br>" +
       "Array: [11, 1, 3, 4, 5]",
     expectedAction: [1, 11],
     errorMessage: "Swap 1 with 11.",

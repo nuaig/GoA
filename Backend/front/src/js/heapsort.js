@@ -562,9 +562,10 @@ function checkLevelCompletionAndUpdate() {
 
 // DONE
 function evaluateActionAndUpdateScore(isCorrect, nodeIndex) {
-  let message;
-
-  message = `Correct! Node ${nodeIndex} is correctly swapped.`;
+  const message =
+    currentStep === 0
+      ? `Correct! Node ${nodeIndex} is correctly placed.`
+      : `Correct! Node ${nodeIndex} is correctly swapped.`;
   if (isCorrect) displayMessage(message, curRoomUI.uiText);
   curRoomUI.currentScore += isCorrect ? correctActionScoreAddition : 0;
 
@@ -573,30 +574,33 @@ function evaluateActionAndUpdateScore(isCorrect, nodeIndex) {
     correctlyPlacedTreeNodes++;
   }
   if (!isCorrect) {
-    curGameSession.incrementMistakes();
-    curRoomUI.health = decrementHealth(curRoomUI.health);
     shakeScreen();
-    if (
-      curRoomUI.health < 0 &&
-      curRoomUI.currentMode == "regular" &&
-      !curRoomUI.isTutorial
-    ) {
-      curRoomUI.fillInfoFailureSuccessCompletionModal();
-      curGameSession.setFinalScore(curRoomUI.currentScore);
-      curGameSession.setSuccessStatus(false);
-      curGameSession.endSession();
+    // Tutorial: wrong moves snap back and hint, but do not cost lives
+    // (same policy as Dijkstra / A*).
+    if (!curRoomUI.isTutorial) {
+      curGameSession.incrementMistakes();
+      curRoomUI.health = decrementHealth(curRoomUI.health);
+      if (
+        curRoomUI.health < 0 &&
+        curRoomUI.currentMode == "regular"
+      ) {
+        curRoomUI.fillInfoFailureSuccessCompletionModal();
+        curGameSession.setFinalScore(curRoomUI.currentScore);
+        curGameSession.setSuccessStatus(false);
+        curGameSession.endSession();
 
-      const sessionData = curGameSession.toObject();
-      console.log("printing session Data");
-      console.log(sessionData);
-      fetch("/api/gamesessions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(sessionData),
-      }).then((res) => res.json());
-      curRoomUI.openCompletionModal();
+        const sessionData = curGameSession.toObject();
+        console.log("printing session Data");
+        console.log(sessionData);
+        fetch("/api/gamesessions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(sessionData),
+        }).then((res) => res.json());
+        curRoomUI.openCompletionModal();
+      }
     }
   }
   if (isCorrect) {

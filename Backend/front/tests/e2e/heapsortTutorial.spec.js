@@ -3,12 +3,13 @@
 // is read through the dev-only hook window.__roomTest (bottom of src/js/heapsort.js).
 //
 // How a tutorial drag works today (controls "dragend" in src/js/heapsort.js):
-//   - step with expectedAction === null (step 0): the element snaps back,
-//     nextTutorialStep() and RETURN - the real game check does not run;
+//   - type "info": the element snaps back with an errorMessage; no advance.
+//   - expectedAction === null (legacy): snap back and advance (unused now that
+//     the intro is type "info").
 //   - otherwise the REAL game check runs (handleStepOnePlacement /
 //     handleStepTwoAndThreePlacement). expectedAction is never compared: ANY
-//     correct game action advances the tutorial step, a wrong one costs a life
-//     (decrementHealth runs in the tutorial too) and the step stays.
+//     correct game action advances the tutorial step; a wrong one snaps back
+//     and keeps the step, but does not cost a life in the tutorial.
 // Each test gets a fresh page (Playwright default).
 import { test, expect } from "@playwright/test";
 import { tutorialSteps } from "../../src/js/heapsortTutorialSteps.js";
@@ -173,14 +174,14 @@ test.describe("Heapsort tutorial", () => {
     await expect(nextButton(page)).toBeHidden();
   });
 
-  test("wrong placement in the build phase costs a life and keeps the step", async ({ page }) => {
+  test("wrong placement in the build phase keeps the step and costs no life", async ({ page }) => {
     await driveStep(page, 0);
 
     // Right slot, wrong turn (index 1 before index 0).
     await dragTo(page, 1, 1);
     expect(await snapshot(page)).toMatchObject({
       step: 1,
-      health: 3, // decrementHealth() also in the tutorial
+      health: 4,
       buildIndex: 0,
       tree: [null, null, null, null, null],
     });
@@ -192,7 +193,7 @@ test.describe("Heapsort tutorial", () => {
     await dragTo(page, 0, 2);
     expect(await snapshot(page)).toMatchObject({
       step: 1,
-      health: 2,
+      health: 4,
       buildIndex: 0,
       tree: [null, null, null, null, null],
     });
@@ -202,11 +203,11 @@ test.describe("Heapsort tutorial", () => {
 
     // The tutorial goes on.
     await driveStep(page, 1);
-    expect(await snapshot(page)).toMatchObject({ step: 2, health: 2, buildIndex: 1 });
-    await expect(uiText(page)).toHaveText("Correct! Node 0 is correctly swapped.");
+    expect(await snapshot(page)).toMatchObject({ step: 2, health: 4, buildIndex: 1 });
+    await expect(uiText(page)).toHaveText("Correct! Node 0 is correctly placed.");
   });
 
-  test("wrong swap in the heapify phase costs a life and keeps the step", async ({ page }) => {
+  test("wrong swap in the heapify phase keeps the step and costs no life", async ({ page }) => {
     await driveSteps(page, 0, 6);
     expect(await snapshot(page)).toMatchObject({ step: 6, phase: 1, health: 4 });
 
@@ -214,7 +215,7 @@ test.describe("Heapsort tutorial", () => {
     await dragSwap(page, 1, 3);
     expect(await snapshot(page)).toMatchObject({
       step: 6,
-      health: 3,
+      health: 4,
       phase: 1,
       array: TUTORIAL_ARRAY, // snapped back, nothing swapped
       tree: TUTORIAL_ARRAY,
@@ -225,6 +226,6 @@ test.describe("Heapsort tutorial", () => {
     );
 
     await driveStep(page, 6);
-    expect(await snapshot(page)).toMatchObject({ step: 7, health: 3, array: [1, 11, 3, 4, 5] });
+    expect(await snapshot(page)).toMatchObject({ step: 7, health: 4, array: [1, 11, 3, 4, 5] });
   });
 });
