@@ -15,6 +15,11 @@ for (const room of ROOMS) {
     await page.goto(`/${room}`);
     await statusServed; // getUser succeeded -> status fetched (no redirect)
     await expect(page.locator("canvas").first()).toBeVisible();
+    // Entry flow: game-feature slides, then tutorial Yes/No after dismiss.
+    const instructionModal = page.locator(".modal.instruction");
+    await expect(instructionModal).toBeVisible();
+    await page.locator(".btn__instruction__start").click();
+    await expect(instructionModal).toBeHidden();
     await expect(page.locator(".modal__tutorial")).toBeVisible();
     await page.waitForLoadState("networkidle").catch(() => {});
     // Let async model loading / camera setup run so late errors surface.

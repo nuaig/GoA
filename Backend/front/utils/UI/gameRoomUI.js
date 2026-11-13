@@ -38,10 +38,8 @@ class GameRoomUI {
     this.isTutorial = false;
     this.currentTutorialStep = 0;
 
-    this.localStorageKey = `hasGameFeatureInstructionModalShownBefore_${this.gameName}`;
-
-    this.hasGameFeatureInstructionModalShownBefore =
-      localStorage.getItem(this.localStorageKey) === "true";
+    // After the entry game-feature slides are dismissed, open the tutorial prompt.
+    this.pendingTutorialPromptAfterInstruction = false;
     this.callbacks = callbacks;
     this.camera = camera;
     this.swiper = new Swiper(".mySwiper", {
@@ -213,7 +211,9 @@ class GameRoomUI {
     this.step3Img = document.querySelector(".step3 img");
     this.closeModalButton = document.querySelector(".btn-algo-instruction-single-close");
 
-    this.openModal(this.tutorialModal);
+    // Every room visit: game-feature slides first, then the tutorial Yes/No prompt.
+    this.pendingTutorialPromptAfterInstruction = true;
+    this.openModal(this.instructionModal);
   }
 
   // NOTES FOR EMILY ON MODALS
@@ -592,7 +592,6 @@ class GameRoomUI {
       ) {
         this.closeModal(this.tutorialModal);
         this.openModal(this.levelsModal);
-        this.showGameFeatureInstructionModalIfNeeded();
       } else {
         this.closeModal(this.tutorialModal);
       }
@@ -673,38 +672,21 @@ class GameRoomUI {
     // this.listenEventChatButtons();
   }
 
-  showGameFeatureInstructionModalIfNeeded() {
-    if (!this.hasGameFeatureInstructionModalShownBefore) {
-      console.log(
-        `Showing game feature instruction modal for ${this.gameName} for the first time...`
-      );
-      this.openModal(this.instructionModal);
-
-      // ✅ Store in LocalStorage to ensure this modal does not show again for this game
-      localStorage.setItem(this.localStorageKey, "true");
-    }
-  }
-
   /**
-   * Handles the event when the "Start Instruction" button is clicked.
-   * - Disables mouse event listeners to prevent unintended interactions.
-   * - Hides the instruction modal and the overlay.
-   * - Ensures that once the instruction modal is closed, it cannot be reopened without user action.
+   * Handles the event when the instruction slides are dismissed ("Start the game" / close).
+   * On room entry that leads into the tutorial Yes/No prompt; from Help it just closes.
    */
   listenEventInstructionModalGameStart() {
     this.buttonStartInstructionModal.addEventListener("click", () => {
       this.disableMouseEventListeners_K_P();
-      console.log("inside Instruction Game Start");
-      console.log(this.levelModalOpen);
-      if (!this.levelModalOpen) {
-        console.log("inside Instruction Game Start enabling");
-        this.overlay.classList.add("hidden");
-        this.closeModal(this.instructionModal);
-      }
+      this.closeModal(this.instructionModal);
       this.instructionModal.classList.add("hidden");
       this.levelModalOpen = false;
-      // ✅ Store the flag so the modal doesn’t show again for this specific game
-      localStorage.setItem(this.localStorageKey, "true");
+
+      if (this.pendingTutorialPromptAfterInstruction) {
+        this.pendingTutorialPromptAfterInstruction = false;
+        this.openModal(this.tutorialModal);
+      }
     });
   }
 
@@ -731,6 +713,8 @@ class GameRoomUI {
   listenEventGameFeatureInstrModal() {
     const gameFeatureBtn = document.querySelector(".sub-menu-game-features");
     gameFeatureBtn.addEventListener("click", () => {
+      // Re-opened from Help: closing should not re-prompt for the tutorial.
+      this.pendingTutorialPromptAfterInstruction = false;
       this.openModal(this.instructionModal);
       this.levelModalOpen = false;
       document.querySelector(".btn__instruction__start").textContent =
@@ -739,7 +723,6 @@ class GameRoomUI {
 
       subMenu.classList.toggle("open-menu");
     });
-   
   }
 
   addAllEventListenersHelperChat() {

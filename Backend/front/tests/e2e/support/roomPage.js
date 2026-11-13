@@ -209,16 +209,15 @@ export function createRoomPage({
     const errors = [];
     page.on("pageerror", (err) => errors.push(err.message));
     const { statusServed } = await mockBackend(page);
-    await page.addInitScript((key) => {
-      // Suppress the one-time game-feature instruction modal (shown after "No").
-      try {
-        localStorage.setItem(key, "true");
-      } catch {}
-    }, `hasGameFeatureInstructionModalShownBefore_${gameName}`);
 
     await page.goto(path);
     await page.waitForFunction((h) => !!window[h], hookName, { timeout: 60_000 });
     await statusServed;
+    // Every entry: game-feature slides first, then dismiss into the tutorial prompt.
+    const instructionModal = page.locator(".modal.instruction");
+    await expect(instructionModal).toBeVisible();
+    await page.locator(".btn__instruction__start").click();
+    await expect(instructionModal).toBeHidden();
     await expect(page.locator(".modal__tutorial")).toBeVisible();
     // toggleMode("regular") runs after the status fetch.
     await expect(page.locator("#regular-mode-btn")).toHaveClass(/active/);
