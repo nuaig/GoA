@@ -73,8 +73,8 @@ export const tutorialSteps = [
     explanation:
       "Part 2 starts. The actual rule (SOT): every number must be bigger than (or equal to) the numbers under it.<br>" +
       "We go bottom-up: i counts down from the last spot, one at a time: i = 4 → 3 → 2 → 1 → 0.<br>" +
-      "• i = 4, 3, 2 hold 11, 4 and 3. Nothing is under them (they are leaves), so we skip them.<br>" +
-      "• i = 1 holds 5. It is the first number with children, so we start here. (Shortcut: the last parent is at ⌊5/2⌋ − 1 = 1.)<br>" +
+      "• Look at indexes 4, 3, 2: the numbers there are 11, 4 and 3. Nothing is under them (they are leaves), so we skip them.<br>" +
+      "• Look at index 1: the number there is 5. It is the first number with children, so we start here. (Shortcut: the last parent is at ⌊5/2⌋ − 1 = 1.)<br>" +
       "Under 5 are 4 and 11. 11 is bigger than 5, so swap them.<br><br>" +
       "Array: [1, 11, 3, 4, 5]",
     expectedAction: [5, 11],
@@ -84,9 +84,9 @@ export const tutorialSteps = [
     instruction: "Step 7: Swap 1 and 11.",
     explanation:
       "Keep counting i down: i = 4 → 3 → 2 → 1 → 0.<br>" +
-      "• i = 4, 3, 2 now hold 5, 4 and 3. They are still leaves, so we skip them.<br>" +
-      "• i = 1 was Step 6. It now holds 11, which is already bigger than 4 and 5 under it, so leave it.<br>" +
-      "• Next is i = 0. It holds 1. Under it are 11 and 3. 11 is bigger than 1, so swap them.<br><br>" +
+      "• Look at indexes 4, 3, 2: the numbers there are now 5, 4 and 3. They are still leaves, so we skip them.<br>" +
+      "• Look at index 1 (Step 6): the number there is now 11, which is already bigger than the 4 and 5 under it, so leave it.<br>" +
+      "• Next, look at index 0: the number there is 1. Under it are 11 and 3. 11 is bigger than 1, so swap them.<br><br>" +
       "Array: [11, 1, 3, 4, 5]",
     expectedAction: [1, 11],
     errorMessage: "Swap 1 with 11.",
