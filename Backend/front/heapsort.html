@@ -31,7 +31,7 @@
     <!--Main chat container-->
     <div class="chat-container">
       <button class="chat-close-button"  id="chat-close-button">X</button>
-      <button class="chat-home-button" id="chat-home-button">Home</button>
+      <button class="chat-home-button" id="chat-home-button" aria-label="Back" title="Back">&#8592;</button>
       <div class="page-home" id="chat-homepage-container">
         
         <!--Message header-->
@@ -197,16 +197,20 @@ Heapify():
       </pre>
     </div>
 
-    <div class="tutorial-instructions-modal hidden">
+    <div class="tutorial-instructions-modal tutorial-instructions-modal--heapsort hidden">
       <h3>Tutorial Walk-through</h3>
       <pre class="code-block">
-<strong>Instruction:</strong>  
-<span class="tuto-instruction-text">Select any edge to begin the tutorial after reading the explanation below.</span>
+        <strong class="tuto-explanation-label">Explanation:</strong>
+        <span class="tuto-explanation-text">Our goal is to sort the array from smallest to largest using Heap Sort.</span>
 
-<strong>Explanation:</strong>
-<span class="tuto-explanation-text">The treasure chests represent nodes and the lines between the treasure chests represent edges. Your goal here is to connect open all the chests, In other words, find a minimum spanning tree ("MST") for this graph. To get a MST, you have to find a subset of the edges connecting all nodes without forming cycles. The total weight must be minimum.  
-</span>
+        <strong class="tuto-instruction-label">Instruction:</strong>
+        <span class="tuto-instruction-text">Read the notes below, then press Next.</span>
+        <div class="tuto-result-text hidden"></div>
       </pre>
+      <div class="tuto-nav">
+        <button class="btn tuto-back-btn hidden">Back</button>
+        <button class="btn tuto-next-btn hidden">Next</button>
+      </div>
     </div>
 
     <div id="header-with-health" class="header">

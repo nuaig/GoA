@@ -100,7 +100,7 @@
     <!--Main chat container-->
     <div class="chat-container">
       <button class="chat-close-button" id="chat-close-button">X</button>
-      <button class="chat-home-button" id="chat-home-button">Home</button>
+      <button class="chat-home-button" id="chat-home-button" aria-label="Back" title="Back">&#8592;</button>
       <div class="page-home" id="chat-homepage-container">
         <div class="chat-header">
           <h2>What can I help you with?</h2>
@@ -263,26 +263,16 @@ A*:
     </div>
 
     <!-- Tutorial Walk Through -->
-    <div class="tutorial-instructions-modal hidden">
+    <div class="tutorial-instructions-modal tutorial-instructions-modal--astar hidden">
       <h3>Tutorial Walk-through</h3>
       <pre class="code-block">
-        <strong>Instruction:</strong>  
-        <span class="tuto-instruction-text">Select the starting node to begin the tutorial after reading the explanation below.</span>
+        <strong>Instruction:</strong>
+        <span class="tuto-instruction-text">Read the notes below, then press Next.</span>
 
-        <strong>Explanation:</strong>  
-<span class="tuto-explanation-text">
-The treasure chests are nodes, and the lines between them are weighted edges. 
-Your goal is to find the shortest path from the starting node to a specific goal node. 
-
-A* algorithm improves on Dijkstra’s approach by using a heuristic — an estimate of how far each node is from the goal. 
-
-For each node, A* computes:
-g(n) = the distance from the start node to n  
-h(n) = the estimated distance from n to the goal  
-f(n) = g(n) + h(n)
-
-At every step, A* selects the unvisited node with the smallest f(n) value, guiding the search intelligently toward the goal.
-</span>      </pre>
+        <strong>Explanation:</strong>
+        <span class="tuto-explanation-text">Our goal is to find the shortest path from the start node S to the goal node G.</span>
+      </pre>
+      <button class="btn tuto-next-btn hidden">Next</button>
     </div>
 
     <!-- Welcome Modal -->

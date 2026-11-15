@@ -37,6 +37,7 @@ import {
 } from "../../utils/UI/animations.js";
 import { GameSession } from "../../utils/gameRelated/gameSession.js";
 import GameRoomUI from "../../utils/UI/gameRoomUI.js";
+import { tutorialSteps } from "./heapsortTutorialSteps.js";
 import { loadModel } from "../../utils/threeModels.js";
 import gsap from "gsap";
 //create an export function with your scene name that takes a scene object and renderer as a constructor
@@ -154,143 +155,155 @@ const stepInstructions = [
   "For this step, repeatedly remove the largest node (the root of the heap) and place it at the end of the array, then reheapify.",
 ];
 
-const tutorialSteps = [
-  {
-    instruction:
-      "Let's start by building a Binary Heap from the given array: [1, 5, 3, 4, 11]. Let's try to click, hold and drag one of the elements in the array to begin the tutorial. ",
-    explanation:
-      "Step 1 of HeapSort is converting the array into a Binary Heap. A Binary Heap is a complete binary tree where elements are inserted from top to bottom, left to right. We are building a **Max-Heap**, where each parent is **greater than or equal to** its children.",
-    expectedAction: null, // No specific action yet
-    errorMessage: "Click on the tree area to start the tutorial.",
-  },
-  {
-    instruction: "Drag and insert 1 (index-0) at the root of the heap.",
-    explanation:
-      "In a binary heap, elements are inserted from top to bottom, left to right. We will fill the index-0 element at the top. Therefore, the first element in the array (1) becomes the root node in the binary heap. One thing to note is that each element from Binary Heap will have maximum 2 elements (left and right children).",
-    expectedAction: [1], // Expecting node 1 to be placed at the root
-    errorMessage: "Place 1 at the root of the tree.",
-  },
-  {
-    instruction:
-      "Drag and Insert 5 (index-1)  as the left child of 1 in Binary Heap.",
-    explanation:
-      "In a binary heap, elements are inserted from top to bottom, left to right. Since highest layer is already filled, we will go down one layer and start filling it from left to right. Therefore, the next element 5 (index-1) becomes the left child of 1.",
-    expectedAction: [5], // Expecting node 5 to be placed as the left child of 1
-    errorMessage: "Place 5 as the left child of node 1.",
-  },
-  {
-    instruction:
-      "Drag and Insert 3 (index-2) as the right child of 1 in Binary Heap.",
-    explanation:
-      "Since this second layer isn't filled yet, we will keep filling it from left to right. As a result, the next element 3 (index-2) will be dragged and inserted as the right child of 1 (index-0) to maintain the binary heap structure.",
-    expectedAction: [3], // Expecting node 3 to be placed as the right child of 1
-    errorMessage: "Place 3 as the right child of node 1.",
-  },
-  {
-    instruction:
-      "Drag and Insert 4 (index-3) as the left child of 5 in Binary Heap.",
-    explanation:
-      "Since second layer is already filled, you will go down to next layer and continue the left-to-right insertion. Therefore, the next element 4 (index-3) is placed as the left child of 5.",
-    expectedAction: [4], // Expecting node 4 to be placed as the left child of 5
-    errorMessage: "Place 4 as the left child of node 5.",
-  },
-  {
-    instruction:
-      "Drag and Insert 11 (index-4) as the right child of 5 in Binary Heap.",
-    explanation:
-      "Continuing the left-to-right insertion, the last element 11 (index-4) is placed as the right child of 5 to maintain the binary heap structure.",
-    expectedAction: [11], // Expecting node 11 to be placed as the right child of 5
-    errorMessage: "Place 11 as the right child of node 5.",
-  },
 
-  {
-    instruction:
-      "Now that you have binary heap data structure. Let's start building Max Heap. Swap 5 and 11 to maintain the Max-Heap property.",
-    explanation:
-      "Step 2 of Heapsort is to build Max Heap which means every element will be larger than its children. You will start at the last parent node (index ⌊n/2 - 1⌋). If that parent node is smaller than its children, we will need to swap it with the largest child. As a result, 5 (index-1) will be swapped with 11 (index-4).",
-    expectedAction: [5, 11],
-    errorMessage: "",
-  },
-  {
-    instruction:
-      "Next step is to decrement the index of last parent node (index-1). The parent node you will be checking becomes index-0. Now, swap 1 (index-0) and 11 (index-1)",
-    explanation:
-      "If you look at last parent node (index-1) which becomes 11 after previous swap, you will notice that it meets max heap property since it is larger than its children. You will move backwards from that parent index and land on index-0. After checking both of its children, wee will swap 1 (index-0) with 11 (index-1) as 11 is the bigger child.",
-    expectedAction: [1, 11], // Expecting node 11 to be placed as the right child of 1
-    errorMessage: "",
-  },
-  {
-    instruction:
-      "Swap 1 (index-1) and 5 (index-4) to maintain the Max-Heap property. Before you decrement the parent index, always remember to check if the sub-tree still maintains max heap property after swapping.",
-    explanation:
-      "After each swap, continue checking the newly swapped value with its children and swapping downwards to keep the entire subtree in correct heap order. After swapping 1 to index-1, it still violates the Max-Heap rule as it has a larger child (5 at index-4)",
-    expectedAction: [1, 5],
-    errorMessage: "",
-  },
-  {
-    instruction:
-      "Max-Heap construction is complete! Now, let's proceed with HeapSort. Swap the root (maximum element 11) with the last element 1 (index-4) and remove it.",
-    explanation:
-      "HeapSort works by repeatedly removing the largest element (root) and swapping it with the last element. This step **places the largest element at the correct sorted position**.",
-    expectedAction: [11, 1],
-    errorMessage: "",
-  },
-  {
-    instruction:
-      "Reheapify the heap after removing the root node. Swap 1 (index-0) and 5 (index-1) to restructure max-heap. ",
-    explanation:
-      "After removing the root (11), the heap is **restructured**. The new root (1 at index-0) violates the Max-Heap property, so we swap it with 5 (index-1).",
-    expectedAction: [1, 5],
-    errorMessage: "",
-  },
-  {
-    instruction:
-      "Continue checking the newly swapped value with its children and swapping downwards as needed. Swap 1 (index-1) with its left child 4 (index-3).",
-    explanation:
-      "We check the newly swapped element 1 (index-1) with its children to see if it requires more swapping downwards. Since left child 4 (index-3) is bigger than its parent 1 (index-1), we swap them to maintain max heap property",
-    expectedAction: [1, 4],
-    errorMessage: "",
-  },
-  {
-    instruction:
-      "Now that we have max heap again, swap the root (maximum element 5) with the last element 1 (index-3) and remove it.",
-    explanation:
-      "After restoring heap order, we remove the largest element (root) and swapping it with the last element. As we remove largest elements one after another, the array will becomed sorted",
-    expectedAction: [5, 1],
-    errorMessage: "",
-  },
-  {
-    instruction:
-      "Re-Heapify the tree. Swap 1 (index-0) with its left child 4 (index-1)",
-    explanation:
-      "After removing the root node, you must restore the Max-Heap property by performing heapify operations. as a result, the new root 1 (index-0) will be swapped with 4 (index-1) since 4 is the largest child of 1.",
-    expectedAction: [1, 4],
-    errorMessage: "",
-  },
-  {
-    instruction:
-      "Now that we have max heap again, swap the root (maximum element 4) with the last element 3 (index-2) and remove 4.",
-    explanation:
-      "Once the heap is restructured, we continue **extracting the max element**. Swap 4 with 3.",
-    expectedAction: [4, 3],
-    errorMessage: "",
-  },
-  {
-    instruction:
-      "Since we still have the max Heap after previous swap, let's swap the root (maximum element 3) with the last element 1 (index-1) and remove 3.",
-    explanation:
-      "After this swap, we will see that all elements will be sorted and heapsort algorithm will be completed.",
-    expectedAction: [3, 1],
-    errorMessage: "",
-  },
-];
+const tutorialNextButton = document.querySelector(".tuto-next-btn");
+const tutorialBackButton = document.querySelector(".tuto-back-btn");
+
+// Pages show Explanation, then Instruction, then (once the player has made
+// the move) the Result. The first (overview) page flips the first two:
+// Instruction first, then the notes.
+function orderTutorialPanel(instructionFirst) {
+  const q = (sel) => document.querySelector(sel);
+  const explLabel = q(".tuto-explanation-label");
+  const explText = q(".tuto-explanation-text");
+  const instrLabel = q(".tuto-instruction-label");
+  const instrText = q(".tuto-instruction-text");
+  if (!explLabel || !explText || !instrLabel || !instrText) return;
+  const parent = explLabel.parentNode;
+  if (instructionFirst) {
+    parent.insertBefore(instrLabel, explLabel);
+    parent.insertBefore(instrText, explLabel);
+  } else {
+    parent.insertBefore(explLabel, instrLabel);
+    parent.insertBefore(explText, instrLabel);
+  }
+}
+
+// True once the player has made this page's move; the page then shows its
+// Result and waits for Next instead of advancing by itself.
+let tutorialStepDone = false;
+
+function isLastTutorialStep() {
+  return curRoomUI.currentTutorialStep >= tutorialSteps.length - 1;
+}
 
 function updateTutorialStep() {
-  document.querySelector(".tuto-instruction-text").innerHTML =
-    tutorialSteps[curRoomUI.currentTutorialStep].instruction;
-  document.querySelector(".tuto-explanation-text").innerHTML =
-    tutorialSteps[curRoomUI.currentTutorialStep].explanation;
+  tutorialStepDone = false;
+  if (tutorialNextButton) tutorialNextButton.textContent = "Next";
+  orderTutorialPanel(curRoomUI.currentTutorialStep === 0);
+  const step = tutorialSteps[curRoomUI.currentTutorialStep];
+  document.querySelector(".tuto-instruction-text").innerHTML = step.instruction;
+  document.querySelector(".tuto-explanation-text").innerHTML = step.explanation;
+  const resultEl = document.querySelector(".tuto-result-text");
+  if (resultEl) {
+    resultEl.innerHTML = step.result ?? "";
+    resultEl.classList.add("hidden");
+  }
+  // Info pages (e.g. the intro) show Next straight away; the other pages show
+  // it after the move (see markTutorialStepDone).
+  tutorialNextButton?.classList.toggle("hidden", step.type !== "info");
+  // Back is offered on every page except the first one.
+  tutorialBackButton?.classList.toggle(
+    "hidden",
+    curRoomUI.currentTutorialStep === 0
+  );
 }
+
+// Called after a correct move in the tutorial: reveal the result and Next
+// (on the last page the button reads End and opens the completion modal).
+function markTutorialStepDone() {
+  tutorialStepDone = true;
+  const resultEl = document.querySelector(".tuto-result-text");
+  if (resultEl && tutorialSteps[curRoomUI.currentTutorialStep].result) {
+    resultEl.classList.remove("hidden");
+  }
+  if (tutorialNextButton) {
+    tutorialNextButton.textContent = isLastTutorialStep() ? "End" : "Next";
+    tutorialNextButton.classList.remove("hidden");
+  }
+}
+
+// End button on the last page: now open the "Well done" tutorial-complete modal.
+function finishTutorial() {
+  curRoomUI.updateTutorialModalToBeTutorialCompleteModal();
+  curRoomUI.currentLevel = null;
+  curRoomUI.isTutorial = false;
+}
+
+// Going back = rebuild the tree as it was on the previous page: reset the
+// scene, then silently replay the correct moves of every earlier page through
+// the same game logic a real drag uses. (The tree cannot simply be "undone":
+// phases, counters and the expected next swap all depend on the moves made.)
+let isReplayingTutorial = false;
+
+async function goBackOneTutorialPage() {
+  if (!curRoomUI.isTutorial || isReplayingTutorial) return;
+  const leaving = curRoomUI.currentTutorialStep;
+  if (leaving <= 0) return;
+  const target = leaving - 1;
+  isReplayingTutorial = true;
+  tutorialBackButton?.classList.add("hidden");
+  tutorialNextButton?.classList.add("hidden");
+  const scoreAfterUndo =
+    curRoomUI.currentScore -
+    (target >= 1 && correctActionScoreAddition ? correctActionScoreAddition : 0);
+  try {
+    resetScene();
+    currentSwapIndices = null;
+    currentNonLeafIndexToHeapify = undefined;
+    affectedSubTree = false;
+    hasSortingStarted = false;
+    curlvlNodesNum = 5;
+    await generateArray([1, 5, 3, 4, 11]);
+    // The slots are created asynchronously (generateArray does not wait for
+    // them), so wait until all of them exist before placing anything.
+    for (let i = 0; i < 200 && DebossedAreaTexts.length < curlvlNodesNum; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+
+    for (let s = 1; s < target; s++) {
+      const action = tutorialSteps[s].expectedAction;
+      if (!action) continue;
+      if (action.length === 1) {
+        // Build phase: put the value on its own slot.
+        const idx = arrayElements.findIndex((e) => e.value === action[0]);
+        const mesh = arrayElements[idx].treeNodeTextMesh;
+        handleStepOnePlacement(idx, idx, mesh, mesh.position.clone());
+      } else {
+        // Swap: "dragged" is the first value, "target" the slot of the second.
+        const from = arrayElements.findIndex((e) => e.value === action[0]);
+        const to = arrayElements.findIndex((e) => e.value === action[1]);
+        const mesh = arrayElements[from].treeNodeTextMesh;
+        handleStepTwoAndThreePlacement(from, to, mesh.position.clone(), mesh);
+      }
+    }
+  } finally {
+    isReplayingTutorial = false;
+  }
+  if (currentStep >= 1) makeTextMeshesVisible();
+  curRoomUI.currentTutorialStep = target;
+  curRoomUI.currentScore = scoreAfterUndo;
+  curRoomUI.updateScore(scoreAfterUndo);
+  displayMessage(stepInstructions[currentStep] ?? "", curRoomUI.uiText);
+  updateTutorialStep();
+}
+
+tutorialBackButton?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  goBackOneTutorialPage();
+});
+
+tutorialNextButton?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  if (!curRoomUI.isTutorial) return;
+  const isInfo = tutorialSteps[curRoomUI.currentTutorialStep]?.type === "info";
+  if (!isInfo && !tutorialStepDone) return;
+  if (isLastTutorialStep() && !isInfo) {
+    finishTutorial();
+    return;
+  }
+  nextTutorialStep();
+});
 
 // Call this function whenever the user makes a correct selection
 function nextTutorialStep() {
@@ -619,9 +632,8 @@ function checkLevelCompletionAndUpdate() {
       isLevelComplete = arraySorted(arrayElements);
       if (isLevelComplete) {
         if (curRoomUI.isTutorial) {
-          curRoomUI.updateTutorialModalToBeTutorialCompleteModal();
-          curRoomUI.currentLevel = null;
-          curRoomUI.isTutorial = false;
+          // The last page shows the sorted array and an End button; the
+          // completion modal opens from that button (finishTutorial).
           return;
         }
         curRoomUI.currentScore = Math.floor(
@@ -677,9 +689,10 @@ function checkLevelCompletionAndUpdate() {
 
 // DONE
 function evaluateActionAndUpdateScore(isCorrect, nodeIndex) {
-  let message;
-
-  message = `Correct! Node ${nodeIndex} is correctly swapped.`;
+  const message =
+    currentStep === 0
+      ? `Correct! Node ${nodeIndex} is correctly placed.`
+      : `Correct! Node ${nodeIndex} is correctly swapped.`;
   if (isCorrect) displayMessage(message, curRoomUI.uiText);
   curRoomUI.currentScore += isCorrect ? correctActionScoreAddition : 0;
 
@@ -688,35 +701,40 @@ function evaluateActionAndUpdateScore(isCorrect, nodeIndex) {
     correctlyPlacedTreeNodes++;
   }
   if (!isCorrect) {
-    curGameSession.incrementMistakes();
-    curRoomUI.health = decrementHealth(curRoomUI.health);
     shakeScreen();
-    if (
-      curRoomUI.health < 0 &&
-      curRoomUI.currentMode == "regular" &&
-      !curRoomUI.isTutorial
-    ) {
-      curRoomUI.fillInfoFailureSuccessCompletionModal();
-      curGameSession.setFinalScore(curRoomUI.currentScore);
-      curGameSession.setSuccessStatus(false);
-      curGameSession.endSession();
+    // Tutorial: wrong moves snap back and hint, but do not cost lives
+    // (same policy as Dijkstra / A*).
+    if (!curRoomUI.isTutorial) {
+      curGameSession.incrementMistakes();
+      curRoomUI.health = decrementHealth(curRoomUI.health);
+      if (
+        curRoomUI.health < 0 &&
+        curRoomUI.currentMode == "regular"
+      ) {
+        curRoomUI.fillInfoFailureSuccessCompletionModal();
+        curGameSession.setFinalScore(curRoomUI.currentScore);
+        curGameSession.setSuccessStatus(false);
+        curGameSession.endSession();
 
-      const sessionData = curGameSession.toObject();
-      console.log("printing session Data");
-      console.log(sessionData);
-      fetch("/api/gamesessions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(sessionData),
-      }).then((res) => res.json());
-      curRoomUI.openCompletionModal();
+        const sessionData = curGameSession.toObject();
+        console.log("printing session Data");
+        console.log(sessionData);
+        fetch("/api/gamesessions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(sessionData),
+        }).then((res) => res.json());
+        curRoomUI.openCompletionModal();
+      }
     }
   }
   if (isCorrect) {
     if (curRoomUI.isTutorial) {
-      nextTutorialStep();
+      // Replaying (Back) moves on by itself; a real move waits for Next.
+      if (isReplayingTutorial) nextTutorialStep();
+      else markTutorialStepDone();
     }
   }
   curRoomUI.updateScore(curRoomUI.currentScore);
@@ -769,6 +787,24 @@ controls.addEventListener("dragend", function (event) {
 
   if (curRoomUI.isTutorial) {
     const currentStep = tutorialSteps[curRoomUI.currentTutorialStep];
+    if (currentStep.type === "info") {
+      // Info pages: nothing can be moved until the player presses Next.
+      draggableTextMesh.position.copy(initialPositionDragged);
+      if (event.object.userData.linkedMesh) {
+        event.object.position.copy(initialPositionDragged);
+      }
+      displayMessage(currentStep.errorMessage, curRoomUI.uiText);
+      return;
+    }
+    if (tutorialStepDone) {
+      // The move for this page is made: wait for Next.
+      draggableTextMesh.position.copy(initialPositionDragged);
+      if (event.object.userData.linkedMesh) {
+        event.object.position.copy(initialPositionDragged);
+      }
+      displayMessage("Press Next to continue.", curRoomUI.uiText);
+      return;
+    }
     if (currentStep.expectedAction === null) {
       draggableTextMesh.position.copy(initialPositionDragged);
       if (event.object.userData.linkedMesh) {
@@ -1360,6 +1396,8 @@ function render() {
 render();
 
 curRoomUI.callbacks.resetLevel = function (curlvl) {
+  tutorialNextButton?.classList.add("hidden");
+  tutorialBackButton?.classList.add("hidden");
   curRoomUI.uiText.innerHTML = stepInstructions[0];
   curRoomUI.health = resetHealth();
 
@@ -1393,3 +1431,94 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 window.addEventListener("resize", onWindowResize, false);
+
+// Dev-only e2e hook (tests/e2e/support/heapsortPage.js). Read-only: it never
+// changes game state. Stripped from production builds (import.meta.env.DEV is
+// false there).
+if (import.meta.env.DEV) {
+  const testRaycaster = new THREE.Raycaster();
+
+  // World position -> CSS pixel coordinates on the renderer canvas.
+  const toScreen = (worldPos) => {
+    const ndc = worldPos.clone().project(camera);
+    const rect = renderer.domElement.getBoundingClientRect();
+    return {
+      x: rect.left + ((ndc.x + 1) / 2) * rect.width,
+      y: rect.top + ((1 - ndc.y) / 2) * rect.height,
+      onScreen: ndc.z < 1 && Math.abs(ndc.x) <= 1 && Math.abs(ndc.y) <= 1,
+    };
+  };
+  const worldPos = (obj) => obj.getWorldPosition(new THREE.Vector3());
+
+  window.__roomTest = {
+    stepIndex: () => curRoomUI.currentTutorialStep,
+    stepDone: () => tutorialStepDone,
+    isTutorial: () => curRoomUI.isTutorial,
+    isModalOpen: () => curRoomUI.isModalOpen,
+    health: () => curRoomUI.health,
+    score: () => curRoomUI.currentScore,
+    currentMode: () => curRoomUI.currentMode,
+    currentLevel: () => curRoomUI.currentLevel,
+    tutorialSteps: () => JSON.parse(JSON.stringify(tutorialSteps)),
+    cameraPosition: () => camera.position.toArray(),
+    uiText: () => curRoomUI.uiText.innerText,
+    // Heapsort-specific
+    phase: () => currentStep, // 0 build, 1 heapify, 2 sort, 3 after level completion
+    buildIndex: () => currentIndexForBuildingBinaryHeap,
+    lastUnsortedIndex: () => lastUnsortedIndex,
+    expectedSwap: () => (currentSwapIndices ? [...currentSwapIndices] : null),
+    arrayCount: () => arrayElements.length,
+    slotCount: () => correctPositions.size,
+    arrayValues: () => arrayElements.map((e) => e.value),
+    // Value of the tree-node text standing on slot i (null = empty slot).
+    treeValues: () =>
+      [...correctPositions.keys()]
+        .sort((a, b) => a - b)
+        .map((i) => {
+          const slot = correctPositions.get(i);
+          const e = arrayElements.find(
+            ({ treeNodeTextMesh: m }) =>
+              Math.abs(m.position.x - slot.x) < 0.05 && Math.abs(m.position.y - slot.y) < 0.05
+          );
+          return e ? e.value : null;
+        }),
+    isSorted: () => arraySorted(arrayElements),
+    isMaxHeap: () => checkMaxHeapProperties(arrayElements),
+    completionModalOpen: () =>
+      !document.querySelector(".modal__completion")?.classList.contains("hidden"),
+    // Screen centres. The tree-node text of element i starts on top of array cell i.
+    arrayElementScreenPos(i) {
+      const e = arrayElements[i];
+      return e ? toScreen(worldPos(e.stationaryGroup.children[0])) : null;
+    },
+    treeElementScreenPos(i) {
+      const e = arrayElements[i];
+      return e ? toScreen(worldPos(e.treeNodeTextMesh)) : null;
+    },
+    // Slot i projected at depth z (default: the slot's own z). Dropping a
+    // dragged object of depth z there puts it exactly on the slot.
+    slotScreenPos(i, z) {
+      const slot = correctPositions.get(i);
+      if (!slot) return null;
+      return toScreen(new THREE.Vector3(slot.x, slot.y, z ?? slot.z));
+    },
+    // What DragControls' pointerdown would grab at client (x, y) (same math:
+    // canvas rect, recursive raycast over instancedObjects.children).
+    pickAt(x, y) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const pointer = new THREE.Vector2(
+        ((x - rect.left) / rect.width) * 2 - 1,
+        -((y - rect.top) / rect.height) * 2 + 1
+      );
+      testRaycaster.setFromCamera(pointer, camera);
+      const obj = testRaycaster.intersectObjects(instancedObjects.children, true)[0]?.object;
+      if (!obj) return null;
+      const mesh = obj.userData.linkedMesh || obj;
+      return {
+        index: mesh.userData.index,
+        kind: obj.userData.linkedMesh ? "plane" : "text",
+        z: worldPos(obj).z,
+      };
+    },
+  };
+}

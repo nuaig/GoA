@@ -29,6 +29,7 @@ import {
   createRing,
 } from "../../utils/graphRelated/drawLine.js";
 import GameRoomUI from "../../utils/UI/gameRoomUI.js";
+import { tutorialSteps } from "./astarTutorialSteps.js";
 import { GameHelper } from "../../utils/gameHelper.js";
 
 // ===== Variable Declaration Section =====
@@ -45,6 +46,7 @@ let hintBooleans = {
 
 const slidesButton = document.querySelector("#button-algo-slides");
 const reArrangeButton = document.querySelector(".Rearrange-Action");
+const tutorialNextButton = document.querySelector(".tuto-next-btn");
 let curGameSession;
 let currentLevel = 1;
 let curNodes;
@@ -136,100 +138,6 @@ scene.add(hoverRing);
 let raycaster;
 const clock = new THREE.Clock();
 
-// Steps for the A* tutorial
-const tutorialSteps = [
-  {
-    instruction: "Step 0: Click on node S to begin.",
-    explanation: "Start node S. g(S)=0. With h(n)=0, A* behaves like Dijkstra.",
-    expectedChests: [0],
-    expectedEdges: null,
-    errorMessage: "Click node S.",
-  },
-  {
-    instruction: "Step 1: Click edge (S,2). Enter 1.",
-    explanation: "g(2)=1. Node 2 enters the open set.",
-    expectedChests: null,
-    expectedEdges: [[0, 2]],
-    updatedDistance: { 2: 1 },
-    errorMessage: "Click edge (S,2).",
-  },
-  {
-    instruction: "Step 2: Click edge (S,1). Enter 2.",
-    explanation: "g(1)=2. Node 1 enters the open set.",
-    expectedChests: null,
-    expectedEdges: [[0, 1]],
-    updatedDistance: { 1: 2 },
-    errorMessage: "Click edge (S,1).",
-  },
-  {
-    instruction: "Step 3: Click node 2 (smallest f).",
-    explanation: "Node 2 has the smallest f (same as g since h=0).",
-    expectedChests: [2],
-    expectedEdges: null,
-    errorMessage: "Click node 2.",
-  },
-  {
-    instruction: "Step 4: Click edge (2,3). Enter 3.",
-    explanation: "g(3)=g(2)+2=3. Add node 3.",
-    expectedChests: null,
-    expectedEdges: [[2, 3]],
-    updatedDistance: { 3: 3 },
-    errorMessage: "Click edge (2,3).",
-  },
-  {
-    instruction: "Step 5: Click edge (2,G). Enter 4.",
-    explanation: "g(G)=g(2)+3=4. Add goal node G.",
-    expectedChests: null,
-    expectedEdges: [[2, 4]],
-    updatedDistance: { 4: 4 },
-    errorMessage: "Click edge (2,G).",
-  },
-  {
-    instruction: "Step 6: Click edge (2,1). Enter 4.",
-    explanation: "Candidate g(1)=g(2)+3=4 from edge (2,1) but g(1)=2 from edge (S,1).",
-    expectedChests: null,
-    expectedEdges: [[2, 1]],
-    updatedDistance: { 1: 4 },
-    errorMessage: "Click edge (2,1).",
-  },
-  {
-    instruction: "Step 7: Click node 1.",
-    explanation: "After Step 6, node 1 still has the smallest value in the queue (g=2), so we visit node 1 next.",
-    expectedChests: [1],
-    expectedEdges: null,
-    errorMessage: "Click node 1.",
-  },
-  {
-    instruction: "Step 8: Click edge (1,3). Enter 6.",
-    explanation: "From node 1, going to node 3 gives candidate g(3)=6, while we already have g(3)=3 from node 2.",
-    expectedChests: null,
-    expectedEdges: [[1, 3]],
-    updatedDistance: { 3: 6 },
-    errorMessage: "Click edge (1,3).",
-  },
-  {
-    instruction: "Step 10: Click node 3.",
-    explanation: "After comparing candidates, node 3 is still the smallest remaining value in the queue (g=3), so we visit node 3.",
-    expectedChests: [3],
-    expectedEdges: null,
-    errorMessage: "Click node 3.",
-  },
-  {
-    instruction: "Step 11: Click edge (3,G). Enter 4.",
-    explanation: "From node 3 to node G, candidate g(G)=4. Compare it with current g(G)=4 and keep 4.",
-    expectedChests: null,
-    expectedEdges: [[3, 4]],
-    updatedDistance: { 4: 4 },
-    errorMessage: "Click edge (3,G).",
-  },
-  {
-    instruction: "Step 12: Click node G (goal).",
-    explanation: "Now node G is next with g(G)=4, and it is the goal. Stop.",
-    expectedChests: [4],
-    expectedEdges: null,
-    errorMessage: "Click node G.",
-  },
-];
 
 // ===== Function Decleration Section =====
 /*
@@ -345,6 +253,9 @@ function updateTutorialStep(isTutorial = true) {
   // Update explanation text
   document.querySelector(".tuto-explanation-text").innerHTML = step.explanation;
   debugPrint("[updateTutorialStep] Explanation updated:", step.explanation);
+
+  // Info pages (e.g. the intro) advance with the Next button instead of a click
+  tutorialNextButton?.classList.toggle("hidden", step.type !== "info");
 }
 
 /*
@@ -704,6 +615,15 @@ function drawLines() {
     const currentStep = curRoomUI.isTutorial
       ? tutorialSteps[curRoomUI.currentTutorialStep]
       : curAlgorithmForGraph.steps[curRoomUI.currentTutorialStep];
+
+    // ========== INFO PAGE (tutorial intro) ==========
+    // Chests and edges can't be selected until the player presses Next.
+    if (curRoomUI.isTutorial && currentStep?.type === "info") {
+      if (chestIntersects.length > 0 || edgeIntersects.length > 0) {
+        updateHintsFromBooleans();
+      }
+      return;
+    }
 
     // ========== NODE CLICK ==========
     if (chestIntersects.length > 0) {
@@ -2429,6 +2349,15 @@ if (slidesButton) {
   });
 }
 
+tutorialNextButton?.addEventListener("click", (event) => {
+  // Keep this click from reaching the window-level scene click handler
+  event.stopPropagation();
+  if (!curRoomUI.isTutorial) return;
+  if (tutorialSteps[curRoomUI.currentTutorialStep]?.type !== "info") return;
+  document.querySelector(".Hint-Text").classList.add("hidden");
+  nextTutorialStep();
+});
+
 reArrangeButton.addEventListener("click", () => {
   debugPrint("Rearrange Button Clicked");
   const margin = 0.1;
@@ -2534,6 +2463,7 @@ setUpGameModel(currentLevel);
 
 // ===== UI Callbacks Section =====
 curRoomUI.callbacks.resetLevel = function (curlvl) {
+  tutorialNextButton?.classList.add("hidden");
   // Restore heuristic weight input (default Euclidean = 1).
   const heuristicInput = document.getElementById("heuristicWeightInput");
   if (heuristicInput) {
@@ -2572,3 +2502,102 @@ curRoomUI.callbacks.startTutorial = function () {
   updateNodeLabel(levelTitle, `Tutorial`, 0.9, 0.3, 0x212529);
   setUpTutorialModel();
 };
+
+// ===== Dev-only test hook (e2e) =====
+// Stripped from production builds (import.meta.env.DEV is false there).
+if (import.meta.env.DEV) {
+  const testRaycaster = new THREE.Raycaster();
+  testRaycaster.params.Line.threshold = 0.5; // same as the game's raycaster
+
+  // World position -> CSS pixel coordinates on the renderer canvas.
+  const toScreen = (worldPos) => {
+    const ndc = worldPos.clone().project(camera);
+    const rect = renderer.domElement.getBoundingClientRect();
+    return {
+      x: rect.left + ((ndc.x + 1) / 2) * rect.width,
+      y: rect.top + ((1 - ndc.y) / 2) * rect.height,
+      onScreen: ndc.z < 1 && Math.abs(ndc.x) <= 1 && Math.abs(ndc.y) <= 1,
+    };
+  };
+
+  const findEdgeLine = (u, v) =>
+    edgeList.find(({ userData: { edge } }) =>
+      (edge.start === u && edge.end === v) || (edge.start === v && edge.end === u)
+    );
+
+  const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : null); // Infinity -> null
+  const queueRow = (e) => ({
+    node: e.node,
+    g: num(e.g),
+    h: num(e.h),
+    f: num(e.f),
+    visited: !!e.visited,
+    transient: !!e.transient,
+  });
+
+  window.__roomTest = {
+    stepIndex: () => curRoomUI.currentTutorialStep,
+    isTutorial: () => curRoomUI.isTutorial,
+    isModalOpen: () => curRoomUI.isModalOpen,
+    health: () => curRoomUI.health,
+    // A scene click is fully effective only once both the click block and the
+    // input-dialog suppression window (showInputDialog) have expired, and no
+    // step advance is in progress.
+    clickBlockedMs: () =>
+      stepAdvanceInProgress
+        ? 1
+        : Math.max(0, clickBlockedUntil - Date.now(), suppressInputDialogUntil - Date.now()),
+    chestCount: () => chestList.length,
+    edgeCount: () => edgeList.length,
+    cameraPosition: () => camera.position.toArray(),
+    tutorialSteps: () => JSON.parse(JSON.stringify(tutorialSteps)),
+    // Regular (non-tutorial) mode: generated steps (may grow after chest clicks).
+    regularSteps: () => JSON.parse(JSON.stringify(curAlgorithmForGraph.steps)),
+    currentMode: () => curRoomUI.currentMode,
+    currentLevel: () => curRoomUI.currentLevel,
+    graphEdges: () => graph.edges.map((e) => [...e]), // [from, to, weight][]
+    isChestOpened: (i) => !!openChestList[i]?.userData?.clicked,
+    // A* extras.
+    // Persistent rows (discovered or visited) + transient candidate rows.
+    priorityQueue: () =>
+      Array.from(priorityQueueState.values())
+        .filter((e) => e.discovered || e.visited)
+        .concat(transientQueueEntries)
+        .map(queueRow),
+    settled: () => settledGState.map((e) => ({ node: e.node, g: num(e.g) })),
+    startNode: () => graph.startNode,
+    goalNode: () => graph.goalNode,
+    heuristicWeight: () => num(graph.heuristicWeight),
+    isDecisionModalOpen: () =>
+      document.getElementById("candidate-decision-modal")?.style.display === "block",
+    // Center of the closed chest's bounding box.
+    chestScreenPos(i) {
+      const chest = chestList[i];
+      if (!chest) return null;
+      return toScreen(new THREE.Box3().setFromObject(chest).getCenter(new THREE.Vector3()));
+    },
+    // Point at fraction t along the edge line (0.5 = midpoint, at line height).
+    edgeScreenPos(u, v, t = 0.5) {
+      const line = findEdgeLine(u, v);
+      if (!line) return null;
+      const { startCube, endCube } = line.userData;
+      return toScreen(startCube.position.clone().lerp(endCube.position, t));
+    },
+    // What onClick's raycast would hit at client (x, y): mirrors its math.
+    pickAt(x, y) {
+      const mouse = new THREE.Vector2(
+        (x / window.innerWidth) * 2 - 1,
+        -(y / window.innerHeight) * 2 + 1
+      );
+      testRaycaster.setFromCamera(mouse, camera);
+      let chest = testRaycaster.intersectObjects([...chestList])[0]?.object;
+      while (chest && chest.userData.nodeIndex === undefined) chest = chest.parent;
+      const edge = testRaycaster.intersectObjects([...edgeList, ...labels])[0]
+        ?.object?.userData?.edge;
+      return {
+        chest: chest ? chest.userData.nodeIndex : null,
+        edge: edge ? [edge.start, edge.end] : null,
+      };
+    },
+  };
+}
