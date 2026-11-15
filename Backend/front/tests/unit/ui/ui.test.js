@@ -67,7 +67,14 @@ const PSEUDO = (cls) =>
   `<div class="topnav-instructions pseudo ${cls} hidden"><div class="button-close-pseudo"><p>X</p></div></div>`;
 
 const srcs = (sel) => [...document.querySelectorAll(sel)].map((e) => e.getAttribute("src"));
-const fills = (sel) => [...document.querySelectorAll(sel)].map((e) => e.style.fill);
+// jsdom versions differ: some keep "#fab005", others return "rgb(250, 176, 5)".
+const toRgb = (c) => {
+  const m = /^#([0-9a-f]{6})$/i.exec(c);
+  if (!m) return c;
+  const n = parseInt(m[1], 16);
+  return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`;
+};
+const fills = (sel) => [...document.querySelectorAll(sel)].map((e) => toRgb(e.style.fill));
 const isHidden = (sel) => document.querySelector(sel).classList.contains("hidden");
 
 beforeEach(() => {
