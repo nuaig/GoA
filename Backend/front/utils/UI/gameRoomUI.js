@@ -765,6 +765,12 @@ class GameRoomUI {
     });
   }
 
+  // Back arrow is only shown once the player is past the first help page
+  updateChatBackButton() {
+    const onHome = this.currChatPage === document.querySelector(".page-home");
+    this.chatHomeButton.style.visibility = onHome ? "hidden" : "visible";
+  }
+
   //Listens to buttons being clicked in the chatbox
   listenEventChatButtons() {
     const contextDiagramBtn = document.querySelector("#context-diagram-button");
@@ -812,13 +818,15 @@ class GameRoomUI {
       this.openModal(this.tutorialModal);
     });
     
-    //Home button in chat
+    this.updateChatBackButton(); // first page has no back arrow
+    //Back button in chat: return to the page we came from
     this.chatHomeButton.addEventListener("click", () => {
-      console.log("Chat Home Button Clicked");
-      this.prevChatPage = this.currChatPage; //store previous page
-      this.prevChatPage.style.visibility = 'hidden';
-      this.currChatPage = document.querySelector(".page-home");
-      this.currChatPage.style.visibility = 'visible';
+      console.log("Chat Back Button Clicked");
+      const backPage = this.prevChatPage;
+      this.currChatPage.style.visibility = 'hidden';
+      backPage.style.visibility = 'visible';
+      this.currChatPage = backPage;
+      this.updateChatBackButton();
     });
 
     
@@ -830,6 +838,7 @@ class GameRoomUI {
 
       this.prevChatPage.style.visibility = 'hidden';
       this.currChatPage.style.visibility = 'visible';
+      this.updateChatBackButton();
     });
 
     this.chatAlgoContextButton.addEventListener("click", () => {
