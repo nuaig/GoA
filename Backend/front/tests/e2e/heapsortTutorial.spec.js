@@ -32,6 +32,10 @@ const LAST_STEP = tutorialSteps.length - 1;
 
 const instruction = (page) => page.locator(".tutorial-instructions-modal .tuto-instruction-text");
 const nextButton = (page) => page.locator(".tutorial-instructions-modal .tuto-next-btn");
+// Instructions may contain <br>; the page shows them as line breaks.
+const plain = (html) => html.replace(/<br>/g, "");
+const backButton = (page) => page.locator(".tutorial-instructions-modal .tuto-back-btn");
+const resultText = (page) => page.locator(".tutorial-instructions-modal .tuto-result-text");
 const uiText = (page) => page.locator("#UI-Text");
 const sameValues = (a, b) => [...a].sort((x, y) => x - y).join() === [...b].sort((x, y) => x - y).join();
 
@@ -49,12 +53,12 @@ async function driveStep(page, i) {
   const last = i === LAST_STEP;
   // Registered only once the step advanced (the last step cannot advance:
   // the sorted array is the signal), so a missed drag is retried.
-  const advanced = last
-    ? () => hook(page, "isSorted")
-    : async () => (await stepIndex(page)) === i + 1;
+  // A correct move no longer advances by itself: the page shows its result and
+  // waits for Next (the last page opens the completion modal instead).
+  const advanced = () => hook(page, "stepDone");
   if (tutorialSteps[i].type === "info") {
     await nextButton(page).click();
-    await expect.poll(advanced, { message: `step ${i} did not advance` }).toBe(true);
+    await expect.poll(() => stepIndex(page), { message: `step ${i} did not advance` }).toBe(i + 1);
   } else if (BUILD_STEPS.includes(i)) {
     const index = i - 1;
     expect(await hook(page, "buildIndex")).toBe(index);
@@ -71,7 +75,27 @@ async function driveStep(page, i) {
     [before[a], before[b]] = [before[b], before[a]];
     expect(after).toEqual(before);
   }
-  if (!last) await expect(instruction(page)).toHaveText(tutorialSteps[i + 1].instruction);
+  if (tutorialSteps[i].type !== "info") {
+    expect(await stepIndex(page)).toBe(i); // still on the page
+    await expect(nextButton(page)).toBeVisible();
+    if (tutorialSteps[i].result) await expect(resultText(page)).toBeVisible();
+    if (last) {
+      // The last page shows the sorted array and an End button; End opens the
+      // "Well done" modal.
+      await expect(nextButton(page)).toHaveText("End");
+      await expect(resultText(page)).toContainText("The array is now sorted");
+      expect(await hook(page, "completionModalOpen")).toBe(false);
+      expect(await hook(page, "isSorted")).toBe(true);
+    }
+    await nextButton(page).click();
+    if (!last) {
+      await expect.poll(() => stepIndex(page), { message: `step ${i} did not advance` }).toBe(i + 1);
+    }
+  }
+  if (!last) {
+    await expect(instruction(page)).toHaveText(plain(tutorialSteps[i + 1].instruction));
+    await expect(resultText(page)).toBeHidden();
+  }
 }
 
 async function driveSteps(page, from, to) {
@@ -94,7 +118,7 @@ test.describe("Heapsort tutorial", () => {
     expect(await hook(page, "tutorialSteps")).toEqual(tutorialSteps);
     expect(tutorialSteps).toHaveLength(16);
     expect(tutorialSteps[0].expectedAction).toBeNull();
-    await expect(instruction(page)).toHaveText(tutorialSteps[0].instruction);
+    await expect(instruction(page)).toHaveText(plain(tutorialSteps[0].instruction));
     const s = await snapshot(page);
     expect(s).toMatchObject({
       step: 0,
@@ -152,6 +176,94 @@ test.describe("Heapsort tutorial", () => {
     expect(await hook(page, "currentLevel")).toBeNull(); // set to null on tutorial completion
     expect(await hook(page, "completionModalOpen")).toBe(false);
     expect(BUILD_STEPS.length + HEAPIFY_STEPS.length + SORT_STEPS.length + 1).toBe(16);
+  });
+
+  test("Back returns to the previous page with the tree as it was, on every page", async ({ page }) => {
+    const state = async () => {
+      const { step, phase, buildIndex, lastUnsorted, expectedSwap, array, tree } = await snapshot(page);
+      return { step, phase, buildIndex, lastUnsorted, expectedSwap, array, tree };
+    };
+    await expect(backButton(page)).toBeHidden(); // nothing before the intro page
+    const seen = [];
+    for (let i = 0; i < LAST_STEP; i++) {
+      seen[i] = await state();
+      await driveStep(page, i);
+    }
+    seen[LAST_STEP] = await state();
+    await expect(backButton(page)).toBeVisible();
+
+    // Walk all the way back; every page must show its original text and tree.
+    for (let i = LAST_STEP - 1; i >= 0; i--) {
+      await backButton(page).click();
+      await expect.poll(() => stepIndex(page), { message: `Back to ${i}` }).toBe(i);
+      await expect(instruction(page)).toHaveText(plain(tutorialSteps[i].instruction));
+      expect(await state(), `state on page ${i} after Back`).toEqual(seen[i]);
+      if (i === 0) await expect(backButton(page)).toBeHidden();
+      else await expect(backButton(page)).toBeVisible();
+    }
+    expect(await hook(page, "health")).toBe(4);
+
+    // And the tutorial can still be finished from the intro page.
+    await driveSteps(page, 0, 16);
+    await expectTutorialCompleteModal(page);
+  });
+
+  test("panel order: Instruction first on the intro page, Explanation first after", async ({ page }) => {
+    const order = () =>
+      page.locator(".tutorial-instructions-modal .code-block").evaluate((pre) =>
+        [...pre.querySelectorAll("strong")].map((e) => e.textContent.trim())
+      );
+    expect(await order()).toEqual(["Instruction:", "Explanation:"]);
+    await driveStep(page, 0);
+    expect(await order()).toEqual(["Explanation:", "Instruction:"]);
+    await backButton(page).click();
+    await expect.poll(() => stepIndex(page)).toBe(0);
+    expect(await order()).toEqual(["Instruction:", "Explanation:"]);
+  });
+
+  test("after a correct move the page shows its result and waits for Next", async ({ page }) => {
+    await driveStep(page, 0);
+    await driveSteps(page, 1, 6);
+    expect(await stepIndex(page)).toBe(6);
+    await expect(resultText(page)).toBeHidden();
+    await expect(nextButton(page)).toBeHidden();
+
+    const [a, b] = await nextSwap(page);
+    await dragSwap(page, a, b, () => hook(page, "stepDone"));
+    expect(await stepIndex(page)).toBe(6); // did not advance by itself
+    await expect(resultText(page)).toBeVisible();
+    await expect(resultText(page)).toContainText("After the swap, the array becomes:");
+    await expect(resultText(page)).toContainText("[1, 11, 3, 4, 5]");
+    await expect(nextButton(page)).toBeVisible();
+
+    // Another drag on this page snaps back: the move is already made.
+    const before = await hook(page, "arrayValues");
+    await dragSwap(page, 0, 1, () => hook(page, "uiText").then((t) => t === "Press Next to continue."));
+    expect(await hook(page, "arrayValues")).toEqual(before);
+
+    await nextButton(page).click();
+    await expect.poll(() => stepIndex(page)).toBe(7);
+    await expect(resultText(page)).toBeHidden();
+    await expect(nextButton(page)).toBeHidden();
+  });
+
+  test("Back sits on the left and Next on the right of the panel", async ({ page }) => {
+    await driveStep(page, 0);
+    const box = async (loc) => loc.boundingBox();
+    const modal = await box(page.locator(".tutorial-instructions-modal"));
+    const mid = modal.x + modal.width / 2;
+    // Page 1: only Back is shown (left half).
+    expect((await box(backButton(page))).x).toBeLessThan(mid);
+    await driveSteps(page, 1, 2);
+    // Page 2 after its move: Back and Next are both shown.
+    await dragTo(page, 1, 1, () => hook(page, "stepDone"));
+    await expect(nextButton(page)).toBeVisible();
+    await expect(backButton(page)).toBeVisible();
+    const back = await box(backButton(page));
+    const next = await box(nextButton(page));
+    expect(back.x).toBeLessThan(mid);
+    expect(next.x).toBeGreaterThan(mid);
+    expect(back.x).toBeLessThan(next.x);
   });
 
   test("starts on the intro page with a Next button", async ({ page }) => {

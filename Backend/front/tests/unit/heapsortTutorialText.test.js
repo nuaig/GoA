@@ -86,7 +86,13 @@ describe("every swap step shows the array after the swap", () => {
 
   swapSteps.forEach((step, i) => {
     test(`swap ${step.expectedAction.join(" and ")} → ${states[i]}`, () => {
-      expect(step.explanation).toContain(`Array: ${states[i]}`);
+      expect(`${step.explanation} ${step.result ?? ""}`).toContain(`Array: ${states[i]}`);
     });
   });
+});
+
+test("every swap step has a result shown after the move, starting with the array", () => {
+  for (const step of swapSteps) {
+    expect(step.result).toMatch(/^After the swap, the array becomes:<br>Array: \[/);
+  }
 });

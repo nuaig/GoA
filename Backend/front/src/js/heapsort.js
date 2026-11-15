@@ -157,23 +157,151 @@ const stepInstructions = [
 
 
 const tutorialNextButton = document.querySelector(".tuto-next-btn");
+const tutorialBackButton = document.querySelector(".tuto-back-btn");
+
+// Pages show Explanation, then Instruction, then (once the player has made
+// the move) the Result. The first (overview) page flips the first two:
+// Instruction first, then the notes.
+function orderTutorialPanel(instructionFirst) {
+  const q = (sel) => document.querySelector(sel);
+  const explLabel = q(".tuto-explanation-label");
+  const explText = q(".tuto-explanation-text");
+  const instrLabel = q(".tuto-instruction-label");
+  const instrText = q(".tuto-instruction-text");
+  if (!explLabel || !explText || !instrLabel || !instrText) return;
+  const parent = explLabel.parentNode;
+  if (instructionFirst) {
+    parent.insertBefore(instrLabel, explLabel);
+    parent.insertBefore(instrText, explLabel);
+  } else {
+    parent.insertBefore(explLabel, instrLabel);
+    parent.insertBefore(explText, instrLabel);
+  }
+}
+
+// True once the player has made this page's move; the page then shows its
+// Result and waits for Next instead of advancing by itself.
+let tutorialStepDone = false;
+
+function isLastTutorialStep() {
+  return curRoomUI.currentTutorialStep >= tutorialSteps.length - 1;
+}
 
 function updateTutorialStep() {
-  document.querySelector(".tuto-instruction-text").innerHTML =
-    tutorialSteps[curRoomUI.currentTutorialStep].instruction;
-  document.querySelector(".tuto-explanation-text").innerHTML =
-    tutorialSteps[curRoomUI.currentTutorialStep].explanation;
-  // Info pages (e.g. the intro) advance with the Next button instead of a drag
-  tutorialNextButton?.classList.toggle(
+  tutorialStepDone = false;
+  if (tutorialNextButton) tutorialNextButton.textContent = "Next";
+  orderTutorialPanel(curRoomUI.currentTutorialStep === 0);
+  const step = tutorialSteps[curRoomUI.currentTutorialStep];
+  document.querySelector(".tuto-instruction-text").innerHTML = step.instruction;
+  document.querySelector(".tuto-explanation-text").innerHTML = step.explanation;
+  const resultEl = document.querySelector(".tuto-result-text");
+  if (resultEl) {
+    resultEl.innerHTML = step.result ?? "";
+    resultEl.classList.add("hidden");
+  }
+  // Info pages (e.g. the intro) show Next straight away; the other pages show
+  // it after the move (see markTutorialStepDone).
+  tutorialNextButton?.classList.toggle("hidden", step.type !== "info");
+  // Back is offered on every page except the first one.
+  tutorialBackButton?.classList.toggle(
     "hidden",
-    tutorialSteps[curRoomUI.currentTutorialStep].type !== "info"
+    curRoomUI.currentTutorialStep === 0
   );
 }
+
+// Called after a correct move in the tutorial: reveal the result and Next
+// (on the last page the button reads End and opens the completion modal).
+function markTutorialStepDone() {
+  tutorialStepDone = true;
+  const resultEl = document.querySelector(".tuto-result-text");
+  if (resultEl && tutorialSteps[curRoomUI.currentTutorialStep].result) {
+    resultEl.classList.remove("hidden");
+  }
+  if (tutorialNextButton) {
+    tutorialNextButton.textContent = isLastTutorialStep() ? "End" : "Next";
+    tutorialNextButton.classList.remove("hidden");
+  }
+}
+
+// End button on the last page: now open the "Well done" tutorial-complete modal.
+function finishTutorial() {
+  curRoomUI.updateTutorialModalToBeTutorialCompleteModal();
+  curRoomUI.currentLevel = null;
+  curRoomUI.isTutorial = false;
+}
+
+// Going back = rebuild the tree as it was on the previous page: reset the
+// scene, then silently replay the correct moves of every earlier page through
+// the same game logic a real drag uses. (The tree cannot simply be "undone":
+// phases, counters and the expected next swap all depend on the moves made.)
+let isReplayingTutorial = false;
+
+async function goBackOneTutorialPage() {
+  if (!curRoomUI.isTutorial || isReplayingTutorial) return;
+  const leaving = curRoomUI.currentTutorialStep;
+  if (leaving <= 0) return;
+  const target = leaving - 1;
+  isReplayingTutorial = true;
+  tutorialBackButton?.classList.add("hidden");
+  tutorialNextButton?.classList.add("hidden");
+  const scoreAfterUndo =
+    curRoomUI.currentScore -
+    (target >= 1 && correctActionScoreAddition ? correctActionScoreAddition : 0);
+  try {
+    resetScene();
+    currentSwapIndices = null;
+    currentNonLeafIndexToHeapify = undefined;
+    affectedSubTree = false;
+    hasSortingStarted = false;
+    curlvlNodesNum = 5;
+    await generateArray([1, 5, 3, 4, 11]);
+    // The slots are created asynchronously (generateArray does not wait for
+    // them), so wait until all of them exist before placing anything.
+    for (let i = 0; i < 200 && DebossedAreaTexts.length < curlvlNodesNum; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+
+    for (let s = 1; s < target; s++) {
+      const action = tutorialSteps[s].expectedAction;
+      if (!action) continue;
+      if (action.length === 1) {
+        // Build phase: put the value on its own slot.
+        const idx = arrayElements.findIndex((e) => e.value === action[0]);
+        const mesh = arrayElements[idx].treeNodeTextMesh;
+        handleStepOnePlacement(idx, idx, mesh, mesh.position.clone());
+      } else {
+        // Swap: "dragged" is the first value, "target" the slot of the second.
+        const from = arrayElements.findIndex((e) => e.value === action[0]);
+        const to = arrayElements.findIndex((e) => e.value === action[1]);
+        const mesh = arrayElements[from].treeNodeTextMesh;
+        handleStepTwoAndThreePlacement(from, to, mesh.position.clone(), mesh);
+      }
+    }
+  } finally {
+    isReplayingTutorial = false;
+  }
+  if (currentStep >= 1) makeTextMeshesVisible();
+  curRoomUI.currentTutorialStep = target;
+  curRoomUI.currentScore = scoreAfterUndo;
+  curRoomUI.updateScore(scoreAfterUndo);
+  displayMessage(stepInstructions[currentStep] ?? "", curRoomUI.uiText);
+  updateTutorialStep();
+}
+
+tutorialBackButton?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  goBackOneTutorialPage();
+});
 
 tutorialNextButton?.addEventListener("click", (event) => {
   event.stopPropagation();
   if (!curRoomUI.isTutorial) return;
-  if (tutorialSteps[curRoomUI.currentTutorialStep]?.type !== "info") return;
+  const isInfo = tutorialSteps[curRoomUI.currentTutorialStep]?.type === "info";
+  if (!isInfo && !tutorialStepDone) return;
+  if (isLastTutorialStep() && !isInfo) {
+    finishTutorial();
+    return;
+  }
   nextTutorialStep();
 });
 
@@ -504,9 +632,8 @@ function checkLevelCompletionAndUpdate() {
       isLevelComplete = arraySorted(arrayElements);
       if (isLevelComplete) {
         if (curRoomUI.isTutorial) {
-          curRoomUI.updateTutorialModalToBeTutorialCompleteModal();
-          curRoomUI.currentLevel = null;
-          curRoomUI.isTutorial = false;
+          // The last page shows the sorted array and an End button; the
+          // completion modal opens from that button (finishTutorial).
           return;
         }
         curRoomUI.currentScore = Math.floor(
@@ -605,7 +732,9 @@ function evaluateActionAndUpdateScore(isCorrect, nodeIndex) {
   }
   if (isCorrect) {
     if (curRoomUI.isTutorial) {
-      nextTutorialStep();
+      // Replaying (Back) moves on by itself; a real move waits for Next.
+      if (isReplayingTutorial) nextTutorialStep();
+      else markTutorialStepDone();
     }
   }
   curRoomUI.updateScore(curRoomUI.currentScore);
@@ -665,6 +794,15 @@ controls.addEventListener("dragend", function (event) {
         event.object.position.copy(initialPositionDragged);
       }
       displayMessage(currentStep.errorMessage, curRoomUI.uiText);
+      return;
+    }
+    if (tutorialStepDone) {
+      // The move for this page is made: wait for Next.
+      draggableTextMesh.position.copy(initialPositionDragged);
+      if (event.object.userData.linkedMesh) {
+        event.object.position.copy(initialPositionDragged);
+      }
+      displayMessage("Press Next to continue.", curRoomUI.uiText);
       return;
     }
     if (currentStep.expectedAction === null) {
@@ -1259,6 +1397,7 @@ render();
 
 curRoomUI.callbacks.resetLevel = function (curlvl) {
   tutorialNextButton?.classList.add("hidden");
+  tutorialBackButton?.classList.add("hidden");
   curRoomUI.uiText.innerHTML = stepInstructions[0];
   curRoomUI.health = resetHealth();
 
@@ -1313,6 +1452,7 @@ if (import.meta.env.DEV) {
 
   window.__roomTest = {
     stepIndex: () => curRoomUI.currentTutorialStep,
+    stepDone: () => tutorialStepDone,
     isTutorial: () => curRoomUI.isTutorial,
     isModalOpen: () => curRoomUI.isModalOpen,
     health: () => curRoomUI.health,

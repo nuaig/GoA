@@ -535,7 +535,8 @@ body {
 .tutorial-instructions-modal--kruskal .tuto-next-btn,
 .tutorial-instructions-modal--prim .tuto-next-btn,
 .tutorial-instructions-modal--astar .tuto-next-btn,
-.tutorial-instructions-modal--heapsort .tuto-next-btn {
+.tutorial-instructions-modal--heapsort .tuto-next-btn,
+.tutorial-instructions-modal--heapsort .tuto-back-btn {
   pointer-events: auto;
   cursor: pointer;
   font-weight: bold;
@@ -547,8 +548,22 @@ body {
 .tutorial-instructions-modal--kruskal .tuto-next-btn:not(.hidden),
 .tutorial-instructions-modal--prim .tuto-next-btn:not(.hidden),
 .tutorial-instructions-modal--astar .tuto-next-btn:not(.hidden),
-.tutorial-instructions-modal--heapsort .tuto-next-btn:not(.hidden) {
+.tutorial-instructions-modal--heapsort .tuto-next-btn:not(.hidden),
+.tutorial-instructions-modal--heapsort .tuto-back-btn:not(.hidden) {
   display: block;
+  margin: 10px 0 0 auto;
+}
+
+/* Heapsort: Back on the left, Next on the right. */
+.tutorial-instructions-modal--heapsort .tuto-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.tutorial-instructions-modal--heapsort .tuto-back-btn:not(.hidden) {
+  margin: 10px auto 0 0;
+}
+.tutorial-instructions-modal--heapsort .tuto-next-btn:not(.hidden) {
   margin: 10px 0 0 auto;
 }
 
