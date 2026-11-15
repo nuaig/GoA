@@ -150,19 +150,28 @@ function drawLines(scene, correctPositions, trackedObjects) {
   });
 }
 
-function createLine(scene, startVector, endVector, trackedObjects) {
-  const material = new MeshLineMaterial({
-    color: "#000",
-    lineWidth: 0.3, // Set the desired line width
-  });
-  const points = [];
-  points.push(new THREE.Vector3(startVector.x, startVector.y, startVector.z));
-  points.push(new THREE.Vector3(endVector.x, endVector.y, endVector.z));
+// Radius of the black bars between tree nodes (a node cube is 0.6 wide).
+// A real mesh is used because WebGL ignores line width on THREE.Line, which
+// made the old lines 1px thin, or invisible on some GPUs.
+const EDGE_RADIUS = 0.05;
 
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  const line = new THREE.Line(geometry, material);
-  scene.add(line);
-  trackedObjects.push(line); // Track the line
+function createLine(scene, startVector, endVector, trackedObjects) {
+  const start = new THREE.Vector3(startVector.x, startVector.y, startVector.z);
+  const end = new THREE.Vector3(endVector.x, endVector.y, endVector.z);
+  const direction = new THREE.Vector3().subVectors(end, start);
+  const length = direction.length();
+
+  const geometry = new THREE.CylinderGeometry(EDGE_RADIUS, EDGE_RADIUS, length, 12);
+  const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+  const bar = new THREE.Mesh(geometry, material);
+  bar.position.copy(start).add(end).multiplyScalar(0.5);
+  // Cylinders point along +Y; rotate that axis onto the edge direction.
+  bar.quaternion.setFromUnitVectors(
+    new THREE.Vector3(0, 1, 0),
+    direction.normalize()
+  );
+  scene.add(bar);
+  trackedObjects.push(bar); // Track the bar so it is removed on reset
 }
 
 export function updateNextSwapIndices(lastUnsortedIndex, arrayElements) {

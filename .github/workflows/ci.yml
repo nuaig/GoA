@@ -1,0 +1,27 @@
+name: CI
+
+# Runs the unit tests on every pull request into main (and on pushes to main).
+# To block merges when it fails: GitHub → Settings → Branches → add a rule for
+# `main` → "Require status checks to pass before merging" → select "unit-tests".
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend/front
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Backend/front/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
